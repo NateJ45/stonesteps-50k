@@ -291,6 +291,171 @@ export type Announcement = {
   enabled?: boolean;
 };
 
+export type Sponsor = {
+  _id: string;
+  _type: 'sponsor';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  logo?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  url?: string;
+  orderRank?: string;
+};
+
+export type CourseFeature = {
+  _id: string;
+  _type: 'courseFeature';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  body?: string;
+  confirmed?: boolean;
+  orderRank?: string;
+};
+
+export type ScheduleItem = {
+  _id: string;
+  _type: 'scheduleItem';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  label?: string;
+  time?: string;
+  detail?: string;
+  confirmed?: boolean;
+  orderRank?: string;
+};
+
+export type AthleteReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'athlete';
+};
+
+export type DistanceReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'distance';
+};
+
+export type RecordEntry = {
+  _id: string;
+  _type: 'recordEntry';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  athlete?: AthleteReference;
+  distance?: DistanceReference;
+  gender?: 'M' | 'F' | 'X';
+  bracket?: 'u30' | '30s' | '40s' | '50s' | '60s' | '70plus';
+  timeSeconds?: number;
+  year?: number;
+  sourceNote?: string;
+};
+
+export type RaceResult = {
+  _id: string;
+  _type: 'raceResult';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  athlete?: AthleteReference;
+  distance?: DistanceReference;
+  year?: number;
+  timeSeconds?: number;
+  gender?: 'M' | 'F' | 'X';
+  age?: number;
+  place?: number;
+  timeSource?: 'chip' | 'gun';
+  sourceNote?: string;
+};
+
+export type Athlete = {
+  _id: string;
+  _type: 'athlete';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  slug?: Slug;
+  city?: string;
+  region?: string;
+};
+
+export type Distance = {
+  _id: string;
+  _type: 'distance';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  slug?: Slug;
+  kicker?: string;
+  loopStructure?: string;
+  blurb?: string;
+  includes?: Array<string>;
+  startTime?: string;
+  trekkerNote?: string;
+  entryCap?: number;
+  runSignUpEventId?: number;
+  featured?: boolean;
+  confirmed?: boolean;
+  orderRank?: string;
+};
+
+export type Race = {
+  _id: string;
+  _type: 'race';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  tagline?: string;
+  editionNumber?: number;
+  raceDate?: string;
+  venue?: string;
+  startArea?: string;
+  streetAddress?: string;
+  city?: string;
+  region?: string;
+  postalCode?: string;
+  geo?: Geopoint;
+  registerUrl?: string;
+  resultsUrl?: string;
+  facebookUrl?: string;
+  gpxUrl?: string;
+  feeTiers?: Array<{
+    label?: string;
+    amount?: number;
+    processingFee?: number;
+    endsOn?: string;
+    _type: 'feeTier';
+    _key: string;
+  }>;
+  directorName?: string;
+  directorNote?: string;
+  parksDonation?: string;
+  confirmed?: boolean;
+};
+
+export type Geopoint = {
+  _type: 'geopoint';
+  lat?: number;
+  lng?: number;
+  alt?: number;
+};
+
 export type StudioPlaybook = {
   _id: string;
   _type: 'studioPlaybook';
@@ -2167,13 +2332,6 @@ export type SanityImageAsset = {
   source?: SanityAssetSourceData;
 };
 
-export type Geopoint = {
-  _type: 'geopoint';
-  lat?: number;
-  lng?: number;
-  alt?: number;
-};
-
 export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | Photo
@@ -2190,6 +2348,17 @@ export type AllSanitySchemaTypes =
   | FaqItem
   | FaqCategory
   | Announcement
+  | Sponsor
+  | CourseFeature
+  | ScheduleItem
+  | AthleteReference
+  | DistanceReference
+  | RecordEntry
+  | RaceResult
+  | Athlete
+  | Distance
+  | Race
+  | Geopoint
   | StudioPlaybook
   | StudioNotes
   | StudioGuide
@@ -2252,5 +2421,4 @@ export type AllSanitySchemaTypes =
   | SanityImageMetadata
   | SanityFileAsset
   | SanityAssetSourceData
-  | SanityImageAsset
-  | Geopoint;
+  | SanityImageAsset;

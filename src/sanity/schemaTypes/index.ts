@@ -2,9 +2,12 @@
 // Order doesn't affect runtime; alphabetical here for readability.
 
 import { aboutPage } from './aboutPage';
+import { athlete } from './athlete';
 import { announcement } from './announcement';
 import { businessInfo } from './businessInfo';
 import { contactPage } from './contactPage';
+import { courseFeature } from './courseFeature';
+import { distance } from './distance';
 import { ctaBlock } from './ctaBlock';
 import { faqCategory } from './faqCategory';
 import { faqItem } from './faqItem';
@@ -21,13 +24,18 @@ import { richSectionSchemas } from './richSections';
 import { notFoundPage } from './notFoundPage';
 import { philosophyPoint } from './philosophyPoint';
 import { privacyPage } from './privacyPage';
+import { race } from './race';
+import { raceResult } from './raceResult';
+import { recordEntry } from './recordEntry';
 import { processPage } from './processPage';
 import { processStep } from './processStep';
 import { redirect } from './redirect';
+import { scheduleItem } from './scheduleItem';
 import { sectionPreset } from './sectionPreset';
 import { service } from './service';
 import { servicesPage } from './servicesPage';
 import { siteSettings } from './siteSettings';
+import { sponsor } from './sponsor';
 import { studioGuide } from './studioGuide';
 import { studioNotes } from './studioNotes';
 import { studioPlaybook } from './studioPlaybook';
@@ -61,6 +69,19 @@ export const schemaTypes = [
   studioGuide,
   studioNotes,
   studioPlaybook,
+  // The one document describing this year's edition.
+  race,
+
+  // The race's structured content. raceResult and recordEntry are the pair the
+  // records system derives from: results are the archive, record entries are the
+  // pre-2017 history the archive cannot reach. See src/lib/age-brackets.ts.
+  distance,
+  athlete,
+  raceResult,
+  recordEntry,
+  scheduleItem,
+  courseFeature,
+  sponsor,
 
   // Reusable content collections
   announcement, // site-wide banner collection (enabled + date-windowed)

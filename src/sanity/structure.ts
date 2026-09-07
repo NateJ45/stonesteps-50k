@@ -45,6 +45,11 @@ import {
   RocketIcon,
   OlistIcon,
   ArrowRightIcon,
+  StarFilledIcon,
+  CalendarIcon,
+  ClockIcon,
+  UsersIcon,
+  ActivityIcon,
 } from '@sanity/icons';
 import StudioGuide from './components/StudioGuide';
 import BusinessOverview from './components/BusinessOverview';
@@ -67,9 +72,20 @@ const SINGLETON_TYPES = [
   'studioGuide',
   'studioNotes',
   'studioPlaybook',
+  // The race's own singleton: date, venue, links, fee tiers.
+  'race',
 ] as const;
 
-const ORDERABLE_TYPES = ['service', 'philosophyPoint', 'processStep'] as const;
+const ORDERABLE_TYPES = [
+  'service',
+  'philosophyPoint',
+  'processStep',
+  // Race collections an editor reorders by dragging.
+  'distance',
+  'scheduleItem',
+  'courseFeature',
+  'sponsor',
+] as const;
 
 const HIDDEN_FROM_DEFAULT = new Set<string>([
   ...SINGLETON_TYPES,
@@ -88,6 +104,10 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'media.tag',
   // processStep is placed explicitly under Content → Process Steps
   'processStep',
+  // Race collections, all placed explicitly under "The Race" below.
+  'athlete',
+  'raceResult',
+  'recordEntry',
 ]);
 
 /**
@@ -109,7 +129,7 @@ function singletonWithPreview(S: StructureBuilder, schemaType: string, title: st
 
 export const deskStructure = (S: StructureBuilder, context: StructureResolverContext) =>
   S.list()
-    .title('Studio Starter')
+    .title('Stone Steps 50K')
     .items([
       // Start Here — three-panel handbook for the editor. First item so it is always visible.
       // Panel 1: how the Studio works and step-by-step how-tos (static).
@@ -169,6 +189,60 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
 
       // Site Settings — pinned singleton (no preview; not a page)
       singletonWithPreview(S, 'siteSettings', 'Site Settings', CogIcon),
+
+      S.divider(),
+
+      // The Race. Everything about the event itself, kept together so an editor
+      // preparing next year's edition never has to hunt through Content.
+      //
+      // Athletes and Results are listed but are not day-to-day editing surfaces:
+      // both are written by scripts/import-results.mjs from the RunSignUp API.
+      // They are here so a name can be corrected at its single source, which is
+      // the whole reason results reference an athlete rather than repeating one.
+      S.listItem()
+        .title('The Race')
+        .icon(ActivityIcon)
+        .child(
+          S.list()
+            .title('The Race')
+            .items([
+              singletonWithPreview(S, 'race', 'This year', CalendarIcon),
+              orderableDocumentListDeskItem({
+                type: 'distance',
+                title: 'Distances',
+                icon: ArrowRightIcon,
+                S,
+                context,
+              }),
+              orderableDocumentListDeskItem({
+                type: 'scheduleItem',
+                title: 'Race-day schedule',
+                icon: ClockIcon,
+                S,
+                context,
+              }),
+              orderableDocumentListDeskItem({
+                type: 'courseFeature',
+                title: 'Course features',
+                icon: PinIcon,
+                S,
+                context,
+              }),
+              orderableDocumentListDeskItem({
+                type: 'sponsor',
+                title: 'Sponsors',
+                icon: HeartIcon,
+                S,
+                context,
+              }),
+              S.divider(),
+              S.documentTypeListItem('raceResult').title('Results').icon(ThListIcon),
+              S.documentTypeListItem('athlete').title('Athletes').icon(UsersIcon),
+              S.documentTypeListItem('recordEntry')
+                .title('Historical records')
+                .icon(StarFilledIcon),
+            ]),
+        ),
 
       S.divider(),
 

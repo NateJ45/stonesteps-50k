@@ -241,6 +241,7 @@ export default defineConfig({
 
 // Singleton document types - one instance each, not duplicable.
 const SINGLETON_TYPES = new Set<string>([
+  'race',
   'siteSettings',
   'businessInfo',
   'homePage',
