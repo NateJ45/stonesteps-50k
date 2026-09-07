@@ -57,6 +57,15 @@ export type SectionPreset = {
       } & RaceHeroSection)
     | ({
         _key: string;
+      } & PageHeaderSection)
+    | ({
+        _key: string;
+      } & ContactSection)
+    | ({
+        _key: string;
+      } & FaqKioskSection)
+    | ({
+        _key: string;
       } & DistanceTicketsSection)
     | ({
         _key: string;
@@ -1326,6 +1335,45 @@ export type DistanceTicketsSection = {
   note?: string;
 };
 
+export type FaqKioskSection = {
+  _type: 'faqKioskSection';
+  eyebrow?: string;
+  headline?: string;
+  items?: Array<{
+    question?: string;
+    answer?: string;
+    _type: 'faqCard';
+    _key: string;
+  }>;
+  unansweredHeading?: string;
+  unansweredNote?: string;
+  unanswered?: Array<string>;
+};
+
+export type ContactSection = {
+  _type: 'contactSection';
+  eyebrow?: string;
+  headline?: string;
+  subjects?: Array<string>;
+  communityNote?: string;
+};
+
+export type PageHeaderSection = {
+  _type: 'pageHeaderSection';
+  eyebrow?: string;
+  headline?: string;
+  headlineSecondLine?: string;
+  lede?: string;
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+};
+
 export type RaceHeroSection = {
   _type: 'raceHeroSection';
   eyebrow?: string;
@@ -1441,6 +1489,15 @@ export type Page = {
     | ({
         _key: string;
       } & RaceHeroSection)
+    | ({
+        _key: string;
+      } & PageHeaderSection)
+    | ({
+        _key: string;
+      } & ContactSection)
+    | ({
+        _key: string;
+      } & FaqKioskSection)
     | ({
         _key: string;
       } & DistanceTicketsSection)
@@ -1861,6 +1918,15 @@ export type ProcessPage = {
       } & RaceHeroSection)
     | ({
         _key: string;
+      } & PageHeaderSection)
+    | ({
+        _key: string;
+      } & ContactSection)
+    | ({
+        _key: string;
+      } & FaqKioskSection)
+    | ({
+        _key: string;
       } & DistanceTicketsSection)
     | ({
         _key: string;
@@ -1942,6 +2008,15 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & RaceHeroSection)
+    | ({
+        _key: string;
+      } & PageHeaderSection)
+    | ({
+        _key: string;
+      } & ContactSection)
+    | ({
+        _key: string;
+      } & FaqKioskSection)
     | ({
         _key: string;
       } & DistanceTicketsSection)
@@ -2065,6 +2140,15 @@ export type AboutPage = {
     | ({
         _key: string;
       } & RaceHeroSection)
+    | ({
+        _key: string;
+      } & PageHeaderSection)
+    | ({
+        _key: string;
+      } & ContactSection)
+    | ({
+        _key: string;
+      } & FaqKioskSection)
     | ({
         _key: string;
       } & DistanceTicketsSection)
@@ -2247,6 +2331,15 @@ export type HomePage = {
     | ({
         _key: string;
       } & RaceHeroSection)
+    | ({
+        _key: string;
+      } & PageHeaderSection)
+    | ({
+        _key: string;
+      } & ContactSection)
+    | ({
+        _key: string;
+      } & FaqKioskSection)
     | ({
         _key: string;
       } & DistanceTicketsSection)
@@ -2623,6 +2716,9 @@ export type AllSanitySchemaTypes =
   | RaceScheduleSection
   | RecordsBoardSection
   | DistanceTicketsSection
+  | FaqKioskSection
+  | ContactSection
+  | PageHeaderSection
   | RaceHeroSection
   | FormQuestion
   | PrivacyPage

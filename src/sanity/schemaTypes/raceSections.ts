@@ -26,6 +26,9 @@
 import { defineType, defineField, defineArrayMember } from 'sanity';
 import {
   ActivityIcon,
+  BlockElementIcon,
+  EnvelopeIcon,
+  HelpCircleIcon,
   CalendarIcon,
   ClockIcon,
   ComponentIcon,
@@ -320,9 +323,180 @@ export const sponsorPatchesSection = defineType({
   },
 });
 
+/* ---------- Page header ---------------------------------------------------- */
+
+export const pageHeaderSection = defineType({
+  name: 'pageHeaderSection',
+  title: 'Page header',
+  type: 'object',
+  icon: BlockElementIcon,
+  // The band at the top of an inner page: eyebrow, big display title, a lede,
+  // and optionally a photograph beside it.
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow', type: 'string' }),
+    defineField({
+      name: 'headline',
+      title: 'Title',
+      type: 'string',
+      description:
+        'Set in the condensed display face, which is CAPS ONLY. Use the second-line field ' +
+        'below rather than typing HTML: the mockup allowed a raw line-break tag here, and ' +
+        'that becomes an injection surface the moment the value comes from the CMS.',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'headlineSecondLine',
+      title: 'Second line of the title (optional)',
+      type: 'string',
+      description: 'Breaks the title onto two lines at a point you choose, safely.',
+    }),
+    defineField({ name: 'lede', title: 'Lede', type: 'text', rows: 3 }),
+    defineField({
+      name: 'image',
+      title: 'Photograph (optional)',
+      type: 'image',
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          description: 'Describe what is in the picture, not the file name.',
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
+    }),
+  ],
+  preview: {
+    select: { title: 'headline', subtitle: 'eyebrow', media: 'image' },
+    prepare: ({ title, subtitle, media }) => ({
+      title: title || 'Page header',
+      subtitle: subtitle || 'Page header',
+      media: media || BlockElementIcon,
+    }),
+  },
+});
+
+/* ---------- Contact -------------------------------------------------------- */
+
+export const contactSection = defineType({
+  name: 'contactSection',
+  title: 'Contact form and details',
+  type: 'object',
+  icon: EnvelopeIcon,
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline (optional)', type: 'string' }),
+    defineField({
+      name: 'subjects',
+      title: 'What is this about? (the dropdown)',
+      type: 'array',
+      of: [{ type: 'string' }],
+      description: 'One option per line. Sent with the message so it can be triaged.',
+    }),
+    defineField({
+      name: 'communityNote',
+      title: 'A line about the Facebook group',
+      type: 'text',
+      rows: 3,
+    }),
+  ],
+  preview: {
+    prepare: () => ({
+      title: 'Contact form and details',
+      subtitle: 'Director, community and start line come from The Race',
+    }),
+  },
+});
+
+/* ---------- The FAQ kiosk -------------------------------------------------- */
+
+export const faqKioskSection = defineType({
+  name: 'faqKioskSection',
+  title: 'FAQ (trailhead kiosk)',
+  type: 'object',
+  icon: HelpCircleIcon,
+  // A recessed noticeboard holding pinned index cards. The recess is an INSET
+  // shadow rather than a raised one, which is what makes it read as a board you
+  // look into rather than a card sitting on the page.
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline (optional)', type: 'string' }),
+    defineField({
+      name: 'items',
+      title: 'Questions',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'faqCard',
+          fields: [
+            defineField({
+              name: 'question',
+              title: 'Question',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'answer',
+              title: 'Answer',
+              type: 'text',
+              rows: 4,
+              options: {
+                canvasApp: {
+                  purpose:
+                    'Answer the question directly in the first sentence. No preamble. Say ' +
+                    'plainly if the answer is not known yet rather than hedging.',
+                },
+              },
+              validation: (Rule) => Rule.required(),
+            }),
+          ],
+          preview: { select: { title: 'question' } },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'unansweredHeading',
+      title: 'Heading for the open questions',
+      type: 'string',
+      description: 'For example: "Still to confirm with the race director".',
+    }),
+    defineField({
+      name: 'unansweredNote',
+      title: 'Why they are open',
+      type: 'text',
+      rows: 3,
+    }),
+    defineField({
+      name: 'unanswered',
+      title: 'The open questions',
+      type: 'array',
+      of: [{ type: 'string' }],
+      description:
+        'Questions the race publishes no answer to. Listing them is not an admission, it ' +
+        'is the most useful thing on the page: every one is something a runner emails to ' +
+        'ask, and answering them is free content the race is currently missing. Delete a ' +
+        'line as it gets answered.',
+    }),
+  ],
+  preview: {
+    select: { title: 'headline', items: 'items', open: 'unanswered' },
+    prepare: ({ title, items, open }) => ({
+      title: title || 'FAQ',
+      subtitle: `${Array.isArray(items) ? items.length : 0} answered, ${
+        Array.isArray(open) ? open.length : 0
+      } still open`,
+    }),
+  },
+});
+
 /** Every race block, in the order they appear in the insert menu. */
 export const raceSectionSchemas = [
   raceHeroSection,
+  pageHeaderSection,
+  contactSection,
+  faqKioskSection,
   distanceTicketsSection,
   recordsBoardSection,
   raceScheduleSection,

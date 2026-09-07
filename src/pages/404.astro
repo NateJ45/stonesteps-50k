@@ -1,114 +1,140 @@
 ---
 // Safe to edit by hand
-// Custom 404. Warm, on-brand, two clear paths back. No search (there isn't one).
 //
-// Layout: two-column on desktop (text + photograph), stacked on mobile. The
-// photo is sourced from Sanity and can be replaced with any studio photo.
-// Asset is referenced by _ref so it pipes through the same SanityImage
-// CDN/transform pipeline as every other photo on the site.
+// The 404, as a wrong turn.
+//
+// Surveyor's flagging tape is what actually marks an off-course turn on a trail
+// race, so that is what this page is. The tape strips FRAME the copy rather
+// than crossing it: tape over the words would be a joke at the reader's expense
+// at the exact moment they are already lost.
+//
+// The repeated phrase is generated rather than typed, so a rotated strip stays
+// filled at any viewport width instead of running out of text on a wide screen.
+//
+// Content comes from the notFoundPage singleton where it is set, with race
+// specific defaults, so an editor can change the words without touching code.
+// Stays noindex.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getNotFoundPage, getSiteSettings } from '@/lib/queries';
-import SanityImage from '@/components/SanityImage.astro';
+import Topo from '@/components/race/Topo.astro';
+import { getNotFoundPage, getRace, getSiteSettings } from '@/lib/queries';
 
-const [notFoundPage, siteSettings] = await Promise.all([
+const [notFoundPage, siteSettings, race] = await Promise.all([
   getNotFoundPage().catch(() => null),
   getSiteSettings().catch(() => null),
+  getRace().catch(() => null),
 ]);
 
-// Fallback photo — Studio dogs on the sofa, in case the singleton hasn't been
-// populated. Sanity singleton always wins if its image field is set.
-const fallbackPhoto = {
-  asset: { _ref: 'image-ce9be41407b946b7453724575c3cfd7aec2f7c4c-3024x4032-jpg' },
-  alt: 'Studio photo.',
-};
-
-const seoTitle = notFoundPage?.seoTitle ?? 'Page not found';
+const seoTitle = notFoundPage?.seoTitle ?? 'Wrong turn';
 const seoDescription =
-  notFoundPage?.seoDescription ??
-  'That page wandered off. Head back to the homepage or get in touch.';
+  notFoundPage?.seoDescription ?? 'That page is not on the course. Here is the way back.';
 
-const eyebrow = notFoundPage?.eyebrow ?? '404';
-const headline = notFoundPage?.headline ?? 'That page wandered off.';
+const eyebrow = notFoundPage?.eyebrow ?? 'Error 404';
+const headline = notFoundPage?.headline ?? 'You took a wrong turn.';
 const body =
   notFoundPage?.body ??
-  "It happens. Maybe a link is old, maybe the URL has a typo. Either way, here's where to head next.";
+  'That page is not on the course. It happens. Follow the blazes back and pick up the loop where you left it.';
 
-const primaryLabel = notFoundPage?.primaryCtaLabel ?? 'Back home';
-const primaryHref = notFoundPage?.primaryCtaHref ?? '/';
-// A CORE route, not /portfolio: the portfolio is an opt-in module that a fresh
-// clone does not build, so the old default shipped a 404 page whose own button
-// 404s. A project that turns the module on can point this at /portfolio in the
-// Studio.
-const secondaryLabel = notFoundPage?.secondaryCtaLabel ?? 'Browse our services';
-const secondaryHref = notFoundPage?.secondaryCtaHref ?? '/services';
-const tertiaryLabel = notFoundPage?.tertiaryCtaLabel ?? 'Get in touch';
-const tertiaryHref = notFoundPage?.tertiaryCtaHref ?? '/contact';
+// The same four places the header offers, so being lost costs one click.
+const links = [
+  { label: 'The Race', href: '/' },
+  { label: 'Course', href: '/course' },
+  { label: 'Records', href: '/records' },
+  { label: 'Contact', href: '/contact' },
+  ...(race?.resultsUrl ? [{ label: 'Results', href: race.resultsUrl }] : []),
+];
 
-const photo = notFoundPage?.heroImage ?? fallbackPhoto;
-const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
+/** Long enough to fill a rotated strip at any viewport width. */
+const repeat = (phrase: string) => Array.from({ length: 18 }, () => phrase).join(' · ');
 ---
 
-<BaseLayout title={seoTitle} description={seoDescription} siteSettings={siteSettings} noindex>
-  <section
-    class="mx-auto grid max-w-content grid-cols-1 items-center gap-section-md px-m py-section-lg md:grid-cols-[1fr_1.1fr]"
-    aria-labelledby="not-found-heading"
-  >
-    {
-      /* Text column. Two clear paths back — no search (there isn't one).
-        Centered on mobile so the lone-element page reads as a sympathetic
-        "you're off-path" moment; left-aligned on desktop where the
-        two-column layout needs the text anchored beside the photo column. */
-    }
-    <div class="text-center md:text-left">
-      <p class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">{eyebrow}</p>
-      <h1
-        id="not-found-heading"
-        class="font-display text-h1 leading-headline-tight text-foreground"
+<BaseLayout title={seoTitle} description={seoDescription} {siteSettings} noindex>
+  <section class="lost relative overflow-hidden py-section-lg">
+    <Topo seed={67} lines={14} class="opacity-40" />
+
+    <!-- Flagging tape, the way an off-course turn actually gets marked. -->
+    <div class="tape tape--a" aria-hidden="true"><span>{repeat('Wrong way')}</span></div>
+    <div class="tape tape--b" aria-hidden="true"><span>{repeat('Not the course')}</span></div>
+
+    <div class="relative z-10 mx-auto mt-24 w-full max-w-content px-6 pb-16">
+      <p
+        class="blaze text-heading-accent mb-4 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase"
       >
-        {headline}
-      </h1>
-      <p class="mx-auto mt-m max-w-xl text-lg leading-relaxed text-foreground/80 md:mx-0">
-        {body}
+        {eyebrow}
       </p>
 
-      <div class="mt-l flex flex-wrap justify-center gap-m md:justify-start">
-        <a
-          href={primaryHref}
-          class="press-tactile inline-flex items-center rounded-sm bg-primary-dark px-l py-s text-xs font-semibold tracking-eyebrow text-white uppercase hover:bg-accent-dark"
-        >
-          {primaryLabel}
-        </a>
-        <a
-          href={secondaryHref}
-          class="press-tactile inline-flex items-center rounded-sm border border-primary px-l py-s text-xs font-semibold tracking-eyebrow text-link uppercase hover:bg-accent"
-        >
-          {secondaryLabel}
-        </a>
-        <a
-          href={tertiaryHref}
-          class="press-tactile inline-flex items-center rounded-sm border border-border-soft px-l py-s text-xs font-semibold tracking-eyebrow text-foreground/85 uppercase hover:border-primary hover:text-primary-dark"
-        >
-          {tertiaryLabel}
-        </a>
-      </div>
-    </div>
+      <h1 class="display text-[clamp(2.5rem,8vw,5.5rem)]">{headline}</h1>
 
-    {
-      /* Photo column. Stacks above the text on mobile (md:order-2 swaps it on
-        desktop so the eye lands on text first, photo balances right). */
-    }
-    <figure class="order-first md:order-2">
-      <SanityImage
-        source={photo}
-        width={1200}
-        sizes="(min-width: 768px) 50vw, 100vw"
-        quality={75}
-        class="h-auto w-full rounded-md"
-      />
-      <figcaption class="mt-s text-right text-xs tracking-eyebrow text-foreground/80 uppercase">
-        {caption}
-      </figcaption>
-    </figure>
+      <p class="mt-6 max-w-[46ch] text-lg text-muted-foreground">{body}</p>
+
+      <nav class="mt-8 flex flex-wrap gap-x-6 gap-y-2" aria-label="Back to the course">
+        {
+          links.map((item) => (
+            <a
+              class="display border-b-2 border-transparent text-lg transition-colors hover:border-[color:var(--heading-accent)]"
+              href={item.href}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <a class="btn-plate mt-10" href="/">
+        Back to the start
+        <span aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
   </section>
 </BaseLayout>
+
+<style>
+  .lost {
+    background: radial-gradient(
+      110% 80% at 25% 0%,
+      color-mix(in srgb, var(--primary) 8%, var(--background)) 0%,
+      var(--background) 62%
+    );
+  }
+
+  /* Two strips of tape, framing the copy rather than crossing it. */
+  .tape {
+    position: absolute;
+    left: -12%;
+    width: 124%;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-block: 2px solid var(--plate-edge);
+    box-shadow: var(--lift);
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .tape > span {
+    display: block;
+    padding: 0.35rem 0;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  /* Pinned in rem, not per cent. A percentage moves with the section height,
+     which changes with the copy, so the clearance below was only ever correct
+     at one viewport. */
+  .tape--a {
+    top: 1rem;
+    transform: rotate(-4deg);
+  }
+  .tape--b {
+    bottom: 1.5rem;
+    transform: rotate(2.5deg);
+  }
+
+  @media (max-width: 700px) {
+    /* One strip on a phone. Two crowd the copy at this width. */
+    .tape--b {
+      display: none;
+    }
+  }
+</style>

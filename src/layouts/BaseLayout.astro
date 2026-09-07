@@ -133,7 +133,9 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" type="application/rss+xml" title={`${site.name} Journal`} href="/journal/rss.xml" />
+    {/* No RSS alternate: the journal and its feed were removed with the
+        other starter pages this race does not have. A <link rel="alternate">
+        pointing at a 404 is an invitation for a reader to fail. */}
     {noindex && <meta name="robots" content="noindex, follow" />}
 
     {/* Mobile browser UI chrome color, theme-aware (Soft Linen / Charcoal Dark). */}

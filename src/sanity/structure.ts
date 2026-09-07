@@ -24,26 +24,17 @@ import {
   BlockElementIcon,
   CogIcon,
   HomeIcon,
-  UserIcon,
-  PackageIcon,
-  HelpCircleIcon,
   InfoOutlineIcon,
   EnvelopeIcon,
   DocumentTextIcon,
   DocumentsIcon,
-  StarIcon,
   HeartIcon,
   ThListIcon,
-  EditIcon,
-  TagIcon,
-  BookIcon,
-  LockIcon,
   PinIcon,
   PresentationIcon,
   ThumbsUpIcon,
   ColorWheelIcon,
   RocketIcon,
-  OlistIcon,
   ArrowRightIcon,
   StarFilledIcon,
   CalendarIcon,
@@ -254,25 +245,24 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
           S.list()
             .title('Pages')
             .items([
+              // Only the pages this site actually serves. The starter's About,
+              // Services, Process, FAQ, Journal and Privacy singletons still
+              // exist as schema types (src/lib/section-fields.test.ts reads two
+              // of those files), but their ROUTES were removed because the race
+              // does not have those pages. Listing a page an editor can fill in
+              // and then never see published is worse than not offering it.
               singletonWithPreview(S, 'homePage', 'Home', HomeIcon),
-              singletonWithPreview(S, 'aboutPage', 'About', UserIcon),
-              singletonWithPreview(S, 'servicesPage', 'Services', PackageIcon),
-              singletonWithPreview(S, 'processPage', 'Process', OlistIcon),
-              singletonWithPreview(S, 'faqPage', 'FAQ', HelpCircleIcon),
-              singletonWithPreview(S, 'contactPage', 'Contact', EnvelopeIcon),
-              singletonWithPreview(S, 'journalPage', 'Journal (index page)', BookIcon),
               singletonWithPreview(S, 'notFoundPage', '404 Page', DocumentTextIcon),
-
-              S.divider(),
-
-              singletonWithPreview(S, 'privacyPage', 'Privacy Policy Page', LockIcon),
 
               S.divider(),
 
               // Custom pages: editors build these themselves from the section library.
               // Multi-instance (not a singleton), so it is a normal document list.
+              // Course, Records and Contact live here: they are `page`
+              // documents built from the section library, not singletons, so
+              // the race director can reorder or add to them freely.
               S.documentTypeListItem('page')
-                .title('Custom pages (build your own)')
+                .title('Pages (course, records, contact)')
                 .icon(DocumentsIcon),
 
               S.divider(),
@@ -300,70 +290,22 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
 
       S.divider(),
 
-      // Content — reusable collections. Orderable types get drag-and-drop;
-      // non-orderable use standard lists.
+      // Content. The starter's service-business collections (services,
+      // philosophy values, process steps, testimonials, FAQ items, journal)
+      // are NOT listed: this site has no routes that render them, and a
+      // collection an editor can fill with content that reaches no page is a
+      // trap. Their schema types stay registered so the section library and
+      // its drift tests are unchanged.
       S.listItem()
         .title('Content')
         .icon(ThListIcon)
         .child(
           S.list()
             .title('Content')
-            .items([
-              // Business info: service areas, travel fees, availability, geo.
-              // Moved here from Site Settings so Settings is identity + infrastructure only.
-              singletonWithPreview(S, 'businessInfo', 'Business info', PinIcon),
-
-              S.divider(),
-
-              orderableDocumentListDeskItem({
-                type: 'service',
-                title: 'Services',
-                icon: PackageIcon,
-                S,
-                context,
-              }),
-              orderableDocumentListDeskItem({
-                type: 'philosophyPoint',
-                title: 'Philosophy Values',
-                icon: HeartIcon,
-                S,
-                context,
-              }),
-              orderableDocumentListDeskItem({
-                type: 'processStep',
-                title: 'Process Steps',
-                icon: OlistIcon,
-                S,
-                context,
-              }),
-              S.documentTypeListItem('testimonial').title('Testimonials').icon(StarIcon),
-              S.documentTypeListItem('faqCategory').title('FAQ Categories').icon(TagIcon),
-              S.documentTypeListItem('faqItem').title('FAQ Items').icon(HelpCircleIcon),
-
-              S.divider(),
-
-              // Announcement banners: queued notices that appear above the header.
-              // Each one has a date window (startDate / endDate) and an on/off toggle.
-              // The active announcement is picked at build time; a rebuild is required
-              // for the banner to appear or disappear on the live site.
-              S.documentTypeListItem('announcement').title('Announcements').icon(BellIcon),
-            ]),
+            .items([S.documentTypeListItem('announcement').title('Announcements').icon(BellIcon)]),
         ),
 
       S.divider(),
-
-      // Journal — its own section so the editor can find posts + categories at a glance
-      S.listItem()
-        .title('Journal')
-        .icon(BookIcon)
-        .child(
-          S.list()
-            .title('Journal')
-            .items([
-              S.documentTypeListItem('journalEntry').title('Posts').icon(EditIcon),
-              S.documentTypeListItem('journalCategory').title('Categories').icon(TagIcon),
-            ]),
-        ),
 
       // Safety net: surface any document type we have NOT explicitly placed above
       // (and keep the hidden set, including media.tag, out of the desk root).

@@ -46,6 +46,10 @@ export const SELF_CONTAINED_TYPES = new Set([
   'sponsorPatchesSection',
   'loopCardSection',
   'raceScheduleSection',
+  // A page header is the top of a page and a kiosk is a board on its own
+  // ground; neither belongs in the alternating body cadence.
+  'pageHeaderSection',
+  'faqKioskSection',
 ]);
 
 /** _type strings for blocks that receive alternating surface assignment. */
@@ -64,6 +68,7 @@ export const CONTENT_TYPES = new Set([
   'recordsBoardSection',
   'courseFeaturesSection',
   'elevationSection',
+  'contactSection',
 ]);
 
 export interface SectionBlock {

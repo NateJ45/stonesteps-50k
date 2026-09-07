@@ -3,6 +3,15 @@
 //
 // Sponsors, as embroidered patches.
 //
+// THE LOGO NEEDS A DEFINITE HEIGHT, not max-height with w-auto. An unloaded
+// lazy image with width:auto shrink-wraps to a 0x0 box, so it never intersects
+// the viewport, so it never loads: the logos simply never appeared, on a page
+// that looked fine in a screenshot because the patches still had their own
+// min-height. A definite height plus the intrinsic aspect ratio gives the
+// browser a real box to reserve before the bytes arrive. max-w-full clamps the
+// wide marks and object-contain letterboxes rather than squashing, so a
+// 1000x204 wordmark and a square badge both sit correctly on the patch.
+//
 // SELF_CONTAINED: paints its own ground, never receives a surface prop.
 //
 // This replaced the greyscale-logos-at-70%-opacity strip, which is the single
@@ -50,7 +59,7 @@ const {
                   width={320}
                   sizes="208px"
                   alt={s.logo.alt ?? s.name ?? ''}
-                  class="max-h-[4.4rem] w-auto object-contain"
+                  class="h-[4.4rem] max-w-full object-contain"
                 />
               ) : (
                 <span class="display on-light text-center text-[1.05rem] text-[color:var(--plate-ink)]">

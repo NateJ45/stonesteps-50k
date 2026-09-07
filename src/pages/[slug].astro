@@ -20,26 +20,17 @@ export async function getStaticPaths() {
   // a custom page can never shadow a built-in route. Keep in sync with
   // src/lib/reservedSlugs.ts (same set, duplicated by Astro isolation necessity).
   const RESERVED = new Set([
-    'about',
-    'services',
-    'process',
-    'portfolio',
-    'faq',
-    'contact',
-    'journal',
-    'e-design',
-    'shop',
-    'gift-certificates',
-    'quiz',
-    'calculator',
-    'resources',
-    'guides',
-    'press',
-    'privacy',
+    // Only the routes that still exist as real files. Course, Records and
+    // Contact are deliberately NOT here: they ARE page documents, built by this
+    // route. The starter's About/Services/FAQ/Journal/Privacy routes were
+    // removed with the pages themselves, so their slugs are free again.
+    //
+    // Kept in sync with src/lib/reservedSlugs.ts by hand. The duplication is
+    // forced: Astro runs getStaticPaths in an isolated scope, and a guard moved
+    // to module scope silently stops working (CLAUDE.md rule 10).
     '404',
     'sitemap-index.xml',
     'og',
-    '_astro',
   ]);
   const slugs = await getAllPageSlugs().catch(() => [] as string[]);
   return slugs.filter((slug) => !RESERVED.has(slug)).map((slug) => ({ params: { slug } }));

@@ -1,0 +1,99 @@
+---
+// Foundation, edit with care
+//
+// The FAQ, as a trailhead kiosk.
+//
+// SELF_CONTAINED: paints its own ground, never receives a surface prop.
+//
+// The board is RECESSED (an inset shadow, not a raised one), so it reads as
+// something you look into rather than a card sitting on the page. The notices
+// pinned to it are index cards, each at its own slight angle, straightening on
+// hover and when opened. The <details>/<summary> semantics are untouched: the
+// whole thing is native disclosure with decoration on top, so it keeps working
+// with no JavaScript at all.
+//
+// THE SECOND HALF IS THE POINT. Listing the questions the race does NOT answer
+// is not an admission of a gap, it is the most useful thing on the page. Every
+// line is something a runner emails to ask, and answering them is free content
+// the race is currently missing.
+
+import type { ProjectedFaqKioskSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  items?: ProjectedFaqKioskSection['items'];
+  unansweredHeading?: string;
+  unansweredNote?: string;
+  unanswered?: string[];
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = 'Answered already',
+  items = [],
+  unansweredHeading,
+  unansweredNote,
+  unanswered = [],
+  headingId = 'faq-heading',
+} = Astro.props as Props;
+---
+
+{
+  (items.length > 0 || unanswered.length > 0) && (
+    <section class="bg-muted py-section-lg" aria-labelledby={headingId}>
+      <div class="mx-auto w-full max-w-content px-6">
+        {eyebrow && (
+          <p class="blaze text-heading-accent mb-4 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase">
+            {eyebrow}
+          </p>
+        )}
+        <h2 id={headingId} class="display text-h2">
+          {headline}
+        </h2>
+
+        {items.length > 0 && (
+          <div class="kiosk mt-10 rounded-2xl border-2 border-black p-5 sm:p-8">
+            <div class="grid gap-4 md:grid-cols-2">
+              {items.map((item) => (
+                <details class="qa">
+                  <summary class="flex items-start gap-3">
+                    <span class="qa__pin" aria-hidden="true" />
+                    <span class="display on-light flex-1 text-[1.05rem]">{item.question}</span>
+                    <span class="qa__i" aria-hidden="true" />
+                  </summary>
+                  <p class="qa__a">{item.answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {unanswered.length > 0 && (
+          <div class="mt-12 max-w-[62ch]">
+            <h3 class="display text-h4">{unansweredHeading ?? 'Still to confirm'}</h3>
+            {unansweredNote && (
+              <p class="provisional mt-3 rounded-md px-3 py-2 text-sm">
+                <span class="rounded-sm bg-primary px-2 py-0.5 font-mono text-[0.6rem] tracking-[0.2em] text-primary-foreground uppercase">
+                  Not published
+                </span>{' '}
+                <span class="text-muted-foreground">{unansweredNote}</span>
+              </p>
+            )}
+            <ul class="mt-4 grid gap-2">
+              {unanswered.map((u) => (
+                <li class="flex items-start gap-3 border-b border-border py-2 text-sm">
+                  <span class="text-heading-accent" aria-hidden="true">
+                    ?
+                  </span>
+                  <span>{u}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}

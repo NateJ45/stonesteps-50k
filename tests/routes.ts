@@ -6,9 +6,10 @@
 // Every path below was verified against dist/client after `npm run build`.
 //
 // Deliberately absent:
-//   /[slug] and /journal/[slug]   dynamic, and build zero paths with no
-//                                 Sanity project configured (which is how the
-//                                 starter builds by default)
+//   /[slug]                       dynamic. /course and /records ARE [slug]
+//                                 pages and are listed below anyway, because
+//                                 this site is configured and they are its
+//                                 actual content.
 //   /studio, /preview/**,
 //   /api/draft-mode/*             SSR only, never emitted into dist/client
 //   the nine module routes        staged under modules/, opt-in, not built
@@ -17,13 +18,13 @@
 /** Routes that render real content and must pass every check. */
 export const routes: string[] = [
   '/',
-  '/about',
-  '/services',
-  '/process',
-  '/faq',
+  // Built from Sanity `page` documents, not from a file in src/pages. They are
+  // listed anyway because they are the site's real content and must pass every
+  // check; if the dataset ever stops producing them the suite should fail
+  // loudly rather than quietly testing one page.
+  '/course',
+  '/records',
   '/contact',
-  '/journal',
-  '/privacy',
 ];
 
 /**

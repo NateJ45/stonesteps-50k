@@ -1,0 +1,122 @@
+---
+// Foundation, edit with care
+//
+// The contact band: the form, and the three things beside it that answer most
+// questions before anyone writes.
+//
+// CONTENT block: receives a surface from the cadence in sectionCadence.ts.
+//
+// The director, the community link and the start line all come from The Race,
+// so they cannot drift out of step with the rest of the site.
+
+import RaceContactForm from '@/components/RaceContactForm';
+import type { ProjectedContactSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  subjects?: string[];
+  communityNote?: string;
+  race?: ProjectedContactSection['race'];
+  surface?: string;
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = 'Send a message',
+  subjects = [],
+  communityNote,
+  race,
+  surface = 'background',
+  headingId = 'contact-heading',
+} = Astro.props as Props;
+
+const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
+
+const raceDate = race?.raceDate ? new Date(race.raceDate) : null;
+const dateLabel =
+  raceDate && !Number.isNaN(raceDate.getTime())
+    ? raceDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : null;
+---
+
+<section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+  <div class="mx-auto w-full max-w-content px-6">
+    <div class="grid gap-12 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-start">
+      <div>
+        {
+          eyebrow && (
+            <p class="blaze text-heading-accent mb-4 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase">
+              {eyebrow}
+            </p>
+          )
+        }
+        <h2 id={headingId} class="display mb-8 text-h3">{headline}</h2>
+        <RaceContactForm client:load subjects={subjects} fallbackUrl={race?.facebookUrl} />
+      </div>
+
+      <aside class="grid gap-8">
+        {
+          race?.directorName && (
+            <div>
+              <p class="text-heading-accent font-mono text-[0.62rem] tracking-[0.2em] uppercase">
+                Race director
+              </p>
+              <p class="display mt-2 text-h4">{race.directorName}</p>
+              {race.directorNote && (
+                <p class="mt-2 text-sm text-muted-foreground">{race.directorNote}</p>
+              )}
+            </div>
+          )
+        }
+
+        {
+          race?.facebookUrl && (
+            <div class="border-t border-border pt-8">
+              <p class="text-heading-accent font-mono text-[0.62rem] tracking-[0.2em] uppercase">
+                The community
+              </p>
+              {communityNote && <p class="mt-2 text-sm text-muted-foreground">{communityNote}</p>}
+              <a
+                class="btn-plate btn-plate--cream mt-4 text-sm"
+                href={race.facebookUrl}
+                rel="noopener"
+              >
+                Join the group
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
+          )
+        }
+
+        {
+          race?.venue && (
+            <div class="border-t border-border pt-8">
+              <p class="text-heading-accent font-mono text-[0.62rem] tracking-[0.2em] uppercase">
+                Start line
+              </p>
+              <p class="mt-2 font-mono text-sm leading-relaxed">
+                {race.startArea && (
+                  <>
+                    {race.startArea}
+                    <br />
+                  </>
+                )}
+                {race.venue}
+                <br />
+                {[race.city, race.region].filter(Boolean).join(', ')}
+              </p>
+              {dateLabel && <p class="mt-2 text-sm text-muted-foreground">{dateLabel}</p>}
+            </div>
+          )
+        }
+      </aside>
+    </div>
+  </div>
+</section>

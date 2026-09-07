@@ -103,8 +103,8 @@ const area = `${line} L ${W} ${BASE} L 0 ${BASE} Z`;
 
     <defs>
       <linearGradient id="elevFill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.32"></stop>
-        <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"></stop>
+        <stop offset="0%" class="elev__stop-top"></stop>
+        <stop offset="100%" class="elev__stop-bottom"></stop>
       </linearGradient>
     </defs>
 
@@ -159,6 +159,19 @@ const area = `${line} L ${W} ${BASE} L 0 ${BASE} Z`;
     height: auto;
     display: block;
     overflow: visible;
+  }
+
+  /* stop-color must be set as a CSS PROPERTY, not a presentation attribute.
+     var() does not resolve inside a presentation attribute, so
+     stop-color="var(--primary)" silently produced no fill at all: the profile
+     rendered as a bare line over empty space. */
+  .elev__stop-top {
+    stop-color: var(--primary);
+    stop-opacity: 0.32;
+  }
+  .elev__stop-bottom {
+    stop-color: var(--primary);
+    stop-opacity: 0;
   }
 
   .elev__line {

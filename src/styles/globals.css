@@ -1519,3 +1519,98 @@ body::before {
   border: 1px dashed color-mix(in srgb, var(--primary) 55%, transparent);
   background: color-mix(in srgb, var(--primary) 7%, transparent);
 }
+
+/* ---------- The trailhead kiosk ----------------------------------------- */
+/* A RECESSED board (inset shadow, never a raised one) holding pinned index
+   cards. The recess is what makes it read as something you look into rather
+   than another card on the page. Native <details> underneath, so it works
+   with no JavaScript. */
+.kiosk {
+  background: var(--accent);
+  box-shadow: inset 0 3px 14px rgb(0 0 0 / 0.45);
+}
+
+.qa {
+  position: relative;
+  background: var(--plate-face);
+  color: var(--plate-ink);
+  border: 2px solid var(--plate-edge);
+  border-radius: 10px;
+  box-shadow: var(--lift);
+  padding: 1rem 1.1rem;
+  transform: rotate(-0.7deg);
+  transition: transform 0.2s ease;
+}
+.qa:nth-child(even) {
+  transform: rotate(0.8deg);
+}
+.qa:hover,
+.qa[open] {
+  transform: rotate(0);
+}
+
+.qa > summary {
+  cursor: pointer;
+  list-style: none;
+}
+.qa > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* The pushpin holding the card to the board. */
+.qa__pin {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  margin-top: 0.35rem;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid var(--plate-edge);
+  box-shadow: 1px 2px 0 rgb(0 0 0 / 0.4);
+}
+
+/* A plus that becomes a minus, built from two bars so there is no icon font. */
+.qa__i {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 0.35rem;
+}
+.qa__i::before,
+.qa__i::after {
+  content: '';
+  position: absolute;
+  inset: 6px 0 auto;
+  height: 2px;
+  background: currentColor;
+  transition: transform 0.2s ease;
+}
+.qa__i::after {
+  transform: rotate(90deg);
+}
+.qa[open] .qa__i::after {
+  transform: rotate(0);
+}
+
+.qa__a {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed rgb(0 0 0 / 0.25);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qa,
+  .qa:hover,
+  .qa[open] {
+    transform: none;
+    transition: none;
+  }
+  .qa__i::before,
+  .qa__i::after {
+    transition: none;
+  }
+}

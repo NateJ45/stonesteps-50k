@@ -5,14 +5,9 @@
       "staticDistDir": "./dist/client",
       "url": [
         "http://localhost/index.html",
-        "http://localhost/about/index.html",
-        "http://localhost/services/index.html",
-        "http://localhost/process/index.html",
-        "http://localhost/faq/index.html",
-        "http://localhost/contact/index.html",
-        "http://localhost/journal/index.html",
-        "http://localhost/privacy/index.html",
-        "http://localhost/404.html"
+        "http://localhost/course/index.html",
+        "http://localhost/records/index.html",
+        "http://localhost/contact/index.html"
       ],
       "numberOfRuns": 3,
       "settings": {

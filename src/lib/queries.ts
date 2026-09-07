@@ -170,6 +170,16 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       ...,
       "race": *[_type == "race"][0]{ gpxUrl }
     },
+    _type == "pageHeaderSection" => {
+      ...,
+      image${IMAGE_PROJECTION}
+    },
+    _type == "contactSection" => {
+      ...,
+      "race": *[_type == "race"][0]{
+        directorName, directorNote, facebookUrl, venue, startArea, city, region, raceDate
+      }
+    },
     _type == "sponsorPatchesSection" => {
       ...,
       "sponsors": *[_type == "sponsor"] | order(orderRank asc){

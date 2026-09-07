@@ -1,0 +1,99 @@
+---
+// Foundation, edit with care
+//
+// The band at the top of an inner page.
+//
+// SELF_CONTAINED: paints its own ground, never receives a surface prop.
+//
+// The title takes an optional SECOND LINE field rather than allowing HTML. The
+// mockup rendered this value with set:html so an editor could type a <br>,
+// which is fine while the value lives in a TypeScript file and is an injection
+// surface the moment it comes from a CMS. Two fields cost nothing and cannot be
+// abused.
+
+import SanityImage from '@/components/SanityImage.astro';
+import Topo from '@/components/race/Topo.astro';
+import type { ProjectedPageHeaderSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  headlineSecondLine?: string;
+  lede?: string;
+  image?: ProjectedPageHeaderSection['image'];
+  seed?: number;
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = '',
+  headlineSecondLine,
+  lede,
+  image,
+  seed = 17,
+  headingId = 'page-header-heading',
+} = Astro.props as Props;
+
+const hasImage = Boolean(image?.asset);
+---
+
+<section
+  class="relative overflow-hidden border-b border-border bg-background py-section-lg"
+  aria-labelledby={headingId}
+>
+  <Topo {seed} lines={13} class="opacity-50" />
+
+  <div class="relative z-10 mx-auto w-full max-w-content px-6">
+    <div class={hasImage ? 'grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center' : ''}>
+      <div>
+        {
+          eyebrow && (
+            <p class="blaze text-heading-accent mb-4 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase">
+              {eyebrow}
+            </p>
+          )
+        }
+        {
+          /* Two BLOCK spans, not a <br>. A <br> gives no word boundary, so the
+            accessible name came out as "Ask therace director." run together.
+            Blocks break the line visually and keep the words separate for a
+            screen reader. */
+        }
+        <h1 id={headingId} class="display text-[clamp(2.5rem,7vw,5.5rem)]">
+          <span class="block">{headline}</span>
+          {
+            /* The explicit space is load-bearing: Astro strips the whitespace
+              between adjacent expressions, so without it the two lines
+              concatenate into "Ask therace director." in the accessible name
+              even though they render on separate lines. */
+          }
+          {
+            headlineSecondLine && (
+              <>
+                {' '}
+                <span class="block">{headlineSecondLine}</span>
+              </>
+            )
+          }
+        </h1>
+        {lede && <p class="mt-6 max-w-[46ch] text-lg text-muted-foreground">{lede}</p>}
+      </div>
+
+      {
+        hasImage && (
+          <figure class="overflow-hidden rounded-xl border-2 border-black shadow-[var(--lift-lg)]">
+            <SanityImage
+              source={image}
+              width={1000}
+              sizes="(min-width: 1024px) 42vw, 100vw"
+              alt={image?.alt ?? ''}
+              loading="eager"
+              class="w-full"
+            />
+          </figure>
+        )
+      }
+    </div>
+  </div>
+</section>

@@ -136,6 +136,16 @@ docs.push({
     'elevation change and an aid station at the end of every loop.',
   pageBuilder: [
     {
+      _type: 'pageHeaderSection',
+      _key: key(),
+      eyebrow: 'The course',
+      headline: 'Seven loops',
+      headlineSecondLine: 'out of The Oval.',
+      lede:
+        'Single track through Mt. Airy Forest, 1,469.9 acres of it, with an aid station ' +
+        'every time you come back through the start.',
+    },
+    {
       _type: 'loopCardSection',
       _key: key(),
       eyebrow: 'The course',
@@ -188,6 +198,16 @@ docs.push({
     '27K in Mt. Airy Forest, Cincinnati.',
   pageBuilder: [
     {
+      _type: 'pageHeaderSection',
+      _key: key(),
+      eyebrow: 'All-time records',
+      headline: 'Twenty years',
+      headlineSecondLine: 'of fast days.',
+      lede:
+        'Course records, age-group records and the fastest finishes on file, for both ' +
+        'distances.',
+    },
+    {
       _type: 'recordsBoardSection',
       _key: key(),
       eyebrow: 'All-time',
@@ -196,6 +216,152 @@ docs.push({
         'Every figure on this page is calculated from the finishing times themselves rather ' +
         'than kept by hand, so the course record and the age-group tables can never disagree ' +
         'with each other.',
+    },
+  ],
+});
+
+// ── Contact ───────────────────────────────────────────────────────────────
+// The mockup's most useful page, and the reason is the second half of the FAQ:
+// the list of things the race publishes no answer to anywhere. Every line is a
+// question runners actually email about, so the list doubles as the brief for
+// the race director and as free content the race is currently missing.
+docs.push({
+  _id: 'page-contact',
+  _type: 'page',
+  title: 'Contact',
+  slug: { _type: 'slug', current: 'contact' },
+  seoTitle: 'Contact | Stone Steps 50K',
+  seoDescription:
+    'Questions about the Stone Steps 50K and 27K? Reach race director David Corfman directly.',
+  pageBuilder: [
+    {
+      _type: 'pageHeaderSection',
+      _key: key(),
+      eyebrow: 'Get in touch',
+      headline: 'Ask the',
+      headlineSecondLine: 'race director.',
+      lede:
+        'Whatever you need answered, you get an answer. Course questions, entry transfers, ' +
+        'volunteering, or whether your shoes are aggressive enough.',
+    },
+    {
+      _type: 'contactSection',
+      _key: key(),
+      eyebrow: 'Send a message',
+      headline: 'Write to the race',
+      subjects: [
+        'Course or race day question',
+        'Registration or transfer',
+        'Volunteering',
+        'Sponsorship',
+        'Results correction',
+        'Something else',
+      ],
+      communityNote:
+        'The Facebook group is where course conditions, carpools and last-minute changes ' +
+        'actually get posted.',
+    },
+    {
+      _type: 'faqKioskSection',
+      _key: key(),
+      eyebrow: 'Before you write',
+      headline: 'Answered already',
+      // Every answer below is drawn from what the race actually publishes, on
+      // RunSignUp or its own site. Nothing here is inferred.
+      items: [
+        {
+          _type: 'faqCard',
+          _key: key(),
+          question: 'What does my entry include?',
+          answer:
+            'A race t-shirt and a timing chip, plus aid at the end of every loop. The 50K ' +
+            'shirt is a tech tee. Entries also fund the annual donation to Cincinnati Parks.',
+        },
+        {
+          _type: 'faqCard',
+          _key: key(),
+          question: 'What time does it start?',
+          answer:
+            'The 50K starts at 8:00 am and the 27K at 8:30 am. Trekkers may start an hour ' +
+            'earlier in each case, and 27K trekkers are not eligible for age group or ' +
+            'overall awards. The course closes at about 4:30 pm.',
+        },
+        {
+          _type: 'faqCard',
+          _key: key(),
+          question: 'Where does the race start?',
+          answer:
+            'The Oval, Area 13, inside Mt. Airy Forest in Cincinnati. Both distances start ' +
+            'and finish in the same place, and you pass back through it at the end of ' +
+            'every loop.',
+        },
+        {
+          _type: 'faqCard',
+          _key: key(),
+          question: 'What is the course actually like?',
+          answer:
+            'Hilly single track with roots, rocks and the occasional tree blow down. The ' +
+            '50K is four 5+ mile loops alternating with three 3+ mile loops, for 10,726 ' +
+            'feet of elevation change. Nothing about it is flat.',
+        },
+        {
+          _type: 'faqCard',
+          _key: key(),
+          question: 'How much is it, and when do prices go up?',
+          answer:
+            'Entry is $35 through January 31, $50 from February 1 through September 30, ' +
+            'and $60 from October 1 to race day, plus a processing fee. The 50K is capped ' +
+            'at 120 entries and the 27K at 130.',
+        },
+        {
+          _type: 'faqCard',
+          _key: key(),
+          question: 'Where do I find past results?',
+          answer:
+            'The records page carries course and age-group records for both distances, ' +
+            'calculated from the finishing times themselves. The complete archive, ' +
+            'including years this site does not hold, lives on RunSignUp.',
+        },
+      ],
+      unansweredHeading: 'Still to confirm with the race director',
+      unansweredNote:
+        'The race publishes no answer to these anywhere. They are the highest-value ' +
+        'content to add, and every one of them is a question runners email to ask.',
+      unanswered: [
+        'Packet pickup: when it opens and where',
+        'Pre-race briefing time',
+        'Awards categories and when they are handed out',
+        'Parking and spectator access',
+        'Drop bag, crew and pacer policy',
+        'Whether dogs are allowed on course',
+        'Refund, transfer and deferral policy',
+      ],
+    },
+    {
+      _type: 'imageTextSection',
+      _key: key(),
+      eyebrow: 'Coming from out of town',
+      headline: 'Stay downtown or near CVG',
+      body: [
+        {
+          _type: 'block',
+          _key: key(),
+          style: 'normal',
+          markDefs: [],
+          children: [
+            {
+              _type: 'span',
+              _key: key(),
+              marks: [],
+              text:
+                'Mt. Airy Forest sits close to both downtown Cincinnati and the airport ' +
+                'area, so either works as a base. It is a couple of miles from I-75 and ' +
+                'I-74 off Colerain Avenue.',
+            },
+          ],
+        },
+      ],
+      imageSide: 'right',
     },
   ],
 });

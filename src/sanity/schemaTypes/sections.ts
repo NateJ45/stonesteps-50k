@@ -602,6 +602,9 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
       title: 'The race',
       of: [
         'raceHeroSection',
+        'pageHeaderSection',
+        'contactSection',
+        'faqKioskSection',
         'distanceTicketsSection',
         'recordsBoardSection',
         'raceScheduleSection',

@@ -493,23 +493,22 @@ const latestProjects = allProjects.slice(0, 3);
       <p>© {currentYear} {brandName}</p>
       <div class="flex items-center gap-m">
         {
-          LEGAL_LINKS.length > 0 ? (
-            LEGAL_LINKS.map((l) => (
-              <a
-                href={l.href}
-                class="underline underline-offset-2 transition-colors hover:text-link"
-              >
-                {l.label}
-              </a>
-            ))
-          ) : (
-            <a
-              href="/privacy"
-              class="underline underline-offset-2 transition-colors hover:text-link"
-            >
-              Privacy policy
-            </a>
-          )
+          LEGAL_LINKS.length > 0
+            ? LEGAL_LINKS.map((l) => (
+                <a
+                  href={l.href}
+                  class="underline underline-offset-2 transition-colors hover:text-link"
+                >
+                  {l.label}
+                </a>
+              ))
+            : /* The starter's fallback here was a hardcoded "Privacy policy"
+                  link. This site has no privacy route, because the race does
+                  not have that page, and a footer link to a 404 is worse than
+                  no link at all. Editor-supplied small print above still
+                  renders; add a page in the Studio and link it there if one is
+                  ever needed. */
+              null
         }
         {
           siteCredit &&

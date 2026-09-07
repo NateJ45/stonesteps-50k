@@ -534,6 +534,46 @@ export interface ProjectedSponsorPatchesSection {
   sponsors?: { _id: string; name?: string; url?: string; logo?: ProjectedImage }[];
 }
 
+export interface ProjectedPageHeaderSection {
+  _type: 'pageHeaderSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  headlineSecondLine?: string;
+  lede?: string;
+  image?: ProjectedImage;
+}
+
+export interface ProjectedContactSection {
+  _type: 'contactSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  subjects?: string[];
+  communityNote?: string;
+  race?: {
+    directorName?: string;
+    directorNote?: string;
+    facebookUrl?: string;
+    venue?: string;
+    startArea?: string;
+    city?: string;
+    region?: string;
+    raceDate?: string;
+  } | null;
+}
+
+export interface ProjectedFaqKioskSection {
+  _type: 'faqKioskSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  items?: { _key?: string; question?: string; answer?: string }[];
+  unansweredHeading?: string;
+  unansweredNote?: string;
+  unanswered?: string[];
+}
+
 export type PageBuilderBlock =
   | ProjectedHeroSection
   | ProjectedRichTextSection
@@ -567,4 +607,7 @@ export type PageBuilderBlock =
   | ProjectedCourseFeaturesSection
   | ProjectedLoopCardSection
   | ProjectedElevationSection
-  | ProjectedSponsorPatchesSection;
+  | ProjectedSponsorPatchesSection
+  | ProjectedPageHeaderSection
+  | ProjectedContactSection
+  | ProjectedFaqKioskSection;

@@ -41,6 +41,9 @@ import CourseFeatures from '@/components/sections/CourseFeatures.astro';
 import LoopCard from '@/components/sections/LoopCard.astro';
 import ElevationBand from '@/components/sections/ElevationBand.astro';
 import SponsorPatches from '@/components/sections/SponsorPatches.astro';
+import PageHeader from '@/components/sections/PageHeader.astro';
+import ContactBand from '@/components/sections/ContactBand.astro';
+import FaqKiosk from '@/components/sections/FaqKiosk.astro';
 import { classifySections } from '@/lib/sectionCadence';
 import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
 import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
@@ -373,6 +376,35 @@ const wrapAttrs = (key: string | undefined) =>
             eyebrow={s.eyebrow}
             headline={s.headline}
             sponsors={s.sponsors ?? []}
+            headingId={headingId}
+          />
+        ) : s._type === 'pageHeaderSection' ? (
+          <PageHeader
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            headlineSecondLine={s.headlineSecondLine}
+            lede={s.lede}
+            image={s.image}
+            headingId={headingId}
+          />
+        ) : s._type === 'contactSection' ? (
+          <ContactBand
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            subjects={s.subjects ?? []}
+            communityNote={s.communityNote}
+            race={s.race}
+            surface={surface ?? 'background'}
+            headingId={headingId}
+          />
+        ) : s._type === 'faqKioskSection' ? (
+          <FaqKiosk
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            items={s.items ?? []}
+            unansweredHeading={s.unansweredHeading}
+            unansweredNote={s.unansweredNote}
+            unanswered={s.unanswered ?? []}
             headingId={headingId}
           />
         ) : (
