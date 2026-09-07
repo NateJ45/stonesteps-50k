@@ -20,6 +20,8 @@
     "llms:full": "node scripts/generate-llms-full.mjs",
     "studio:import": "node scripts/import-content.mjs",
     "seed": "node scripts/seed-core.mjs",
+    "seed:race": "node scripts/seed-race.mjs",
+    "import:results": "node scripts/import-results.mjs",
     "parity": "node scripts/page-parity.mjs",
     "sync-check": "node scripts/sync-check.mjs",
     "free-dist": "node scripts/free-dist.mjs",
