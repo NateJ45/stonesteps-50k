@@ -62,6 +62,8 @@ export type RecordRow = {
 /** The minimum a result needs to compete for a record. */
 export type ResultLike = {
   athlete?: { name?: string | null; slug?: string | null } | null;
+  /** Trekkers take the early start and are ineligible for awards. */
+  trekker?: boolean | null;
   year?: number | null;
   timeSeconds?: number | null;
   age?: number | null;
@@ -126,6 +128,10 @@ export function bracketRecords(
   };
 
   for (const r of results) {
+    // The race states that trekkers, who take the optional early start, are
+    // ineligible for age group and overall awards. Their time is real and the
+    // results tables show it; it just cannot hold a record.
+    if (r.trekker) continue;
     const b = bracketForAge(r.age);
     if (!b) continue;
     consider(toRow(b, r, false));

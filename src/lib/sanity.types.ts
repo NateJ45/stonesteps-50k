@@ -423,6 +423,7 @@ export type RaceResult = {
   age?: number;
   place?: number;
   timeSource?: 'chip' | 'gun';
+  trekker?: boolean;
   sourceNote?: string;
 };
 

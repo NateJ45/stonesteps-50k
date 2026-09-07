@@ -81,6 +81,19 @@ function boardFor(slug: string) {
   });
 }
 
+// COVERAGE, COMPUTED. This used to be a sentence claiming the archive started
+// in 2017, which stopped being true the moment the recovered years landed. Any
+// statement about what the data contains should be read OFF the data.
+const allYears = results.map((r) => r.year).filter(Boolean) as number[];
+const firstYear = allYears.length ? Math.min(...allYears) : null;
+const lastYear = allYears.length ? Math.max(...allYears) : null;
+const missingYears =
+  firstYear && lastYear
+    ? Array.from({ length: lastYear - firstYear + 1 }, (_, i) => firstYear + i).filter(
+        (y) => !allYears.includes(y),
+      )
+    : [];
+
 const boards = distances
   .filter((d) => d.slug)
   .map((d) => ({ ...d, slug: d.slug as string, genders: boardFor(d.slug as string) }));
@@ -220,7 +233,7 @@ const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
                       <div class="mt-8 overflow-x-auto">
                         <table class="w-full border-collapse text-sm">
                           <caption class="pb-2 text-left font-mono text-[0.6rem] tracking-[0.18em] text-muted-foreground uppercase">
-                            Fastest {g.topTen.length} since 2017
+                            Fastest {g.topTen.length} on file
                           </caption>
                           <thead>
                             <tr class="border-b border-primary/30">
@@ -299,9 +312,12 @@ const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
         visitor looking for 2013 needs to know where it actually is. */
     }
     <p class="mt-10 max-w-[62ch] text-sm text-muted-foreground">
-      Every name links to that runner's full history here. Records back to 2007 are carried from the
-      race's own published tables. The finishing times behind them cover 2017 onward, and 2020, 2021
-      and earlier years are not all available.
+      Every name links to that runner's full history here. Finishing times on file cover{' '}
+      {firstYear} to {lastYear}{
+        missingYears.length > 0 && <>, with no surviving results for {missingYears.join(', ')}</>
+      }. The 27K is only on file from 2015: earlier years were timed elsewhere and those results are
+      lost. A few records are carried from the race's own published tables, where the finishing
+      times behind them did not survive.
       {
         race?.resultsUrl && (
           <>

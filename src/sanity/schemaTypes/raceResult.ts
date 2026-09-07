@@ -96,6 +96,16 @@ export const raceResult = defineType({
       initialValue: 'gun',
     }),
     defineField({
+      name: 'trekker',
+      title: 'Ran as a trekker',
+      type: 'boolean',
+      description:
+        'Trekkers take the optional early start and are, in the words of the race, ' +
+        'ineligible for age group and overall awards. The time is real and is shown; it ' +
+        'is excluded from records. See src/lib/age-brackets.ts.',
+      options: { canvasApp: { exclude: true } },
+    }),
+    defineField({
       name: 'sourceNote',
       title: 'Note on the source',
       type: 'string',

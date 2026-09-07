@@ -142,7 +142,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
         _id, name, "slug": slug.current
       },
       "results": *[_type == "raceResult"]{
-        year, timeSeconds, gender, age, place, timeSource,
+        year, timeSeconds, gender, age, place, timeSource, trekker,
         "distance": distance->slug.current,
         "athlete": { "name": athlete->name, "slug": athlete->slug.current }
       },
@@ -189,7 +189,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
         _id, name, "slug": slug.current
       },
       "results": *[_type == "raceResult"]{
-        year, timeSeconds, gender, age,
+        year, timeSeconds, gender, age, trekker,
         "distance": distance->slug.current,
         "athlete": { "name": athlete->name, "slug": athlete->slug.current }
       },
@@ -363,7 +363,7 @@ export async function getAllRunners() {
       | order(name asc){
       name, "slug": slug.current, city, region,
       "results": *[_type == "raceResult" && references(^._id)] | order(year desc){
-        year, timeSeconds, gender, age, place, timeSource,
+        year, timeSeconds, gender, age, place, timeSource, trekker,
         "distance": distance->name,
         "distanceSlug": distance->slug.current
       },
@@ -383,7 +383,7 @@ export async function getRunner(slug: string) {
     `*[_type == "athlete" && slug.current == $slug][0]{
       name, "slug": slug.current, city, region,
       "results": *[_type == "raceResult" && references(^._id)] | order(year desc){
-        year, timeSeconds, gender, age, place, timeSource,
+        year, timeSeconds, gender, age, place, timeSource, trekker,
         "distance": distance->name,
         "distanceSlug": distance->slug.current
       },

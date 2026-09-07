@@ -424,6 +424,7 @@ export interface ProjectedRaceResult {
   age?: number;
   place?: number;
   timeSource?: 'chip' | 'gun';
+  trekker?: boolean;
   distance?: string;
   athlete?: { name?: string | null; slug?: string | null } | null;
 }

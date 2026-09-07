@@ -110,6 +110,19 @@ describe('bracketRecords', () => {
     assert.equal(rows.find((x) => x.bracket === '40s')?.athlete, 'Old Mark');
   });
 
+  it('excludes trekkers, who are ineligible for awards', () => {
+    // The race states that the optional early start forfeits age group and
+    // overall awards. The time stays real and is shown in the results; it just
+    // cannot take a record off someone who started with the field.
+    const rows = bracketRecords([
+      { athlete: { name: 'Trekker' }, age: 35, timeSeconds: 10000, year: 2006, trekker: true },
+      { athlete: { name: 'Racer' }, age: 35, timeSeconds: 15000, year: 2006 },
+    ]);
+    const thirties = rows.find((x) => x.bracket === '30s');
+    assert.equal(thirties?.athlete, 'Racer');
+    assert.equal(thirties?.timeSeconds, 15000);
+  });
+
   it('carries a sourceNote through', () => {
     const rows = bracketRecords(
       [],
