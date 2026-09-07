@@ -3,12 +3,18 @@
 # check would fail forever on every repo. Copy the SHAPE from here, and keep
 # the step list, the concurrency group and the linkinator skip identical.
 #
-# This repo ships no Sanity project of its own, so there is nothing to pin and
-# the build takes the credential-less fallback path. A client repo sets its
-# PUBLIC_SANITY_* identifiers in an `env:` block here (they are public, they
-# appear in every GROQ request URL) so the build and the test job run against
-# the REAL content, which is what decides whether a page is a real render or a
-# hidden-section stub.
+# This repo HAS a Sanity project, and the identifiers below are wired at the
+# workflow level on purpose. They are public: they appear in every GROQ request
+# URL and in every image URL in the page source, so they are repo VARIABLES, not
+# secrets. The dataset is public too, so no read token is needed and the whole
+# pipeline still works on forks and pull requests.
+#
+# WHY THIS IS NOT OPTIONAL HERE. /course, /records and /contact are Sanity
+# `page` documents built by src/pages/[slug].astro from getAllPageSlugs(). With
+# no project configured, sanityFetch returns its empty fallback, getStaticPaths
+# yields zero paths, and those three routes simply do not exist in dist. The
+# build stays green and the smoke suite then 404s on three of the site's four
+# pages. That is exactly how this workflow failed on 2026-09-07.
 name: CI
 
 on:
@@ -22,6 +28,13 @@ on:
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
+
+# Wired at the workflow level so the build job and the test job agree about what
+# the site contains. Setting it per-step is how three routes came to exist in
+# one job and not the other.
+env:
+  PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+  PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
 
 jobs:
   build:
@@ -70,9 +83,7 @@ jobs:
         # source) but it still has to be handed to this step: there is no .env
         # on a runner, and the audit refuses to skip when it cannot find one -
         # it would rather fail than report a pass it did not earn.
-        env:
-          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
-          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        # Inherits the workflow-level env above.
         run: node scripts/public-data-audit.mjs
 
       - name: Generate Sanity types

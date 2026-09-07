@@ -19,6 +19,15 @@ concurrency:
   group: lighthouse-${{ github.ref }}
   cancel-in-progress: true
 
+# Same reason as ci.yml: /course, /records and /contact are Sanity `page`
+# documents, so without these the build emits neither, lighthouserc's url list
+# points at three files that do not exist, and the audit fails on missing pages
+# rather than on anything about performance. Public identifiers, repo variables,
+# no secrets, works on forks.
+env:
+  PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+  PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
