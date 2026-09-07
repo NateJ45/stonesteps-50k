@@ -35,7 +35,7 @@
     "test:ui": "playwright test --ui",
     "test:unit": "node --experimental-strip-types --test src/lib/*.test.ts",
     "serve:dist": "http-server dist/client -p 4321 -s -c-1 --silent",
-    "check:links": "linkinator ./dist/client --recurse --skip \"^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])\" --skip \"/studio\" --skip \"/preview\" --skip \"/api/\""
+    "check:links": "linkinator ./dist/client --recurse --skip \"^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])\" --skip \"/studio\" --skip \"/preview\" --skip \"/runners\" --skip \"/api/\""
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.2.4",
