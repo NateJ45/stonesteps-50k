@@ -191,12 +191,30 @@ export const courseFeaturesSection = defineType({
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
     defineField({ name: 'headline', title: 'Headline (optional)', type: 'string' }),
     defineField({ name: 'cta', title: 'Link button (optional)', type: 'ctaBlock' }),
+    defineField({
+      name: 'image',
+      title: 'Photograph (optional)',
+      type: 'image',
+      options: { hotspot: true },
+      description:
+        'Sits beside the list and stays put while the features scroll past it. Use a tall ' +
+        'crop: it is held in view for the length of the section.',
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
+    }),
   ],
   preview: {
-    select: { title: 'headline' },
-    prepare: ({ title }) => ({
+    select: { title: 'headline', media: 'image' },
+    prepare: ({ title, media }) => ({
       title: title || 'Course features',
       subtitle: 'Fills itself from Course features',
+      media: media || PinIcon,
     }),
   },
 });

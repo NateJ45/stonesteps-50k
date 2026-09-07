@@ -1277,6 +1277,93 @@ body::before {
   transform: rotate(-3deg);
   box-shadow: var(--lift-sm);
 }
+/* The hairline that runs off to the right edge. It is what makes an eyebrow
+   read as a rule across the top of a section rather than as a stray line of
+   small caps. */
+.blaze::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--heading-accent) 35%, transparent);
+}
+
+/* The hero's own marker. It takes a DOT and no rule, because the hero already
+   carries the biggest mark on the page and a blaze plus a rule beside it reads
+   as two markers competing. */
+.blaze--plain::before {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  transform: none;
+  box-shadow: none;
+}
+.blaze--plain::after {
+  display: none;
+}
+
+/* The outlined k.
+   The logo says 50k, not 50K, and Staatliches is caps-only so live type cannot
+   render the lowercase form (see the note on .lc). Outlining the letter instead
+   of filling it is how the mockup kept the character distinct without needing a
+   glyph the face does not have. Purely decorative: the real string is in the
+   sr-only copy of the headline. */
+.k-outline {
+  -webkit-text-stroke: 2px var(--heading-accent);
+  color: transparent;
+}
+
+/* Arrows nudge on hover, so a button reads as pointing somewhere. */
+.btn-plate__arrow {
+  transition: transform 0.16s ease;
+}
+.btn-plate:hover .btn-plate__arrow {
+  transform: translateX(4px);
+}
+
+/* The footnote marker on a record the published source reports two ways. A
+   circled question mark reads as a footnote; a bare ? reads as a typo. */
+.source-flag {
+  display: inline-grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-left: 0.4rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  line-height: 1;
+  cursor: help;
+  text-decoration: none;
+}
+
+/* The row holding the outright record. The mockup highlighted its "Course" row;
+   we derive that record rather than storing it, so the highlight moves to
+   whichever bracket actually holds it. */
+.is-overall {
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+.is-overall .rec-time,
+.is-overall .rec-bracket {
+  color: var(--heading-accent);
+}
+.is-overall .rec-name {
+  font-weight: 700;
+}
+
+/* The featured entry is a DIFFERENT OBJECT, not the same ticket with a flag on
+   it: forest stock, cream ink, gold lettering on the distance. */
+.ticket--feature {
+  background: var(--color-tertiary);
+  color: var(--plate-face);
+}
+.ticket--feature .ticket__stub {
+  border-top-color: color-mix(in srgb, var(--plate-face) 45%, transparent);
+}
+.ticket--feature .display.on-light {
+  color: var(--gold-on-forest);
+  text-shadow: var(--lift-sm);
+}
 
 /* ---------- Sign-plate buttons ------------------------------------------ */
 /* Every CTA is a sibling of the logo's badge: rounded rectangle, solid fill,

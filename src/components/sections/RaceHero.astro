@@ -6,7 +6,13 @@
 // SELF_CONTAINED: paints its own ground, never receives a surface prop.
 //
 // The headline is split per character into spans so `.hand` can give each
-// letter a fraction of a degree of rotation. That reads as hand-cut lettering
+// letter a fraction of a degree of rotation.
+//
+// A trailing distance token (50k, 27k) gets its k OUTLINED. The logo says 50k,
+// not 50K, and Staatliches is caps-only so live type cannot render the
+// lowercase form at all. Outlining the letter keeps it distinct without needing
+// a glyph the face does not have. It is decoration only: the real string is in
+// the sr-only copy above. That reads as hand-cut lettering
 // without a distressed typeface, so legibility and font weight are unaffected.
 // The real, unsplit text is exposed to screen readers separately, because a
 // heading chopped into 30 spans is announced letter by letter by some readers.
@@ -44,6 +50,9 @@ const {
 // Split into words, then characters, so a word never breaks mid-rotation
 // across a line end.
 const words = headline.split(/\s+/).filter(Boolean);
+
+/** True for a final token like "50k" or "27k", whose k gets outlined. */
+const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d+k$/i.test(w);
 ---
 
 <section class="relative overflow-hidden bg-background py-section-lg" aria-labelledby={headingId}>
@@ -54,7 +63,7 @@ const words = headline.split(/\s+/).filter(Boolean);
       <div>
         {
           eyebrow && (
-            <p class="blaze text-heading-accent mb-5 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase">
+            <p class="blaze blaze--plain text-heading-accent mb-5 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase">
               {eyebrow}
             </p>
           )
@@ -67,8 +76,16 @@ const words = headline.split(/\s+/).filter(Boolean);
               words.map((word, wi) => (
                 <>
                   <span class="inline-block whitespace-nowrap">
-                    {word.split('').map((ch) => (
-                      <span>{ch}</span>
+                    {word.split('').map((ch, ci) => (
+                      <span
+                        class={
+                          isDistanceToken(word, wi) && ci === word.length - 1
+                            ? 'k-outline lc'
+                            : undefined
+                        }
+                      >
+                        {ch}
+                      </span>
                     ))}
                   </span>
                   {wi < words.length - 1 && ' '}

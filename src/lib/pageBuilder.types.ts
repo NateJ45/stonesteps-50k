@@ -499,6 +499,7 @@ export interface ProjectedCourseFeaturesSection {
   eyebrow?: string;
   headline?: string;
   cta?: ProjectedCtaBlock;
+  image?: ProjectedImage;
   features?: { _id: string; title?: string; body?: string; confirmed?: boolean }[];
 }
 

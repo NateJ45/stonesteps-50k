@@ -59,7 +59,9 @@ function registerHref(eventId?: number): string | undefined {
     <div class="mt-12 grid gap-10 md:grid-cols-2 md:items-start">
       {
         distances.map((d) => (
-          <article class="ticket w-full max-w-[26rem] justify-self-center">
+          <article
+            class={`ticket w-full max-w-[26rem] justify-self-center ${d.featured ? 'ticket--feature' : ''}`}
+          >
             {d.featured && d.kicker && (
               <div class="ticket__flag" aria-hidden="true">
                 <span>{d.kicker}</span>
@@ -119,6 +121,9 @@ function registerHref(eventId?: number): string | undefined {
                   rel="noopener"
                 >
                   Register for the <span class="lc">{d.name}</span>
+                  <span class="btn-plate__arrow" aria-hidden="true">
+                    &rarr;
+                  </span>
                 </a>
               )}
 

@@ -175,6 +175,20 @@ async function main() {
     console.log('  homePage parks image');
   }
 
+  // The sticky terrain photograph on the home course band. trail-descent was
+  // uploaded from the start and sat unused until the sticky layout existed.
+  const homeFeat = await client.fetch('*[_id == "homePage"][0]{ pageBuilder[]{ _key, _type } }');
+  const featKey = homeFeat?.pageBuilder?.find((b) => b._type === 'courseFeaturesSection')?._key;
+  if (featKey && ids.descent) {
+    await client
+      .patch('homePage')
+      .set({
+        [`pageBuilder[_key=="${featKey}"].image`]: imageField(ids.descent, IMAGES.descent.alt),
+      })
+      .commit();
+    console.log('  homePage course-features image');
+  }
+
   // The lodging band on contact, and the forest band wherever an imageText
   // section is waiting for one.
   const contact = await client.fetch(

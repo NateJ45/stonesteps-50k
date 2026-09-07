@@ -73,7 +73,11 @@ function boardFor(slug: string) {
       .sort((a, b) => (a.timeSeconds as number) - (b.timeSeconds as number))
       .slice(0, 10);
 
-    return { ...g, brackets, course, topTen, archiveCount: set.length };
+    // Which bracket row holds the outright record. The mockup highlighted a
+    // stored "Course" row; we derive that record, so the highlight follows it.
+    const overall = course?.bracket ?? null;
+
+    return { ...g, brackets, course, overall, topTen, archiveCount: set.length };
   });
 }
 
@@ -170,17 +174,21 @@ const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
                         </thead>
                         <tbody>
                           {g.brackets.map((row: RecordRow) => (
-                            <tr class="border-b border-border/60">
-                              <th scope="row" class="py-2 pr-3 text-left font-normal">
+                            <tr
+                              class={`border-b border-border/60 ${
+                                row.bracket === g.overall ? 'is-overall' : ''
+                              }`}
+                            >
+                              <th scope="row" class="rec-bracket py-2 pr-3 text-left font-normal">
                                 {row.label}
                               </th>
-                              <td class="py-2 pr-3">
+                              <td class="rec-name py-2 pr-3">
                                 {row.athlete ?? (
                                   <span class="text-muted-foreground">Unclaimed</span>
                                 )}
                                 {row.sourceNote && (
                                   <abbr
-                                    class="ml-1 cursor-help text-primary"
+                                    class="source-flag text-muted-foreground"
                                     title={row.sourceNote}
                                   >
                                     ?
@@ -188,7 +196,7 @@ const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
                                 )}
                               </td>
                               <td class="py-2 text-right whitespace-nowrap">{row.year ?? ''}</td>
-                              <td class="tabular py-2 text-right font-bold whitespace-nowrap">
+                              <td class="rec-time tabular py-2 text-right font-bold whitespace-nowrap">
                                 {formatRaceTime(row.timeSeconds) || '—'}
                               </td>
                             </tr>
@@ -233,13 +241,18 @@ const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
                           </thead>
                           <tbody>
                             {g.topTen.map((row, idx) => (
-                              <tr class="border-b border-border/60">
-                                <th scope="row" class="tabular py-2 pr-3 text-left font-normal">
+                              <tr
+                                class={`border-b border-border/60 ${idx === 0 ? 'is-overall' : ''}`}
+                              >
+                                <th
+                                  scope="row"
+                                  class="rec-bracket tabular py-2 pr-3 text-left font-normal"
+                                >
                                   {String(idx + 1).padStart(2, '0')}
                                 </th>
-                                <td class="py-2 pr-3">{row.athlete?.name ?? ''}</td>
+                                <td class="rec-name py-2 pr-3">{row.athlete?.name ?? ''}</td>
                                 <td class="py-2 text-right whitespace-nowrap">{row.year ?? ''}</td>
-                                <td class="tabular py-2 text-right font-bold whitespace-nowrap">
+                                <td class="rec-time tabular py-2 text-right font-bold whitespace-nowrap">
                                   {formatRaceTime(row.timeSeconds)}
                                 </td>
                               </tr>

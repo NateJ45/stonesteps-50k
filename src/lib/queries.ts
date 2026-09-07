@@ -162,6 +162,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
     _type == "courseFeaturesSection" => {
       ...,
       cta${CTA_PROJECTION},
+      image${IMAGE_PROJECTION},
       "features": *[_type == "courseFeature"] | order(orderRank asc){
         _id, title, body, confirmed
       }
