@@ -170,6 +170,31 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       ...,
       "race": *[_type == "race"][0]{ gpxUrl }
     },
+    _type == "parksSection" => {
+      ...,
+      image${IMAGE_PROJECTION},
+      "race": *[_type == "race"][0]{ parksDonation, directorName, directorNote }
+    },
+    // Same shape the records board takes, because it runs the same derivation.
+    // Handing this block a pre-computed answer instead would mean two code
+    // paths that could drift, which is the whole thing being avoided here.
+    _type == "dynastiesSection" => {
+      ...,
+      cta${CTA_PROJECTION},
+      "distances": *[_type == "distance"] | order(orderRank asc){
+        _id, name, "slug": slug.current
+      },
+      "results": *[_type == "raceResult"]{
+        year, timeSeconds, gender, age,
+        "distance": distance->slug.current,
+        "athlete": { "name": athlete->name }
+      },
+      "historical": *[_type == "recordEntry"]{
+        bracket, gender, year, timeSeconds,
+        "distance": distance->slug.current,
+        "athlete": { "name": athlete->name }
+      }
+    },
     _type == "pageHeaderSection" => {
       ...,
       image${IMAGE_PROJECTION}

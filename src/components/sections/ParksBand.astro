@@ -1,0 +1,123 @@
+---
+// Foundation, edit with care
+//
+// The giving-back band: what the entry fee pays for, and who runs the race.
+//
+// SELF_CONTAINED: paints its own ground, never receives a surface prop.
+//
+// The donation figure and the director byline come from The Race rather than
+// from this block's own fields. That is the rule the whole site follows: a
+// number that appears in two places is a number that will eventually disagree
+// with itself.
+//
+// TWO COLOUR TRAPS, both hit on the first pass.
+//
+// 1. `bg-secondary` is NOT the shadcn --secondary. Tailwind resolves it to the
+//    @theme brand token --color-secondary, which is Stone #8A7F66, so this band
+//    rendered on grey-brown instead of forest. The forest value is
+//    --color-tertiary. globals.css warns about exactly this collision for
+//    --color-accent; it applies here too.
+// 2. Text is set in SOLID tokens, never the ground colour at reduced opacity.
+//    Cream on forest measures 7.04:1 and gold 6.11:1, both clear AA. The
+//    opacity-80/90 version measured 2.4 to 2.7 and failed axe.
+
+import SanityImage from '@/components/SanityImage.astro';
+import Topo from '@/components/race/Topo.astro';
+import type { ProjectedParksSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  body?: string;
+  image?: ProjectedParksSection['image'];
+  caption?: string;
+  showDirector?: boolean;
+  race?: ProjectedParksSection['race'];
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = 'It gives back',
+  body,
+  image,
+  caption,
+  showDirector = true,
+  race,
+  headingId = 'parks-heading',
+} = Astro.props as Props;
+---
+
+<section class="parks relative overflow-hidden py-section-lg" aria-labelledby={headingId}>
+  <Topo seed={53} lines={12} class="opacity-30" />
+
+  <div class="relative z-10 mx-auto w-full max-w-content px-6">
+    <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
+      <div>
+        {
+          eyebrow && (
+            <p class="parks__label mb-4 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase">
+              {eyebrow}
+            </p>
+          )
+        }
+        <h2 id={headingId} class="display text-h2">
+          {race?.parksDonation && <span class="block">{race.parksDonation} a year</span>}
+          {headline}
+        </h2>
+        {body && <p class="mt-5 max-w-[46ch]">{body}</p>}
+
+        {
+          showDirector && race?.directorName && (
+            <div class="parks__rule mt-8 border-t pt-5">
+              <p class="parks__label font-mono text-[0.62rem] tracking-[0.2em] uppercase">
+                Race director
+              </p>
+              <p class="display mt-1 text-h4">{race.directorName}</p>
+              {race.directorNote && <p class="mt-1 text-sm">{race.directorNote}</p>}
+            </div>
+          )
+        }
+      </div>
+
+      {
+        image?.asset && (
+          <figure>
+            <div class="overflow-hidden rounded-xl border-2 border-black shadow-[var(--lift-lg)]">
+              <SanityImage
+                source={image}
+                width={1200}
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                alt={image.alt ?? ''}
+                class="w-full"
+              />
+            </div>
+            {caption && (
+              <figcaption class="parks__label mt-3 font-mono text-[0.68rem] tracking-[0.14em] uppercase">
+                {caption}
+              </figcaption>
+            )}
+          </figure>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Forest ground with cream ink, fixed in both themes: this band is a
+     photograph of a forest with a colour field behind it, not a page surface
+     that should follow the reader's theme. */
+  .parks {
+    background: var(--color-tertiary);
+    color: var(--plate-face);
+  }
+  /* Gold for the small labels. A solid token, measured at 6.11:1 on forest,
+     rather than cream at an opacity nobody checked. */
+  .parks__label {
+    color: var(--gold-on-forest);
+  }
+  .parks__rule {
+    border-color: color-mix(in srgb, var(--plate-face) 30%, transparent);
+  }
+</style>

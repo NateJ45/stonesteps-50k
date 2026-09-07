@@ -1,0 +1,94 @@
+---
+// Foundation, edit with care
+//
+// The record holders, as callouts.
+//
+// CONTENT block: receives a surface from the cadence in sectionCadence.ts.
+//
+// DERIVED, not typed. The mockup hardcoded two names and two times. That is the
+// same hand-maintained duplication the records system exists to remove: the day
+// somebody breaks one of these, the band goes quietly wrong while still looking
+// authoritative. These come from the same merged set the records tables use, so
+// this band and the page it links to cannot disagree.
+
+import SectionHeading from '@/components/SectionHeading.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import { bracketRecords, courseRecord } from '@/lib/age-brackets';
+import { formatRaceTime } from '@/lib/race-time';
+import type { ProjectedDynastiesSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  cta?: ProjectedDynastiesSection['cta'];
+  distances?: ProjectedDynastiesSection['distances'];
+  results?: ProjectedDynastiesSection['results'];
+  historical?: ProjectedDynastiesSection['historical'];
+  surface?: string;
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = 'The names on the board',
+  cta,
+  distances = [],
+  results = [],
+  historical = [],
+  surface = 'background',
+  headingId = 'dynasties-heading',
+} = Astro.props as Props;
+
+const GENDERS = [
+  { key: 'M', label: 'Men' },
+  { key: 'F', label: 'Women' },
+] as const;
+
+// One callout per distance and gender: whoever holds the outright record.
+const holders = distances
+  .filter((d) => d.slug)
+  .flatMap((d) =>
+    GENDERS.map((g) => {
+      const set = results.filter((r) => r.distance === d.slug && r.gender === g.key);
+      const hist = historical.filter((h) => h.distance === d.slug && h.gender === g.key);
+      const rec = courseRecord(bracketRecords(set, hist));
+      return rec?.athlete && rec.timeSeconds
+        ? { distance: d.name ?? '', gender: g.label, ...rec }
+        : null;
+    }),
+  )
+  .filter((x): x is NonNullable<typeof x> => x !== null);
+
+const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
+---
+
+{
+  holders.length > 0 && (
+    <section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+      <div class="mx-auto w-full max-w-content px-6">
+        <SectionHeading {eyebrow} {headline} {headingId} />
+
+        <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {holders.map((h) => (
+            <li class="border-l-[3px] border-[color:var(--heading-accent)] pl-5">
+              <p class="font-mono text-[0.62rem] tracking-[0.2em] text-muted-foreground uppercase">
+                {h.gender} <span class="lc">{h.distance}</span>
+              </p>
+              <p class="tabular text-heading-accent mt-2 text-2xl font-bold">
+                {formatRaceTime(h.timeSeconds)}
+              </p>
+              <p class="display mt-1 text-h5">{h.athlete}</p>
+              {h.year && <p class="mt-1 text-sm text-muted-foreground">{h.year}</p>}
+            </li>
+          ))}
+        </ul>
+
+        {cta && (
+          <div class="mt-10">
+            <CtaLink {cta} class="btn-plate btn-plate--cream" />
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}

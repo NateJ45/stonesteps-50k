@@ -1185,6 +1185,10 @@ body::before {
      sweep caught it. This value is bark at 70%, resolved to a literal, which
      measures 6.08:1 on the plate. */
   --plate-ink-soft: #5f5745;
+  /* Gold, for small labels on the forest band. Measured 6.11:1 on #2E5738.
+     A solid value, because the last three contrast failures on this site were
+     all a correct colour diluted with an opacity utility. */
+  --gold-on-forest: #fed89b;
   --plate-edge: #000000;
   --plate-radius: 12px;
 }

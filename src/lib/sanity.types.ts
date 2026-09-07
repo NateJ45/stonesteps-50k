@@ -87,6 +87,18 @@ export type SectionPreset = {
       } & SponsorPatchesSection)
     | ({
         _key: string;
+      } & TickerSection)
+    | ({
+        _key: string;
+      } & ParksSection)
+    | ({
+        _key: string;
+      } & DynastiesSection)
+    | ({
+        _key: string;
+      } & GearSection)
+    | ({
+        _key: string;
       } & HeroSection)
     | ({
         _key: string;
@@ -1280,6 +1292,47 @@ export type HeroSection = {
   size?: 'tall' | 'short';
 };
 
+export type GearSection = {
+  _type: 'gearSection';
+  eyebrow?: string;
+  headline?: string;
+  items?: Array<{
+    title?: string;
+    body?: string;
+    _type: 'gearItem';
+    _key: string;
+  }>;
+};
+
+export type DynastiesSection = {
+  _type: 'dynastiesSection';
+  eyebrow?: string;
+  headline?: string;
+  cta?: CtaBlock;
+};
+
+export type ParksSection = {
+  _type: 'parksSection';
+  eyebrow?: string;
+  headline?: string;
+  body?: string;
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  caption?: string;
+  showDirector?: boolean;
+};
+
+export type TickerSection = {
+  _type: 'tickerSection';
+  items?: Array<string>;
+};
+
 export type SponsorPatchesSection = {
   _type: 'sponsorPatchesSection';
   eyebrow?: string;
@@ -1303,6 +1356,13 @@ export type LoopCardSection = {
     miles?: string;
     inShortDistance?: boolean;
     _type: 'loop';
+    _key: string;
+  }>;
+  aside?: Array<{
+    title?: string;
+    body?: string;
+    confirmed?: boolean;
+    _type: 'loopNote';
     _key: string;
   }>;
   legend?: string;
@@ -1519,6 +1579,18 @@ export type Page = {
     | ({
         _key: string;
       } & SponsorPatchesSection)
+    | ({
+        _key: string;
+      } & TickerSection)
+    | ({
+        _key: string;
+      } & ParksSection)
+    | ({
+        _key: string;
+      } & DynastiesSection)
+    | ({
+        _key: string;
+      } & GearSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -1948,6 +2020,18 @@ export type ProcessPage = {
       } & SponsorPatchesSection)
     | ({
         _key: string;
+      } & TickerSection)
+    | ({
+        _key: string;
+      } & ParksSection)
+    | ({
+        _key: string;
+      } & DynastiesSection)
+    | ({
+        _key: string;
+      } & GearSection)
+    | ({
+        _key: string;
       } & HeroSection)
     | ({
         _key: string;
@@ -2038,6 +2122,18 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & SponsorPatchesSection)
+    | ({
+        _key: string;
+      } & TickerSection)
+    | ({
+        _key: string;
+      } & ParksSection)
+    | ({
+        _key: string;
+      } & DynastiesSection)
+    | ({
+        _key: string;
+      } & GearSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -2170,6 +2266,18 @@ export type AboutPage = {
     | ({
         _key: string;
       } & SponsorPatchesSection)
+    | ({
+        _key: string;
+      } & TickerSection)
+    | ({
+        _key: string;
+      } & ParksSection)
+    | ({
+        _key: string;
+      } & DynastiesSection)
+    | ({
+        _key: string;
+      } & GearSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -2361,6 +2469,18 @@ export type HomePage = {
     | ({
         _key: string;
       } & SponsorPatchesSection)
+    | ({
+        _key: string;
+      } & TickerSection)
+    | ({
+        _key: string;
+      } & ParksSection)
+    | ({
+        _key: string;
+      } & DynastiesSection)
+    | ({
+        _key: string;
+      } & GearSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -2709,6 +2829,10 @@ export type AllSanitySchemaTypes =
   | ImageTextSection
   | RichTextSection
   | HeroSection
+  | GearSection
+  | DynastiesSection
+  | ParksSection
+  | TickerSection
   | SponsorPatchesSection
   | ElevationSection
   | LoopCardSection

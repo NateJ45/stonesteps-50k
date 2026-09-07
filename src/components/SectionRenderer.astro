@@ -44,6 +44,10 @@ import SponsorPatches from '@/components/sections/SponsorPatches.astro';
 import PageHeader from '@/components/sections/PageHeader.astro';
 import ContactBand from '@/components/sections/ContactBand.astro';
 import FaqKiosk from '@/components/sections/FaqKiosk.astro';
+import Ticker from '@/components/sections/Ticker.astro';
+import ParksBand from '@/components/sections/ParksBand.astro';
+import Dynasties from '@/components/sections/Dynasties.astro';
+import GearBand from '@/components/sections/GearBand.astro';
 import { classifySections } from '@/lib/sectionCadence';
 import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
 import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
@@ -359,6 +363,7 @@ const wrapAttrs = (key: string | undefined) =>
             headline={s.headline}
             legend={s.legend}
             loops={s.loops ?? []}
+            aside={s.aside ?? []}
             headingId={headingId}
           />
         ) : s._type === 'elevationSection' ? (
@@ -405,6 +410,38 @@ const wrapAttrs = (key: string | undefined) =>
             unansweredHeading={s.unansweredHeading}
             unansweredNote={s.unansweredNote}
             unanswered={s.unanswered ?? []}
+            headingId={headingId}
+          />
+        ) : s._type === 'tickerSection' ? (
+          <Ticker items={s.items ?? []} />
+        ) : s._type === 'parksSection' ? (
+          <ParksBand
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            body={s.body}
+            image={s.image}
+            caption={s.caption}
+            showDirector={s.showDirector}
+            race={s.race}
+            headingId={headingId}
+          />
+        ) : s._type === 'dynastiesSection' ? (
+          <Dynasties
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            cta={s.cta}
+            distances={s.distances ?? []}
+            results={s.results ?? []}
+            historical={s.historical ?? []}
+            surface={surface ?? 'background'}
+            headingId={headingId}
+          />
+        ) : s._type === 'gearSection' ? (
+          <GearBand
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            items={s.items ?? []}
+            surface={surface ?? 'background'}
             headingId={headingId}
           />
         ) : (

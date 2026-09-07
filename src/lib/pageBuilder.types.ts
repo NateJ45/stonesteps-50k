@@ -514,6 +514,7 @@ export interface ProjectedLoopCardSection {
     miles?: string;
     inShortDistance?: boolean;
   }[];
+  aside?: { _key?: string; title?: string; body?: string; confirmed?: boolean }[];
 }
 
 export interface ProjectedElevationSection {
@@ -574,6 +575,47 @@ export interface ProjectedFaqKioskSection {
   unanswered?: string[];
 }
 
+export interface ProjectedTickerSection {
+  _type: 'tickerSection';
+  _key: string;
+  items?: string[];
+}
+
+export interface ProjectedParksSection {
+  _type: 'parksSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  body?: string;
+  image?: ProjectedImage;
+  caption?: string;
+  showDirector?: boolean;
+  race?: {
+    parksDonation?: string;
+    directorName?: string;
+    directorNote?: string;
+  } | null;
+}
+
+export interface ProjectedDynastiesSection {
+  _type: 'dynastiesSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  cta?: ProjectedCtaBlock;
+  distances?: { _id: string; name?: string; slug?: string }[];
+  results?: ProjectedRaceResult[];
+  historical?: ProjectedRecordEntry[];
+}
+
+export interface ProjectedGearSection {
+  _type: 'gearSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  items?: { _key?: string; title?: string; body?: string }[];
+}
+
 export type PageBuilderBlock =
   | ProjectedHeroSection
   | ProjectedRichTextSection
@@ -610,4 +652,8 @@ export type PageBuilderBlock =
   | ProjectedSponsorPatchesSection
   | ProjectedPageHeaderSection
   | ProjectedContactSection
-  | ProjectedFaqKioskSection;
+  | ProjectedFaqKioskSection
+  | ProjectedTickerSection
+  | ProjectedParksSection
+  | ProjectedDynastiesSection
+  | ProjectedGearSection;

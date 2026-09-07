@@ -72,6 +72,42 @@ docs.push({
       secondaryCta: cta('See the course', '/course'),
     },
     {
+      _type: 'tickerSection',
+      _key: key(),
+      // Every one of these is stated properly elsewhere on the page. That is
+      // the condition for the strip being aria-hidden decoration.
+      items: [
+        '10,726 ft of climbing',
+        'Seven loops',
+        'Aid every loop',
+        'Mt. Airy Forest',
+        'Since 2003',
+        'USATF sanctioned',
+      ],
+    },
+    {
+      _type: 'statSection',
+      _key: key(),
+      stats: [
+        {
+          _type: 'statItem',
+          _key: key(),
+          number: 10726,
+          suffix: ' ft',
+          label: 'Total elevation change',
+        },
+        { _type: 'statItem', _key: key(), number: 31.1, suffix: ' mi', label: 'Full 50K distance' },
+        {
+          _type: 'statItem',
+          _key: key(),
+          number: 7,
+          suffix: ' loops',
+          label: 'Alternating long and short',
+        },
+        { _type: 'statItem', _key: key(), number: 23, suffix: 'rd', label: 'Edition, in 2026' },
+      ],
+    },
+    {
       _type: 'distanceTicketsSection',
       _key: key(),
       eyebrow: 'Two distances',
@@ -107,13 +143,30 @@ docs.push({
       headline: 'How the morning goes',
     },
     {
-      _type: 'recordsBoardSection',
+      // The full board lives on /records. Home gets the four callouts, which is
+      // the pacing the design mockup had: a teaser here, the data there.
+      _type: 'dynastiesSection',
       _key: key(),
       eyebrow: 'The fast ones',
-      headline: 'All-time records',
-      intro:
-        'Course records, age-group records and the fastest finishes on file. These are ' +
-        'calculated from the results themselves, so they update the day new results land.',
+      headline: 'The names on the board',
+      cta: {
+        _type: 'ctaBlock',
+        label: 'All-time records',
+        linkType: 'internal',
+        externalUrl: '/records',
+      },
+    },
+    {
+      _type: 'parksSection',
+      _key: key(),
+      eyebrow: 'Why it exists',
+      headline: 'to Cincinnati Parks',
+      body:
+        'Mt. Airy Forest is 1,469.9 acres, larger than Central Park. The race has run here ' +
+        'without a break for over twenty years, and every entry helps keep the trail ' +
+        'runnable for everyone who uses it the rest of the year.',
+      caption: 'Mt. Airy Forest, Cincinnati',
+      showDirector: true,
     },
     {
       _type: 'sponsorPatchesSection',
@@ -151,6 +204,45 @@ docs.push({
       eyebrow: 'The course',
       headline: 'Seven loops out of The Oval',
       legend: 'The 27K punches the first four and finishes. The 50K punches all seven.',
+      aside: [
+        {
+          _type: 'loopNote',
+          _key: key(),
+          title: 'The 27K',
+          body:
+            'Two 5+ mile loops alternating with two 3+ mile loops, on exactly the same ' +
+            'trail. Same climbs, four loops instead of seven.',
+          confirmed: true,
+        },
+        {
+          _type: 'loopNote',
+          _key: key(),
+          title: 'Aid',
+          body:
+            'At the end of every loop, because the course is a stack out of The Oval. On ' +
+            'the 50K you pass through it seven times, and drop bags stay in one place all ' +
+            'day.',
+          confirmed: true,
+        },
+        {
+          _type: 'loopNote',
+          _key: key(),
+          title: 'Start and finish',
+          body:
+            'The Oval, Area 13, inside Mt. Airy Forest. Both distances start and finish in ' +
+            'the same place. The 50K goes at 8:00 am, the 27K at 8:30.',
+          confirmed: true,
+        },
+        {
+          _type: 'loopNote',
+          _key: key(),
+          title: 'Cutoff',
+          body:
+            'The course closes at about 4:30 pm. How that is enforced loop by loop is not ' +
+            'published anywhere.',
+          confirmed: false,
+        },
+      ],
       loops: [
         { _type: 'loop', _key: key(), kind: 'long', miles: '5+', inShortDistance: true },
         { _type: 'loop', _key: key(), kind: 'short', miles: '3+', inShortDistance: true },
@@ -176,6 +268,42 @@ docs.push({
       _key: key(),
       eyebrow: 'The terrain',
       headline: 'What you are running on',
+    },
+    {
+      _type: 'gearSection',
+      _key: key(),
+      eyebrow: 'Kit',
+      headline: 'What to bring',
+      items: [
+        {
+          _type: 'gearItem',
+          _key: key(),
+          title: 'Trail shoes with real lugs',
+          body:
+            'Roots, rocks and wet leaves in late October. Road shoes will get you round ' +
+            'and will not enjoy it.',
+        },
+        {
+          _type: 'gearItem',
+          _key: key(),
+          title: 'A handheld or a vest',
+          body: 'Aid is only at The Oval, so a long loop is five plus miles between refills.',
+        },
+        {
+          _type: 'gearItem',
+          _key: key(),
+          title: 'One drop bag',
+          body:
+            'It stays at The Oval all day and you pass it every loop, so it does the work ' +
+            'a crew would.',
+        },
+        {
+          _type: 'gearItem',
+          _key: key(),
+          title: 'Layers you can shed',
+          body: 'An October morning in Cincinnati starts cold and rarely stays that way.',
+        },
+      ],
     },
     {
       _type: 'distanceTicketsSection',
@@ -206,6 +334,12 @@ docs.push({
       lede:
         'Course records, age-group records and the fastest finishes on file, for both ' +
         'distances.',
+    },
+    {
+      _type: 'dynastiesSection',
+      _key: key(),
+      eyebrow: 'Course records',
+      headline: 'The names on the board',
     },
     {
       _type: 'recordsBoardSection',

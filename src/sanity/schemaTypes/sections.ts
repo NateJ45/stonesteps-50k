@@ -612,6 +612,10 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
         'loopCardSection',
         'elevationSection',
         'sponsorPatchesSection',
+        'tickerSection',
+        'parksSection',
+        'dynastiesSection',
+        'gearSection',
       ],
     },
     {

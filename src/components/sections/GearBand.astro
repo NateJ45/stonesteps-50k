@@ -1,0 +1,50 @@
+---
+// Safe to edit by hand
+//
+// What to bring. Deliberately plain: a labelled list with a rust rule, no
+// object metaphor. Three or four signature objects across a site reads as
+// craft; a dozen reads as a novelty, and the restraint is what makes the
+// decorated pieces land.
+//
+// CONTENT block: receives a surface from the cadence in sectionCadence.ts.
+
+import SectionHeading from '@/components/SectionHeading.astro';
+import type { ProjectedGearSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  items?: ProjectedGearSection['items'];
+  surface?: string;
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = 'What to bring',
+  items = [],
+  surface = 'background',
+  headingId = 'gear-heading',
+} = Astro.props as Props;
+
+const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
+---
+
+{
+  items.length > 0 && (
+    <section class={`py-section-md ${surfaceClass}`} aria-labelledby={headingId}>
+      <div class="mx-auto w-full max-w-content px-6">
+        <SectionHeading {eyebrow} {headline} {headingId} />
+
+        <ul class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map((item) => (
+            <li class="border-l-[3px] border-primary pl-5">
+              <h3 class="display text-h5">{item.title}</h3>
+              {item.body && <p class="mt-2 text-sm text-muted-foreground">{item.body}</p>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}

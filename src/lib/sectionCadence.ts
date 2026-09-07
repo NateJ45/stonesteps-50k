@@ -50,6 +50,10 @@ export const SELF_CONTAINED_TYPES = new Set([
   // ground; neither belongs in the alternating body cadence.
   'pageHeaderSection',
   'faqKioskSection',
+  // The ticker is a full-bleed strip and the parks band paints its own forest
+  // ground; neither takes part in the alternating body cadence.
+  'tickerSection',
+  'parksSection',
 ]);
 
 /** _type strings for blocks that receive alternating surface assignment. */
@@ -69,6 +73,8 @@ export const CONTENT_TYPES = new Set([
   'courseFeaturesSection',
   'elevationSection',
   'contactSection',
+  'dynastiesSection',
+  'gearSection',
 ]);
 
 export interface SectionBlock {

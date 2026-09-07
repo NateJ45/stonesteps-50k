@@ -132,8 +132,8 @@ async function main() {
 
   // The hero photograph. Patched by array key rather than by rewriting the
   // whole pageBuilder, so an editor's other changes to the page survive.
-  const home = await client.fetch('*[_id == "homePage"][0]{ pageBuilder[]{ _key, _type } }');
-  const heroKey = home?.pageBuilder?.find((b) => b._type === 'raceHeroSection')?._key;
+  const homeHero = await client.fetch('*[_id == "homePage"][0]{ pageBuilder[]{ _key, _type } }');
+  const heroKey = homeHero?.pageBuilder?.find((b) => b._type === 'raceHeroSection')?._key;
   if (heroKey && ids.hero) {
     await client
       .patch('homePage')
@@ -160,6 +160,19 @@ async function main() {
       .set({ [`pageBuilder[_key=="${k}"].image`]: imageField(ids[key], IMAGES[key].alt) })
       .commit();
     console.log(`  ${docId} header image`);
+  }
+
+  // The parks band's forest photograph.
+  const home = await client.fetch('*[_id == "homePage"][0]{ pageBuilder[]{ _key, _type } }');
+  const parksKey = home?.pageBuilder?.find((b) => b._type === 'parksSection')?._key;
+  if (parksKey && ids.forest) {
+    await client
+      .patch('homePage')
+      .set({
+        [`pageBuilder[_key=="${parksKey}"].image`]: imageField(ids.forest, IMAGES.forest.alt),
+      })
+      .commit();
+    console.log('  homePage parks image');
   }
 
   // The lodging band on contact, and the forest band wherever an imageText

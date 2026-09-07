@@ -1,0 +1,97 @@
+---
+// Safe to edit by hand
+//
+// The scrolling strip under the hero.
+//
+// SELF_CONTAINED: paints its own ground, never receives a surface prop.
+//
+// DECORATION, and treated as such. The list is duplicated so the loop has no
+// seam, and the whole thing is aria-hidden: a screen reader announcing the same
+// six facts twice, out of order, is worse than silence. Every fact in here is
+// stated properly somewhere else on the page, which is the condition for
+// hiding it.
+//
+// The animation stops entirely under prefers-reduced-motion. A permanently
+// moving strip is a genuine problem for vestibular disorders, and there is no
+// version of this that is worth that.
+
+type Props = { items?: string[] };
+const { items = [] } = Astro.props as Props;
+---
+
+{
+  items.length > 0 && (
+    <div
+      class="ticker border-y-2 border-black bg-primary text-primary-foreground"
+      aria-hidden="true"
+    >
+      <div class="ticker__track">
+        {[0, 1].map(() => (
+          <ul class="ticker__row">
+            {items.map((item) => (
+              <li>
+                {item}
+                <span class="ticker__dot">&middot;</span>
+              </li>
+            ))}
+          </ul>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .ticker {
+    overflow: hidden;
+    padding-block: 0.55rem;
+  }
+  .ticker__track {
+    display: flex;
+    width: max-content;
+    animation: ticker-slide 42s linear infinite;
+  }
+  .ticker__row {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ticker__row li {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding-right: 1.5rem;
+    white-space: nowrap;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .ticker__dot {
+    opacity: 0.55;
+  }
+
+  /* Two identical rows, so the reset at -50% is invisible. */
+  @keyframes ticker-slide {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticker__track {
+      animation: none;
+      /* Without the animation the duplicate row is dead weight, and the strip
+         should still read as a strip rather than as a truncated list. */
+      width: 100%;
+      overflow-x: auto;
+    }
+    .ticker__row:last-child {
+      display: none;
+    }
+  }
+</style>

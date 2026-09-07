@@ -26,6 +26,7 @@
 import { defineType, defineField, defineArrayMember } from 'sanity';
 import {
   ActivityIcon,
+  ArrowRightIcon,
   BlockElementIcon,
   EnvelopeIcon,
   HelpCircleIcon,
@@ -263,6 +264,41 @@ export const loopCardSection = defineType({
       ],
     }),
     defineField({
+      name: 'aside',
+      title: 'Notes beside the card',
+      type: 'array',
+      description:
+        'Short answers that belong next to the loop order: what the 27K is, where aid is, ' +
+        'where the start and finish are, and the cutoff. Anything unconfirmed should say so ' +
+        'rather than being left off the page.',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'loopNote',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Heading',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({ name: 'body', title: 'Body', type: 'text', rows: 3 }),
+            defineField({
+              name: 'confirmed',
+              title: 'Confirmed by the race director',
+              type: 'boolean',
+              initialValue: true,
+              description:
+                'Untick to show the "Not confirmed" marker under this note. The cutoff is ' +
+                'the one that usually needs it.',
+              options: { canvasApp: { exclude: true } },
+            }),
+          ],
+          preview: { select: { title: 'title', subtitle: 'body' } },
+        }),
+      ],
+    }),
+    defineField({
       name: 'legend',
       title: 'Legend',
       type: 'string',
@@ -491,6 +527,164 @@ export const faqKioskSection = defineType({
   },
 });
 
+/* ---------- The ticker ----------------------------------------------------- */
+
+export const tickerSection = defineType({
+  name: 'tickerSection',
+  title: 'Ticker (scrolling strip)',
+  type: 'object',
+  icon: ArrowRightIcon,
+  fields: [
+    defineField({
+      name: 'items',
+      title: 'Phrases',
+      type: 'array',
+      of: [{ type: 'string' }],
+      description:
+        'Short facts, three to eight of them. They scroll past on a loop, so each one has to ' +
+        'read on its own: nobody reads a ticker from the start.',
+      validation: (Rule) => Rule.min(3).max(10),
+    }),
+  ],
+  preview: {
+    select: { items: 'items' },
+    prepare: ({ items }) => ({
+      title: 'Ticker',
+      subtitle: Array.isArray(items) ? items.slice(0, 2).join(' | ') : undefined,
+    }),
+  },
+});
+
+/* ---------- Giving back ---------------------------------------------------- */
+
+export const parksSection = defineType({
+  name: 'parksSection',
+  title: 'Giving back (parks band)',
+  type: 'object',
+  icon: HeartIcon,
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({
+      name: 'headline',
+      title: 'Headline',
+      type: 'string',
+      description:
+        'The donation figure itself lives on The Race, so it is not retyped here. Write the ' +
+        'line around it.',
+    }),
+    defineField({ name: 'body', title: 'Body', type: 'text', rows: 4 }),
+    defineField({
+      name: 'image',
+      title: 'Photograph',
+      type: 'image',
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
+    }),
+    defineField({ name: 'caption', title: 'Photo caption (optional)', type: 'string' }),
+    defineField({
+      name: 'showDirector',
+      title: 'Show the race director byline',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Reads the name and the note from The Race.',
+      options: { canvasApp: { exclude: true } },
+    }),
+  ],
+  preview: {
+    select: { title: 'headline', media: 'image' },
+    prepare: ({ title, media }) => ({
+      title: title || 'Giving back',
+      subtitle: 'Donation figure comes from The Race',
+      media: media || HeartIcon,
+    }),
+  },
+});
+
+/* ---------- The names on the board ---------------------------------------- */
+
+export const dynastiesSection = defineType({
+  name: 'dynastiesSection',
+  title: 'Record holders (callouts)',
+  type: 'object',
+  icon: StarFilledIcon,
+  // SELF-DERIVING, like the records board. The mockup hardcoded two names and
+  // two times, which is the same hand-maintained duplication the records system
+  // exists to remove: a course record that changed would leave this band quietly
+  // wrong while looking authoritative. These are computed from the same merged
+  // set the records tables use.
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline (optional)', type: 'string' }),
+    defineField({ name: 'cta', title: 'Link button (optional)', type: 'ctaBlock' }),
+  ],
+  preview: {
+    prepare: () => ({
+      title: 'Record holders',
+      subtitle: 'Derived from Results. Not editable here, on purpose',
+    }),
+  },
+});
+
+/* ---------- Gear ----------------------------------------------------------- */
+
+export const gearSection = defineType({
+  name: 'gearSection',
+  title: 'What to bring (gear)',
+  type: 'object',
+  icon: ComponentIcon,
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline (optional)', type: 'string' }),
+    defineField({
+      name: 'items',
+      title: 'Items',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'gearItem',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Item',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'body',
+              title: 'Why',
+              type: 'text',
+              rows: 3,
+              options: {
+                canvasApp: {
+                  purpose:
+                    'Say why it matters on THIS course specifically. Generic trail-running ' +
+                    'advice is not worth the space.',
+                },
+              },
+            }),
+          ],
+          preview: { select: { title: 'title', subtitle: 'body' } },
+        }),
+      ],
+    }),
+  ],
+  preview: {
+    select: { title: 'headline', items: 'items' },
+    prepare: ({ title, items }) => ({
+      title: title || 'What to bring',
+      subtitle: (Array.isArray(items) ? items.length : 0) + ' items',
+    }),
+  },
+});
+
 /** Every race block, in the order they appear in the insert menu. */
 export const raceSectionSchemas = [
   raceHeroSection,
@@ -504,6 +698,10 @@ export const raceSectionSchemas = [
   loopCardSection,
   elevationSection,
   sponsorPatchesSection,
+  tickerSection,
+  parksSection,
+  dynastiesSection,
+  gearSection,
 ];
 
 export const RACE_SECTION_TYPES = raceSectionSchemas.map((s) => ({ type: s.name }));
