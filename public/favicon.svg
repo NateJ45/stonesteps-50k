@@ -1,0 +1,37 @@
+<!--
+  Studio Starter favicon. A Slate (#586577) circle with paper (#FBFBFA)
+  "S" initial set in a serif stack.
+
+  Theme behavior:
+    - Light mode: slate disc on light tab background.
+    - Dark mode: disc lifts slightly so it reads against dark tab strips.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .disc { fill: #586577; }
+    .mark { fill: #FBFBFA; }
+    @media (prefers-color-scheme: dark) {
+      .disc { fill: #6B7A8D; }
+      .mark { fill: #F0F0EE; }
+    }
+  </style>
+
+  <!-- Slate disc — the brand mark. -->
+  <circle class="disc" cx="32" cy="32" r="30" />
+
+  <!--
+    "S" monogram. Serif stack gives a refined feel without embedding a webfont.
+    text-anchor + dominant-baseline keep the letterform optically centered.
+    font-weight 700 gives stems enough body to read at 16px.
+  -->
+  <text
+    class="mark"
+    x="32"
+    y="32"
+    font-family="Libre Baskerville, Georgia, Cambria, 'Times New Roman', serif"
+    font-size="34"
+    font-weight="700"
+    text-anchor="middle"
+    dominant-baseline="central"
+  >S</text>
+</svg>

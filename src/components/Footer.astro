@@ -1,0 +1,532 @@
+---
+// Foundation, edit with care
+// Site footer. Compact layout that reads as a SEPARATE zone from the FinalCta
+// section that sits above it on most pages.
+//
+// Color decoupling: the footer uses bg-muted (Cream in light, dark warm in
+// dark) so it doesn't visually merge with the Charcoal Dark FinalCta. The
+// 4px Warm Bronze accent stripe at the top is the same brand signature
+// used in the header and mobile menu drawer.
+//
+// Structure (top to bottom):
+//   1. Bronze accent stripe
+//   2. Optional newsletter signup (only when siteSettings.newsletter.enabled)
+//   3. Compact brand bar: logo + tagline side by side (one short row, not a
+//      tall stacked block) so the footer stays roughly half its old height.
+//   4. Five-column link grid: Studio / Work / Free tools / Latest projects /
+//      Get in touch (email, phone, location, socials).
+//   5. Thin bottom bar: auto-year copyright, privacy link, optional "Site
+//      by..." credit, all on one line.
+//
+// Tailwind v4 gotcha: max-w-xs/s/m/l are shadowed by this project's custom
+// --spacing-* tokens (they resolve to a few px, not the container scale). Use
+// max-w-md / max-w-2xl / arbitrary values like max-w-[28rem] for text widths.
+//
+// Latest projects pull from Sanity. Gracefully degrades to a "see portfolio"
+// message when nothing is published yet.
+
+import { getImage } from 'astro:assets';
+import { site } from '@/data/site';
+import {
+  IconBrandInstagram,
+  IconBrandFacebook,
+  IconBrandLinkedin,
+  IconBrandPinterest,
+  IconBrandYoutube,
+  IconBrandTiktok,
+  IconBrandX,
+  IconLink,
+} from '@tabler/icons-react';
+import { Mail, Phone } from 'lucide-react';
+import CopyEmailButton from '@/components/CopyEmailButton';
+import NewsletterSignup from '@/components/NewsletterSignup';
+import { getAllProjects, type CoreProjectCard } from '@/lib/queries';
+import logoLightAsset from '@/assets/logo-light.png';
+import logoDarkAsset from '@/assets/logo-dark.png';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
+import { telHref } from '@/lib/phone';
+
+// Pre-render the four footer-logo variants (1x + 2x for each theme) so we
+// can ship ONE img tag with data-attribute URLs and let the BaseLayout
+// anti-FOUC script pick the right variant — same trick as the header.
+// Footer logo displays at h-16 (64 px tall); the 96w/192w pair still covers retina.
+const footerLogoLight1x = await getImage({ src: logoLightAsset, format: 'webp', width: 96 });
+const footerLogoLight2x = await getImage({ src: logoLightAsset, format: 'webp', width: 192 });
+const footerLogoDark1x = await getImage({ src: logoDarkAsset, format: 'webp', width: 96 });
+const footerLogoDark2x = await getImage({ src: logoDarkAsset, format: 'webp', width: 192 });
+const footerLogoLightSrcset = `${footerLogoLight1x.src} 1x, ${footerLogoLight2x.src} 2x`;
+const footerLogoDarkSrcset = `${footerLogoDark1x.src} 1x, ${footerLogoDark2x.src} 2x`;
+
+interface NewsletterConfig {
+  enabled?: boolean;
+  heading?: string;
+  blurb?: string;
+  buttonLabel?: string;
+  successMessage?: string;
+  consentNote?: string;
+  formActionUrl?: string | null;
+  audienceId?: string | null;
+}
+
+interface SocialLink {
+  platform?: string;
+  url?: string;
+  label?: string;
+}
+
+interface Props {
+  siteSettings?:
+    | (RawChromeSettings & {
+        title?: string;
+        email?: string;
+        phone?: string;
+        socialInstagram?: string;
+        socialFacebook?: string;
+        socialLinks?: SocialLink[] | null;
+        serviceAreas?: string[];
+        tagline?: string;
+        footerCredit?: string;
+        footerCreditUrl?: string;
+        newsletter?: NewsletterConfig | null;
+      })
+    | null;
+}
+
+const { siteSettings } = Astro.props as Props;
+
+// The chrome (footer columns, the small-print row, the social switch) resolves
+// through one shared helper (see src/lib/siteSettings.ts) so the footer can't
+// drift from the header. Both menus come back EMPTY when Sanity is empty, and
+// the built-in markup below renders instead.
+const chrome = resolveSiteSettings(siteSettings);
+
+// Normalize section visibility. Unset => visible (safe default for live site).
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+
+const brandName = siteSettings?.title ?? site.name;
+const email = siteSettings?.email ?? '';
+const phone = siteSettings?.phone ?? '';
+
+// Social links: prefer the new socialLinks array; fall back to the legacy
+// socialInstagram / socialFacebook fields so existing datasets keep working.
+// The footer's own "show social buttons" switch (Site Settings -> Navigation).
+// Unset means yes, so an untouched site is unchanged.
+const showFooterSocials = chrome.showFooterSocials;
+const rawSocialLinks = showFooterSocials ? (siteSettings?.socialLinks ?? []) : [];
+const ig = showFooterSocials ? (siteSettings?.socialInstagram ?? '') : '';
+const fb = showFooterSocials ? (siteSettings?.socialFacebook ?? '') : '';
+const socialLinksToRender: SocialLink[] =
+  rawSocialLinks.length > 0
+    ? rawSocialLinks.filter((l) => l?.url)
+    : [
+        ...(ig ? [{ platform: 'Instagram', url: ig }] : []),
+        ...(fb ? [{ platform: 'Facebook', url: fb }] : []),
+      ];
+
+// Map platform name to a Tabler icon component.
+function socialIcon(platform: string | undefined) {
+  switch (platform) {
+    case 'Instagram':
+      return IconBrandInstagram;
+    case 'Facebook':
+      return IconBrandFacebook;
+    case 'LinkedIn':
+      return IconBrandLinkedin;
+    case 'Pinterest':
+      return IconBrandPinterest;
+    case 'YouTube':
+      return IconBrandYoutube;
+    case 'TikTok':
+      return IconBrandTiktok;
+    case 'X':
+      return IconBrandX;
+    // Tabler has no Houzz brand icon; the generic link icon covers it.
+    default:
+      return IconLink;
+  }
+}
+// Copyright auto-updates every build via new Date(). The "Site by..." line
+// (siteCredit + siteCreditUrl) is a SEPARATE concept that sits next to the
+// auto-year copyright in the thin bottom bar.
+const currentYear = new Date().getFullYear();
+const siteCredit = siteSettings?.footerCredit;
+const siteCreditUrl = siteSettings?.footerCreditUrl;
+
+// Optional editor-managed footer columns. When non-empty, these replace the
+// built-in Studio / Work / Free tools columns. "Get in touch" always renders
+// as the last column regardless. Additive: empty = built-in defaults.
+const sanityFooterColumns = chrome.footerColumns;
+const useCustomFooterColumns = sanityFooterColumns.length > 0;
+
+// The small-print row at the very bottom. EMPTY means "keep the built-in
+// privacy link", which is rendered as its own markup below.
+const LEGAL_LINKS = chrome.legalNav;
+
+// Pull the three most recent projects for the Latest Projects column.
+// Falls back to an empty array when Sanity isn't reachable (build won't fail).
+const allProjects: CoreProjectCard[] = (await getAllProjects().catch(() => [])) ?? [];
+const latestProjects = allProjects.slice(0, 3);
+---
+
+<footer class="bg-muted text-foreground">
+  {/* Brand accent stripe — matches header + mobile drawer. */}
+  <div class="h-1 bg-primary" aria-hidden="true"></div>
+
+  {
+    /* Newsletter signup — renders only when siteSettings.newsletter.enabled is
+       true. Island hydrates when scrolled into view. */
+  }
+  {
+    siteSettings?.newsletter?.enabled && (
+      <div class="mx-auto max-w-content px-m pt-l">
+        <div class="mx-auto max-w-md">
+          <NewsletterSignup client:visible newsletter={siteSettings.newsletter} source="footer" />
+        </div>
+      </div>
+    )
+  }
+
+  {
+    /* Five-column link grid. Single centered column on mobile, five columns
+       at md+ (left-aligned). The fifth column carries contact details.
+       When siteSettings.footerColumns is non-empty, the custom Sanity columns
+       replace the built-in Studio / Work / Free tools columns. The Latest
+       Projects column and Get in touch column always render. */
+  }
+  <div
+    class="mx-auto grid max-w-content grid-cols-1 gap-l px-m pt-l pb-m text-center sm:grid-cols-2 md:grid-cols-3 md:text-left lg:grid-cols-5"
+  >
+    {/* --- Editor-managed columns (from Sanity siteSettings.footerColumns) --- */}
+    {
+      useCustomFooterColumns ? (
+        sanityFooterColumns.map((col, colIdx) => (
+          <nav aria-labelledby={`footer-custom-${colIdx}`}>
+            <p
+              id={`footer-custom-${colIdx}`}
+              class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase"
+            >
+              {col.title}
+            </p>
+            <ul class="list-none space-y-2 p-0 text-sm">
+              {col.links.map((link) => (
+                <li>
+                  <a href={link.href} class="text-foreground/85 transition-colors hover:text-link">
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))
+      ) : (
+        <>
+          {/* --- Built-in columns (default when footerColumns is empty) --- */}
+
+          {/* STUDIO */}
+          <nav aria-labelledby="footer-studio">
+            <p
+              id="footer-studio"
+              class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase"
+            >
+              Studio
+            </p>
+            <ul class="list-none space-y-2 p-0 text-sm">
+              <li>
+                <a href="/about" class="text-foreground/85 transition-colors hover:text-link">
+                  About
+                </a>
+              </li>
+              <li>
+                <a href="/process" class="text-foreground/85 transition-colors hover:text-link">
+                  Process
+                </a>
+              </li>
+              <li>
+                <a href="/services" class="text-foreground/85 transition-colors hover:text-link">
+                  Services &amp; Pricing
+                </a>
+              </li>
+              <li>
+                <a href="/faq" class="text-foreground/85 transition-colors hover:text-link">
+                  FAQ
+                </a>
+              </li>
+              {visible.press && (
+                <li>
+                  <a href="/press" class="text-foreground/85 transition-colors hover:text-link">
+                    Press
+                  </a>
+                </li>
+              )}
+            </ul>
+          </nav>
+
+          {/* WORK */}
+          <nav aria-labelledby="footer-work">
+            <p id="footer-work" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
+              Work
+            </p>
+            <ul class="list-none space-y-2 p-0 text-sm">
+              {visible.portfolio && (
+                <li>
+                  <a href="/portfolio" class="text-foreground/85 transition-colors hover:text-link">
+                    Portfolio
+                  </a>
+                </li>
+              )}
+              {visible.portfolio && (
+                <li>
+                  <a
+                    href="/portfolio/before-after"
+                    class="text-foreground/85 transition-colors hover:text-link"
+                  >
+                    Before &amp; After
+                  </a>
+                </li>
+              )}
+              {visible.journal && (
+                <li>
+                  <a href="/journal" class="text-foreground/85 transition-colors hover:text-link">
+                    Journal
+                  </a>
+                </li>
+              )}
+              {visible.shop && (
+                <li>
+                  <a href="/shop" class="text-foreground/85 transition-colors hover:text-link">
+                    Shop
+                  </a>
+                </li>
+              )}
+              {visible.giftCertificates && (
+                <li>
+                  <a
+                    href="/gift-certificates"
+                    class="text-foreground/85 transition-colors hover:text-link"
+                  >
+                    Gift Certificates
+                  </a>
+                </li>
+              )}
+            </ul>
+          </nav>
+
+          {/* FREE TOOLS & GUIDES */}
+          <nav aria-labelledby="footer-tools">
+            <p id="footer-tools" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
+              Free tools &amp; guides
+            </p>
+            <ul class="list-none space-y-2 p-0 text-sm">
+              {visible.styleQuiz && (
+                <li>
+                  <a href="/quiz" class="text-foreground/85 transition-colors hover:text-link">
+                    Style Quiz
+                  </a>
+                </li>
+              )}
+              {visible.budgetCalculator && (
+                <li>
+                  <a
+                    href="/calculator"
+                    class="text-foreground/85 transition-colors hover:text-link"
+                  >
+                    Cost Calculator
+                  </a>
+                </li>
+              )}
+              {visible.guides && (
+                <li>
+                  <a href="/guides" class="text-foreground/85 transition-colors hover:text-link">
+                    Guides
+                  </a>
+                </li>
+              )}
+              {visible.resources && (
+                <li>
+                  <a href="/resources" class="text-foreground/85 transition-colors hover:text-link">
+                    Resources
+                  </a>
+                </li>
+              )}
+            </ul>
+          </nav>
+        </>
+      )
+    }
+
+    {/* LATEST PROJECTS — only when portfolio is visible. */}
+    {
+      visible.portfolio ? (
+        <nav aria-labelledby="footer-latest">
+          <p id="footer-latest" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
+            Latest projects
+          </p>
+          {latestProjects.length > 0 ? (
+            <ul class="list-none space-y-2 p-0 text-sm">
+              {latestProjects.map((p) => (
+                <li>
+                  <a
+                    href={`/portfolio/${p.slug?.current ?? ''}`}
+                    class="text-foreground/85 transition-colors hover:text-link"
+                  >
+                    {p.title}
+                  </a>
+                </li>
+              ))}
+              <li class="pt-xs">
+                <a
+                  href="/portfolio"
+                  class="inline-flex items-center gap-xs text-xs font-semibold tracking-eyebrow text-link uppercase transition-colors hover:text-primary-dark"
+                >
+                  View all <span aria-hidden="true">→</span>
+                </a>
+              </li>
+            </ul>
+          ) : (
+            <p class="text-sm text-foreground/85 italic">
+              Case studies are coming soon.{' '}
+              <a
+                href="/portfolio"
+                class="text-link underline underline-offset-2 hover:text-primary-dark"
+              >
+                See the portfolio →
+              </a>
+            </p>
+          )}
+        </nav>
+      ) : (
+        <div aria-hidden="true" />
+      )
+    }
+
+    {/* GET IN TOUCH — email, phone, location, socials. */}
+    <div>
+      <p class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">Get in touch</p>
+      <div class="space-y-1 text-sm">
+        {
+          email && (
+            <p>
+              <CopyEmailButton client:visible email={email} variant="link" />
+            </p>
+          )
+        }
+        {
+          phone && (
+            <p>
+              <a
+                href={telHref(phone)}
+                class="inline-flex items-center gap-xs text-link transition-colors hover:text-primary-dark"
+              >
+                <Phone size={14} aria-hidden="true" />
+                {phone}
+              </a>
+            </p>
+          )
+        }
+      </div>
+      <p class="mt-s text-sm text-foreground/75">
+        {site.name}
+      </p>
+      {
+        socialLinksToRender.length > 0 && (
+          <ul class="mt-m flex list-none justify-center gap-s p-0 text-sm md:justify-start">
+            {socialLinksToRender.map((link) => {
+              const Icon = socialIcon(link.platform);
+              const ariaLabel = link.label ?? link.platform ?? 'Social link';
+              return (
+                <li>
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={ariaLabel}
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-primary-dark hover:bg-primary-dark hover:text-white"
+                  >
+                    <Icon size={20} stroke={1.5} />
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        )
+      }
+    </div>
+  </div>
+
+  {/* Logo + tagline — sits below the nav grid as a centered brand signature. */}
+  <div class="mx-auto flex max-w-content flex-col items-center gap-s px-m pb-l text-center">
+    <a
+      href="/"
+      aria-label={`${brandName} home`}
+      class="inline-block transition-opacity hover:opacity-80"
+    >
+      <img
+        alt={brandName}
+        width={96}
+        height={102}
+        class="h-20 w-auto"
+        loading="lazy"
+        decoding="async"
+        data-theme-logo
+        data-logo-light-src={footerLogoLight1x.src}
+        data-logo-light-srcset={footerLogoLightSrcset}
+        data-logo-dark-src={footerLogoDark1x.src}
+        data-logo-dark-srcset={footerLogoDarkSrcset}
+      />
+    </a>
+    {
+      siteSettings?.tagline && (
+        <p class="max-w-[28rem] text-sm text-foreground/80 italic">{siteSettings.tagline}</p>
+      )
+    }
+  </div>
+
+  {
+    /* Thin bottom bar — copyright, privacy, optional "Site by..." credit on one
+       line so they don't add a tall block to a footer column. */
+  }
+  <div class="border-t border-border">
+    <div
+      class="mx-auto flex max-w-content flex-col items-center justify-center gap-xs px-m py-m text-center text-xs text-foreground/80 sm:flex-row sm:justify-between"
+    >
+      <p>© {currentYear} {brandName}</p>
+      <div class="flex items-center gap-m">
+        {
+          LEGAL_LINKS.length > 0 ? (
+            LEGAL_LINKS.map((l) => (
+              <a
+                href={l.href}
+                class="underline underline-offset-2 transition-colors hover:text-link"
+              >
+                {l.label}
+              </a>
+            ))
+          ) : (
+            <a
+              href="/privacy"
+              class="underline underline-offset-2 transition-colors hover:text-link"
+            >
+              Privacy policy
+            </a>
+          )
+        }
+        {
+          siteCredit &&
+            (siteCreditUrl ? (
+              <a
+                href={siteCreditUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline underline-offset-2 transition-colors hover:text-link"
+              >
+                {siteCredit}
+              </a>
+            ) : (
+              <span>{siteCredit}</span>
+            ))
+        }
+      </div>
+    </div>
+  </div>
+</footer>

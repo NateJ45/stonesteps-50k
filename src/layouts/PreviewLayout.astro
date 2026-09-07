@@ -1,0 +1,279 @@
+---
+/* ============================================================================
+   PreviewLayout - Studio-only shell for /preview/* pages
+   (ported from presacademy 2026-08-28; original lineage: the WCP site)
+   ============================================================================
+   Deliberately NOT BaseLayout: it skips analytics, canonical/OG tags, Lenis and
+   the theme bootstrap, none of which belong on a draft-content page that only
+   the Presentation Tool's iframe ever loads. `noindex, nofollow` is
+   non-negotiable here: these pages must never appear in search results.
+
+   Renders the REAL Header and Footer around the page body (2026-08-28) so the
+   preview matches production edge to edge. This shell was chrome-less until
+   the click interceptor existed: back then a header link would have bounced
+   the iframe onto the live site. The interceptor closed that hole (edit-mode
+   clicks select only; browse-mode clicks remap into /preview/*). Each piece
+   is wrapped in a `data-sanity` attribute pointed at `siteSettings` - the
+   WordPress-template-part gesture: in Edit mode the chrome outlines as an
+   editable surface and a click opens Site settings in the edit panel.
+   ============================================================================ */
+import '../styles/globals.css';
+import VisualEditingOverlay from '@/components/preview/VisualEditingOverlay.tsx';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import { previewFetch } from '@/lib/cms-preview';
+import { docEditAttr } from '@/lib/preview-edit-attr';
+import { SITE_SETTINGS_PROJECTION } from '@/lib/queries';
+
+interface Props {
+  title: string;
+  draftMode: boolean;
+  /** Doc id this preview renders (e.g. "homePage" or a page doc id). */
+  pageId: string;
+}
+const { title, draftMode, pageId } = Astro.props;
+
+// ---------------------------------------------------------------------------
+// THE SOFT-REFRESH RENDER IS A CHEAPER RENDER (2026-08-28)
+// ---------------------------------------------------------------------------
+// The overlay's reconcile refetch sends `x-preview-soft-refresh: 1` and then
+// consumes exactly one thing from the response: `#main`. Everything this shell
+// draws AROUND <main> - the header and the footer - is parsed and thrown away.
+// That cost a Sanity round trip, on a route that measures ~0.9s per render
+// against a public page's ~0.1s, and a burst of edits runs this repeatedly.
+//
+// So on a soft refresh that fetch is skipped. This is safe in the narrow,
+// checkable sense that matters: NOTHING inside `#main` reads the value.
+// `chromeSettings` feeds only Header and Footer, and both are siblings of
+// <main> in the body below. The page body's own data comes from the route's
+// separate draft fetches (src/pages/preview/[...slug].astro), which are
+// untouched. The `#main` HTML is therefore byte-for-byte what a full render
+// produces, which is the only thing the swap can see.
+//
+// The chrome still renders, from its null fallbacks, so this response is a
+// valid page rather than a fragment. Nobody looks at it: the header is only ever
+// sent by the refetch in VisualEditingOverlay.tsx, never by a navigation.
+// Preview-only either way; the static build never reaches this route.
+const softRefresh = Astro.request.headers.get('x-preview-soft-refresh') === '1';
+
+// Draft-aware settings for the chrome, so header/footer edits live-update in
+// the preview. Null-safe: Header and Footer render their fallbacks cleanly.
+// The SAME projection the live build uses (src/lib/queries.ts), so menu links
+// that point at a picked page arrive dereferenced here too — fetching the raw
+// document would leave every one of them null in the preview.
+//
+// Loose type: the raw doc, the same shape BaseLayout passes. (The
+// no-explicit-any disable this used to carry is gone — the rule stopped
+// reporting here once the fetch moved into the branch below, and an unused
+// directive is itself a lint warning.)
+const chromeSettings = softRefresh
+  ? null
+  : await previewFetch<any>(
+      draftMode,
+      `*[_type == "siteSettings"][0]${SITE_SETTINGS_PROJECTION}`,
+    ).catch(() => null);
+
+// Header opens the doc at its identity, footer at the tagline, so each click
+// lands the editor near what that piece of chrome shows.
+const headerAttr = docEditAttr('siteSettings', 'siteSettings', 'title');
+const footerAttr = docEditAttr('siteSettings', 'siteSettings', 'tagline');
+---
+
+<!doctype html>
+<html lang="en" data-draft={draftMode ? '1' : '0'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+    <script is:inline>
+      // Before paint: mark whether this preview page is EMBEDDED in the Studio's
+      // Presentation iframe. Two behaviors hang off the class:
+      //  - The "Exit preview" button hides when embedded. Inside Presentation it
+      //    is a trap: it clears the draft cookie and strands the iframe on the
+      //    live site with no Studio connection, and nothing short of reloading
+      //    the whole Studio re-runs the enable handshake. The way out of
+      //    Presentation is Presentation's own chrome.
+      //  - The slim bar shows a reconnect hint if a page ever renders embedded
+      //    but WITHOUT draft mode (a dead session), instead of failing silently.
+      if (window.self !== window.top) {
+        document.documentElement.classList.add('in-studio-frame');
+        if (document.documentElement.dataset.draft !== '1') {
+          document.documentElement.classList.add('preview-disconnected');
+        }
+      }
+    </script>
+    <style>
+      .in-studio-frame [data-exit-preview] {
+        display: none;
+      }
+      [data-reconnect-hint] {
+        display: none;
+      }
+      .in-studio-frame.preview-disconnected [data-reconnect-hint] {
+        display: inline;
+      }
+      .in-studio-frame.preview-disconnected [data-connected-note] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="relative bg-background text-foreground">
+    <div
+      class="flex items-center justify-between gap-4 border-b border-border-soft bg-card px-4 py-1.5 text-xs text-foreground/70"
+    >
+      <span data-connected-note
+        >Draft preview. Click the header or footer to edit Site settings.</span
+      >
+      <span data-reconnect-hint class="font-semibold"
+        >Draft session ended. Reload the Studio browser tab to reconnect the preview.</span
+      >
+    </div>
+    {
+      /* The real site chrome, draft-aware, each piece an editable surface. The
+        wrapper divs are REAL block boxes on purpose: the overlay outlines the
+        element's rect (same rule as sectionEditAttr). */
+    }
+    <div data-sanity={headerAttr}>
+      <Header siteSettings={chromeSettings} />
+    </div>
+    <main id="main"><slot /></main>
+    <div data-sanity={footerAttr}>
+      <Footer siteSettings={chromeSettings} />
+    </div>
+
+    {
+      /* The motion system's END states, forced. BaseLayout's IntersectionObserver
+        script is not loaded here (this shell is deliberately minimal), and the
+        reveal and stagger entrances hide content at opacity 0 until it runs, so
+        without this block the preview would render INVISIBLE sections. Keep it
+        in step with the motion vocabulary in src/styles/globals.css: today that
+        is [data-reveal], [data-stagger-grid] and .hero-entry-stagger. Looping
+        keyframe effects (the Ken Burns hero) are left running: they need no JS
+        and reach a visible state on their own. */
+    }
+    <style is:global>
+      [data-reveal] {
+        opacity: 1 !important;
+        translate: 0 0 !important;
+      }
+      [data-stagger-grid] > * {
+        opacity: 1 !important;
+        translate: 0 0 !important;
+      }
+      .hero-entry-stagger > * {
+        opacity: 1 !important;
+        animation: none !important;
+        transform: none !important;
+      }
+    </style>
+
+    {
+      draftMode && (
+        <>
+          <VisualEditingOverlay client:only="react" pageId={pageId} />
+          <a
+            href="/api/draft-mode/disable"
+            data-exit-preview
+            class="fixed right-4 bottom-4 z-50 rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-lg hover:bg-primary-dark"
+          >
+            Exit preview
+          </a>
+        </>
+      )
+    }
+
+    <script>
+      // =======================================================================
+      // Keep clicks INSIDE the preview surface (PORTS.md card 11)
+      // =======================================================================
+      // Section bodies are full of real-site links (/about, /services, CTAs).
+      // Left alone, clicking one navigates the Presentation iframe to the LIVE
+      // page, which has no Studio connection: the URL bar, the page navigator
+      // and the edit panel all silently freeze on the previous page while the
+      // iframe shows the real site, chrome and all. An editor reported exactly
+      // this against a production site in the family.
+      //
+      // So: same-origin links with a preview equivalent are remapped into
+      // /preview/* (the visual-editing history adapter then reports the new
+      // location, and Presentation resolves the document, so the navigator and
+      // the edit panel follow the click). Links with NO preview route (detail
+      // pages like /journal/<slug>, /api, /studio, external origins) split by
+      // context:
+      //  - EMBEDDED in the Studio: the navigation is SUPPRESSED entirely. A
+      //    click on a card there is an EDIT gesture (the stega overlay already
+      //    selects the right field and document), and a live tab popping open
+      //    on every card click forces a tab-switch back to the Studio each time.
+      //  - Standalone /preview tab: NEW TAB, so the preview surface is never
+      //    hijacked.
+      //
+      // THE ROUTE MAP IS PER-SITE. FIRST_SEGMENT_PREVIEWABLE mirrors
+      // SINGLETON_BY_PATH in src/pages/preview/[...slug].astro (plus: any
+      // single-segment path is a custom `page` slug, which /preview/<slug> also
+      // renders). Keep the two in sync.
+      const FIRST_SEGMENT_PREVIEWABLE = new Set([
+        'about',
+        'services',
+        'process',
+        'faq',
+        'contact',
+        'journal',
+        'privacy',
+      ]);
+      const NEVER_REMAP = new Set(['api', 'studio', 'preview', '404']);
+
+      document.addEventListener(
+        'click',
+        (event) => {
+          if (event.defaultPrevented || event.button !== 0) return;
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          const anchor = (event.target as Element | null)?.closest?.('a[href]');
+          if (!(anchor instanceof HTMLAnchorElement)) return;
+          if (anchor.target === '_blank' || anchor.hasAttribute('download')) return;
+
+          const embedded = document.documentElement.classList.contains('in-studio-frame');
+          // EDIT MODE (2026-08-28, editor feedback on presacademy): while
+          // Presentation's Edit toggle is ON, the visual-editing overlay keeps
+          // its outline boxes ([data-sanity-overlay-element]) in the DOM. In
+          // that mode EVERY click is a selection gesture - buttons with
+          // preview equivalents included - so suppress ALL navigation and let
+          // the overlay's selection be the whole result. With Edit toggled
+          // OFF the boxes are gone and clicks browse normally (remap below).
+          if (embedded && document.querySelector('[data-sanity-overlay-element]')) {
+            event.preventDefault();
+            return;
+          }
+          const url = new URL(anchor.href, window.location.href);
+          // External origin: never let it take over the iframe.
+          if (url.origin !== window.location.origin) {
+            event.preventDefault();
+            if (!embedded) window.open(url.href, '_blank', 'noopener');
+            return;
+          }
+          const path = url.pathname.replace(/\/+$/, '') || '/';
+          // Already a preview path, an API call, or a same-page hash: default.
+          const first = path === '/' ? '' : path.split('/')[1];
+          if (path.startsWith('/preview') || first === 'api') return;
+          if (path === window.location.pathname && url.hash) return;
+
+          const segments = path === '/' ? [] : path.slice(1).split('/');
+          const previewable =
+            path === '/' ||
+            (segments.length === 1 && !NEVER_REMAP.has(first)) ||
+            (segments.length === 1 && FIRST_SEGMENT_PREVIEWABLE.has(first));
+
+          event.preventDefault();
+          if (previewable) {
+            window.location.assign(path === '/' ? '/preview' : `/preview${path}`);
+          } else if (!embedded) {
+            // Standalone tab: detail routes without a preview open in a new tab.
+            window.open(url.href, '_blank', 'noopener');
+          }
+          // Embedded: suppressed. The stega overlay's field selection IS the
+          // click's result; the editor stays in the Studio.
+        },
+        true,
+      );
+    </script>
+  </body>
+</html>
