@@ -1387,6 +1387,14 @@ export type CourseFeaturesSection = {
   eyebrow?: string;
   headline?: string;
   cta?: CtaBlock;
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
 };
 
 export type RaceScheduleSection = {
