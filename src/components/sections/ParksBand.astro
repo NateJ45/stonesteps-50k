@@ -61,8 +61,19 @@ const {
             </p>
           )
         }
+        {
+          /* The explicit space matters. Astro strips whitespace between adjacent
+            expressions, so without it the accessible name runs together as
+            "$2,000 a yearto Cincinnati Parks". Same trap as PageHeader. */
+        }
         <h2 id={headingId} class="display text-h2">
-          {race?.parksDonation && <span class="block">{race.parksDonation} a year</span>}
+          {
+            race?.parksDonation && (
+              <>
+                <span class="block">{race.parksDonation} a year</span>{' '}
+              </>
+            )
+          }
           {headline}
         </h2>
         {body && <p class="mt-5 max-w-[46ch]">{body}</p>}
