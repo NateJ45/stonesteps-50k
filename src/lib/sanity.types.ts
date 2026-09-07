@@ -1369,6 +1369,7 @@ export type LoopCardSection = {
   loops?: Array<{
     kind?: 'long' | 'short';
     miles?: string;
+    throughMiles?: string;
     inShortDistance?: boolean;
     _type: 'loop';
     _key: string;
@@ -1381,6 +1382,7 @@ export type LoopCardSection = {
     _key: string;
   }>;
   legend?: string;
+  sourceNote?: string;
 };
 
 export type CourseFeaturesSection = {

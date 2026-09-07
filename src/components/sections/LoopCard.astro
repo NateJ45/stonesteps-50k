@@ -16,8 +16,15 @@
 // cell fights that. The punch column's header is visually hidden for the same
 // reason: at 22px wide the label collided with the next heading.
 //
-// The mileage labels are the race's own "5+" and "3+", not invented per-loop
-// distances. The race does not publish exact figures and neither does this.
+// THE MILEAGES ARE THE RACE'S OWN, and they are more exact than anything it
+// publishes today. Its public copy says "5+" and "3+"; its timing spreadsheets
+// for 2006, 2007, 2008 and 2009 all carry the same split columns, 5.3M / 8.5M /
+// 13.8M / 17M / 22.3M / 25.5M, which is a 5.3 mile long loop and a 3.2 mile
+// short one. Four independent years agreeing is what makes this a measurement
+// rather than a guess, and the 27K falls exactly on the fourth mark.
+//
+// Precision the reader cannot trace is worse than vagueness, so the card
+// carries a sourceNote saying where the numbers came from. Do not drop it.
 
 import Provisional from '@/components/race/Provisional.astro';
 import type { ProjectedLoopCardSection } from '@/lib/pageBuilder.types';
@@ -26,6 +33,7 @@ type Props = {
   eyebrow?: string;
   headline?: string;
   legend?: string;
+  sourceNote?: string;
   loops?: ProjectedLoopCardSection['loops'];
   aside?: ProjectedLoopCardSection['aside'];
   headingId?: string;
@@ -35,6 +43,7 @@ const {
   eyebrow,
   headline = 'Seven loops out of The Oval',
   legend,
+  sourceNote,
   loops = [],
   aside = [],
   headingId = 'loops-heading',
@@ -62,7 +71,7 @@ const {
               aria-label="Loop order for the 50K, and which loops the 27K covers"
             >
               <div
-                class="grid grid-cols-[22px_3rem_1fr_3.5rem] items-center gap-4 border-b-2 border-dashed border-black/35 pb-2"
+                class="grid grid-cols-[22px_3rem_1fr_4.5rem] items-center gap-4 border-b-2 border-dashed border-black/35 pb-2"
                 role="row"
               >
                 <span class="sr-only" role="columnheader">
@@ -85,12 +94,13 @@ const {
                   role="columnheader"
                 >
                   Miles
+                  <span class="sr-only">, and the total when you come back through The Oval</span>
                 </span>
               </div>
 
               {loops.map((loop, i) => (
                 <div
-                  class="grid grid-cols-[22px_3rem_1fr_3.5rem] items-center gap-4 border-b border-black/10 py-2.5 last:border-b-0"
+                  class="grid grid-cols-[22px_3rem_1fr_4.5rem] items-center gap-4 border-b border-black/10 py-2.5 last:border-b-0"
                   role="row"
                 >
                   <span
@@ -110,8 +120,21 @@ const {
                   >
                     {loop.kind === 'short' ? 'Short' : 'Long'}
                   </span>
-                  <span class="tabular text-right text-sm" role="cell">
-                    {loop.miles}
+                  <span class="text-right" role="cell">
+                    <span class="tabular text-sm">{loop.miles}</span>
+                    {/* The cumulative figure is the one a runner uses on the
+                        day: it answers "how far in am I" at the only point on
+                        the course where they can be told. */}
+                    {loop.throughMiles && (
+                      <span class="tabular block text-[0.65rem] text-[color:var(--plate-ink-soft)]">
+                        {/* "8.5 in" reads as distance covered. The final loop
+                            carries the race's own label for that column, "50K",
+                            which is not a mileage and must not take the suffix. */}
+                        {/^[\d.]+$/.test(loop.throughMiles)
+                          ? `${loop.throughMiles} in`
+                          : loop.throughMiles}
+                      </span>
+                    )}
                   </span>
                 </div>
               ))}
@@ -121,6 +144,15 @@ const {
               <p class="mt-6 flex items-start gap-3 border-t border-dashed border-black/30 pt-4 text-sm opacity-75">
                 <span class="punch__hole is-punched mt-0.5 shrink-0" aria-hidden="true" />
                 <span>{legend}</span>
+              </p>
+            )}
+
+            {/* Where the mileages came from. The card claims a tenth of a mile
+                and the race's own website does not, so it has to show its
+                working or it reads as invented. */}
+            {sourceNote && (
+              <p class="mt-4 border-t border-dashed border-black/20 pt-3 text-[0.72rem] leading-relaxed text-[color:var(--plate-ink-soft)]">
+                {sourceNote}
               </p>
             )}
           </div>

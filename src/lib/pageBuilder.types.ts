@@ -510,10 +510,12 @@ export interface ProjectedLoopCardSection {
   eyebrow?: string;
   headline?: string;
   legend?: string;
+  sourceNote?: string;
   loops?: {
     _key?: string;
     kind?: 'long' | 'short';
     miles?: string;
+    throughMiles?: string;
     inShortDistance?: boolean;
   }[];
   aside?: { _key?: string; title?: string; body?: string; confirmed?: boolean }[];

@@ -258,11 +258,22 @@ export const loopCardSection = defineType({
             }),
             defineField({
               name: 'miles',
-              title: 'Distance label',
+              title: 'Loop distance',
               type: 'string',
               description:
-                'The race publishes "5+" and "3+" rather than exact per-loop mileages. ' +
-                'Do not sharpen that into a precision the race does not claim.',
+                'What the race itself measured: 5.3 for a long loop, 3.2 for a short one. ' +
+                'Its public copy still says "5+" and "3+", but its timing sheets for 2006 ' +
+                'through 2009 all carry the same split marks, so these are the numbers the ' +
+                'race itself ran the clock against. See the note field below.',
+            }),
+            defineField({
+              name: 'throughMiles',
+              title: 'Total miles at the end of this loop',
+              type: 'string',
+              description:
+                'What the mile counter reads when you come back through The Oval. Taken ' +
+                'from the same split columns: 5.3, 8.5, 13.8, 17, 22.3, 25.5, then the ' +
+                'finish. This is the column a runner actually uses on the day.',
             }),
             defineField({
               name: 'inShortDistance',
@@ -272,9 +283,16 @@ export const loopCardSection = defineType({
             }),
           ],
           preview: {
-            select: { kind: 'kind', miles: 'miles', inShort: 'inShortDistance' },
-            prepare: ({ kind, miles, inShort }) => ({
-              title: `${kind === 'short' ? 'Short' : 'Long'} ${miles ?? ''}`.trim(),
+            select: {
+              kind: 'kind',
+              miles: 'miles',
+              through: 'throughMiles',
+              inShort: 'inShortDistance',
+            },
+            prepare: ({ kind, miles, through, inShort }) => ({
+              title:
+                `${kind === 'short' ? 'Short' : 'Long'} ${miles ?? ''}`.trim() +
+                (through ? ` (through ${through})` : ''),
               subtitle: inShort ? 'Both distances' : '50K only',
             }),
           },
@@ -323,6 +341,16 @@ export const loopCardSection = defineType({
       description:
         'States the punch metaphor in words, for anyone who does not read it from the ' +
         'graphic. Not optional in practice: the holes carry meaning.',
+    }),
+    defineField({
+      name: 'sourceNote',
+      title: 'Where the mileages came from',
+      type: 'text',
+      rows: 3,
+      description:
+        'The loop distances are more exact than anything the race publishes today, so the ' +
+        'page has to say where they came from. Without this line the numbers read as ' +
+        'invented, which is worse than saying "5+".',
     }),
   ],
   preview: {

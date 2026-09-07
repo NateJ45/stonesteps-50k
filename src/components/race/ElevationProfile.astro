@@ -1,10 +1,14 @@
 ---
 // Foundation, edit with care
 /**
- * Elevation profile for the 50K, drawn from the published loop structure:
- * four 5+ mile loops alternating with three 3+ mile loops, in the order
- * L S L S L S L. Each loop climbs and drops back to The Oval, so the
- * profile is a stack of saw teeth rather than a point-to-point line.
+ * Elevation profile for the 50K, drawn from the loop structure: four 5.3 mile
+ * loops alternating with three 3.2 mile loops, in the order L S L S L S L. Each
+ * loop climbs and drops back to The Oval, so the profile is a stack of saw
+ * teeth rather than a point-to-point line.
+ *
+ * The loop lengths are the race's own, from the split columns on its 2006 to
+ * 2009 timing spreadsheets. They set the x spacing of the teeth, which is why
+ * they matter here and not just on the punch card.
  *
  * THE SHAPE IS SYNTHETIC. It is illustrative of the loop structure and the
  * 10,726 ft total, and it is NOT surveyed GPS data. The caption says so on the
@@ -56,13 +60,13 @@ const PEAK = 46;
 type Loop = { kind: 'long' | 'short'; miles: number };
 
 const loops: Loop[] = [
-  { kind: 'long', miles: 5.2 },
-  { kind: 'short', miles: 3.3 },
-  { kind: 'long', miles: 5.2 },
-  { kind: 'short', miles: 3.3 },
-  { kind: 'long', miles: 5.2 },
-  { kind: 'short', miles: 3.3 },
-  { kind: 'long', miles: 5.2 },
+  { kind: 'long', miles: 5.3 },
+  { kind: 'short', miles: 3.2 },
+  { kind: 'long', miles: 5.3 },
+  { kind: 'short', miles: 3.2 },
+  { kind: 'long', miles: 5.3 },
+  { kind: 'short', miles: 3.2 },
+  { kind: 'long', miles: 5.3 },
 ];
 
 const totalMiles = loops.reduce((s, l) => s + l.miles, 0);

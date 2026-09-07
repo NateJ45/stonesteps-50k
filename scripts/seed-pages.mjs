@@ -210,8 +210,8 @@ docs.push({
           _key: key(),
           title: 'The 27K',
           body:
-            'Two 5+ mile loops alternating with two 3+ mile loops, on exactly the same ' +
-            'trail. Same climbs, four loops instead of seven.',
+            'Two 5.3 mile loops alternating with two 3.2 mile loops, on exactly the same ' +
+            'trail. You turn for home at 17 miles. Same climbs, four loops instead of seven.',
           confirmed: true,
         },
         {
@@ -243,14 +243,70 @@ docs.push({
           confirmed: false,
         },
       ],
+      // The loop distances are the race's own, recovered from the split
+      // columns on its 2006 to 2009 timing spreadsheets. All four years carry
+      // the same marks. See the sourceNote below, which ships on the page.
+      sourceNote:
+        'Loop distances come from the split columns on the timing sheets the race kept for ' +
+        '2006 through 2009, which all read 5.3M, 8.5M, 13.8M, 17M, 22.3M and 25.5M. Its ' +
+        'current copy rounds these to "5+" and "3+".',
       loops: [
-        { _type: 'loop', _key: key(), kind: 'long', miles: '5+', inShortDistance: true },
-        { _type: 'loop', _key: key(), kind: 'short', miles: '3+', inShortDistance: true },
-        { _type: 'loop', _key: key(), kind: 'long', miles: '5+', inShortDistance: true },
-        { _type: 'loop', _key: key(), kind: 'short', miles: '3+', inShortDistance: true },
-        { _type: 'loop', _key: key(), kind: 'long', miles: '5+', inShortDistance: false },
-        { _type: 'loop', _key: key(), kind: 'short', miles: '3+', inShortDistance: false },
-        { _type: 'loop', _key: key(), kind: 'long', miles: '5+', inShortDistance: false },
+        {
+          _type: 'loop',
+          _key: key(),
+          kind: 'long',
+          miles: '5.3',
+          throughMiles: '5.3',
+          inShortDistance: true,
+        },
+        {
+          _type: 'loop',
+          _key: key(),
+          kind: 'short',
+          miles: '3.2',
+          throughMiles: '8.5',
+          inShortDistance: true,
+        },
+        {
+          _type: 'loop',
+          _key: key(),
+          kind: 'long',
+          miles: '5.3',
+          throughMiles: '13.8',
+          inShortDistance: true,
+        },
+        {
+          _type: 'loop',
+          _key: key(),
+          kind: 'short',
+          miles: '3.2',
+          throughMiles: '17',
+          inShortDistance: true,
+        },
+        {
+          _type: 'loop',
+          _key: key(),
+          kind: 'long',
+          miles: '5.3',
+          throughMiles: '22.3',
+          inShortDistance: false,
+        },
+        {
+          _type: 'loop',
+          _key: key(),
+          kind: 'short',
+          miles: '3.2',
+          throughMiles: '25.5',
+          inShortDistance: false,
+        },
+        {
+          _type: 'loop',
+          _key: key(),
+          kind: 'long',
+          miles: '5.3',
+          throughMiles: '50K',
+          inShortDistance: false,
+        },
       ],
     },
     {
@@ -435,7 +491,7 @@ docs.push({
           question: 'What is the course actually like?',
           answer:
             'Hilly single track with roots, rocks and the occasional tree blow down. The ' +
-            '50K is four 5+ mile loops alternating with three 3+ mile loops, for 10,726 ' +
+            '50K is four 5.3 mile loops alternating with three 3.2 mile loops, for 10,726 ' +
             'feet of elevation change. Nothing about it is flat.',
         },
         {

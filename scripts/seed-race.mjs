@@ -119,9 +119,13 @@ docs.push({
   name: '50K',
   slug: { _type: 'slug', current: '50k' },
   kicker: 'The full ultra',
-  // The race publishes "5+" and "3+" mile loops, not exact mileages. Do not
-  // sharpen this into false precision.
-  loopStructure: 'Four 5+ mile loops alternating with three 3+ mile loops',
+  // 5.3 and 3.2 are the race's OWN figures, not a rounding of "5+" and "3+".
+  // Its 2006 to 2009 timing spreadsheets all carry the same split columns:
+  // 5.3M, 8.5M, 13.8M, 17M, 22.3M, 25.5M. Four independent years agreeing is
+  // what licenses the tenth of a mile. Anywhere these numbers appear on the
+  // page they must appear with their source: see the loopCardSection's
+  // sourceNote in scripts/seed-pages.mjs.
+  loopStructure: 'Four 5.3 mile loops alternating with three 3.2 mile loops',
   blurb:
     'The original. Seven single-track loops through Mt. Airy Forest, each one returning ' +
     'you through the aid station at The Oval before sending you back out. Roots, rocks, ' +
@@ -142,7 +146,7 @@ docs.push({
   name: '27K',
   slug: { _type: 'slug', current: '27k' },
   kicker: 'The fun run',
-  loopStructure: 'Two 5+ mile loops alternating with two 3+ mile loops',
+  loopStructure: 'Two 5.3 mile loops alternating with two 3.2 mile loops, turning for home at 17',
   blurb:
     'Same trail, same climbs, four loops instead of seven. The way a lot of Stone Steps ' +
     'finishers start before they come back for the 50K.',
