@@ -1128,6 +1128,15 @@ body::before {
      sitting ON the page, not part of it. */
   --plate-face: #ffebbb;
   --plate-ink: #1a1712;
+  /* Secondary ink ON a plate. A real colour, NOT the ink at reduced opacity.
+     Tailwind's opacity-* utilities looked like the obvious way to soften a
+     label on cream and quietly broke contrast: bark at 50% over #FFEBBB
+     measures 3.26:1 and at 60% still only 4.41:1, both under AA. Neither the
+     @theme contrast gate nor the surfaces gate can see that, because the
+     TOKENS are fine and the dilution happens in a utility class. Only the axe
+     sweep caught it. This value is bark at 70%, resolved to a literal, which
+     measures 6.08:1 on the plate. */
+  --plate-ink-soft: #5f5745;
   --plate-edge: #000000;
   --plate-radius: 12px;
 }

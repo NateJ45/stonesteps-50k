@@ -65,9 +65,7 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
                 </span>
               )}
               <span class="clock__group grid justify-items-center">
-                <span class="clock__ghost tabular" aria-hidden="true">
-                  {u.ghost}
-                </span>
+                <span class="clock__ghost tabular" aria-hidden="true" data-ghost={u.ghost} />
                 <span class="clock__val tabular" data-unit={u.key}>
                   {u.text}
                 </span>
@@ -108,8 +106,18 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
     letter-spacing: 0.02em;
     color: var(--led);
   }
+  /* The unlit segments a real seven-segment display shows behind its active
+     ones. Rendered as GENERATED CONTENT, not as DOM text, because that is what
+     it is: decoration carrying no information, already aria-hidden. As text it
+     was a genuine axe failure (1.11:1 against the housing) with no honest fix,
+     since the whole point is that it is barely visible. As generated content it
+     is correctly classified as presentational. The width still follows the real
+     digit count, so a three-digit day count still lines up. */
   .clock__ghost {
     opacity: 0.13;
+  }
+  .clock__ghost::before {
+    content: attr(data-ghost);
   }
   .clock__val {
     text-shadow:

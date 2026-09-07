@@ -65,19 +65,19 @@ const {
                 Included in the 27K
               </span>
               <span
-                class="font-mono text-[0.58rem] tracking-[0.18em] uppercase opacity-60"
+                class="font-mono text-[0.58rem] tracking-[0.18em] text-[color:var(--plate-ink-soft)] uppercase"
                 role="columnheader"
               >
                 Loop
               </span>
               <span
-                class="font-mono text-[0.58rem] tracking-[0.18em] uppercase opacity-60"
+                class="font-mono text-[0.58rem] tracking-[0.18em] text-[color:var(--plate-ink-soft)] uppercase"
                 role="columnheader"
               >
                 Type
               </span>
               <span
-                class="text-right font-mono text-[0.58rem] tracking-[0.18em] uppercase opacity-60"
+                class="text-right font-mono text-[0.58rem] tracking-[0.18em] text-[color:var(--plate-ink-soft)] uppercase"
                 role="columnheader"
               >
                 Miles
@@ -95,13 +95,13 @@ const {
                   aria-label={loop.inShortDistance ? 'Included in the 27K' : '50K only'}
                 />
                 <span
-                  class={`tabular text-lg ${loop.kind === 'long' ? 'font-bold' : 'opacity-50'}`}
+                  class={`tabular text-lg ${loop.kind === 'long' ? 'font-bold' : 'text-[color:var(--plate-ink-soft)]'}`}
                   role="cell"
                 >
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span
-                  class={`text-sm ${loop.kind === 'long' ? 'text-[color:var(--primary)]' : 'opacity-60'}`}
+                  class={`text-sm ${loop.kind === 'long' ? 'text-[color:var(--primary)]' : 'text-[color:var(--plate-ink-soft)]'}`}
                   role="cell"
                 >
                   {loop.kind === 'short' ? 'Short' : 'Long'}
