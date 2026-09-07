@@ -12,6 +12,49 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ---------- Metric-matched fallbacks for the display face --------------- */
+/* Staatliches is far narrower than any system face: measured in the browser,
+   "STONE STEPS 50K" at 100px is 599px in Staatliches against 741px in Arial
+   Narrow and 904px in Arial. With plain font-display:swap the hero headline
+   therefore does not nudge when the webfont lands, it visibly resizes, and
+   Lighthouse measured CLS 0.178 against a 0.1 budget. Warm it measures zero,
+   which is why local testing never sees it.
+     size-adjust scales each fallback to Staatliches' own width so the swap is
+   a change of shape, not of size. One face per local font, because the right
+   ratio differs per font and a single @font-face with several local() sources
+   would apply one number to all of them.
+     The Arial Narrow figure is MEASURED in a browser that has the font:
+   staatlichesWidth / fallbackWidth, verified afterwards at a ratio of 1.000.
+   The other two are derived from known metric compatibility, because a
+   local() name the system cannot resolve measures as the DEFAULT face rather
+   than failing, which quietly produces a confident wrong number. */
+@font-face {
+  font-family: 'Staatliches Fallback';
+  src: local('Arial Narrow');
+  size-adjust: 80.8%;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Staatliches Fallback 2';
+  /* What a Linux CI runner and most Linux desktops actually have. Liberation
+     Sans Narrow is designed to be metrically compatible with Arial Narrow, so
+     it takes the same ratio. DERIVED, not measured: this machine does not have
+     the font, and measuring a name the system cannot resolve silently returns
+     the DEFAULT face's width instead of an error. The first pass here recorded
+     72% from exactly that mistake. */
+  src: local('Liberation Sans Narrow');
+  size-adjust: 80.8%;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Staatliches Fallback 3';
+  /* macOS. Helvetica is Arial-width, not narrow, so it needs a much smaller
+     ratio than the two above: 598.9 / 904.05. Derived for the same reason. */
+  src: local('Helvetica Neue'), local('Helvetica');
+  size-adjust: 66.2%;
+  font-display: swap;
+}
+
 /* ---------- Brand tokens ---------------------------------- */
 /* Reachable as utility classes: bg-bg, text-accent, border-secondary,
    font-display, text-h1, p-l, max-w-content. */
@@ -35,7 +78,12 @@
   --color-white-pure: #ffffff;
 
   /* Fonts */
-  --font-display: 'Staatliches', 'Arial Narrow', system-ui, sans-serif;
+  /* The three Fallback faces are metric-matched (see the @font-face block
+     above). They must sit BEFORE the unadjusted generics, or the browser picks
+     an unscaled face and the swap resizes the hero again. */
+  --font-display:
+    'Staatliches', 'Staatliches Fallback', 'Staatliches Fallback 2', 'Staatliches Fallback 3',
+    'Arial Narrow', system-ui, sans-serif;
   --font-body: 'Archivo Variable', system-ui, -apple-system, sans-serif;
   /* JetBrains Mono carries every TIME VALUE on the site: results, records,
      splits, the countdown. Times then read as a timing clock rather than as

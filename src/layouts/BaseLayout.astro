@@ -11,6 +11,8 @@
 //   - BackToTop React island
 
 import { ClientRouter } from 'astro:transitions';
+// Preloaded, not merely imported. See the <link rel="preload"> below.
+import staatlichesWoff2 from '@fontsource/staatliches/files/staatliches-latin-400-normal.woff2?url';
 import { site } from '@/data/site';
 import { urlFor } from '@/lib/sanity';
 import { localBusinessSchema } from '@/lib/schemas';
@@ -133,6 +135,24 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+
+    {/* PRELOAD THE DISPLAY FACE. Every headline on the site is Staatliches, and
+        it is ~20% narrower than any fallback: 599px against Arial Narrow's
+        741px for the same string at the same size. So a font-display:swap
+        reflow does not nudge the hero, it visibly resizes it, and Lighthouse
+        measured CLS 0.178 against a 0.1 budget on a cold load. Warm, it is
+        zero, which is exactly why this is invisible in local testing.
+
+        Preloading gets the file into the first request wave so the headline
+        paints once. The metric-matched fallbacks in globals.css cover the case
+        where it still has not arrived. */}
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href={staatlichesWoff2}
+      crossorigin="anonymous"
+    />
     {/* No RSS alternate: the journal and its feed were removed with the
         other starter pages this race does not have. A <link rel="alternate">
         pointing at a 404 is an invitation for a reader to fail. */}
