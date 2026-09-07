@@ -1,0 +1,51 @@
+---
+// Foundation, edit with care
+//
+// The elevation band: heading, intro, and the profile itself.
+//
+// CONTENT block: receives a surface from the cadence in sectionCadence.ts.
+//
+// The profile's shape is synthetic and says so in its own caption. See
+// src/components/race/ElevationProfile.astro before treating it as data.
+
+import SectionHeading from '@/components/SectionHeading.astro';
+import Topo from '@/components/race/Topo.astro';
+import ElevationProfile from '@/components/race/ElevationProfile.astro';
+import type { ProjectedElevationSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+  totalGain?: string;
+  race?: ProjectedElevationSection['race'];
+  surface?: string;
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = 'Ten thousand feet of it',
+  intro,
+  totalGain,
+  race,
+  surface = 'background',
+  headingId = 'elevation-heading',
+} = Astro.props as Props;
+
+const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
+---
+
+<section
+  class={`relative overflow-hidden py-section-lg ${surfaceClass}`}
+  aria-labelledby={headingId}
+>
+  <Topo seed={29} lines={10} class="opacity-35" />
+  <div class="relative z-10 mx-auto w-full max-w-content px-6">
+    <SectionHeading {eyebrow} {headline} {headingId} />
+    {intro && <p class="mt-4 max-w-[52ch] text-muted-foreground">{intro}</p>}
+    <div class="mt-10">
+      <ElevationProfile totalGain={totalGain} gpxUrl={race?.gpxUrl} />
+    </div>
+  </div>
+</section>

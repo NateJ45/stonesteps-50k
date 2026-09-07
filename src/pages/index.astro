@@ -7,21 +7,34 @@
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SectionRenderer from '@/components/SectionRenderer.astro';
-import { getHomePage, getSiteSettings } from '@/lib/queries';
+import { getHomePage, getRace, getSiteSettings } from '@/lib/queries';
 import { site } from '@/data/site';
 import { DEFAULT_HOME_SECTIONS } from '@/data/defaultSections';
+import { raceEventSchema } from '@/lib/race-schema';
 
-const [page, siteSettings] = await Promise.all([
+const [page, siteSettings, race] = await Promise.all([
   getHomePage().catch(() => null),
   getSiteSettings().catch(() => null),
+  getRace().catch(() => null),
 ]);
 
 const title = page?.seoTitle ?? site.name;
-const description = page?.seoDescription ?? 'Your tagline goes here.';
+const description =
+  page?.seoDescription ??
+  race?.tagline ??
+  "Cincinnati's longest running ultra marathon, in Mt. Airy Forest.";
 
 const sections = page?.pageBuilder?.length ? page.pageBuilder : DEFAULT_HOME_SECTIONS;
+
+// schema.org/SportsEvent. This is what drives Google's event results, and it
+// is what the WordPress site being replaced has never had. The builder returns
+// null rather than a skeleton when the race has no date, and it keeps
+// unconfirmed fee tiers out entirely: structured data has no way to say "to be
+// confirmed", so an absent field beats a plausible one.
+const eventSchema = raceEventSchema(race, site.url);
+const schemas = eventSchema ? [JSON.stringify(eventSchema)] : [];
 ---
 
-<BaseLayout {title} {description} {siteSettings} seoImage={page?.seoImage}>
+<BaseLayout {title} {description} {siteSettings} seoImage={page?.seoImage} {schemas}>
   <SectionRenderer {sections} idPrefix="home" />
 </BaseLayout>

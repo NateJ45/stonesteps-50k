@@ -1,0 +1,72 @@
+---
+// Safe to edit by hand
+/**
+ * Topographic contour backdrop, generated at build time.
+ *
+ * Ported from the design mockup unchanged. It costs one component and zero
+ * bytes of image payload: the contours are SVG paths computed from a seeded
+ * PRNG at build time, so there is no runtime work and no asset to download.
+ * Deterministic: the same `seed` always yields the same ridge line,
+ * so the art is stable across builds but varies per section.
+ */
+interface Props {
+  seed?: number;
+  lines?: number;
+  class?: string;
+}
+
+const { seed = 7, lines = 14, class: className = '' } = Astro.props;
+
+const W = 1200;
+const H = 700;
+
+/** Small deterministic PRNG so builds are reproducible. */
+function rng(s: number) {
+  let x = s * 9301 + 49297;
+  return () => {
+    x = (x * 9301 + 49297) % 233280;
+    return x / 233280;
+  };
+}
+
+const rand = rng(seed);
+
+/** One contour: a smooth ridge across the full width at a given offset. */
+function contour(offset: number, amp: number, phase: number, freq: number) {
+  const steps = 24;
+  const pts: string[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const x = (i / steps) * W;
+    const t = (i / steps) * Math.PI * 2 * freq + phase;
+    const y = offset + Math.sin(t) * amp + Math.sin(t * 2.3) * (amp * 0.35);
+    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+  }
+  // Convert the point list into a smooth cubic path.
+  let d = `M ${pts[0]}`;
+  for (let i = 1; i < pts.length; i++) {
+    const [px, py] = pts[i - 1].split(',').map(Number);
+    const [cx, cy] = pts[i].split(',').map(Number);
+    const mx = (px + cx) / 2;
+    d += ` Q ${px.toFixed(1)},${py.toFixed(1)} ${mx.toFixed(1)},${((py + cy) / 2).toFixed(1)}`;
+  }
+  return d;
+}
+
+const paths = Array.from({ length: lines }, (_, i) => {
+  const offset = (i / (lines - 1)) * (H * 1.15) - H * 0.08;
+  const amp = 26 + rand() * 54;
+  const phase = rand() * Math.PI * 2;
+  const freq = 0.7 + rand() * 0.8;
+  return contour(offset, amp, phase, freq);
+});
+---
+
+<svg
+  class={`topo ${className}`}
+  viewBox={`0 0 ${W} ${H}`}
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  {paths.map((d) => <path d={d} />)}
+</svg>

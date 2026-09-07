@@ -1,0 +1,235 @@
+---
+// Foundation, edit with care
+/**
+ * Elevation profile for the 50K, drawn from the published loop structure:
+ * four 5+ mile loops alternating with three 3+ mile loops, in the order
+ * L S L S L S L. Each loop climbs and drops back to The Oval, so the
+ * profile is a stack of saw teeth rather than a point-to-point line.
+ *
+ * THE SHAPE IS SYNTHETIC. It is illustrative of the loop structure and the
+ * 10,726 ft total, and it is NOT surveyed GPS data. The caption says so on the
+ * page, in words, and that caption is not optional: a plausible-looking
+ * elevation chart is read as measurement, and this one is not one.
+ *
+ * When a real GPX track exists, set gpxUrl on The Race. The caption switches to
+ * offering the download and the synthetic-shape warning comes off. Replacing
+ * this path with the real track is the outstanding job; the component stays.
+ */
+
+interface Props {
+  /** Shown in the caption. Verified: 10,726 ft. */
+  totalGain?: string;
+  /** A real surveyed track, when one exists. Changes what the caption claims. */
+  gpxUrl?: string;
+}
+
+const { totalGain = '10,726 ft', gpxUrl } = Astro.props;
+
+const W = 1400;
+const H = 320;
+const BASE = H - 42;
+const PEAK = 46;
+
+type Loop = { kind: 'long' | 'short'; miles: number };
+
+const loops: Loop[] = [
+  { kind: 'long', miles: 5.2 },
+  { kind: 'short', miles: 3.3 },
+  { kind: 'long', miles: 5.2 },
+  { kind: 'short', miles: 3.3 },
+  { kind: 'long', miles: 5.2 },
+  { kind: 'short', miles: 3.3 },
+  { kind: 'long', miles: 5.2 },
+];
+
+const totalMiles = loops.reduce((s, l) => s + l.miles, 0);
+
+/** Deterministic wobble so each loop reads as trail, not as a clean triangle. */
+function jitter(i: number, n: number) {
+  return Math.sin(i * 12.9898 + n * 78.233) * 0.5;
+}
+
+let x = 0;
+let cumulative = 0;
+const points: [number, number][] = [[0, BASE]];
+const markers: { x: number; label: string; kind: Loop['kind']; mile: number }[] = [];
+
+loops.forEach((loop, li) => {
+  const w = (loop.miles / totalMiles) * W;
+  // Long loops get more internal climbs than short ones.
+  const teeth = loop.kind === 'long' ? 4 : 3;
+  const height = loop.kind === 'long' ? 1 : 0.72;
+
+  for (let t = 0; t < teeth; t++) {
+    const seg = w / teeth;
+    const up = x + seg * 0.45;
+    const down = x + seg;
+    const wob = jitter(li, t) * 26;
+    const crest = BASE - (BASE - PEAK) * height * (0.62 + 0.38 * Math.abs(jitter(li, t + 3))) + wob;
+    points.push([up, Math.max(PEAK, Math.min(BASE - 20, crest))]);
+    points.push([down, BASE - (t === teeth - 1 ? 0 : 34)]);
+    x = down;
+  }
+
+  cumulative += loop.miles;
+  markers.push({
+    x,
+    label: `Loop ${li + 1}`,
+    kind: loop.kind,
+    mile: cumulative,
+  });
+});
+
+/** Smooth the saw teeth just enough to feel like terrain. */
+const line = points
+  .map(([px, py], i) => {
+    if (i === 0) return `M ${px.toFixed(1)} ${py.toFixed(1)}`;
+    const [qx, qy] = points[i - 1];
+    const cx = (qx + px) / 2;
+    return `C ${cx.toFixed(1)} ${qy.toFixed(1)} ${cx.toFixed(1)} ${py.toFixed(1)} ${px.toFixed(1)} ${py.toFixed(1)}`;
+  })
+  .join(' ');
+
+const area = `${line} L ${W} ${BASE} L 0 ${BASE} Z`;
+---
+
+<figure class="elev">
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="elev-title elev-desc">
+    <title id="elev-title">Stone Steps 50K elevation profile</title>
+    <desc id="elev-desc">
+      Seven loops from The Oval: four long loops alternating with three short loops of just over
+      three miles, totalling 10,726 feet of elevation change across 31 miles.
+    </desc>
+
+    <defs>
+      <linearGradient id="elevFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.32"></stop>
+        <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"></stop>
+      </linearGradient>
+    </defs>
+
+    <!-- Aid-station verticals: you pass through The Oval at the end of every loop. -->
+    {
+      markers.map((m) => (
+        <g class="elev__aid">
+          <line x1={m.x} y1={PEAK - 20} x2={m.x} y2={BASE} />
+          <circle cx={m.x} cy={BASE} r="4" />
+        </g>
+      ))
+    }
+
+    <path d={area} fill="url(#elevFill)"></path>
+    <path d={line} class="elev__line"></path>
+    <line x1="0" y1={BASE} x2={W} y2={BASE} class="elev__base"></line>
+
+    {
+      markers.map((m, i) => (
+        <text
+          x={m.x}
+          y={BASE + 26}
+          class={`elev__lbl ${m.kind === 'long' ? 'is-long' : ''}`}
+          text-anchor="middle"
+        >
+          {i + 1}
+        </text>
+      ))
+    }
+  </svg>
+
+  <figcaption class="elev__cap">
+    <span class="mono"><b>{totalGain}</b> total elevation change</span>
+    {
+      gpxUrl ? (
+        <a class="elev__note" href={gpxUrl} rel="noopener">
+          Download the course GPX
+        </a>
+      ) : (
+        <span class="elev__note">Shape illustrates the loop structure. Not surveyed GPS data</span>
+      )
+    }
+    <span class="elev__key">
+      <span class="elev__dot"></span> Aid station at the end of every loop
+    </span>
+  </figcaption>
+</figure>
+
+<style>
+  .elev svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+  }
+
+  .elev__line {
+    fill: none;
+    stroke: var(--heading-accent);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+  }
+
+  .elev__base {
+    stroke: color-mix(in srgb, var(--foreground) 35%, transparent);
+    stroke-width: 1;
+  }
+
+  .elev__aid line {
+    stroke: color-mix(in srgb, var(--foreground) 22%, transparent);
+    stroke-width: 1;
+    stroke-dasharray: 3 6;
+  }
+
+  .elev__aid circle {
+    fill: var(--foreground);
+  }
+
+  .elev__lbl {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    fill: var(--muted-foreground);
+  }
+
+  .elev__lbl.is-long {
+    fill: var(--foreground);
+    font-weight: 700;
+  }
+
+  .elev__cap {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    color: var(--cream-dim);
+    text-transform: uppercase;
+  }
+
+  .elev__cap b {
+    color: var(--heading-accent);
+  }
+
+  .elev__key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .elev__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--foreground);
+    display: inline-block;
+  }
+
+  .elev__note {
+    text-transform: none;
+    letter-spacing: 0.02em;
+    color: var(--muted-foreground);
+    font-style: italic;
+  }
+</style>

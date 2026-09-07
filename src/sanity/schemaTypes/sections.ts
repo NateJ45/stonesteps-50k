@@ -13,6 +13,7 @@
 // defined so every builder offers the same library.
 
 import { defineType, defineField, defineArrayMember, type ArrayOptions } from 'sanity';
+import { raceSectionSchemas } from './raceSections';
 import {
   BlockElementIcon,
   ImageIcon,
@@ -556,6 +557,10 @@ export const embedSection = defineType({
 
 // All section schema objects, to register in the schema index.
 export const pageSectionSchemas = [
+  // The race's own blocks. Kept in raceSections.ts so the general library
+  // stays portable back to the starter, but registered here so they join
+  // SECTION_TYPES and appear in every page builder.
+  ...raceSectionSchemas,
   heroSection,
   richTextSection,
   imageTextSection,
@@ -592,6 +597,20 @@ export const SECTION_TYPES = pageSectionSchemas.map((s) => ({ type: s.name }));
 export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
   filter: true,
   groups: [
+    {
+      name: 'race',
+      title: 'The race',
+      of: [
+        'raceHeroSection',
+        'distanceTicketsSection',
+        'recordsBoardSection',
+        'raceScheduleSection',
+        'courseFeaturesSection',
+        'loopCardSection',
+        'elevationSection',
+        'sponsorPatchesSection',
+      ],
+    },
     {
       name: 'basics',
       title: 'Basics',

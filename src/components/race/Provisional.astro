@@ -1,0 +1,39 @@
+---
+// Safe to edit by hand
+//
+// The "not confirmed" marker.
+//
+// WHAT CHANGED FROM THE MOCKUP. There it was placed by hand wherever a value
+// had been invented, which works exactly once: it relies on a developer
+// remembering to delete it the day the real answer arrives, and nothing fails
+// if they forget. Here it is driven by a document's `confirmed` field, so the
+// marker appears and disappears on its own and the burden sits with the person
+// who actually knows the answer. See src/sanity/schemaTypes/_confirmedField.ts.
+//
+// Rendering nothing when confirmed is deliberate: the component is always safe
+// to include, so a caller never has to write the conditional itself.
+
+interface Props {
+  /** The document's `confirmed` flag. Anything other than true shows the marker. */
+  confirmed?: boolean | null;
+  /** What is unconfirmed, in plain words. Shown beside the tag. */
+  what: string;
+  class?: string;
+}
+
+const { confirmed, what, class: className = '' } = Astro.props;
+---
+
+{
+  confirmed !== true && (
+    <p
+      class={`provisional flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md px-3 py-2 text-sm ${className}`}
+      role="note"
+    >
+      <span class="rounded-sm bg-primary px-2 py-0.5 font-mono text-[0.6rem] tracking-[0.2em] text-primary-foreground uppercase">
+        Not confirmed
+      </span>
+      <span class="text-muted-foreground">{what}</span>
+    </p>
+  )
+}

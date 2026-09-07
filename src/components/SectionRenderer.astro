@@ -32,6 +32,15 @@ import LogoStrip from '@/components/sections/LogoStrip.astro';
 import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
+// Stone Steps race blocks.
+import RaceHero from '@/components/sections/RaceHero.astro';
+import DistanceTickets from '@/components/sections/DistanceTickets.astro';
+import RecordsBoard from '@/components/sections/RecordsBoard.astro';
+import RaceSchedule from '@/components/sections/RaceSchedule.astro';
+import CourseFeatures from '@/components/sections/CourseFeatures.astro';
+import LoopCard from '@/components/sections/LoopCard.astro';
+import ElevationBand from '@/components/sections/ElevationBand.astro';
+import SponsorPatches from '@/components/sections/SponsorPatches.astro';
 import { classifySections } from '@/lib/sectionCadence';
 import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
 import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
@@ -290,6 +299,80 @@ const wrapAttrs = (key: string | undefined) =>
             cta={s.cta}
             columns={s.columns}
             limit={s.limit}
+            headingId={headingId}
+          />
+        ) : s._type === 'raceHeroSection' ? (
+          <RaceHero
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            subhead={s.subhead}
+            image={s.image}
+            showCountdown={s.showCountdown}
+            primaryCta={s.primaryCta}
+            secondaryCta={s.secondaryCta}
+            race={s.race}
+            headingId={headingId}
+          />
+        ) : s._type === 'distanceTicketsSection' ? (
+          <DistanceTickets
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            note={s.note}
+            distances={s.distances ?? []}
+            race={s.race}
+            headingId={headingId}
+          />
+        ) : s._type === 'recordsBoardSection' ? (
+          <RecordsBoard
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            intro={s.intro}
+            distances={s.distances ?? []}
+            results={s.results ?? []}
+            historical={s.historical ?? []}
+            race={s.race}
+            surface={surface ?? 'background'}
+            headingId={headingId}
+          />
+        ) : s._type === 'raceScheduleSection' ? (
+          <RaceSchedule
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            items={s.items ?? []}
+            headingId={headingId}
+          />
+        ) : s._type === 'courseFeaturesSection' ? (
+          <CourseFeatures
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            cta={s.cta}
+            features={s.features ?? []}
+            surface={surface ?? 'background'}
+            headingId={headingId}
+          />
+        ) : s._type === 'loopCardSection' ? (
+          <LoopCard
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            legend={s.legend}
+            loops={s.loops ?? []}
+            headingId={headingId}
+          />
+        ) : s._type === 'elevationSection' ? (
+          <ElevationBand
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            intro={s.intro}
+            totalGain={s.totalGain}
+            race={s.race}
+            surface={surface ?? 'background'}
+            headingId={headingId}
+          />
+        ) : s._type === 'sponsorPatchesSection' ? (
+          <SponsorPatches
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            sponsors={s.sponsors ?? []}
             headingId={headingId}
           />
         ) : (

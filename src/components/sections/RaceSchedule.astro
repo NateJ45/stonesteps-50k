@@ -1,0 +1,85 @@
+---
+// Foundation, edit with care
+//
+// Race day, on a clipboard.
+//
+// SELF_CONTAINED: paints its own ground, never receives a surface prop.
+//
+// The clipboard is apt rather than decorative: several of these times are still
+// unconfirmed, and a clipboard reads as "not final yet". Board, metal clamp,
+// paper sheet, all CSS, no images.
+//
+// A row with no confirmed time shows "To be confirmed" and NOT a plausible
+// hour. The mockup this is based on invented an entire race-day schedule, and
+// that is precisely the failure this is built to prevent.
+
+import type { ProjectedRaceScheduleSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  items?: ProjectedRaceScheduleSection['items'];
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = 'Race day',
+  items = [],
+  headingId = 'schedule-heading',
+} = Astro.props as Props;
+
+const anyUnconfirmed = items.some((i) => i.confirmed !== true);
+---
+
+{
+  items.length > 0 && (
+    <section class="bg-background py-section-lg" aria-labelledby={headingId}>
+      <div class="mx-auto w-full max-w-content px-6">
+        {eyebrow && (
+          <p class="blaze text-heading-accent mb-4 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase">
+            {eyebrow}
+          </p>
+        )}
+        <h2 id={headingId} class="display text-h2">
+          {headline}
+        </h2>
+
+        <div class="clip mx-auto mt-14 max-w-[46rem] px-[1.1rem] pt-6 pb-[1.1rem]">
+          <div class="clip__clamp" aria-hidden="true" />
+          <div class="clip__sheet p-6 sm:p-8">
+            {anyUnconfirmed && (
+              <p class="provisional mb-5 rounded-md px-3 py-2 text-sm">
+                <span class="rounded-sm bg-primary px-2 py-0.5 font-mono text-[0.6rem] tracking-[0.2em] text-primary-foreground uppercase">
+                  Not confirmed
+                </span>{' '}
+                <span class="opacity-75">
+                  The race publishes start times and the course close. The rest is still to come
+                  from the race director.
+                </span>
+              </p>
+            )}
+
+            <ol class="grid gap-1">
+              {items.map((item) => (
+                <li class="grid grid-cols-[6.5rem_1fr] items-baseline gap-x-4 gap-y-0.5 border-b border-black/10 py-2.5 last:border-b-0 sm:grid-cols-[6.5rem_minmax(0,1fr)_auto]">
+                  <span
+                    class={`tabular text-sm ${item.time ? 'text-[color:var(--primary)]' : 'opacity-45'}`}
+                  >
+                    {item.time ?? 'TBC'}
+                  </span>
+                  <span class="display on-light text-[1.15rem]">{item.label}</span>
+                  {item.detail && (
+                    <span class="col-start-2 text-xs opacity-60 sm:col-start-3 sm:text-right">
+                      {item.detail}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

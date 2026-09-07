@@ -54,6 +54,30 @@ export type SectionPreset = {
   section?: Array<
     | ({
         _key: string;
+      } & RaceHeroSection)
+    | ({
+        _key: string;
+      } & DistanceTicketsSection)
+    | ({
+        _key: string;
+      } & RecordsBoardSection)
+    | ({
+        _key: string;
+      } & RaceScheduleSection)
+    | ({
+        _key: string;
+      } & CourseFeaturesSection)
+    | ({
+        _key: string;
+      } & LoopCardSection)
+    | ({
+        _key: string;
+      } & ElevationSection)
+    | ({
+        _key: string;
+      } & SponsorPatchesSection)
+    | ({
+        _key: string;
       } & HeroSection)
     | ({
         _key: string;
@@ -1247,6 +1271,79 @@ export type HeroSection = {
   size?: 'tall' | 'short';
 };
 
+export type SponsorPatchesSection = {
+  _type: 'sponsorPatchesSection';
+  eyebrow?: string;
+  headline?: string;
+};
+
+export type ElevationSection = {
+  _type: 'elevationSection';
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+  totalGain?: string;
+};
+
+export type LoopCardSection = {
+  _type: 'loopCardSection';
+  eyebrow?: string;
+  headline?: string;
+  loops?: Array<{
+    kind?: 'long' | 'short';
+    miles?: string;
+    inShortDistance?: boolean;
+    _type: 'loop';
+    _key: string;
+  }>;
+  legend?: string;
+};
+
+export type CourseFeaturesSection = {
+  _type: 'courseFeaturesSection';
+  eyebrow?: string;
+  headline?: string;
+  cta?: CtaBlock;
+};
+
+export type RaceScheduleSection = {
+  _type: 'raceScheduleSection';
+  eyebrow?: string;
+  headline?: string;
+};
+
+export type RecordsBoardSection = {
+  _type: 'recordsBoardSection';
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+};
+
+export type DistanceTicketsSection = {
+  _type: 'distanceTicketsSection';
+  eyebrow?: string;
+  headline?: string;
+  note?: string;
+};
+
+export type RaceHeroSection = {
+  _type: 'raceHeroSection';
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  showCountdown?: boolean;
+  primaryCta?: CtaBlock;
+  secondaryCta?: CtaBlock;
+};
+
 export type FormQuestion = {
   _type: 'formQuestion';
   label?: string;
@@ -1341,6 +1438,30 @@ export type Page = {
   title?: string;
   slug?: Slug;
   pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & RaceHeroSection)
+    | ({
+        _key: string;
+      } & DistanceTicketsSection)
+    | ({
+        _key: string;
+      } & RecordsBoardSection)
+    | ({
+        _key: string;
+      } & RaceScheduleSection)
+    | ({
+        _key: string;
+      } & CourseFeaturesSection)
+    | ({
+        _key: string;
+      } & LoopCardSection)
+    | ({
+        _key: string;
+      } & ElevationSection)
+    | ({
+        _key: string;
+      } & SponsorPatchesSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -1737,6 +1858,30 @@ export type ProcessPage = {
   pageBuilder?: Array<
     | ({
         _key: string;
+      } & RaceHeroSection)
+    | ({
+        _key: string;
+      } & DistanceTicketsSection)
+    | ({
+        _key: string;
+      } & RecordsBoardSection)
+    | ({
+        _key: string;
+      } & RaceScheduleSection)
+    | ({
+        _key: string;
+      } & CourseFeaturesSection)
+    | ({
+        _key: string;
+      } & LoopCardSection)
+    | ({
+        _key: string;
+      } & ElevationSection)
+    | ({
+        _key: string;
+      } & SponsorPatchesSection)
+    | ({
+        _key: string;
       } & HeroSection)
     | ({
         _key: string;
@@ -1794,6 +1939,30 @@ export type ServicesPage = {
   _updatedAt: string;
   _rev: string;
   pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & RaceHeroSection)
+    | ({
+        _key: string;
+      } & DistanceTicketsSection)
+    | ({
+        _key: string;
+      } & RecordsBoardSection)
+    | ({
+        _key: string;
+      } & RaceScheduleSection)
+    | ({
+        _key: string;
+      } & CourseFeaturesSection)
+    | ({
+        _key: string;
+      } & LoopCardSection)
+    | ({
+        _key: string;
+      } & ElevationSection)
+    | ({
+        _key: string;
+      } & SponsorPatchesSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -1893,6 +2062,30 @@ export type AboutPage = {
   _updatedAt: string;
   _rev: string;
   pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & RaceHeroSection)
+    | ({
+        _key: string;
+      } & DistanceTicketsSection)
+    | ({
+        _key: string;
+      } & RecordsBoardSection)
+    | ({
+        _key: string;
+      } & RaceScheduleSection)
+    | ({
+        _key: string;
+      } & CourseFeaturesSection)
+    | ({
+        _key: string;
+      } & LoopCardSection)
+    | ({
+        _key: string;
+      } & ElevationSection)
+    | ({
+        _key: string;
+      } & SponsorPatchesSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -2051,6 +2244,30 @@ export type HomePage = {
   _updatedAt: string;
   _rev: string;
   pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & RaceHeroSection)
+    | ({
+        _key: string;
+      } & DistanceTicketsSection)
+    | ({
+        _key: string;
+      } & RecordsBoardSection)
+    | ({
+        _key: string;
+      } & RaceScheduleSection)
+    | ({
+        _key: string;
+      } & CourseFeaturesSection)
+    | ({
+        _key: string;
+      } & LoopCardSection)
+    | ({
+        _key: string;
+      } & ElevationSection)
+    | ({
+        _key: string;
+      } & SponsorPatchesSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -2399,6 +2616,14 @@ export type AllSanitySchemaTypes =
   | ImageTextSection
   | RichTextSection
   | HeroSection
+  | SponsorPatchesSection
+  | ElevationSection
+  | LoopCardSection
+  | CourseFeaturesSection
+  | RaceScheduleSection
+  | RecordsBoardSection
+  | DistanceTicketsSection
+  | RaceHeroSection
   | FormQuestion
   | PrivacyPage
   | JournalEntryReference

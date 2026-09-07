@@ -1,0 +1,64 @@
+---
+// Foundation, edit with care
+//
+// What the course is actually like. Deliberately plain: this is prose, and
+// numbering it is as much treatment as it needs.
+//
+// CONTENT block: receives a surface from the cadence in sectionCadence.ts.
+
+import SectionHeading from '@/components/SectionHeading.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import Provisional from '@/components/race/Provisional.astro';
+import type { ProjectedCourseFeaturesSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  cta?: ProjectedCourseFeaturesSection['cta'];
+  features?: ProjectedCourseFeaturesSection['features'];
+  surface?: string;
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = 'The course',
+  cta,
+  features = [],
+  surface = 'background',
+  headingId = 'course-features-heading',
+} = Astro.props as Props;
+
+const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
+---
+
+{
+  features.length > 0 && (
+    <section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+      <div class="mx-auto w-full max-w-content px-6">
+        <SectionHeading {eyebrow} {headline} {headingId} />
+
+        <div class="mt-10 grid gap-px sm:grid-cols-2">
+          {features.map((f, i) => (
+            <article class="border-t border-border py-6 sm:pr-8">
+              <p class="tabular text-heading-accent text-sm">{String(i + 1).padStart(2, '0')}</p>
+              <h3 class="display mt-2 text-h4">{f.title}</h3>
+              {f.body && <p class="mt-3 max-w-[46ch] text-muted-foreground">{f.body}</p>}
+              <Provisional
+                confirmed={f.confirmed}
+                what="Not yet verified against the course."
+                class="mt-3"
+              />
+            </article>
+          ))}
+        </div>
+
+        {cta && (
+          <div class="mt-10">
+            <CtaLink {cta} class="btn-plate btn-plate--cream" />
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}

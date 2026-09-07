@@ -141,6 +141,10 @@ const NON_STEGA_FIELDS = new Set([
   // and this template adds no surface or accent COLOUR enum at all (see
   // src/lib/surfaces.ts for why).
   'headingAccent',
+  // Stone Steps. `kind` drives which loop row renders long vs short on the
+  // punch card, and it is compared as an exact string. Encoded, it matches
+  // neither branch and every loop renders as short, IN THE PREVIEW ONLY.
+  'kind',
 ]);
 
 export function getPreviewClient(draftMode: boolean): SanityClient {

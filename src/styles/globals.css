@@ -1091,3 +1091,431 @@ body::before {
     font-family: var(--font-body);
   }
 }
+
+/* =========================================================================
+   STONE STEPS: the race objects
+   =========================================================================
+   The design mockup's governing idea was that a decorated element should stop
+   being a styled div and become an OBJECT FROM THE RACE'S OWN WORLD, and that
+   the mapping should carry information the plain version could not. The test
+   before adding any of this: does it map onto a real artefact from the sport,
+   and does the mapping tell the reader something? If it only looks nice, it is
+   costume.
+
+   Four objects passed that test and live here. Everything else on the site is
+   deliberately plain, and the records tables most of all: forty rows of times
+   have to stay scannable, and decorating the one page whose entire job is data
+   would wreck it.
+
+   THEME. The mockup was dark only, and painted its holes and notches with a
+   literal bark hex. That only reads as a hole over the page ground, so those
+   are painted with --ground here, which follows the theme. A ticket notch has
+   to look punched through the card on paper as well as on bark.
+   ========================================================================= */
+
+:root {
+  /* The page ground, for objects that punch holes through themselves. Kept
+     separate from --background so a section on a different surface can
+     re-point it and the holes still match what is actually behind them. */
+  --ground: var(--background);
+  /* The hard shadow offset down and right. The logo's signature move, and the
+     cheapest way to tie an element to the mark. */
+  --lift-sm: 2px 3px 0 rgb(0 0 0 / 0.5);
+  --lift: 3px 4px 0 rgb(0 0 0 / 0.55);
+  --lift-lg: 5px 7px 0 rgb(0 0 0 / 0.5);
+  /* The plate: a cream sign face with dark lettering, quoted from the logo's
+     "Trail Run" badge. Fixed in both themes, because a plate is an object
+     sitting ON the page, not part of it. */
+  --plate-face: #ffebbb;
+  --plate-ink: #1a1712;
+  --plate-edge: #000000;
+  --plate-radius: 12px;
+}
+
+.dark {
+  /* Lighter shadows on bark: a 55%-black shadow on a near-black ground is
+     invisible, and the object loses its lift entirely. */
+  --lift-sm: 2px 3px 0 rgb(0 0 0 / 0.7);
+  --lift: 3px 4px 0 rgb(0 0 0 / 0.75);
+  --lift-lg: 5px 7px 0 rgb(0 0 0 / 0.7);
+}
+
+/* ---------- Display type ------------------------------------------------ */
+/* Staatliches is a SINGLE WEIGHT (400) caps face. Never set a heavier weight
+   on it: the browser synthesises a faux bold that smears the letterforms.
+   Weight contrast comes from size and colour instead. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.84;
+  letter-spacing: -0.015em;
+  text-shadow: var(--lift-sm);
+}
+
+/* The lift is tuned for dark grounds. On a cream plate the same heavy shadow
+   reads as a misregistered print, so anything display-sized on a light surface
+   takes this instead. */
+.display.on-light,
+.ticket .display,
+.punch .display,
+.clip__sheet .display {
+  text-shadow: 1px 2px 0 rgb(0 0 0 / 0.13);
+}
+
+/* Preserve the logo's lowercase k inside uppercased display type.
+   MUST STAY GLOBAL AND MUST STAY AFTER .display. Astro wraps component-scoped
+   selectors in :where(), which has zero specificity, so a scoped
+   text-transform:none ties with .display and loses on source order. This
+   silently swallowed the lowercase k twice in the mockup. */
+.lc {
+  text-transform: none;
+}
+
+/* Sub-degree per-letter rotation. Reads as hand-cut without a distressed
+   typeface, so legibility and loading cost are unaffected. */
+.hand > span {
+  display: inline-block;
+}
+.hand > span:nth-child(3n) {
+  transform: rotate(-1.1deg) translateY(1px);
+}
+.hand > span:nth-child(3n + 1) {
+  transform: rotate(0.8deg);
+}
+.hand > span:nth-child(4n) {
+  transform: rotate(-0.5deg) translateY(-1px);
+}
+.hand > span:nth-child(5n) {
+  transform: rotate(0.45deg) translateY(1px);
+}
+
+/* Every time value on the site. Tabular figures so a column of results lines
+   up: a time is a measurement, and measurements align. */
+.tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- The trail blaze --------------------------------------------- */
+/* A section label leads with the painted rectangle that marks a route on a
+   tree. Off-square corners and a three-degree rotation, because a blaze is
+   painted by hand. */
+.blaze {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.blaze::before {
+  content: '';
+  flex: none;
+  width: 9px;
+  height: 22px;
+  background: var(--heading-accent);
+  border-radius: 2px 3px 2px 3px;
+  transform: rotate(-3deg);
+  box-shadow: var(--lift-sm);
+}
+
+/* ---------- Sign-plate buttons ------------------------------------------ */
+/* Every CTA is a sibling of the logo's badge: rounded rectangle, solid fill,
+   black outline, offset shadow. The press physics matter: hover lifts the
+   plate up and left and grows the shadow, active drives it down and right and
+   zeroes it, so the button behaves like a physical thing. */
+.btn-plate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.9rem 1.7rem;
+  border: 2px solid var(--plate-edge);
+  border-radius: var(--plate-radius);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: var(--lift);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+.btn-plate:hover {
+  background: var(--primary-accent);
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 6px 0 rgb(0 0 0 / 0.55);
+}
+.btn-plate:active {
+  transform: translate(2px, 3px);
+  box-shadow: 0 0 0 rgb(0 0 0 / 0.55);
+}
+/* A direct quote of the "Trail Run" badge: cream face, dark lettering. */
+.btn-plate--cream {
+  background: var(--plate-face);
+  color: var(--plate-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-plate,
+  .btn-plate:hover,
+  .btn-plate:active {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* ---------- The ticket -------------------------------------------------- */
+/* Entries are TICKETS, not cards: a torn perforation, punched notches, a
+   tear-off stub carrying the includes list and the CTA, and a corner flag on
+   the featured one. The metaphor came from the live WordPress site, which
+   tilts its registration cards; this commits to it instead of implying it. */
+.ticket {
+  position: relative;
+  background: var(--plate-face);
+  color: var(--plate-ink);
+  border: 2px solid var(--plate-edge);
+  border-radius: 16px;
+  box-shadow: var(--lift-lg);
+  transform: rotate(-1.4deg);
+  transition:
+    transform 0.24s ease,
+    box-shadow 0.24s ease;
+}
+.ticket:nth-of-type(even) {
+  transform: rotate(1.6deg);
+}
+.ticket:hover,
+.ticket:focus-within {
+  transform: rotate(0) translateY(-6px);
+  box-shadow: 8px 12px 0 rgb(0 0 0 / 0.5);
+}
+
+/* The perforation, and the two notches punched through it. The notches are
+   filled with --ground, the page behind the ticket, which is what makes them
+   read as holes rather than as decoration. */
+.ticket__stub {
+  position: relative;
+  border-top: 2px dashed rgb(0 0 0 / 0.4);
+}
+.ticket__stub::before,
+.ticket__stub::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--ground);
+}
+.ticket__stub::before {
+  left: 0;
+  transform: translate(-50%, -50%);
+}
+.ticket__stub::after {
+  right: 0;
+  transform: translate(50%, -50%);
+}
+
+/* The corner flag needs overflow:hidden to clip its diagonal, but the ticket
+   needs overflow:visible for the notches above. The two requirements conflict,
+   so the flag gets its own clipping box. */
+.ticket__flag {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 132px;
+  height: 132px;
+  overflow: hidden;
+  border-top-right-radius: 16px;
+  pointer-events: none;
+}
+.ticket__flag > span {
+  position: absolute;
+  top: 30px;
+  right: -36px;
+  width: 160px;
+  transform: rotate(45deg);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.35rem 0;
+  border-block: 2px solid var(--plate-edge);
+}
+
+/* Tilted full-width cards overflow horizontally on a phone. */
+@media (max-width: 1000px) {
+  .ticket,
+  .ticket:nth-of-type(even) {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticket,
+  .ticket:hover,
+  .ticket:focus-within {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ---------- The lap punch card ------------------------------------------ */
+/* The seven loops as punch positions. The holes are LOAD-BEARING, not
+   decorative: punched holes are loops the 27K covers, unpunched rings are 50K
+   only, so the graphic encodes the difference between the two distances. A
+   legend states it in words for anyone who does not read the metaphor. */
+.punch {
+  position: relative;
+  background: var(--plate-face);
+  color: var(--plate-ink);
+  border: 2px solid var(--plate-edge);
+  border-radius: 14px;
+  box-shadow: var(--lift-lg);
+  transform: rotate(-0.8deg);
+}
+.punch__hole {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px dashed rgb(0 0 0 / 0.4);
+  display: block;
+}
+/* A punched hole shows the page behind the card, but a real hole in card stock
+   also sits in shadow. On bark the page alone carries it; on paper the page and
+   the cream card are only a few percent apart and the hole read as a ring, so
+   the ground is darkened toward black and the inset shadow deepened. Both
+   themes now read as punched rather than drawn. */
+.punch__hole.is-punched {
+  border: 2px solid var(--plate-edge);
+  background: color-mix(in srgb, var(--ground) 55%, #000);
+  box-shadow:
+    inset 0 2px 5px rgb(0 0 0 / 0.95),
+    inset 0 0 0 1px rgb(0 0 0 / 0.35);
+}
+@media (max-width: 900px) {
+  .punch {
+    transform: none;
+  }
+}
+
+/* ---------- The clipboard ----------------------------------------------- */
+/* The race-day schedule sits on a clipboard, which is apt precisely because
+   several of its times are still unconfirmed: a clipboard reads as "not final
+   yet". Board, metal clamp, paper sheet, no images. */
+.clip {
+  position: relative;
+  background: var(--muted);
+  border: 2px solid var(--plate-edge);
+  border-radius: 12px;
+  box-shadow: var(--lift-lg);
+}
+.clip__clamp {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 118px;
+  height: 30px;
+  background: linear-gradient(#d6ccb8, #8d8574);
+  border: 2px solid var(--plate-edge);
+  border-radius: 7px;
+  box-shadow: var(--lift-sm);
+}
+.clip__clamp::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 9px;
+  transform: translateX(-50%);
+  width: 58px;
+  height: 8px;
+  background: rgb(0 0 0 / 0.4);
+  border-radius: 4px;
+}
+.clip__sheet {
+  background: var(--plate-face);
+  color: var(--plate-ink);
+  border-radius: 6px;
+}
+
+/* ---------- Sponsor patches --------------------------------------------- */
+/* Embroidered patches: a stitched dashed border inside a solid outline, each
+   sewn on at its own angle. This replaced the greyscale-logos-at-70%-opacity
+   strip, which is the most common generated-design default in existence.
+   Logos show in full colour, because patches are colourful, and because a
+   sponsor who paid deserves their actual mark. */
+.patch {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: var(--plate-face);
+  border: 2px solid var(--plate-edge);
+  border-radius: 14px;
+  box-shadow: var(--lift);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.patch::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 2px dashed rgb(0 0 0 / 0.4);
+  border-radius: 9px;
+  pointer-events: none;
+}
+.patch:nth-child(4n + 1) {
+  transform: rotate(-2deg);
+}
+.patch:nth-child(4n + 2) {
+  transform: rotate(1.4deg);
+}
+.patch:nth-child(4n + 3) {
+  transform: rotate(-1deg);
+}
+.patch:nth-child(4n) {
+  transform: rotate(2.2deg);
+}
+.patch:hover {
+  transform: rotate(0) translateY(-4px);
+  box-shadow: 6px 9px 0 rgb(0 0 0 / 0.5);
+}
+@media (prefers-reduced-motion: reduce) {
+  .patch,
+  .patch:hover {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ---------- Topographic backdrop ---------------------------------------- */
+/* Build-time SVG contours from a seeded PRNG. Deterministic, so a given seed
+   always renders the same ridge: zero runtime cost, zero image weight. */
+.topo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  z-index: 0;
+}
+.topo path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--foreground) 12%, transparent);
+  stroke-width: 1;
+}
+.topo path:nth-child(3n) {
+  stroke: color-mix(in srgb, var(--heading-accent) 30%, transparent);
+}
+
+/* ---------- The provisional marker -------------------------------------- */
+/* Rendered wherever a document's confirmed flag is false. See
+   src/sanity/schemaTypes/_confirmedField.ts for why this is data-driven. */
+.provisional {
+  border: 1px dashed color-mix(in srgb, var(--primary) 55%, transparent);
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}

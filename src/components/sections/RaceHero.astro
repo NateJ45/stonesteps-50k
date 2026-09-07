@@ -1,0 +1,114 @@
+---
+// Foundation, edit with care
+//
+// The hero. Topographic backdrop, display wordmark, and the race clock.
+//
+// SELF_CONTAINED: paints its own ground, never receives a surface prop.
+//
+// The headline is split per character into spans so `.hand` can give each
+// letter a fraction of a degree of rotation. That reads as hand-cut lettering
+// without a distressed typeface, so legibility and font weight are unaffected.
+// The real, unsplit text is exposed to screen readers separately, because a
+// heading chopped into 30 spans is announced letter by letter by some readers.
+
+import SanityImage from '@/components/SanityImage.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import Topo from '@/components/race/Topo.astro';
+import Countdown from '@/components/race/Countdown.astro';
+import type { ProjectedRaceHeroSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  image?: ProjectedRaceHeroSection['image'];
+  showCountdown?: boolean;
+  primaryCta?: ProjectedRaceHeroSection['primaryCta'];
+  secondaryCta?: ProjectedRaceHeroSection['secondaryCta'];
+  race?: ProjectedRaceHeroSection['race'];
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = '',
+  subhead,
+  image,
+  showCountdown = true,
+  primaryCta,
+  secondaryCta,
+  race,
+  headingId = 'race-hero-heading',
+} = Astro.props as Props;
+
+// Split into words, then characters, so a word never breaks mid-rotation
+// across a line end.
+const words = headline.split(/\s+/).filter(Boolean);
+---
+
+<section class="relative overflow-hidden bg-background py-section-lg" aria-labelledby={headingId}>
+  <Topo seed={11} lines={16} class="opacity-70" />
+
+  <div class="relative z-10 mx-auto w-full max-w-content px-6">
+    <div class="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+      <div>
+        {
+          eyebrow && (
+            <p class="blaze text-heading-accent mb-5 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase">
+              {eyebrow}
+            </p>
+          )
+        }
+
+        <h1 id={headingId} class="display text-[clamp(3rem,10vw,7rem)]">
+          <span class="sr-only">{headline}</span>
+          <span class="hand" aria-hidden="true">
+            {
+              words.map((word, wi) => (
+                <>
+                  <span class="inline-block whitespace-nowrap">
+                    {word.split('').map((ch) => (
+                      <span>{ch}</span>
+                    ))}
+                  </span>
+                  {wi < words.length - 1 && ' '}
+                </>
+              ))
+            }
+          </span>
+        </h1>
+
+        {subhead && <p class="mt-6 max-w-[46ch] text-lg text-muted-foreground">{subhead}</p>}
+
+        <div class="mt-8 flex flex-wrap items-center gap-4">
+          {primaryCta && <CtaLink cta={primaryCta} class="btn-plate" />}
+          {secondaryCta && <CtaLink cta={secondaryCta} class="btn-plate btn-plate--cream" />}
+        </div>
+      </div>
+
+      <div>
+        {
+          image?.asset && (
+            <figure class="relative overflow-hidden rounded-xl border-2 border-black shadow-[var(--lift-lg)]">
+              <SanityImage
+                source={image}
+                width={1200}
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                alt={image.alt ?? ''}
+                loading="eager"
+                class="w-full"
+              />
+            </figure>
+          )
+        }
+        {
+          showCountdown && race?.raceDate && (
+            <div class="border-heading-accent mt-6 border-t-2 pt-5">
+              <Countdown target={race.raceDate} />
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</section>

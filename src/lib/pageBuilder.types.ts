@@ -387,6 +387,153 @@ export interface ProjectedDynamicListSection {
 // Discriminated union
 // ---------------------------------------------------------------------------
 
+/* ---------- Stone Steps race blocks --------------------------------------
+ * Most of these carry a collection the GROQ projection filled in, not fields
+ * an editor typed. See the race clauses in sectionsProjection().
+ */
+
+export interface ProjectedRaceDistance {
+  _id: string;
+  name?: string;
+  slug?: string;
+  kicker?: string;
+  loopStructure?: string;
+  blurb?: string;
+  includes?: string[];
+  startTime?: string;
+  trekkerNote?: string;
+  entryCap?: number;
+  runSignUpEventId?: number;
+  featured?: boolean;
+  confirmed?: boolean;
+}
+
+export interface ProjectedFeeTier {
+  _key?: string;
+  label?: string;
+  amount?: number;
+  processingFee?: number;
+  endsOn?: string;
+}
+
+/** One row out of the results archive, before any derivation. */
+export interface ProjectedRaceResult {
+  year?: number;
+  timeSeconds?: number;
+  gender?: string;
+  age?: number;
+  place?: number;
+  timeSource?: 'chip' | 'gun';
+  distance?: string;
+  athlete?: { name?: string | null } | null;
+}
+
+/** One transcribed record that predates the results archive. */
+export interface ProjectedRecordEntry {
+  bracket?: string;
+  gender?: string;
+  year?: number;
+  timeSeconds?: number;
+  sourceNote?: string;
+  distance?: string;
+  athlete?: { name?: string | null } | null;
+}
+
+export interface ProjectedRaceHeroSection {
+  _type: 'raceHeroSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  image?: ProjectedImage;
+  showCountdown?: boolean;
+  primaryCta?: ProjectedCtaBlock;
+  secondaryCta?: ProjectedCtaBlock;
+  race?: {
+    raceDate?: string;
+    registerUrl?: string;
+    resultsUrl?: string;
+    confirmed?: boolean;
+  } | null;
+}
+
+export interface ProjectedDistanceTicketsSection {
+  _type: 'distanceTicketsSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  note?: string;
+  distances?: ProjectedRaceDistance[];
+  race?: { registerUrl?: string; feeTiers?: ProjectedFeeTier[] } | null;
+}
+
+export interface ProjectedRecordsBoardSection {
+  _type: 'recordsBoardSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+  distances?: { _id: string; name?: string; slug?: string }[];
+  results?: ProjectedRaceResult[];
+  historical?: ProjectedRecordEntry[];
+  race?: { resultsUrl?: string } | null;
+}
+
+export interface ProjectedRaceScheduleSection {
+  _type: 'raceScheduleSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  items?: {
+    _id: string;
+    label?: string;
+    time?: string;
+    detail?: string;
+    confirmed?: boolean;
+  }[];
+}
+
+export interface ProjectedCourseFeaturesSection {
+  _type: 'courseFeaturesSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  cta?: ProjectedCtaBlock;
+  features?: { _id: string; title?: string; body?: string; confirmed?: boolean }[];
+}
+
+export interface ProjectedLoopCardSection {
+  _type: 'loopCardSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  legend?: string;
+  loops?: {
+    _key?: string;
+    kind?: 'long' | 'short';
+    miles?: string;
+    inShortDistance?: boolean;
+  }[];
+}
+
+export interface ProjectedElevationSection {
+  _type: 'elevationSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+  totalGain?: string;
+  race?: { gpxUrl?: string } | null;
+}
+
+export interface ProjectedSponsorPatchesSection {
+  _type: 'sponsorPatchesSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  sponsors?: { _id: string; name?: string; url?: string; logo?: ProjectedImage }[];
+}
+
 export type PageBuilderBlock =
   | ProjectedHeroSection
   | ProjectedRichTextSection
@@ -411,4 +558,13 @@ export type PageBuilderBlock =
   | ProjectedTeamSection
   | ProjectedEmbedSection
   // Church-reverse-port
-  | ProjectedDynamicListSection;
+  | ProjectedDynamicListSection
+  // Stone Steps race blocks
+  | ProjectedRaceHeroSection
+  | ProjectedDistanceTicketsSection
+  | ProjectedRecordsBoardSection
+  | ProjectedRaceScheduleSection
+  | ProjectedCourseFeaturesSection
+  | ProjectedLoopCardSection
+  | ProjectedElevationSection
+  | ProjectedSponsorPatchesSection;

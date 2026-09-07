@@ -1,0 +1,182 @@
+---
+// Safe to edit by hand
+//
+// The countdown, rendered as the finish-line race clock.
+//
+// WHY IT LOOKS LIKE THIS. The hero photograph on the same screen shows the real
+// clock above the aid station reading in red LED. Rendering the countdown as
+// that object means the interface rhymes with the photograph beside it instead
+// of being a generic four-number widget. It costs one component and no extra
+// payload: the faint unlit "88" behind each pair is the ghost a real seven
+// segment display shows behind its active segments.
+//
+// CHANGED FROM THE MOCKUP: the target is a prop rather than a direct import of
+// the race data, so the component is reusable and the value comes from Sanity.
+//
+// Server-rendered first so the block never renders empty or shifts layout,
+// then a small inline script takes over. If the script never runs, the visitor
+// still sees a correct countdown as of build time rather than four zeros.
+
+interface Props {
+  /** ISO datetime of the start. */
+  target?: string | null;
+  label?: string;
+  class?: string;
+}
+
+const { target, label = 'Gun time in', class: className = '' } = Astro.props;
+
+const targetDate = target ? new Date(target) : null;
+const valid = targetDate && !Number.isNaN(targetDate.getTime());
+const ms = valid ? Math.max(0, targetDate.getTime() - Date.now()) : 0;
+
+const totalSeconds = Math.floor(ms / 1000);
+const units = [
+  { key: 'days', value: Math.floor(totalSeconds / 86400), lbl: 'days' },
+  { key: 'hours', value: Math.floor(totalSeconds / 3600) % 24, lbl: 'hrs' },
+  { key: 'minutes', value: Math.floor(totalSeconds / 60) % 60, lbl: 'min' },
+  { key: 'seconds', value: totalSeconds % 60, lbl: 'sec' },
+].map((u) => {
+  const text = String(u.value).padStart(2, '0');
+  return { ...u, text, ghost: '8'.repeat(text.length) };
+});
+
+const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set';
+---
+
+{
+  valid && (
+    <div class={className}>
+      <p class="mb-2 font-mono text-[0.68rem] tracking-[0.22em] text-muted-foreground uppercase">
+        {label}
+      </p>
+      <div
+        class="clock inline-block rounded-[10px] border-2 border-black px-[1.15rem] pt-[0.9rem] pb-3"
+        data-target={target}
+        role="timer"
+        aria-label={srText}
+      >
+        <div class="flex items-end gap-2">
+          {units.map((u, i) => (
+            <>
+              {i > 0 && (
+                <span class="clock__sep pb-4 font-mono text-2xl leading-none" aria-hidden="true">
+                  :
+                </span>
+              )}
+              <span class="clock__group grid justify-items-center">
+                <span class="clock__ghost tabular" aria-hidden="true">
+                  {u.ghost}
+                </span>
+                <span class="clock__val tabular" data-unit={u.key}>
+                  {u.text}
+                </span>
+                <span class="clock__lbl font-mono" aria-hidden="true">
+                  {u.lbl}
+                </span>
+              </span>
+            </>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+<style>
+  /* The housing. Deliberately near-black in BOTH themes: this is a physical
+     object sitting on the page, and a race clock is not made of paper. */
+  .clock {
+    --led: #ff3b1f;
+    background: #0d0b09;
+    box-shadow:
+      var(--lift),
+      inset 0 2px 0 rgb(255 235 187 / 0.07);
+  }
+
+  /* Digits stack over their ghost via grid areas, so the label never drifts
+     when the digit count changes. */
+  .clock__group {
+    grid-template-areas: 'digits' 'label';
+  }
+  .clock__ghost,
+  .clock__val {
+    grid-area: digits;
+    font-weight: 700;
+    font-size: clamp(1.9rem, 4.4vw, 2.9rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--led);
+  }
+  .clock__ghost {
+    opacity: 0.13;
+  }
+  .clock__val {
+    text-shadow:
+      0 0 6px rgb(255 59 31 / 0.5),
+      0 0 18px rgb(255 59 31 / 0.22);
+  }
+  .clock__lbl {
+    grid-area: label;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgb(255 235 187 / 0.5);
+    margin-top: 0.35rem;
+  }
+  .clock__sep {
+    color: var(--led);
+    opacity: 0.7;
+  }
+
+  /* The slow blink a real display has. Off entirely for anyone who asked for
+     less motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .clock__val[data-unit='seconds'] {
+      animation: led 1s steps(2, end) infinite;
+    }
+  }
+  @keyframes led {
+    0%,
+    60% {
+      opacity: 1;
+    }
+    61%,
+    100% {
+      opacity: 0.88;
+    }
+  }
+</style>
+
+<script>
+  // Progressive enhancement only. The markup above is already correct as of
+  // build time, so a failure here leaves a stale countdown, never a broken one.
+  document.querySelectorAll<HTMLElement>('.clock[data-target]').forEach((clock) => {
+    const target = new Date(clock.dataset.target ?? '');
+    if (Number.isNaN(target.getTime())) return;
+
+    const cells: Record<string, HTMLElement | null> = {
+      days: clock.querySelector('[data-unit="days"]'),
+      hours: clock.querySelector('[data-unit="hours"]'),
+      minutes: clock.querySelector('[data-unit="minutes"]'),
+      seconds: clock.querySelector('[data-unit="seconds"]'),
+    };
+
+    const tick = () => {
+      const total = Math.max(0, Math.floor((target.getTime() - Date.now()) / 1000));
+      const parts = {
+        days: Math.floor(total / 86400),
+        hours: Math.floor(total / 3600) % 24,
+        minutes: Math.floor(total / 60) % 60,
+        seconds: total % 60,
+      };
+      for (const [key, el] of Object.entries(cells)) {
+        if (el) el.textContent = String(parts[key as keyof typeof parts]).padStart(2, '0');
+      }
+      clock.setAttribute('aria-label', `${total} seconds remaining`);
+    };
+
+    tick();
+    setInterval(tick, 1000);
+  });
+</script>

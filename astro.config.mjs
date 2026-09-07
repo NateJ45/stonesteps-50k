@@ -104,7 +104,22 @@ export default defineConfig({
   // read at build time above. The Cloudflare adapter turns these into real
   // 301/302s. A repo that also needs hand-written launch redirects puts them
   // BEFORE the spread, so an editor entry can correct one without a code change.
-  redirects: { ...cmsRedirects },
+  redirects: {
+    // LAUNCH REDIRECTS, declared BEFORE the CMS spread so an editor can still
+    // override one from the Studio without a code change.
+    //
+    // /all-time-records is the single highest-risk item in this migration. It
+    // is one of only three real URLs on the WordPress site it replaces, and it
+    // has twenty years of inbound links from running forums pointing at it.
+    // Losing it loses the audience that already knows this race exists.
+    //
+    // It lives here rather than only in Sanity because a code redirect survives
+    // an empty dataset: a restore, a bad deploy or a dataset swap must not
+    // silently drop it. normalizeRedirectPath strips the trailing slash, so
+    // this one entry covers both /all-time-records and /all-time-records/.
+    '/all-time-records': { status: 301, destination: '/records' },
+    ...cmsRedirects,
+  },
   integrations: [
     mdx(),
     // Embedded Sanity Studio at /studio (added 2026-08-28). This is the ONE

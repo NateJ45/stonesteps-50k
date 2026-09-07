@@ -109,6 +109,73 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       ...,
       logos[]${IMAGE_PROJECTION}
     },
+    // ---- Stone Steps race blocks ----------------------------------------
+    // Most of these are SELF-FILLING: the editor places the section and names
+    // it, and the contents come from the collections. That is deliberate. A
+    // records table that can be typed by hand is a records table that will
+    // eventually disagree with the results it claims to summarise, which is
+    // exactly what happened on the site this one replaces.
+    _type == "raceHeroSection" => {
+      ...,
+      image${IMAGE_PROJECTION},
+      primaryCta${CTA_PROJECTION},
+      secondaryCta${CTA_PROJECTION},
+      "race": *[_type == "race"][0]{ raceDate, registerUrl, resultsUrl, confirmed }
+    },
+    _type == "distanceTicketsSection" => {
+      ...,
+      "distances": *[_type == "distance"] | order(orderRank asc){
+        _id, name, "slug": slug.current, kicker, loopStructure, blurb, includes,
+        startTime, trekkerNote, entryCap, runSignUpEventId, featured, confirmed
+      },
+      "race": *[_type == "race"][0]{ registerUrl, feeTiers }
+    },
+    // The records board hands the component the RAW result set per distance and
+    // gender, plus the transcribed historical rows, and the derivation happens
+    // in src/lib/age-brackets.ts. Deriving in GROQ would need one ordered query
+    // per bracket per gender per distance, which is twenty-four round trips to
+    // build one page, and would put the bracket boundaries somewhere they
+    // cannot be unit tested.
+    _type == "recordsBoardSection" => {
+      ...,
+      "distances": *[_type == "distance"] | order(orderRank asc){
+        _id, name, "slug": slug.current
+      },
+      "results": *[_type == "raceResult"]{
+        year, timeSeconds, gender, age, place, timeSource,
+        "distance": distance->slug.current,
+        "athlete": { "name": athlete->name }
+      },
+      "historical": *[_type == "recordEntry"]{
+        bracket, gender, year, timeSeconds, sourceNote,
+        "distance": distance->slug.current,
+        "athlete": { "name": athlete->name }
+      },
+      "race": *[_type == "race"][0]{ resultsUrl }
+    },
+    _type == "raceScheduleSection" => {
+      ...,
+      "items": *[_type == "scheduleItem"] | order(orderRank asc){
+        _id, label, time, detail, confirmed
+      }
+    },
+    _type == "courseFeaturesSection" => {
+      ...,
+      cta${CTA_PROJECTION},
+      "features": *[_type == "courseFeature"] | order(orderRank asc){
+        _id, title, body, confirmed
+      }
+    },
+    _type == "elevationSection" => {
+      ...,
+      "race": *[_type == "race"][0]{ gpxUrl }
+    },
+    _type == "sponsorPatchesSection" => {
+      ...,
+      "sponsors": *[_type == "sponsor"] | order(orderRank asc){
+        _id, name, url, logo${IMAGE_PROJECTION}
+      }
+    },
     _type == "teamSection" => {
       ...,
       members[]{
@@ -232,6 +299,29 @@ export const SITE_SETTINGS_PROJECTION = `{
       showBudgetCalculator
     }
   }`;
+
+/**
+ * The race singleton: date, venue, links, fee tiers.
+ *
+ * Used for the SportsEvent JSON-LD as well as page content. Everything it
+ * returns is either verified against the race's RunSignUp listing or carries
+ * the `confirmed` flag, and unconfirmed values are kept OUT of the structured
+ * data. Telling Google a start time the race has not published would be worse
+ * than telling it nothing.
+ */
+export async function getRace() {
+  return sanityFetch(
+    `*[_type == "race"][0]{
+      name, tagline, editionNumber, raceDate, venue, startArea,
+      streetAddress, city, region, postalCode, geo,
+      registerUrl, resultsUrl, facebookUrl, gpxUrl,
+      feeTiers[]{ label, amount, processingFee, endsOn },
+      directorName, directorNote, parksDonation, confirmed
+    }`,
+    {},
+    null,
+  );
+}
 
 export async function getSiteSettings() {
   if (_siteSettingsPromise) return _siteSettingsPromise;

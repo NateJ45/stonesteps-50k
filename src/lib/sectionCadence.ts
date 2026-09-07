@@ -38,6 +38,14 @@ export const SELF_CONTAINED_TYPES = new Set([
   'embedSection',
   // Church-reverse-port: dynamic list section manages its own surface
   'dynamicListSection',
+  // Stone Steps. The hero, the tickets and the sponsor patches all paint their
+  // own ground, and the punch card and clipboard are cream OBJECTS that need a
+  // controlled surface behind them rather than whatever the cadence hands out.
+  'raceHeroSection',
+  'distanceTicketsSection',
+  'sponsorPatchesSection',
+  'loopCardSection',
+  'raceScheduleSection',
 ]);
 
 /** _type strings for blocks that receive alternating surface assignment. */
@@ -51,6 +59,11 @@ export const CONTENT_TYPES = new Set([
   'storySection',
   'serviceAreaSection',
   'guaranteeSection',
+  // Stone Steps. These three are ordinary content bands and take whichever
+  // surface the alternating cadence gives them.
+  'recordsBoardSection',
+  'courseFeaturesSection',
+  'elevationSection',
 ]);
 
 export interface SectionBlock {

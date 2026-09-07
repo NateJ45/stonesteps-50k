@@ -1,0 +1,327 @@
+---
+// Foundation, edit with care
+//
+// The all-time records board.
+//
+// EVERYTHING HERE IS DERIVED. The component receives the raw results archive
+// and the transcribed historical rows, and computes the course record, the top
+// ten and the age-bracket table itself, through src/lib/age-brackets.ts. There
+// is no field an editor can type a record into, on purpose: the site this
+// replaces stores its records as hand-copied duplicates of age rows, and those
+// copies have already drifted apart. See raceResult.ts for the full argument.
+//
+// DELIBERATELY PLAIN. The rest of the site turns elements into objects from the
+// race's world (tickets, punch cards, patches). This page does not, and that is
+// the decision, not an omission: its entire job is forty rows of times, and
+// decorating data is how you make data unreadable. The only visual weight is on
+// the outright record row.
+//
+// ACCESSIBILITY. The distance switcher is a real ARIA tablist with roving
+// tabindex, arrow keys that wrap, and Home/End. Every table carries a
+// screen-reader caption and uses `scope` on both column and row headers, so the
+// bracket name is announced with each cell rather than leaving a screen reader
+// to guess which row it is in.
+
+import SectionHeading from '@/components/SectionHeading.astro';
+import { bracketRecords, courseRecord, type RecordRow } from '@/lib/age-brackets';
+import { formatRaceTime } from '@/lib/race-time';
+import type { ProjectedRecordsBoardSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+  distances?: ProjectedRecordsBoardSection['distances'];
+  results?: ProjectedRecordsBoardSection['results'];
+  historical?: ProjectedRecordsBoardSection['historical'];
+  race?: ProjectedRecordsBoardSection['race'];
+  surface?: string;
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = 'All-time records',
+  intro,
+  distances = [],
+  results = [],
+  historical = [],
+  race,
+  surface = 'background',
+  headingId = 'records-heading',
+} = Astro.props as Props;
+
+const GENDERS = [
+  { key: 'M', label: 'Men' },
+  { key: 'F', label: 'Women' },
+] as const;
+
+/** Build every table for one distance, once, so the markup is a pure map. */
+function boardFor(slug: string) {
+  return GENDERS.map((g) => {
+    const set = results.filter((r) => r.distance === slug && r.gender === g.key);
+    const hist = historical.filter((h) => h.distance === slug && h.gender === g.key);
+
+    const brackets = bracketRecords(set, hist);
+    const course = courseRecord(brackets);
+
+    // The top ten is the results archive only. A transcribed record is a single
+    // best mark, not a ranked field, so mixing them would imply an ordering the
+    // historical rows cannot support.
+    const topTen = [...set]
+      .filter((r) => typeof r.timeSeconds === 'number' && r.timeSeconds > 0)
+      .sort((a, b) => (a.timeSeconds as number) - (b.timeSeconds as number))
+      .slice(0, 10);
+
+    return { ...g, brackets, course, topTen, archiveCount: set.length };
+  });
+}
+
+const boards = distances
+  .filter((d) => d.slug)
+  .map((d) => ({ ...d, slug: d.slug as string, genders: boardFor(d.slug as string) }));
+
+const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
+---
+
+<section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+  <div class="mx-auto w-full max-w-content px-6">
+    <SectionHeading {eyebrow} {headline} {headingId} />
+    {intro && <p class="mt-4 max-w-[52ch] text-muted-foreground">{intro}</p>}
+
+    {
+      boards.length > 0 && (
+        <>
+          <div class="tabs mt-10 flex gap-2" role="tablist" aria-label="Race distance">
+            {boards.map((b, i) => (
+              <button
+                type="button"
+                role="tab"
+                id={`rtab-${b.slug}`}
+                aria-controls={`rpanel-${b.slug}`}
+                aria-selected={i === 0 ? 'true' : 'false'}
+                tabindex={i === 0 ? 0 : -1}
+                data-tab={b.slug}
+                class="display lc rounded-md border-2 border-black px-5 py-2 text-lg transition-colors aria-selected:bg-primary aria-selected:text-primary-foreground"
+              >
+                {b.name}
+              </button>
+            ))}
+          </div>
+
+          {boards.map((b, i) => (
+            <div
+              class="panel mt-8"
+              id={`rpanel-${b.slug}`}
+              role="tabpanel"
+              aria-labelledby={`rtab-${b.slug}`}
+              hidden={i !== 0}
+            >
+              <div class="grid gap-10 lg:grid-cols-2">
+                {b.genders.map((g) => (
+                  <div>
+                    <h3 class="display mb-3 text-h4">
+                      {g.label} <span class="lc">{b.name}</span>
+                    </h3>
+
+                    {g.course?.timeSeconds && (
+                      <p class="mb-4 text-sm text-muted-foreground">
+                        Course record{' '}
+                        <span class="tabular font-bold text-foreground">
+                          {formatRaceTime(g.course.timeSeconds)}
+                        </span>
+                        {g.course.athlete && <> by {g.course.athlete}</>}
+                        {g.course.year && <>, {g.course.year}</>}.
+                      </p>
+                    )}
+
+                    <div class="overflow-x-auto">
+                      <table class="w-full border-collapse text-sm">
+                        <caption class="sr-only">
+                          {g.label} {b.name} records by age group
+                        </caption>
+                        <thead>
+                          <tr class="border-b border-primary/30">
+                            <th
+                              scope="col"
+                              class="pb-2 text-left font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                            >
+                              Bracket
+                            </th>
+                            <th
+                              scope="col"
+                              class="pb-2 text-left font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                            >
+                              Holder
+                            </th>
+                            <th
+                              scope="col"
+                              class="pb-2 text-right font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                            >
+                              Year
+                            </th>
+                            <th
+                              scope="col"
+                              class="pb-2 text-right font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                            >
+                              Time
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {g.brackets.map((row: RecordRow) => (
+                            <tr class="border-b border-border/60">
+                              <th scope="row" class="py-2 pr-3 text-left font-normal">
+                                {row.label}
+                              </th>
+                              <td class="py-2 pr-3">
+                                {row.athlete ?? (
+                                  <span class="text-muted-foreground">Unclaimed</span>
+                                )}
+                                {row.sourceNote && (
+                                  <abbr
+                                    class="ml-1 cursor-help text-primary"
+                                    title={row.sourceNote}
+                                  >
+                                    ?
+                                  </abbr>
+                                )}
+                              </td>
+                              <td class="py-2 text-right whitespace-nowrap">{row.year ?? ''}</td>
+                              <td class="tabular py-2 text-right font-bold whitespace-nowrap">
+                                {formatRaceTime(row.timeSeconds) || '—'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {g.topTen.length > 0 && (
+                      <div class="mt-8 overflow-x-auto">
+                        <table class="w-full border-collapse text-sm">
+                          <caption class="pb-2 text-left font-mono text-[0.6rem] tracking-[0.18em] text-muted-foreground uppercase">
+                            Fastest {g.topTen.length} since 2017
+                          </caption>
+                          <thead>
+                            <tr class="border-b border-primary/30">
+                              <th
+                                scope="col"
+                                class="pb-2 text-left font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                              >
+                                #
+                              </th>
+                              <th
+                                scope="col"
+                                class="pb-2 text-left font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                              >
+                                {g.label}
+                              </th>
+                              <th
+                                scope="col"
+                                class="pb-2 text-right font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                              >
+                                Year
+                              </th>
+                              <th
+                                scope="col"
+                                class="pb-2 text-right font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                              >
+                                Time
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {g.topTen.map((row, idx) => (
+                              <tr class="border-b border-border/60">
+                                <th scope="row" class="tabular py-2 pr-3 text-left font-normal">
+                                  {String(idx + 1).padStart(2, '0')}
+                                </th>
+                                <td class="py-2 pr-3">{row.athlete?.name ?? ''}</td>
+                                <td class="py-2 text-right whitespace-nowrap">{row.year ?? ''}</td>
+                                <td class="tabular py-2 text-right font-bold whitespace-nowrap">
+                                  {formatRaceTime(row.timeSeconds)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </>
+      )
+    }
+
+    {
+      /* Saying what the archive does NOT contain matters more than saying what it
+        does. The results here start in 2017 and skip three years; the records
+        above them reach back to 2007 from the race's own published tables. A
+        visitor looking for 2013 needs to know where it actually is. */
+    }
+    <p class="mt-10 max-w-[62ch] text-sm text-muted-foreground">
+      Records back to 2007 are carried from the race's own published tables. The finishing times
+      behind them cover 2017 onward, and 2020, 2021 and earlier years are not all available.
+      {
+        race?.resultsUrl && (
+          <>
+            {' '}
+            <a class="text-link underline" href={race.resultsUrl} rel="noopener">
+              The complete results archive lives on RunSignUp.
+            </a>
+          </>
+        )
+      }
+      <br />
+      <span class="text-xs">
+        A <abbr
+          class="text-primary"
+          title="Marks a value the published source records inconsistently">?</abbr
+        >
+        marks a record the race's own tables report two different ways.
+      </span>
+    </p>
+  </div>
+</section>
+
+<script>
+  // Roving tabindex over the distance switcher.
+  //
+  // Scoped to each tablist rather than a document-wide querySelectorAll, so a
+  // second board on the same page cannot steal the first one's keyboard focus.
+  // Home and End are handled because a tablist that only answers arrows is a
+  // half-implemented widget.
+  document.querySelectorAll<HTMLElement>('[role="tablist"]').forEach((list) => {
+    const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    if (tabs.length < 2) return;
+
+    const select = (id: string) => {
+      for (const t of tabs) {
+        const on = t.dataset.tab === id;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(`rpanel-${t.dataset.tab}`);
+        if (panel) panel.hidden = !on;
+      }
+    };
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab.dataset.tab ?? ''));
+      tab.addEventListener('keydown', (e: KeyboardEvent) => {
+        let next: HTMLButtonElement | undefined;
+        if (e.key === 'ArrowRight') next = tabs[(i + 1) % tabs.length];
+        else if (e.key === 'ArrowLeft') next = tabs[(i - 1 + tabs.length) % tabs.length];
+        else if (e.key === 'Home') next = tabs[0];
+        else if (e.key === 'End') next = tabs[tabs.length - 1];
+        if (!next) return;
+        e.preventDefault();
+        select(next.dataset.tab ?? '');
+        next.focus();
+      });
+    });
+  });
+</script>
