@@ -50,6 +50,8 @@ export type RecordRow = {
   bracket: string;
   label: string;
   athlete: string | null;
+  /** Slug of the athlete document, so a record can link to their history. */
+  athleteSlug?: string | null;
   year: number | null;
   timeSeconds: number | null;
   sourceNote?: string;
@@ -59,7 +61,7 @@ export type RecordRow = {
 
 /** The minimum a result needs to compete for a record. */
 export type ResultLike = {
-  athlete?: { name?: string | null } | null;
+  athlete?: { name?: string | null; slug?: string | null } | null;
   year?: number | null;
   timeSeconds?: number | null;
   age?: number | null;
@@ -68,7 +70,7 @@ export type ResultLike = {
 
 /** A transcribed row, which already knows its bracket and may have no athlete. */
 export type HistoricalLike = {
-  athlete?: { name?: string | null } | null;
+  athlete?: { name?: string | null; slug?: string | null } | null;
   bracket?: string | null;
   year?: number | null;
   timeSeconds?: number | null;
@@ -78,7 +80,7 @@ export type HistoricalLike = {
 function toRow(
   b: AgeBracket,
   r: {
-    athlete?: { name?: string | null } | null;
+    athlete?: { name?: string | null; slug?: string | null } | null;
     year?: number | null;
     timeSeconds?: number | null;
     sourceNote?: string;
@@ -89,6 +91,7 @@ function toRow(
     bracket: b.id,
     label: b.label,
     athlete: r.athlete?.name ?? null,
+    athleteSlug: r.athlete?.slug ?? null,
     year: r.year ?? null,
     timeSeconds: r.timeSeconds ?? null,
     ...(r.sourceNote ? { sourceNote: r.sourceNote } : {}),

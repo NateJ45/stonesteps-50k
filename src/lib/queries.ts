@@ -144,12 +144,12 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       "results": *[_type == "raceResult"]{
         year, timeSeconds, gender, age, place, timeSource,
         "distance": distance->slug.current,
-        "athlete": { "name": athlete->name }
+        "athlete": { "name": athlete->name, "slug": athlete->slug.current }
       },
       "historical": *[_type == "recordEntry"]{
         bracket, gender, year, timeSeconds, sourceNote,
         "distance": distance->slug.current,
-        "athlete": { "name": athlete->name }
+        "athlete": { "name": athlete->name, "slug": athlete->slug.current }
       },
       "race": *[_type == "race"][0]{ resultsUrl }
     },
@@ -191,12 +191,12 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       "results": *[_type == "raceResult"]{
         year, timeSeconds, gender, age,
         "distance": distance->slug.current,
-        "athlete": { "name": athlete->name }
+        "athlete": { "name": athlete->name, "slug": athlete->slug.current }
       },
       "historical": *[_type == "recordEntry"]{
         bracket, gender, year, timeSeconds,
         "distance": distance->slug.current,
-        "athlete": { "name": athlete->name }
+        "athlete": { "name": athlete->name, "slug": athlete->slug.current }
       }
     },
     _type == "pageHeaderSection" => {
@@ -348,6 +348,79 @@ export const SITE_SETTINGS_PROJECTION = `{
  * data. Telling Google a start time the race has not published would be worse
  * than telling it nothing.
  */
+/* ---------- Runners ------------------------------------------------------ */
+
+/**
+ * Every athlete slug, for getStaticPaths.
+ *
+ * Only athletes who actually have a result: the historical record entries
+ * reference a few athletes with no imported finish, and a page showing one
+ * transcribed row and nothing else is not worth a URL.
+ */
+export async function getAllRunners() {
+  return sanityFetch(
+    `*[_type == "athlete" && count(*[_type == "raceResult" && references(^._id)]) > 0]
+      | order(name asc){
+      name, "slug": slug.current, city, region,
+      "results": *[_type == "raceResult" && references(^._id)] | order(year desc){
+        year, timeSeconds, gender, age, place, timeSource,
+        "distance": distance->name,
+        "distanceSlug": distance->slug.current
+      },
+      "records": *[_type == "recordEntry" && references(^._id)]{
+        bracket, gender, year, timeSeconds, sourceNote,
+        "distance": distance->name,
+        "distanceSlug": distance->slug.current
+      }
+    }`,
+    {},
+    [],
+  );
+}
+
+export async function getRunner(slug: string) {
+  return sanityFetch(
+    `*[_type == "athlete" && slug.current == $slug][0]{
+      name, "slug": slug.current, city, region,
+      "results": *[_type == "raceResult" && references(^._id)] | order(year desc){
+        year, timeSeconds, gender, age, place, timeSource,
+        "distance": distance->name,
+        "distanceSlug": distance->slug.current
+      },
+      // Transcribed records this runner holds. Without these a page can
+      // UNDERSTATE someone: Katie Ruhlman holds the 50K course record from
+      // 2020, and 2020 has no importable results, so her page would otherwise
+      // show only her slower 2017 and 2018 finishes and look authoritative
+      // while doing it.
+      "records": *[_type == "recordEntry" && references(^._id)]{
+        bracket, gender, year, timeSeconds, sourceNote,
+        "distance": distance->name,
+        "distanceSlug": distance->slug.current
+      }
+    }`,
+    { slug },
+    null,
+  );
+}
+
+/**
+ * The lookup index behind the results search: one small row per runner.
+ *
+ * Deliberately NOT a browsable directory. See src/pages/runners/[slug].astro
+ * for why these pages are noindex, and why search is the right way in.
+ */
+export async function getRunnerIndex() {
+  return sanityFetch(
+    `*[_type == "athlete" && count(*[_type == "raceResult" && references(^._id)]) > 0]
+      | order(name asc){
+        name, "slug": slug.current,
+        "n": count(*[_type == "raceResult" && references(^._id)])
+      }`,
+    {},
+    [],
+  );
+}
+
 export async function getRace() {
   return sanityFetch(
     `*[_type == "race"][0]{

@@ -425,7 +425,7 @@ export interface ProjectedRaceResult {
   place?: number;
   timeSource?: 'chip' | 'gun';
   distance?: string;
-  athlete?: { name?: string | null } | null;
+  athlete?: { name?: string | null; slug?: string | null } | null;
 }
 
 /** One transcribed record that predates the results archive. */
@@ -436,7 +436,7 @@ export interface ProjectedRecordEntry {
   timeSeconds?: number;
   sourceNote?: string;
   distance?: string;
-  athlete?: { name?: string | null } | null;
+  athlete?: { name?: string | null; slug?: string | null } | null;
 }
 
 export interface ProjectedRaceHeroSection {

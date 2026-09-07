@@ -143,6 +143,12 @@ export default defineConfig({
       filter: (page) => {
         if (page.includes('/404') || page.includes('/studio') || page.includes('/preview'))
           return false;
+        // Runner pages are deliberately noindex: 711 pages each titled with a
+        // private individual's name and home city is a real escalation in
+        // findability over a results table, and the race gains nothing from
+        // indexing them. They stay reachable from the results themselves and
+        // from the search on /records. See src/pages/runners/[slug].astro.
+        if (page.includes('/runners/')) return false;
         try {
           const path = new URL(page).pathname.replace(/\/+$/, '');
           return !hiddenPagePaths.has(path);

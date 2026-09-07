@@ -1,0 +1,231 @@
+---
+// Safe to edit by hand
+//
+// One runner's history at Stone Steps.
+//
+// WHY THIS PAGE CAN EXIST AT ALL. Results reference an `athlete` document
+// rather than repeating a name, so "everything this person has run here" is a
+// single query and is correct by construction. On the site this replaces, the
+// same question could only be answered by reading four hand-maintained tables
+// and hoping the spelling matched, which it did not: the same runner is
+// published as both "Brian List" and "Brain List".
+//
+// WHY IT IS noindex. The data is already public, and it came from RunSignUp's
+// own public results pages. But 711 search-indexed pages, each titled with a
+// private individual's name and home city, is a real escalation in findability
+// over a results table, and the benefit to the race of indexing them is close
+// to zero. So they are built, linked from the results a runner is already
+// looking at, and reachable by search on /records, but they are kept out of
+// Google and out of the sitemap. That is the cautious default and it is one
+// line to reverse if the race wants them indexed.
+//
+// See the `athlete` entry in public-data-policy.json for the wider decision,
+// including what to do if someone asks to be removed.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getRunner, getSiteSettings } from '@/lib/queries';
+import { formatRaceTime } from '@/lib/race-time';
+import { BRACKET_BY_ID } from '@/lib/age-brackets';
+
+// RENDERED ON DEMAND, not at build time.
+//
+// These pages are the one part of this site that should not be static. There
+// are 711 of them today and there will be thousands once the archived years are
+// imported, each is visited rarely, and every one is noindex so there is no SEO
+// argument for prerendering. Building them statically cost FOUR AND THREE
+// QUARTER MINUTES of an otherwise fourteen-second build, and CI runs that build
+// three times per push.
+//
+// (The first version was worse still: a per-page getRunner(slug) call meant 711
+// round trips to Sanity and a seven-minute build. Fetching once in
+// getStaticPaths fixed the queries; going SSR removes the cost entirely.)
+//
+// The dataset is public, so the runtime read needs no token.
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+const [runner, siteSettings] = await Promise.all([
+  getRunner(slug as string).catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+if (!runner) return new Response(null, { status: 404 });
+
+const results = (runner.results ?? []) as {
+  year?: number;
+  timeSeconds?: number;
+  place?: number;
+  timeSource?: string;
+  distance?: string;
+  distanceSlug?: string;
+}[];
+
+const records = (runner.records ?? []) as {
+  bracket?: string;
+  year?: number;
+  timeSeconds?: number;
+  distance?: string;
+}[];
+
+/** Fastest run per distance, across the archive. */
+const bests = new Map<string, { distance: string; timeSeconds: number; year?: number }>();
+for (const r of results) {
+  if (!r.distance || !r.timeSeconds) continue;
+  const cur = bests.get(r.distance);
+  if (!cur || r.timeSeconds < cur.timeSeconds) {
+    bests.set(r.distance, { distance: r.distance, timeSeconds: r.timeSeconds, year: r.year });
+  }
+}
+
+const years = results.map((r) => r.year).filter(Boolean) as number[];
+const span = years.length ? `${Math.min(...years)} to ${Math.max(...years)}` : null;
+const where = [runner.city, runner.region].filter(Boolean).join(', ');
+
+const title = `${runner.name} | Stone Steps 50K results`;
+const description = `Every Stone Steps 50K and 27K finish on file for ${runner.name}.`;
+---
+
+<BaseLayout {title} {description} {siteSettings} noindex>
+  <section class="bg-background py-section-lg">
+    <div class="mx-auto w-full max-w-content px-6">
+      <p
+        class="blaze text-heading-accent mb-4 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase"
+      >
+        Runner
+      </p>
+      <h1 class="display text-[clamp(2.5rem,7vw,4.5rem)]">{runner.name}</h1>
+
+      <p class="mt-4 text-muted-foreground">
+        {where && <>{where}. </>}
+        {
+          results.length > 0 && (
+            <>
+              {results.length} {results.length === 1 ? 'finish' : 'finishes'} on file
+              {span && <>, {span}</>}.
+            </>
+          )
+        }
+      </p>
+
+      {
+        bests.size > 0 && (
+          <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[...bests.values()].map((b) => (
+              <li class="border-l-[3px] border-[color:var(--heading-accent)] pl-5">
+                <p class="font-mono text-[0.62rem] tracking-[0.2em] text-muted-foreground uppercase">
+                  Best <span class="lc">{b.distance}</span>
+                </p>
+                <p class="tabular text-heading-accent mt-2 text-2xl font-bold">
+                  {formatRaceTime(b.timeSeconds)}
+                </p>
+                {b.year && <p class="mt-1 text-sm text-muted-foreground">{b.year}</p>}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      {
+        records.length > 0 && (
+          <div class="mt-12">
+            <h2 class="display text-h4">Records held</h2>
+            <ul class="mt-4 grid gap-2">
+              {records.map((r) => (
+                <li class="flex flex-wrap items-baseline gap-x-3 border-b border-border py-2 text-sm">
+                  <span class="tabular text-heading-accent font-bold">
+                    {formatRaceTime(r.timeSeconds)}
+                  </span>
+                  <span class="lc">{r.distance}</span>
+                  <span class="text-muted-foreground">
+                    {r.bracket ? BRACKET_BY_ID[r.bracket]?.label : ''}
+                    {r.year ? `, ${r.year}` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {/* Some records predate the importable archive, so they will not
+                appear in the table below. Saying so stops the page reading as
+                if the two disagree. */}
+            <p class="mt-3 max-w-[60ch] text-sm text-muted-foreground">
+              Records are carried from the race's own published tables and can predate the finishing
+              times below, which start in 2017.
+            </p>
+          </div>
+        )
+      }
+
+      {
+        results.length > 0 && (
+          <div class="mt-12 overflow-x-auto">
+            <table class="w-full border-collapse text-sm">
+              <caption class="sr-only">Every Stone Steps finish on file for {runner.name}</caption>
+              <thead>
+                <tr class="border-b border-primary/30">
+                  <th
+                    scope="col"
+                    class="pb-2 text-left font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                  >
+                    Year
+                  </th>
+                  <th
+                    scope="col"
+                    class="pb-2 text-left font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                  >
+                    Distance
+                  </th>
+                  <th
+                    scope="col"
+                    class="pb-2 text-right font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                  >
+                    Place
+                  </th>
+                  <th
+                    scope="col"
+                    class="pb-2 text-right font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                  >
+                    Time
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {results.map((r) => (
+                  <tr class="border-b border-border/60">
+                    <th scope="row" class="tabular py-2 text-left font-normal">
+                      {r.year}
+                    </th>
+                    <td class="py-2">
+                      <span class="lc">{r.distance}</span>
+                    </td>
+                    <td class="tabular py-2 text-right">{r.place ?? ''}</td>
+                    <td class="tabular py-2 text-right font-bold whitespace-nowrap">
+                      {formatRaceTime(r.timeSeconds)}
+                      {/* Gun time until the race started publishing chip times
+                          in 2024. Marking it stops the column implying a
+                          precision the earlier years do not have. */}
+                      {r.timeSource === 'gun' && (
+                        <abbr
+                          class="source-flag text-muted-foreground"
+                          title="Gun time, not chip time"
+                        >
+                          g
+                        </abbr>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      }
+
+      <div class="mt-12 flex flex-wrap gap-4">
+        <a class="btn-plate btn-plate--cream" href="/records">
+          All-time records
+          <span class="btn-plate__arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
