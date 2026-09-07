@@ -524,7 +524,17 @@ export interface ProjectedElevationSection {
   headline?: string;
   intro?: string;
   totalGain?: string;
-  race?: { gpxUrl?: string } | null;
+  race?: {
+    gpxUrl?: string;
+    elevationProfile?: {
+      source?: string;
+      miles?: number;
+      gainFt?: number;
+      lowFt?: number;
+      highFt?: number;
+      points?: { mile?: number; ft?: number }[];
+    } | null;
+  } | null;
 }
 
 export interface ProjectedSponsorPatchesSection {

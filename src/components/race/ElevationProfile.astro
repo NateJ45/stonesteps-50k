@@ -11,9 +11,15 @@
  * page, in words, and that caption is not optional: a plausible-looking
  * elevation chart is read as measurement, and this one is not one.
  *
- * When a real GPX track exists, set gpxUrl on The Race. The caption switches to
- * offering the download and the synthetic-shape warning comes off. Replacing
- * this path with the real track is the outstanding job; the component stays.
+ * WHEN A MEASURED PROFILE EXISTS it is used instead, and the caption stops
+ * hedging. Produce one with `node scripts/build-elevation.mjs <track.gpx>
+ * --write`, which samples USGS 3DEP 1 m LiDAR along a real GPS track. Read that
+ * script's header before trying to reconstruct a route from the course map: I
+ * tried, and the 1998 map is a schematic whose registration error is scattered
+ * rather than systematic, so it cannot be snapped to the trail network.
+ *
+ * The synthetic path below stays as the fallback, because a page that renders
+ * nothing is worse than a page that renders something clearly labelled.
  */
 
 interface Props {
@@ -21,9 +27,26 @@ interface Props {
   totalGain?: string;
   /** A real surveyed track, when one exists. Changes what the caption claims. */
   gpxUrl?: string;
+  /** A measured profile from scripts/build-elevation.mjs. Wins when present. */
+  profile?: {
+    source?: string;
+    miles?: number;
+    gainFt?: number;
+    lowFt?: number;
+    highFt?: number;
+    points?: { mile?: number; ft?: number }[];
+  } | null;
 }
 
-const { totalGain = '10,726 ft', gpxUrl } = Astro.props;
+const { totalGain = '10,726 ft', gpxUrl, profile } = Astro.props;
+
+const measured =
+  Array.isArray(profile?.points) && profile.points.length > 8
+    ? (profile.points.filter((p) => typeof p.mile === 'number' && typeof p.ft === 'number') as {
+        mile: number;
+        ft: number;
+      }[])
+    : null;
 
 const W = 1400;
 const H = 320;
@@ -91,6 +114,23 @@ const line = points
   .join(' ');
 
 const area = `${line} L ${W} ${BASE} L 0 ${BASE} Z`;
+
+// A measured profile replaces both paths and the aid markers. Scaled to the
+// same viewBox so every style rule below keeps applying unchanged.
+let mLine = '';
+let mArea = '';
+if (measured) {
+  const maxMile = Math.max(...measured.map((p) => p.mile)) || 1;
+  const lo = Math.min(...measured.map((p) => p.ft));
+  const hi = Math.max(...measured.map((p) => p.ft));
+  const span = Math.max(1, hi - lo);
+  const sx = (m: number) => (m / maxMile) * W;
+  const sy = (ft: number) => BASE - ((ft - lo) / span) * (BASE - PEAK);
+  mLine = measured
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${sx(p.mile).toFixed(1)} ${sy(p.ft).toFixed(1)}`)
+    .join(' ');
+  mArea = `${mLine} L ${W} ${BASE} L 0 ${BASE} Z`;
+}
 ---
 
 <figure class="elev">
@@ -110,41 +150,54 @@ const area = `${line} L ${W} ${BASE} L 0 ${BASE} Z`;
 
     <!-- Aid-station verticals: you pass through The Oval at the end of every loop. -->
     {
-      markers.map((m) => (
-        <g class="elev__aid">
-          <line x1={m.x} y1={PEAK - 20} x2={m.x} y2={BASE} />
-          <circle cx={m.x} cy={BASE} r="4" />
-        </g>
-      ))
+      !measured &&
+        markers.map((m) => (
+          <g class="elev__aid">
+            <line x1={m.x} y1={PEAK - 20} x2={m.x} y2={BASE} />
+            <circle cx={m.x} cy={BASE} r="4" />
+          </g>
+        ))
     }
 
-    <path d={area} fill="url(#elevFill)"></path>
-    <path d={line} class="elev__line"></path>
+    <path d={measured ? mArea : area} fill="url(#elevFill)"></path>
+    <path d={measured ? mLine : line} class="elev__line"></path>
     <line x1="0" y1={BASE} x2={W} y2={BASE} class="elev__base"></line>
 
     {
-      markers.map((m, i) => (
-        <text
-          x={m.x}
-          y={BASE + 26}
-          class={`elev__lbl ${m.kind === 'long' ? 'is-long' : ''}`}
-          text-anchor="middle"
-        >
-          {i + 1}
-        </text>
-      ))
+      !measured &&
+        markers.map((m, i) => (
+          <text
+            x={m.x}
+            y={BASE + 26}
+            class={`elev__lbl ${m.kind === 'long' ? 'is-long' : ''}`}
+            text-anchor="middle"
+          >
+            {i + 1}
+          </text>
+        ))
     }
   </svg>
 
   <figcaption class="elev__cap">
-    <span class="mono"><b>{totalGain}</b> total elevation change</span>
+    <span class="mono">
+      <b>{measured && profile?.gainFt ? `${profile.gainFt.toLocaleString()} ft` : totalGain}</b> total
+      elevation change
+    </span>
     {
-      gpxUrl ? (
+      measured ? (
+        <span class="elev__note">
+          Measured from USGS 1 m LiDAR along the recorded course
+          {profile?.miles ? `, ${profile.miles} miles` : ''}
+        </span>
+      ) : (
+        <span class="elev__note">Shape illustrates the loop structure. Not surveyed GPS data</span>
+      )
+    }
+    {
+      gpxUrl && (
         <a class="elev__note" href={gpxUrl} rel="noopener">
           Download the course GPX
         </a>
-      ) : (
-        <span class="elev__note">Shape illustrates the loop structure. Not surveyed GPS data</span>
       )
     }
     <span class="elev__key">

@@ -480,6 +480,20 @@ export type Race = {
   resultsUrl?: string;
   facebookUrl?: string;
   gpxUrl?: string;
+  elevationProfile?: {
+    source?: string;
+    sampledAt?: string;
+    miles?: number;
+    gainFt?: number;
+    lowFt?: number;
+    highFt?: number;
+    points?: Array<{
+      mile?: number;
+      ft?: number;
+      _type: 'elevPoint';
+      _key: string;
+    }>;
+  };
   feeTiers?: Array<{
     label?: string;
     amount?: number;

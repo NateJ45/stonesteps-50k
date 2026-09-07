@@ -45,7 +45,11 @@ const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
     <SectionHeading {eyebrow} {headline} {headingId} />
     {intro && <p class="mt-4 max-w-[52ch] text-muted-foreground">{intro}</p>}
     <div class="mt-10">
-      <ElevationProfile totalGain={totalGain} gpxUrl={race?.gpxUrl} />
+      <ElevationProfile
+        totalGain={totalGain}
+        gpxUrl={race?.gpxUrl}
+        profile={race?.elevationProfile}
+      />
     </div>
   </div>
 </section>

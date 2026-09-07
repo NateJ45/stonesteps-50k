@@ -125,6 +125,44 @@ export const race = defineType({
         'illustrative whenever this is empty.',
     }),
     defineField({
+      name: 'elevationProfile',
+      title: 'Elevation profile (measured)',
+      type: 'object',
+      group: 'links',
+      description:
+        'Written by scripts/build-elevation.mjs from a real GPS track, not typed by hand. ' +
+        'While this is empty the site draws a SYNTHETIC profile that says so in its own ' +
+        'caption. Filling it in is what makes the profile a measurement.',
+      options: { collapsible: true, collapsed: true, canvasApp: { exclude: true } },
+      fields: [
+        defineField({ name: 'source', title: 'Where the data came from', type: 'string' }),
+        defineField({ name: 'sampledAt', title: 'Sampled at', type: 'datetime' }),
+        defineField({ name: 'miles', title: 'Length (miles)', type: 'number' }),
+        defineField({ name: 'gainFt', title: 'Gain (ft)', type: 'number' }),
+        defineField({ name: 'lowFt', title: 'Lowest point (ft)', type: 'number' }),
+        defineField({ name: 'highFt', title: 'Highest point (ft)', type: 'number' }),
+        defineField({
+          name: 'points',
+          title: 'Profile points',
+          type: 'array',
+          of: [
+            defineArrayMember({
+              type: 'object',
+              name: 'elevPoint',
+              fields: [
+                defineField({ name: 'mile', title: 'Mile', type: 'number' }),
+                defineField({ name: 'ft', title: 'Elevation (ft)', type: 'number' }),
+              ],
+              preview: {
+                select: { mile: 'mile', ft: 'ft' },
+                prepare: ({ mile, ft }) => ({ title: `mile ${mile}`, subtitle: `${ft} ft` }),
+              },
+            }),
+          ],
+        }),
+      ],
+    }),
+    defineField({
       name: 'feeTiers',
       title: 'Entry fee tiers',
       type: 'array',
