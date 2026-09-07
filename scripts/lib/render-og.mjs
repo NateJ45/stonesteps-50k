@@ -14,12 +14,12 @@ import sharp from 'sharp';
 const DEFAULTS = {
   width: 1200,
   height: 630,
-  bg: '#FBFBFA', // Paper
-  primary: '#586577', // Slate
-  primaryDark: '#434E5C', // Slate Dark
-  accent: '#2A2D31', // Ink
-  taupe: '#AAB0B8', // Cool Gray
-  fontDisplay: 'Libre Baskerville, Georgia, Cambria, Times New Roman, serif',
+  bg: '#FBF6EA', // Paper
+  primary: '#A83C26', // Slate
+  primaryDark: '#8F3323', // Slate Dark
+  accent: '#1A1712', // Ink
+  taupe: '#8A7F66', // Cool Gray
+  fontDisplay: 'Staatliches, Arial Narrow, Impact, sans-serif',
 };
 
 async function renderText(text, fontSize, color, font, weight = 'normal') {

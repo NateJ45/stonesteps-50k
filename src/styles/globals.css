@@ -1,4 +1,4 @@
-/* Studio Starter — global stylesheet. Foundation, edit with care.
+/* Stone Steps 50K — global stylesheet. Foundation, edit with care.
    Brand tokens declared here (Tailwind 4 @theme block) and mapped
    onto shadcn's semantic tokens (:root / .dark) so brand identity
    carries everywhere the design system is referenced. */
@@ -6,9 +6,9 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import '@fontsource/libre-baskerville/400.css';
-@import '@fontsource/libre-baskerville/700.css';
-@import '@fontsource-variable/inter';
+@import '@fontsource/staatliches/400.css';
+@import '@fontsource-variable/archivo';
+@import '@fontsource-variable/jetbrains-mono';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -17,22 +17,31 @@
    font-display, text-h1, p-l, max-w-content. */
 
 @theme {
-  /* Brand palette — neutral Slate default. Swap per project. */
-  --color-primary: #586577; /* Slate */
-  --color-primary-dark: #434e5c; /* Slate Dark — body anchor text */
-  --color-accent: #2a2d31; /* Ink — headings + body */
-  --color-accent-dark: #1e2024; /* Ink Dark — dark surfaces */
-  --color-secondary: #aab0b8; /* Cool Gray — borders, eyebrows */
-  --color-tertiary: #9db0a6; /* Muted Sage — sparingly */
-  --color-bg: #fbfbfa; /* Paper — primary surface */
-  --color-bg-soft: #f3f4f2; /* Soft Paper — alternating surface */
-  --color-border-soft: #e6e7e5; /* Faint dividers */
+  /* Brand palette — derived from the logo, a hand-painted vintage trail sign.
+     Cream and gold were SAMPLED from the mark (43% and 14% of its opaque
+     pixels). Bark is that near-black warmed so cream sits on it the way it
+     does on the sign. Rust and forest are eyeballed and PROVISIONAL: no asset
+     published on stonesteps50k.com contains a single red or green pixel, so
+     both must be replaced from a real brand file when one exists. */
+  --color-primary: #a83c26; /* Rust — PROVISIONAL. Button ground, carries cream at 5.35:1 */
+  --color-primary-dark: #8f3323; /* Rust Deep — PROVISIONAL. Body anchor text */
+  --color-accent: #1a1712; /* Bark — headings + body */
+  --color-accent-dark: #0f0d0a; /* Bark Deep — the fixed ink band */
+  --color-secondary: #8a7f66; /* Stone — borders, eyebrows */
+  --color-tertiary: #2e5738; /* Forest — PROVISIONAL. Sparingly */
+  --color-bg: #fbf6ea; /* Paper — primary surface, a warm cream stock */
+  --color-bg-soft: #f4ebd6; /* Soft Paper — the alternating band */
+  --color-border-soft: #e3d6b8; /* Faint dividers */
   --color-white-pure: #ffffff;
 
   /* Fonts */
-  --font-display: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
-  --font-body: 'Inter Variable', system-ui, -apple-system, sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', Consolas, monospace;
+  --font-display: 'Staatliches', 'Arial Narrow', system-ui, sans-serif;
+  --font-body: 'Archivo Variable', system-ui, -apple-system, sans-serif;
+  /* JetBrains Mono carries every TIME VALUE on the site: results, records,
+     splits, the countdown. Times then read as a timing clock rather than as
+     prose, and tabular-nums keeps digits from shifting between rows. This is
+     the one type decision the design mockup asked to keep verbatim. */
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Consolas, monospace;
   --font-script: 'Snell Roundhand', 'Apple Chancery', cursive;
 
   /* Fluid heading sizes */
@@ -198,33 +207,36 @@
 
 :root {
   /* Surfaces */
-  --background: #fbfbfa;
-  --foreground: #2a2d31;
-  --card: #ffffff;
-  --card-foreground: #2a2d31;
-  --popover: #ffffff;
-  --popover-foreground: #2a2d31;
+  --background: #fbf6ea;
+  --foreground: #1a1712;
+  --card: #ffebbb;
+  --card-foreground: #1a1712;
+  --popover: #fff7e4;
+  --popover-foreground: #1a1712;
 
   /* Brand */
-  --primary: #586577;
-  --primary-foreground: #ffffff;
-  --secondary: #aab0b8;
-  --secondary-foreground: #2a2d31;
+  --primary: #a83c26;
+  --primary-foreground: #ffebbb;
+  --secondary: #2e5738;
+  --secondary-foreground: #ffebbb;
 
   /* Quiet surfaces / muted text */
-  --muted: #f3f4f2;
-  --muted-foreground: #5f6469; /* ~5.6:1 on #FBFBFA — passes AA */
+  --muted: #f4ebd6;
+  --muted-foreground: #5c513b; /* ~5.6:1 on #FBFBFA — passes AA */
 
   /* Accent */
-  --accent: #e8e9e7;
-  --accent-foreground: #2a2d31;
+  --accent: #f0e6ce;
+  --accent-foreground: #1a1712;
 
   /* States */
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #e6e7e5;
-  --input: #e6e7e5;
-  --ring: #586577;
-  --link: #434e5c; /* ~8:1 on #FBFBFA — passes AA */
+  --border: #e3d6b8;
+  --input: #e3d6b8;
+  --ring: #a83c26;
+  --link: #8f3323; /* ~8:1 on #FBFBFA — passes AA */
+  /* Rust-deep. 7.3:1 on paper, so it clears the 3:1 large-text floor with
+     room to spare while staying unmistakably the brand red. */
+  --heading-accent: #8f3323;
 
   /* Charts (kept neutral, not used at launch) */
   --chart-1: oklch(0.87 0 0);
@@ -233,34 +245,34 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
 
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 
   /* Sidebar (reserved for Studio-style admin contexts, not used on site) */
-  --sidebar: #fbfbfa;
-  --sidebar-foreground: #2a2d31;
-  --sidebar-primary: #586577;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f3f4f2;
-  --sidebar-accent-foreground: #2a2d31;
-  --sidebar-border: #e6e7e5;
-  --sidebar-ring: #586577;
+  --sidebar: #fbf6ea;
+  --sidebar-foreground: #1a1712;
+  --sidebar-primary: #a83c26;
+  --sidebar-primary-foreground: #ffebbb;
+  --sidebar-accent: #f4ebd6;
+  --sidebar-accent-foreground: #1a1712;
+  --sidebar-border: #e3d6b8;
+  --sidebar-ring: #a83c26;
 
-  --tint-rgb: 88, 101, 119;
+  --tint-rgb: 168, 60, 38;
 
   /* Starwind UI extra semantic tokens — not in shadcn's default set.
        Values are harmonized to the existing neutral palette so the starter
        renders sensibly out of the box. apply-brand rewrites these. */
-  --primary-accent: #434e5c; /* darker shade of --primary for hover states */
-  --secondary-accent: #2a2d31; /* dark ink — active/pressed secondary */
-  --info: #93c5fd; /* soft blue, harmonized with slate primary */
-  --info-foreground: #1e3a5f; /* deep blue for text on info surfaces */
-  --success: #86efac; /* soft green */
-  --success-foreground: #14532d; /* deep green for text on success surfaces */
-  --warning: #fde68a; /* soft amber */
-  --warning-foreground: #713f12; /* deep amber for text on warning surfaces */
-  --error: oklch(0.577 0.245 27.325); /* matches --destructive */
-  --error-foreground: #ffffff;
-  --outline: #586577; /* matches --ring */
+  --primary-accent: #8f3323; /* darker shade of --primary for hover states */
+  --secondary-accent: #24462d; /* dark ink — active/pressed secondary */
+  --info: #2e5738; /* soft blue, harmonized with slate primary */
+  --info-foreground: #ffebbb; /* deep blue for text on info surfaces */
+  --success: #24462d; /* soft green */
+  --success-foreground: #ffebbb; /* deep green for text on success surfaces */
+  --warning: #8a6318; /* soft amber */
+  --warning-foreground: #ffebbb; /* deep amber for text on warning surfaces */
+  --error: #8f3323; /* matches --destructive */
+  --error-foreground: #ffebbb;
+  --outline: #1a1712; /* matches --ring */
 }
 
 /* ---------- Dark mode --------------------------------------------------
@@ -268,29 +280,32 @@
    Slate and Ink hold their identity; surfaces flip to deep cool grays. */
 
 .dark {
-  --background: #17191c;
-  --foreground: #f2f3f2;
-  --card: #202327;
-  --card-foreground: #f2f3f2;
-  --popover: #202327;
-  --popover-foreground: #f2f3f2;
+  --background: #1a1712;
+  --foreground: #ffebbb;
+  --card: #241f17;
+  --card-foreground: #ffebbb;
+  --popover: #2f281d;
+  --popover-foreground: #ffebbb;
 
-  --primary: #8a96a6;
-  --primary-foreground: #17191c;
-  --secondary: #5a6068;
-  --secondary-foreground: #f2f3f2;
+  --primary: #a83c26;
+  --primary-foreground: #ffebbb;
+  --secondary: #2e5738;
+  --secondary-foreground: #ffebbb;
 
-  --muted: #202327;
-  --muted-foreground: #aab0b8;
+  --muted: #241f17;
+  --muted-foreground: #c9b98f;
 
-  --accent: #2c3036;
-  --accent-foreground: #f2f3f2;
+  --accent: #2f281d;
+  --accent-foreground: #fed89b;
 
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: #8a96a6;
-  --link: #8a96a6;
+  --border: #3a3226;
+  --input: #3a3226;
+  --ring: #fed89b;
+  --link: #fed89b;
+  /* Gold. The logo's second hue, and the only accent that reads as display
+     type on bark. See the .heading-accent rule below. */
+  --heading-accent: #fed89b;
 
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
@@ -298,29 +313,29 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
 
-  --sidebar: #202327;
-  --sidebar-foreground: #f2f3f2;
-  --sidebar-primary: #8a96a6;
-  --sidebar-primary-foreground: #17191c;
-  --sidebar-accent: #2c3036;
-  --sidebar-accent-foreground: #f2f3f2;
-  --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: #8a96a6;
+  --sidebar: #1a1712;
+  --sidebar-foreground: #ffebbb;
+  --sidebar-primary: #a83c26;
+  --sidebar-primary-foreground: #ffebbb;
+  --sidebar-accent: #241f17;
+  --sidebar-accent-foreground: #fed89b;
+  --sidebar-border: #3a3226;
+  --sidebar-ring: #fed89b;
 
-  --tint-rgb: 138, 150, 166;
+  --tint-rgb: 255, 235, 187;
 
   /* Starwind UI extra semantic tokens — dark mode variants. */
-  --primary-accent: #8a96a6; /* lifted primary for dark hover states */
-  --secondary-accent: #f2f3f2; /* near-white for dark active secondary */
-  --info: #93c5fd; /* same soft blue works on dark surfaces */
-  --info-foreground: #1e3a5f;
-  --success: #86efac;
-  --success-foreground: #14532d;
-  --warning: #fde68a;
-  --warning-foreground: #713f12;
-  --error: oklch(0.704 0.191 22.216); /* matches dark --destructive */
-  --error-foreground: #ffffff;
-  --outline: #8a96a6; /* matches dark --ring */
+  --primary-accent: #c9553a; /* lifted primary for dark hover states */
+  --secondary-accent: #3e7049; /* near-white for dark active secondary */
+  --info: #9dc2a8; /* same soft blue works on dark surfaces */
+  --info-foreground: #1a1712;
+  --success: #9dc2a8;
+  --success-foreground: #1a1712;
+  --warning: #fed89b;
+  --warning-foreground: #1a1712;
+  --error: #e58a72; /* matches dark --destructive */
+  --error-foreground: #1a1712;
+  --outline: #ffebbb; /* matches dark --ring */
 }
 
 /* ---------- Base resets and defaults ---------------------------------- */
@@ -537,15 +552,23 @@
    paints, in both themes, at the 3:1 large-text threshold. It also asserts that
    BOTH rules below still exist, because deleting either one silently breaks a
    measurement it is still passing. */
+/* STONE STEPS: the accent word reads --heading-accent, not --primary.
+   --primary is rust, and rust is the BUTTON ground: it carries cream text at
+   5.35:1, which is exactly what stops it doubling as display text on a dark
+   ground, where it measures 2.84:1 against bark and misses the 3:1 large-text
+   floor. The two jobs pull in opposite directions and no single rust satisfies
+   both, so the accent word gets its own token: rust-deep on paper, gold on
+   bark. That is also what the logo does, since gold is one of only two hues
+   the mark contains. */
 .heading-accent {
-  color: var(--section-accent, var(--primary));
+  color: var(--section-accent, var(--heading-accent));
 }
 
 /* On the fixed ink band (the closing CTA panel) a theme-aware token would flip
    with the READER's page theme rather than with the band it is sitting on, so
-   pin it to the lifted slate that reads on near-black in either theme. */
+   pin it to the gold that reads on near-black in either theme. */
 .bg-accent-dark {
-  --section-accent: #8a96a6;
+  --section-accent: #fed89b;
 }
 
 /* Tactile press on primary CTAs. Tap/click depresses ~1px so the press
@@ -1057,7 +1080,7 @@ body::before {
 
   /* Print-only header + footer injected into every page. */
   body::after {
-    content: 'Studio Starter · example.com';
+    content: 'Stone Steps 50K · stonesteps50k.com';
     display: block;
     margin-top: 0.5in;
     padding-top: 0.25in;

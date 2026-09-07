@@ -121,20 +121,26 @@ export function sectionsProjection(field = 'pageBuilder'): string {
     _type == "dynamicListSection" => {
       ...,
       cta${CTA_PROJECTION},
+      // GROQ subscript ranges must have INTEGER endpoints. A slice written as
+      // 0...limit is a parse error, not a dynamic slice, and the limit here is
+      // a per-BLOCK field so a single $param cannot stand in for it either.
+      // Slice at 12, the schema's max, and let DynamicList.astro trim to the
+      // block's own limit. NOTE: no backticks in this comment. It lives inside
+      // a template literal, so one would terminate the query string.
       "items": select(
-        source == "journal" => *[_type == "journalEntry"] | order(publishedAt desc)[0...limit]{
+        source == "journal" => *[_type == "journalEntry"] | order(publishedAt desc)[0...12]{
           _id, "title": title, "meta": publishedAt, "summary": excerpt,
           "href": "/journal/" + slug.current,
           "coverImage": coverImage${IMAGE_PROJECTION}
         },
-        source == "services" => *[_type == "service"] | order(orderRank asc, displayOrder asc)[0...limit]{
+        source == "services" => *[_type == "service"] | order(orderRank asc, displayOrder asc)[0...12]{
           _id, "title": name, "meta": price, "summary": shortDescription,
           "href": "/services#" + slug.current
         },
-        source == "testimonials" => *[_type == "testimonial"] | order(_createdAt desc)[0...limit]{
+        source == "testimonials" => *[_type == "testimonial"] | order(_createdAt desc)[0...12]{
           _id, "title": attribution, "meta": detail, "summary": quote, "href": null
         },
-        source == "faqs" => *[_type == "faqItem"] | order(displayOrder asc, _createdAt asc)[0...limit]{
+        source == "faqs" => *[_type == "faqItem"] | order(displayOrder asc, _createdAt asc)[0...12]{
           _id, "title": question, "summary": null, "meta": coalesce(categoryRef->title, category), "href": null,
           "answer": answer
         }

@@ -69,9 +69,9 @@ export const SECTION_SURFACES: SurfacePair[] = [
     title: 'Paper',
     hint: 'The ordinary page surface. Every other surface is a step away from it.',
     className: 'bg-background',
-    dot: '#FBFBFA',
-    dotDark: '#17191C',
-    dotInk: '#2A2D31',
+    dot: '#FBF6EA',
+    dotDark: '#1A1712',
+    dotInk: '#1A1712',
     inCadence: true,
     tokens: { bg: '--background', text: '--foreground', heading: '--foreground', link: '--link' },
   },
@@ -80,9 +80,9 @@ export const SECTION_SURFACES: SurfacePair[] = [
     title: 'Soft paper',
     hint: 'The alternating band. The cadence puts it between two Paper sections.',
     className: 'bg-muted',
-    dot: '#F3F4F2',
-    dotDark: '#202327',
-    dotInk: '#2A2D31',
+    dot: '#F4EBD6',
+    dotDark: '#241F17',
+    dotInk: '#1A1712',
     inCadence: true,
     tokens: { bg: '--muted', text: '--foreground', heading: '--foreground', link: '--link' },
   },
@@ -91,9 +91,9 @@ export const SECTION_SURFACES: SurfacePair[] = [
     title: 'Card',
     hint: 'The raised surface inside a grid. Never a whole band on its own.',
     className: 'bg-card',
-    dot: '#FFFFFF',
-    dotDark: '#202327',
-    dotInk: '#2A2D31',
+    dot: '#FFEBBB',
+    dotDark: '#241F17',
+    dotInk: '#1A1712',
     tokens: {
       bg: '--card',
       text: '--card-foreground',
@@ -106,9 +106,9 @@ export const SECTION_SURFACES: SurfacePair[] = [
     title: 'Ink',
     hint: 'The closing CTA band. The same near-black on a light or a dark page.',
     className: 'bg-accent-dark text-bg',
-    dot: '#1E2024',
-    dotDark: '#1E2024',
-    dotInk: '#FBFBFA',
+    dot: '#0F0D0A',
+    dotDark: '#0F0D0A',
+    dotInk: '#FBF6EA',
     themeStatic: true,
     tokens: {
       bg: '--color-accent-dark',
@@ -142,11 +142,18 @@ export function surfaceClass(value?: string | null): string {
  * `.heading-accent` in globals.css is the other half; the gate measures both.
  */
 export const HEADING_ACCENT = {
-  /** Theme-aware token the accent word reads on the theme-following surfaces. */
-  token: '--primary',
+  /** Theme-aware token the accent word reads on the theme-following surfaces.
+   *
+   *  STONE STEPS: this is `--heading-accent`, not `--primary`. Rust is the
+   *  button ground and has to carry cream text, which pins it dark enough that
+   *  it measures 2.84:1 as display type on bark and misses the 3:1 large-text
+   *  floor. The accent word therefore gets its own token: rust-deep on paper,
+   *  gold on bark. Gold is one of only two hues in the logo, so the dark half
+   *  is the mark's own colour rather than an invention. */
+  token: '--heading-accent',
   /** Literal light/dark values of `token`, asserted against globals.css. */
-  light: '#586577',
-  dark: '#8A96A6',
+  light: '#8F3323',
+  dark: '#FED89B',
   /** Pinned colour on the fixed ink band, where a theme-aware token would flip. */
-  onDarkBand: '#8A96A6',
+  onDarkBand: '#FED89B',
 } as const;

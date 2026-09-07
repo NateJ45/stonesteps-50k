@@ -52,7 +52,7 @@ const outDir = resolve(root, 'public/og');
 // override without touching source; falls back to the value in src/data/site.ts
 // (hard-coded here to avoid a TypeScript import from a plain .mjs script).
 // Update this default when you replace the starter identity in src/data/site.ts.
-const WORDMARK = env.SITE_NAME ?? 'Studio Starter';
+const WORDMARK = env.SITE_NAME ?? 'Stone Steps 50K';
 
 let count = 0;
 async function render(slug, tagline) {

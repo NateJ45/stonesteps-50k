@@ -172,7 +172,10 @@ describe('the heading accent word', () => {
     // READER's page theme instead of with the band it is sitting on.
     // Case-insensitive: prettier's CSS pass lowercases hex literals, and the
     // colour is the assertion here, not its spelling.
-    assert.match(css, /\.bg-accent-dark\s*\{[^}]*--section-accent:\s*#8A96A6/i);
-    assert.match(css, /\.heading-accent\s*\{[^}]*var\(--section-accent,\s*var\(--primary\)\)/);
+    assert.match(css, /\.bg-accent-dark\s*\{[^}]*--section-accent:\s*#FED89B/i);
+    assert.match(
+      css,
+      /\.heading-accent\s*\{[^}]*var\(--section-accent,\s*var\(--heading-accent\)\)/,
+    );
   });
 });

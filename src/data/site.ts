@@ -20,8 +20,8 @@ function slugify(s: string): string {
 // All derived fields (studio, storageKeyPrefix, themeStorageKey) are computed
 // from `name` at module load time — they are never rewritten by the script and
 // can never go stale across reskins.
-const _name = "Stone Steps 50K";
-const _domain = "stonesteps50k.com";
+const _name = 'Stone Steps 50K';
+const _domain = 'stonesteps50k.com';
 const _slug = slugify(_name);
 
 export const site = {
@@ -46,15 +46,15 @@ export const site = {
   // Brand colors are also declared in src/styles/globals.css.
   // Mirrored here for any script that needs them outside CSS (OG generator, structured data, etc.).
   brandColors: {
-    primary: '#586577', // Slate
-    primaryDark: '#434E5C', // Slate Dark
-    accent: '#2A2D31', // Ink
-    accentDark: '#1E2024', // Ink Dark
-    secondary: '#AAB0B8', // Cool Gray
-    tertiary: '#9DB0A6', // Muted Sage
-    bg: '#FBFBFA', // Paper
-    bgSoft: '#F3F4F2', // Soft Paper
-    border: '#E6E7E5', // Faint dividers
+    primary: '#A83C26', // Slate
+    primaryDark: '#8F3323', // Slate Dark
+    accent: '#1A1712', // Ink
+    accentDark: '#0F0D0A', // Ink Dark
+    secondary: '#8A7F66', // Cool Gray
+    tertiary: '#2E5738', // Muted Sage
+    bg: '#FBF6EA', // Paper
+    bgSoft: '#F4EBD6', // Soft Paper
+    border: '#E3D6B8', // Faint dividers
   },
 
   // Static asset paths under public/

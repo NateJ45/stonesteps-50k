@@ -67,8 +67,8 @@ import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 // These two lines are REWRITTEN by `npm run apply-brand` from
 // brand/brand.config.json (studio.fonts.display / studio.fonts.body). Keep them
 // as single-quoted one-line string literals or the rewrite will not match.
-const DISPLAY_STACK = '"Libre Baskerville", Georgia, "Times New Roman", serif';
-const BODY_STACK = '"Inter Variable", system-ui, -apple-system, sans-serif';
+const DISPLAY_STACK = '"Staatliches", "Arial Narrow", system-ui, sans-serif';
+const BODY_STACK = '"Archivo Variable", system-ui, -apple-system, sans-serif';
 
 function withFamily(font: ThemeFont, family: string): ThemeFont {
   return { ...font, family };
