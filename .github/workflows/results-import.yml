@@ -1,0 +1,218 @@
+name: Import race results
+
+# Pulls each year's results from RunSignUp into Sanity and redeploys the site,
+# so nobody has to do anything after the race.
+#
+# ── WHY THIS CAN BE FULLY AUTOMATIC ─────────────────────────────────────────
+# The race is registered and timed on RunSignUp, so the results are public on
+# its API the same day the timer posts them. scripts/import-results.mjs
+# discovers events by walking the race's own event list
+# (/rest/race/15282?future_events_only=F) rather than a hardcoded list of
+# years, so a new running needs no code change, no event id and no new year
+# added anywhere. It is idempotent, with deterministic _ids and
+# createOrReplace, so running it before the results exist does nothing and
+# running it twice changes nothing.
+#
+# That is the whole reason this workflow is worth having: the alternative is a
+# person remembering, once a year, to run two commands.
+#
+# ── WHAT IT NEEDS ───────────────────────────────────────────────────────────
+# Repo secrets:
+#   SANITY_API_WRITE_TOKEN   an Editor token. Without it the import skips.
+#   CLOUDFLARE_API_TOKEN     without these two the import still runs and the
+#   CLOUDFLARE_ACCOUNT_ID    deploy skips with a warning, so the data lands
+#                            and someone can deploy by hand.
+# Repo variables (already set):
+#   PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET
+#
+# Every one of those is checked in a step rather than an `if:`, because a
+# secret cannot be read in an `if:` expression. Missing credentials WARN and
+# skip rather than failing, so this file is safe to commit before any of them
+# exist. Same stance as sanity-backup.yml and deploy-staging.yml.
+#
+# ── THE SCHEDULE ────────────────────────────────────────────────────────────
+# Daily through October and November, which covers the race (late October) and
+# the weeks after it when a timer might correct a row. The rest of the year it
+# runs only when someone asks. GitHub's scheduler is best-effort and can be
+# late by tens of minutes under load; nothing here is time-critical.
+#
+# ── THE DEPLOY IS CONDITIONAL, AND IMPERFECTLY SO ───────────────────────────
+# The site is statically built, so imported results are invisible until it is
+# rebuilt. Rebuilding on all 61 scheduled runs would be waste, so the job
+# counts the results before and after and deploys only when the number moved.
+#
+# KNOWN LIMIT: a re-import that CORRECTS an existing row (a fixed time, a
+# corrected place) does not change the count, so it will not trigger a deploy.
+# Use the manual run for that; `deploy_anyway` forces it. This is stated
+# plainly rather than hidden because a workflow that silently skips the deploy
+# you needed is worse than one that admits when it will.
+#
+# ── WHAT THIS DOES NOT DO ───────────────────────────────────────────────────
+# It does not set the `trekker` flag. Trekkers take the optional early start
+# and the race makes them ineligible for awards, and src/lib/age-brackets.ts
+# excludes them from every record. The importer has no idea who they are: only
+# 2004 to 2007 carry the flag, because those years came from spreadsheets with
+# a Trekkers column. If RunSignUp ever exposes the early start as a bib range
+# or a separate event, teach import-results.mjs to read it. Until then an
+# unflagged trekker can take a record they were not eligible to win, and
+# somebody has to tick the box in the Studio.
+
+on:
+  schedule:
+    - cron: '0 9 * 10,11 *' # daily 09:00 UTC, October and November
+  workflow_dispatch:
+    inputs:
+      year:
+        description: 'One year only (blank imports everything available)'
+        required: false
+        type: string
+      deploy_anyway:
+        description: 'Deploy even if the result count did not change'
+        required: false
+        type: boolean
+        default: false
+
+# One at a time. Two overlapping imports would race on the same documents, and
+# two overlapping deploys would race on the same Worker.
+concurrency:
+  group: results-import
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+      can_deploy: ${{ steps.check.outputs.can_deploy }}
+    steps:
+      - id: check
+        # No checkout: this job needs nothing but the presence of credentials.
+        env:
+          WRITE_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+        run: |
+          if [ -z "$WRITE_TOKEN" ] || [ -z "$PROJECT_ID" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::SANITY_API_WRITE_TOKEN secret and/or PUBLIC_SANITY_PROJECT_ID variable not set; skipping the results import."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "$CF_TOKEN" ] && [ -n "$CF_ACCOUNT" ]; then
+            echo "can_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "can_deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Cloudflare credentials not set; results will import but the site will not be rebuilt."
+          fi
+
+  import:
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The dataset is public, so counting needs no token. Counted before and
+      # after so the deploy can be skipped on the 60 days a year when the
+      # import finds nothing new. See the header for what this misses.
+      - name: Count results before
+        id: before
+        env:
+          PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: |
+          N=$(curl -sfG \
+            "https://$PROJECT_ID.api.sanity.io/v2026-05-01/data/query/${DATASET:-production}" \
+            --data-urlencode 'query=count(*[_type == "raceResult"])' | jq -r '.result')
+          echo "count=$N" >> "$GITHUB_OUTPUT"
+          echo "results before: $N"
+
+      - name: Import from RunSignUp
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+          SANITY_API_WRITE_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+          ONLY_YEAR: ${{ inputs.year }}
+        run: |
+          if [ -n "$ONLY_YEAR" ]; then
+            node scripts/import-results.mjs --year "$ONLY_YEAR"
+          else
+            node scripts/import-results.mjs
+          fi
+
+      - name: Count results after
+        id: after
+        env:
+          PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: |
+          # The import commits with visibility: 'async', so the query index can
+          # trail the write by a moment. Poll briefly rather than reading once
+          # and concluding nothing changed.
+          BEFORE=${{ steps.before.outputs.count }}
+          for i in 1 2 3 4 5 6; do
+            N=$(curl -sfG \
+              "https://$PROJECT_ID.api.sanity.io/v2026-05-01/data/query/${DATASET:-production}" \
+              --data-urlencode 'query=count(*[_type == "raceResult"])' | jq -r '.result')
+            [ "$N" != "$BEFORE" ] && break
+            sleep 5
+          done
+          echo "count=$N" >> "$GITHUB_OUTPUT"
+          echo "results after: $N"
+
+      - name: Summarise
+        env:
+          BEFORE: ${{ steps.before.outputs.count }}
+          AFTER: ${{ steps.after.outputs.count }}
+        run: |
+          {
+            echo "### Results import"
+            echo ""
+            echo "| | count |"
+            echo "| --- | --- |"
+            echo "| before | $BEFORE |"
+            echo "| after | $AFTER |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$BEFORE" = "$AFTER" ]; then
+            echo "No new results." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Imported $((AFTER - BEFORE)) new results." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Generate Sanity types
+        if: >-
+          needs.gate.outputs.can_deploy == 'true' &&
+          (steps.before.outputs.count != steps.after.outputs.count || inputs.deploy_anyway)
+        run: npm run typegen
+
+      - name: Build
+        if: >-
+          needs.gate.outputs.can_deploy == 'true' &&
+          (steps.before.outputs.count != steps.after.outputs.count || inputs.deploy_anyway)
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: npm run build
+
+      # THE CONFIG FLAG IS LOAD-BEARING. This is a hybrid static+SSR build, and
+      # a plain `wrangler deploy` reads the SOURCE wrangler.jsonc, which knows
+      # nothing about the adapter's generated asset manifest: every sub-route
+      # 404s. Deploy the adapter's own config, exactly as `npm run deploy` does.
+      - name: Deploy
+        if: >-
+          needs.gate.outputs.can_deploy == 'true' &&
+          (steps.before.outputs.count != steps.after.outputs.count || inputs.deploy_anyway)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy -c dist/server/wrangler.json

@@ -1,9 +1,14 @@
 name: Deploy staging preview
 
-# Deploys the `staging` branch to a SEPARATE Cloudflare Worker (ncs-astro-sanity-starter-staging)
+# Deploys the `staging` branch to a SEPARATE Cloudflare Worker (stonesteps-50k-staging)
 # so you can verify on the real edge (security headers, the Sanity CDN image
 # pipeline, redirects, real Lighthouse) before it reaches production. The
-# preview lives at https://ncs-astro-sanity-starter-staging.<your-subdomain>.workers.dev.
+# preview lives at https://stonesteps-50k-staging.<your-subdomain>.workers.dev.
+#
+# The Worker name below was `ncs-astro-sanity-starter-staging` until 2026-09-07,
+# inherited unchanged from the starter this repo was forked from. It would have
+# deployed this site under the STARTER's name the first time anyone set the
+# Cloudflare secrets and pushed a staging branch. Check this line on any fork.
 #
 # Activates once these repo secrets exist: CLOUDFLARE_API_TOKEN,
 # CLOUDFLARE_ACCOUNT_ID. Until then the gate below skips the deploy with a
@@ -69,4 +74,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy -c dist/server/wrangler.json --name ncs-astro-sanity-starter-staging
+          command: deploy -c dist/server/wrangler.json --name stonesteps-50k-staging
