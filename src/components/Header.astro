@@ -293,10 +293,10 @@ function isGroupActive(items: { href: string }[]) {
             logo, show the full availabilityStatus so the roomy header doesn't
             read as half-empty. The complete status is always in the aria-label
             and on the Contact page. */}
-          <span class="text-[0.65rem] font-semibold tracking-eyebrow whitespace-nowrap uppercase md:hidden">
+          <span class="text-[0.75rem] font-semibold tracking-eyebrow whitespace-nowrap uppercase md:hidden">
             Open
           </span>
-          <span class="hidden text-[0.65rem] font-semibold tracking-eyebrow whitespace-nowrap uppercase md:inline">
+          <span class="hidden text-[0.75rem] font-semibold tracking-eyebrow whitespace-nowrap uppercase md:inline">
             {availability}
           </span>
         </a>
@@ -454,7 +454,7 @@ function isGroupActive(items: { href: string }[]) {
           <a
             href={headerCta.href}
             class:list={[
-              'press-tactile inline-flex items-center rounded-md px-m py-2 text-xs font-semibold tracking-eyebrow uppercase',
+              'press-tactile inline-flex items-center rounded-md px-m py-2 text-sm font-semibold tracking-eyebrow uppercase',
               isActive(headerCta.href)
                 ? 'bg-accent-dark text-white'
                 : 'bg-primary-dark text-white hover:bg-accent-dark',

@@ -90,7 +90,7 @@ export default function RaceContactForm({ subjects, fallbackUrl }: Props) {
     <form className="grid gap-6" onSubmit={onSubmit} noValidate>
       {!configured && (
         <p className="provisional rounded-md px-3 py-2 text-sm" role="note">
-          <span className="rounded-sm bg-primary px-2 py-0.5 font-mono text-[0.6rem] tracking-[0.2em] text-primary-foreground uppercase">
+          <span className="rounded-sm bg-primary px-2 py-0.5 font-mono text-[0.6875rem] tracking-[0.2em] text-primary-foreground uppercase">
             Not connected
           </span>{' '}
           <span className="text-muted-foreground">
@@ -102,7 +102,7 @@ export default function RaceContactForm({ subjects, fallbackUrl }: Props) {
 
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="grid gap-2">
-          <label className="font-mono text-[0.62rem] tracking-[0.18em] uppercase" htmlFor="name">
+          <label className="font-mono text-[0.6875rem] tracking-[0.18em] uppercase" htmlFor="name">
             Name
           </label>
           <input
@@ -115,7 +115,7 @@ export default function RaceContactForm({ subjects, fallbackUrl }: Props) {
           />
         </div>
         <div className="grid gap-2">
-          <label className="font-mono text-[0.62rem] tracking-[0.18em] uppercase" htmlFor="email">
+          <label className="font-mono text-[0.6875rem] tracking-[0.18em] uppercase" htmlFor="email">
             Email
           </label>
           <input
@@ -130,7 +130,7 @@ export default function RaceContactForm({ subjects, fallbackUrl }: Props) {
       </div>
 
       <div className="grid gap-2">
-        <label className="font-mono text-[0.62rem] tracking-[0.18em] uppercase" htmlFor="subject">
+        <label className="font-mono text-[0.6875rem] tracking-[0.18em] uppercase" htmlFor="subject">
           What is this about?
         </label>
         <select
@@ -145,7 +145,7 @@ export default function RaceContactForm({ subjects, fallbackUrl }: Props) {
       </div>
 
       <div className="grid gap-2">
-        <label className="font-mono text-[0.62rem] tracking-[0.18em] uppercase" htmlFor="message">
+        <label className="font-mono text-[0.6875rem] tracking-[0.18em] uppercase" htmlFor="message">
           Message
         </label>
         <textarea

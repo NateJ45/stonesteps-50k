@@ -47,7 +47,7 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
 {
   valid && (
     <div class={className}>
-      <p class="mb-2 font-mono text-[0.68rem] tracking-[0.22em] text-muted-foreground uppercase">
+      <p class="mb-2 font-mono text-[0.75rem] tracking-[0.22em] text-muted-foreground uppercase">
         {label}
       </p>
       <div
@@ -126,7 +126,9 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
   }
   .clock__lbl {
     grid-area: label;
-    font-size: 0.55rem;
+    /* 11px floor. This was 0.55rem, which rendered at 8.8px: the smallest
+       text on the site, and a label a visitor is meant to read. */
+    font-size: 0.6875rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: rgb(255 235 187 / 0.5);
