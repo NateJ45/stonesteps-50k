@@ -1,0 +1,141 @@
+name: Deploy
+
+# Deploys the production Worker (stonesteps-50k).
+#
+# ── WHY THIS EXISTS ─────────────────────────────────────────────────────────
+# Until 2026-09-07 this repo had no production deploy at all. deploy-staging.yml
+# only handles the `staging` branch, results-import.yml only deploys when it
+# finds new results, and everything else came off a laptop by hand. So a merged
+# code change was live only if somebody remembered, and a Sanity publish was
+# live only if somebody remembered twice.
+#
+# ── THE THREE WAYS IT FIRES ─────────────────────────────────────────────────
+# push to main          a code change. Docs-only paths are ignored, see below.
+# repository_dispatch   an editor published in the Studio. A Sanity webhook
+#   (sanity-publish)    POSTs to GitHub's dispatches endpoint. This is the piece
+#                       that makes content edits reach the live site on their
+#                       own, because the site is STATICALLY BUILT: publishing in
+#                       Sanity changes the dataset and nothing else. Setup is in
+#                       docs/PENDING.md.
+# workflow_dispatch     a human, for when something needs pushing out now.
+#
+# ── WHAT IT WILL NOT DO ─────────────────────────────────────────────────────
+# It will not deploy a build whose unit tests fail. Those 489 tests run in well
+# under a second and three of them are gates rather than ordinary suites: colour
+# contrast over the theme palette, the layout-variant column derivation, and the
+# section-field drift check. `astro build` does NOT type-check, so without this
+# step a red repo could still ship.
+#
+# Playwright is deliberately NOT run here. ci.yml runs it on the same push, in
+# parallel, and duplicating a 50 second browser matrix in the deploy path buys
+# nothing: if it fails, the fix is another commit either way.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      # Prose that cannot reach the built site. Everything else deploys,
+      # because a missed deploy is a worse failure than a spare one.
+      - 'docs/**'
+      - 'README.md'
+      - 'CLAUDE.md'
+      - 'OPERATIONS.md'
+      - 'PORTS.md'
+      - '.github/**/*.md'
+  repository_dispatch:
+    types: [sanity-publish]
+  workflow_dispatch:
+
+# Deploys queue rather than cancelling each other. cancel-in-progress would
+# abort a run mid `wrangler deploy`, and three spare minutes is a much better
+# outcome than an interrupted upload.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        # A secret cannot be read in an `if:` expression, so the check happens
+        # in a step. Missing credentials warn and skip rather than failing, so
+        # a fork of this repo is never red for a reason it cannot fix.
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Cloudflare credentials not set; skipping the production deploy."
+          fi
+
+  deploy:
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Sanity types
+        run: npm run typegen
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Build
+        env:
+          # Without these the build succeeds and ships EMPTY pages, because
+          # sanityFetch falls back silently when the project id is absent. That
+          # is the right behaviour for a fresh clone and the wrong thing to
+          # deploy, so treat a missing variable here as a real problem.
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: |
+          if [ -z "$PUBLIC_SANITY_PROJECT_ID" ]; then
+            echo "::error::PUBLIC_SANITY_PROJECT_ID is not set. The build would ship empty pages over the live site."
+            exit 1
+          fi
+          npm run build
+
+      # THE CONFIG FLAG IS LOAD-BEARING. This is a hybrid static+SSR build, and
+      # a plain `wrangler deploy` reads the SOURCE wrangler.jsonc, which knows
+      # nothing about the adapter's generated asset manifest: every sub-route
+      # 404s. Deploy the adapter's own config, exactly as `npm run deploy` does.
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy -c dist/server/wrangler.json
+
+      # A deploy that 200s on the home page but empties every sub-route is the
+      # failure this repo has already had once, via assets.not_found_handling.
+      # Prove the routes rather than trusting the upload.
+      - name: Smoke the deployed site
+        run: |
+          BASE=https://stonesteps-50k.nathanjnixon86.workers.dev
+          FAIL=0
+          for path in / /course /records /results /results/2011 /contact; do
+            CODE=$(curl -sL -o /dev/null -w '%{http_code}' "$BASE$path")
+            echo "$CODE $path"
+            [ "$CODE" = "200" ] || FAIL=1
+          done
+          # One content assertion, so an empty-but-200 deploy cannot pass.
+          curl -sL "$BASE/results" | grep -q 'finishes across' || {
+            echo "::error::/results rendered without its results."
+            FAIL=1
+          }
+          exit $FAIL

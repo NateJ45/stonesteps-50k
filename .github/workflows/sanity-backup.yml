@@ -12,11 +12,17 @@ name: Sanity dataset backup
 # / presacademy) and the `--project-id` flag on the export (reid-design-site,
 # 2026-09-05).
 #
-# ── THIS REPO IS A TEMPLATE ──────────────────────────────────────────────────
-# ncs-astro-sanity-starter ships no Sanity project of its own, so there is
-# nothing here worth backing up and the schedule is COMMENTED OUT (same stance
-# as publish-due.yml). It is committed anyway so a FORK inherits a working
-# backup on day one.
+# ── THIS FORK: SCHEDULE IS ON ────────────────────────────────────────────────
+# Enabled 2026-09-07. In the starter this block is commented out, because the
+# starter ships no Sanity project and has nothing worth backing up. This fork
+# does, and a lot of it exists NOWHERE ELSE: the race deleted its own results
+# pages, and 929 of the 1,961 results here were recovered from the Wayback
+# Machine and from spreadsheets. Losing this dataset would mean redoing that
+# recovery, or failing to.
+#
+# The steps below are kept as written, because they are the instructions a
+# future fork needs. For this repo, 1 and 3 are done and 2 is the passphrase
+# Nathan holds outside GitHub.
 #
 # To enable in a fork, per site:
 #   1. Set the SANITY_AUTH_TOKEN repo secret (a READ token is enough).
@@ -58,8 +64,8 @@ name: Sanity dataset backup
 # workflow_dispatch stays on, so a manual run always works.
 
 on:
-  # schedule:
-  #   - cron: '0 7 * * *' # daily 07:00 UTC
+  schedule:
+    - cron: '0 7 * * *' # daily 07:00 UTC
   workflow_dispatch:
 
 jobs:
