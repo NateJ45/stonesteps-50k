@@ -398,6 +398,8 @@ export interface ProjectedRaceDistance {
   slug?: string;
   kicker?: string;
   loopStructure?: string;
+  totalMiles?: number;
+  loopCount?: number;
   blurb?: string;
   includes?: string[];
   startTime?: string;

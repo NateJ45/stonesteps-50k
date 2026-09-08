@@ -44,6 +44,26 @@ export const distance = defineType({
         'In the race\'s own words. It publishes "five plus" and "three plus" mile loops ' +
         'rather than exact per-loop mileages, so do not invent precise figures here.',
     }),
+    // A DISTANCE HAS A LENGTH AND A LOOP COUNT, and until now those facts only
+    // existed inside the loopStructure sentence, where nothing could read them.
+    // Same reasoning as storing a finish time in seconds rather than as
+    // "3:40:56": a number can be shown, compared and checked; a sentence cannot.
+    defineField({
+      name: 'totalMiles',
+      title: 'Total distance (miles)',
+      type: 'number',
+      description:
+        'The loops for this distance added up, taken from the 2006 to 2009 timing ' +
+        'sheets: 30.8 for the 50K (four 5.3s and three 3.2s) and 17.0 for the 27K. ' +
+        'Shown on the ticket because "50K" alone tells a US trail runner very little. ' +
+        'Leave empty rather than rounding to a nicer number.',
+    }),
+    defineField({
+      name: 'loopCount',
+      title: 'Number of loops',
+      type: 'number',
+      description: 'Seven for the 50K, four for the 27K.',
+    }),
     defineField({
       name: 'blurb',
       title: 'Description',

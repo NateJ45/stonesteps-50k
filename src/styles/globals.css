@@ -1685,32 +1685,54 @@ main > .band-torn:first-child::before {
 }
 @media (min-width: 768px) {
   .ticket-board__row {
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 26rem));
     justify-content: center;
-    gap: 0;
+    gap: 2.5rem;
   }
-  .ticket-board__row > * {
-    flex: 0 1 26rem;
-  }
-  /* The overlap. The tickets are already rotated in opposite directions, so
-     tucking them together reads as two tickets dropped on a desk rather than a
-     layout mistake. The featured one sits on top.
-     THE OVERLAP MUST STAY SMALLER THAN THE CARD'S OWN PADDING (p-7, 1.75rem).
-     At -2.25rem the top card ate 8px of the one behind it and clipped the first
-     letter of every line: "turning for home" rendered as "urning for home". An
-     overlap that covers content is not a style, it is a defect. */
-  .ticket-board__row > * + * {
-    margin-left: -1rem;
-  }
-  .ticket-board__row > .ticket--feature {
-    position: relative;
-    z-index: 2;
+
+  /* THE ROWS LINE UP ACROSS BOTH TICKETS, and that is the whole job of this
+     section. It is a comparison: a runner wants to read START against START and
+     the includes list against the includes list. Subgrid is what makes that
+     true no matter how much longer one blurb runs than the other, so the
+     perforation, the stub and the register button sit at the same height on
+     both cards without anyone hand-tuning a min-height.
+
+     WHAT WAS HERE BEFORE, and why it went. The two tickets were tucked together
+     with a negative margin and counter-rotated, meant to read as two tickets
+     dropped on a desk. Three things were wrong with it. The top card ran across
+     the featured one's corner ribbon, so "THE FULL ULTRA" rendered as a broken
+     diagonal stripe. The opposing rotations pulled the two perforation lines
+     and their notch holes out of alignment, which reads as a mistake rather
+     than as casual. And the overlap put every equivalent field at a different
+     height, so the one thing the section exists to support, comparing the two,
+     was the thing it made hardest. */
+  .ticket-board__row > .ticket {
+    display: grid;
+    grid-row: span 2;
+    grid-template-rows: subgrid;
   }
 }
 
+/* The distance and loop count, directly under the big name. Uses the plate's
+   own soft ink rather than an opacity utility, for the reason recorded on
+   .ticket-soft above. */
+.ticket-stat {
+  color: var(--ticket-ink-soft);
+}
+
+/* Tickets OUTSIDE the board keep the hand-dropped tilt; inside it they sit
+   square, because a comparison needs a shared baseline. */
 .ticket:nth-of-type(even) {
   transform: rotate(1.6deg);
+}
+.ticket-board__row > .ticket,
+.ticket-board__row > .ticket:nth-of-type(even) {
+  transform: none;
+}
+.ticket-board__row > .ticket:hover,
+.ticket-board__row > .ticket:focus-within {
+  transform: translateY(-6px);
 }
 .ticket:hover,
 .ticket:focus-within {

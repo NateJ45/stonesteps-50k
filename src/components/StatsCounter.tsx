@@ -25,6 +25,13 @@ function AnimatedNumber({
   duration: number;
   run: boolean;
 }) {
+  // A target with a decimal keeps it. The counter used to round to whole
+  // numbers, which quietly turned the 50K's measured 30.8 mile course into
+  // "31" and put the stats band into open disagreement with the distance
+  // tickets, which carry the same figure from the same timing sheets. A stat
+  // that rounds away the interesting part of a number is worse than no stat.
+  const decimals = Number.isInteger(target) ? 0 : 1;
+  const factor = 10 ** decimals;
   const [value, setValue] = useState(0);
   const rafRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
@@ -47,18 +54,18 @@ function AnimatedNumber({
       if (!startTimeRef.current) startTimeRef.current = time;
       const elapsed = time - startTimeRef.current;
       const progress = Math.min(elapsed / duration, 1);
-      setValue(Math.round(easeOutQuart(progress) * target));
+      setValue(Math.round(easeOutQuart(progress) * target * factor) / factor);
       if (progress < 1) {
         rafRef.current = requestAnimationFrame(animate);
       }
     };
     rafRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [run, target, duration, reduceMotion]);
+  }, [run, target, duration, reduceMotion, factor]);
 
   return (
     <span>
-      {value}
+      {value.toFixed(decimals)}
       {suffix && <span className="align-super text-[0.6em] text-secondary">{suffix}</span>}
     </span>
   );

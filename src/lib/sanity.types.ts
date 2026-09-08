@@ -449,6 +449,8 @@ export type Distance = {
   slug?: Slug;
   kicker?: string;
   loopStructure?: string;
+  totalMiles?: number;
+  loopCount?: number;
   blurb?: string;
   includes?: Array<string>;
   startTime?: string;

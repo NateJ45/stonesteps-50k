@@ -126,6 +126,8 @@ docs.push({
   // page they must appear with their source: see the loopCardSection's
   // sourceNote in scripts/seed-pages.mjs.
   loopStructure: 'Four 5.3 mile loops alternating with three 3.2 mile loops',
+  totalMiles: 30.8, // 4 x 5.3 + 3 x 3.2
+  loopCount: 7,
   blurb:
     'The original. Seven single-track loops through Mt. Airy Forest, each one returning ' +
     'you through the aid station at The Oval before sending you back out. Roots, rocks, ' +
@@ -147,6 +149,8 @@ docs.push({
   slug: { _type: 'slug', current: '27k' },
   kicker: 'The fun run',
   loopStructure: 'Two 5.3 mile loops alternating with two 3.2 mile loops, turning for home at 17',
+  totalMiles: 17, // 2 x 5.3 + 2 x 3.2, and the race's own "turning for home at 17"
+  loopCount: 4,
   blurb:
     'Same trail, same climbs, four loops instead of seven. The way a lot of Stone Steps ' +
     'finishers start before they come back for the 50K.',

@@ -148,7 +148,17 @@ docs.push({
           suffix: ' ft',
           label: 'Total elevation change',
         },
-        { _type: 'statItem', _key: key(), number: 31.1, suffix: ' mi', label: 'Full 50K distance' },
+        // 30.8, not the 31.1 a 50 km conversion gives. The number that belongs
+        // on the page is the one the COURSE measures, from the race's own 2006
+        // to 2009 split columns, and it is the same figure the distance ticket
+        // carries. Two numbers for one course is how a site loses trust.
+        {
+          _type: 'statItem',
+          _key: key(),
+          number: 30.8,
+          suffix: ' mi',
+          label: '50K course distance',
+        },
         {
           _type: 'statItem',
           _key: key(),
