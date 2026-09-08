@@ -1322,6 +1322,42 @@ body::after {
   --display-shadow: var(--lift-sm);
 }
 
+/* ---------- The second ink -------------------------------------------- */
+/* A HARD OFFSET IN THE BRAND RED, not a drop shadow. The distinction is the
+   whole rule above: an offset in the GROUND's colour is a shadow, and the
+   comment on --display-shadow explains why that one has to switch off in light
+   mode. An offset in a different HUE is not pretending to be light falling on
+   anything. It is a second pass of ink slightly out of register, which is how
+   every cheaply-printed race poster and gig flyer this design is descended from
+   actually looked. So it is correct in both themes, from one token, with no
+   inversion to get wrong.
+
+   Three things keep it deliberate rather than accidental:
+   - No blur. A soft offset reads as a botched shadow; a hard one reads as a
+     second plate.
+   - Offset in em, so it scales with the clamp() rather than shrinking to a
+     smudge on a phone.
+   - Down and RIGHT only, one direction, matching the light everywhere else.
+
+   The live WordPress site does the soft-blurred-dark version of this, which is
+   the Bricks default and the reason its dark-on-cream headings below the fold
+   carry no shadow at all: there was nowhere for that treatment to go. */
+:root {
+  --display-echo: #a83c26;
+}
+
+.display-echo {
+  text-shadow: 0.055em 0.055em 0 var(--display-echo);
+}
+
+/* The outlined k is TRANSPARENT text with a stroke. A text-shadow paints the
+   shape of the glyph regardless, so the echo would fill the counter with a
+   solid red slug and undo the outline. It keeps the outline and skips the
+   second ink. */
+.display-echo .k-outline {
+  text-shadow: none;
+}
+
 /* Preserve the logo's lowercase k inside uppercased display type.
    MUST STAY GLOBAL AND MUST STAY AFTER .display. Astro wraps component-scoped
    selectors in :where(), which has zero specificity, so a scoped
