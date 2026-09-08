@@ -47,7 +47,12 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
 {
   valid && (
     <div class={className}>
-      <p class="mb-2 font-mono text-[0.75rem] tracking-[0.22em] text-muted-foreground uppercase">
+      {/* Full-strength ink, not muted. This label is 12px on the busiest band
+      of the site, with mud behind it, and axe measured it at 4.11:1 there
+      against AA's 4.5. Softening a label that sits on texture is the wrong
+      economy: the hierarchy here comes from size and letter-spacing, which it
+      already has. */}
+      <p class="mb-2 font-mono text-[0.75rem] tracking-[0.22em] text-foreground uppercase">
         {label}
       </p>
       <div

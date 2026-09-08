@@ -1,0 +1,168 @@
+---
+// Safe to edit by hand
+//
+// The home hero's mud: four baked layers, worn as CSS masks.
+//
+// HOME HERO ONLY. This is the first impression and it is meant to be loud, but
+// the same field repeated down the page would read as a clip-art race t-shirt.
+//
+// WHY MASKS AND NOT INLINE SVG. The first version of this drew the field live,
+// as about nine hundred inline <ellipse> elements. That is roughly 43KB gzipped
+// of markup on the CRITICAL PATH, nine hundred nodes for the browser to style
+// and paint above the fold, and it still looked generated, because spatter made
+// of plain ellipses always does. The art is now baked by `npm run mud`
+// (scripts/lib/mud.mjs), which also lets it run through feTurbulence and
+// feDisplacementMap for genuinely ragged edges: a filter that would be a
+// performance disaster on this many live shapes and is free once it is a pixel.
+//
+// The files are ALPHA MASKS rather than pictures, so this paints them with
+// `background: currentcolor`. One set of files is therefore bark on the cream
+// theme and cream on the bark theme, with no second asset to keep in step.
+//
+// FOUR LAYERS, because one image could only fade in as a whole. Three throws
+// land in sequence and the trail of prints then walks across, which is the
+// entire reason the hero moves.
+//
+// TWO SHAPES, swapped by media query on the custom property so only the one in
+// use is ever fetched. The layer is `cover`ed to its band, so giving a
+// 0.44-aspect phone hero the 1.7-aspect desktop art scales it 2.1x and crops
+// four fifths of its width: magnified blobs, landing on the subhead.
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props as Props;
+---
+
+<div class={`mud ${className}`} aria-hidden="true" data-contrast-media>
+  <div class="mud__l mud__l--1"></div>
+  <div class="mud__l mud__l--2"></div>
+  <div class="mud__l mud__l--3"></div>
+  <div class="mud__l mud__l--trail"></div>
+</div>
+
+<style>
+  .mud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    color: var(--spatter-ink);
+  }
+
+  /* THE TRANSPARENCY IS IN THE COLOUR, NOT IN AN `opacity` ON THE WRAPPER, and
+     that is an accessibility fix rather than a style preference.
+
+     With `opacity` on the parent, each layer's own background is a FULLY OPAQUE
+     currentcolor and only the mask makes it sparse. axe cannot see a mask: it
+     walks the elements over a piece of text, finds an opaque bark rectangle
+     covering the whole hero, and reports the countdown label at about 1.2:1.
+     It was right to, given what it can see. Mixing the alpha into the colour
+     instead means the layer really is semi-transparent, so axe blends it the
+     way the browser does and gets the true number.
+
+     One consequence worth knowing: the layers now stack, so where two overlap
+     the mud is denser. That is what real mud does, and it is why the per-layer
+     value is lower than the old composite one. */
+  .mud__l {
+    position: absolute;
+    inset: 0;
+    background-color: color-mix(
+      in srgb,
+      currentcolor calc(var(--spatter-opacity) * 100%),
+      transparent
+    );
+    -webkit-mask-image: var(--src);
+    mask-image: var(--src);
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+
+  .mud__l--1 {
+    --src: url('/mud/wide-1.png');
+  }
+  .mud__l--2 {
+    --src: url('/mud/wide-2.png');
+  }
+  .mud__l--3 {
+    --src: url('/mud/wide-3.png');
+  }
+  .mud__l--trail {
+    --src: url('/mud/wide-4.png');
+  }
+
+  /* THE PHONE WEARS ONE COMBINED LAYER, and that is an accessibility decision.
+     axe cannot see a mask: it finds these elements over a piece of text, reads
+     their background colours and blends them, so four stacked semi-transparent
+     layers model as a 57% veil across the hero. It flagged the countdown's 12px
+     label below AA on the phone, where that label sits in the flow rather than
+     off beside the photograph. One element blends once and models what is
+     really painted.
+
+     The three that are not used are `display: none`, so their masks are never
+     fetched either. The phone gives up the throw-by-throw arrival for this,
+     which is the cheaper thing to lose on a small screen; it still fades in.
+
+     Only the applied value is ever fetched, which is why the shape is swapped
+     on the custom property rather than by shipping a second set of elements. */
+  @media (width < 48rem) {
+    .mud__l--1 {
+      --src: url('/mud/phone.png');
+    }
+    .mud__l--2,
+    .mud__l--3,
+    .mud__l--trail {
+      display: none;
+    }
+  }
+
+  /* ---- The arrival ------------------------------------------------------
+     Each throw lands in turn, scaled very slightly past its resting size so it
+     reads as an impact rather than as a fade. The trail then wipes in from the
+     left, which reveals the prints in walking order for the price of one
+     animated property.
+
+     One-shot, on paint: the hero is the first thing on the page and there is
+     nothing to wait for. It settles inside about two and a half seconds.
+
+     Inside a no-preference query, so the RESTING state is the finished field
+     and anyone who asked for less motion gets the mud already there. */
+  @media (prefers-reduced-motion: no-preference) {
+    .mud__l--1 {
+      animation: mud-land 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .mud__l--2 {
+      animation: mud-land 900ms cubic-bezier(0.16, 1, 0.3, 1) 260ms both;
+    }
+    .mud__l--3 {
+      animation: mud-land 1000ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both;
+    }
+    .mud__l--trail {
+      animation: mud-walk 1600ms cubic-bezier(0.4, 0, 0.3, 1) 700ms both;
+    }
+  }
+
+  @keyframes mud-land {
+    from {
+      opacity: 0;
+      scale: 1.07;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  @keyframes mud-walk {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+</style>

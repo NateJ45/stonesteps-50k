@@ -1243,7 +1243,7 @@ body::after {
      opacity low enough that it reads as a stain in the paper rather than as a
      graphic sitting on top of it. */
   --spatter-ink: #1a1712;
-  --spatter-opacity: 0.2;
+  --spatter-opacity: 0.26;
   /* Gold, for small labels on the forest band. Measured 6.11:1 on #2E5738.
      A solid value, because the last three contrast failures on this site were
      all a correct colour diluted with an opacity utility. */
@@ -1269,7 +1269,7 @@ body::after {
   /* On bark, mud has to be LIGHTER than the ground to be seen at all. Cream at
      a whisper: any stronger and it reads as snow, not dirt. */
   --spatter-ink: #ffebbb;
-  --spatter-opacity: 0.17;
+  --spatter-opacity: 0.19;
 }
 
 /* ---------- Display type ------------------------------------------------ */
