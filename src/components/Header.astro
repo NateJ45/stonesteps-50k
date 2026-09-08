@@ -150,7 +150,7 @@ function isGroupActive(items: { href: string }[]) {
 }
 ---
 
-<header class="site-header bg-background">
+<header class="site-header sign-board bg-background">
   {
     /* Eyebrow strip (desktop only). Carries the locked positioning line and
       utility controls (email + social icons + theme toggle). Mobile gets
@@ -302,8 +302,9 @@ function isGroupActive(items: { href: string }[]) {
       class="inline-flex items-center transition-opacity hover:opacity-80"
       aria-label={`${brandName} home`}
     >
-      {
-        /*
+      <span class="sign-badge">
+        {
+          /*
         Single theme-aware logo. The img ships with NO src/srcset so the
         browser doesn't start fetching anything; the inline script below
         sets the right variant synchronously before paint based on the
@@ -317,37 +318,38 @@ function isGroupActive(items: { href: string }[]) {
         so the browser reserves the right layout box before the file lands
         — no CLS.
       */
-      }
-      {
-        logo ? (
-          /* An uploaded Site Settings logo replaces the pair above. It carries no
+        }
+        {
+          logo ? (
+            /* An uploaded Site Settings logo replaces the pair above. It carries no
            data-theme-logo attribute, so the inline swap script below skips it
            and the one image serves both themes. */
-          <img
-            src={logoSrc}
-            srcset={logoSrcset}
-            sizes="280px"
-            alt={logo.alt || brandName}
-            class="h-12 w-auto"
-            loading="eager"
-            decoding="async"
-          />
-        ) : (
-          <img
-            alt={brandName}
-            width={280}
-            height={60}
-            class="h-12 w-auto"
-            loading="eager"
-            decoding="async"
-            data-theme-logo
-            data-logo-light-src={logoLightImg.src}
-            data-logo-light-srcset={logoLightSrcset}
-            data-logo-dark-src={logoDarkImg.src}
-            data-logo-dark-srcset={logoDarkSrcset}
-          />
-        )
-      }
+            <img
+              src={logoSrc}
+              srcset={logoSrcset}
+              sizes="280px"
+              alt={logo.alt || brandName}
+              class="h-12 w-auto"
+              loading="eager"
+              decoding="async"
+            />
+          ) : (
+            <img
+              alt={brandName}
+              width={280}
+              height={60}
+              class="h-12 w-auto"
+              loading="eager"
+              decoding="async"
+              data-theme-logo
+              data-logo-light-src={logoLightImg.src}
+              data-logo-light-srcset={logoLightSrcset}
+              data-logo-dark-src={logoDarkImg.src}
+              data-logo-dark-srcset={logoDarkSrcset}
+            />
+          )
+        }
+      </span>
     </a>
     {
       /* Synchronous inline setup — runs immediately after the img element
@@ -383,7 +385,7 @@ function isGroupActive(items: { href: string }[]) {
               <a
                 href={item.href}
                 class:list={[
-                  'nav-underline text-sm tracking-wide transition-colors',
+                  'nav-blaze text-sm tracking-wide transition-colors',
                   isActive(item.href)
                     ? 'font-semibold text-link'
                     : 'text-foreground hover:text-link',

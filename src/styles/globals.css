@@ -1570,6 +1570,132 @@ body::after {
   mix-blend-mode: normal;
 }
 
+/* ---------- The header, as a painted trail sign ------------------------- */
+/* The site's chrome is the one place that still read as a web page rather than
+   as an object from the race's own world. It is now a BOARD: a painted face,
+   a torn bottom edge like every other band, and the mark nailed to it.
+   Everything is CSS on the existing markup, because the desktop nav is
+   server-rendered and stays that way (CLAUDE.md rule 4).
+
+   THE BOTTOM TEARS INSTEAD OF RULING. Same language as the section seams, but
+   pointing down: this is a board laid OVER the page, so the page shows through
+   where the board is torn. `background-color: inherit` again, so it is always
+   the header's own colour and never needs a second token. */
+.sign-board {
+  position: relative;
+}
+.sign-board::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: -13px;
+  height: 14px;
+  background-color: inherit;
+  pointer-events: none;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 12' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L0,4.8 L9,3 L21,7.8 L37,9.1 L57,3.6 L74,7 L87,5.6 L105,4.7 L117,7.8 L130,8.3 L148,4.2 L160,3.2 L172,5 L182,7.7 L201,4.1 L210,4.9 L229,6.7 L238,8.9 L253,4.7 L267,3.5 L274,8.6 L283,7.4 L298,7.1 L300,4.8 L300,0 Z' fill='%23000'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 12' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L0,4.8 L9,3 L21,7.8 L37,9.1 L57,3.6 L74,7 L87,5.6 L105,4.7 L117,7.8 L130,8.3 L148,4.2 L160,3.2 L172,5 L182,7.7 L201,4.1 L210,4.9 L229,6.7 L238,8.9 L253,4.7 L267,3.5 L274,8.6 L283,7.4 L298,7.1 L300,4.8 L300,0 Z' fill='%23000'/%3E%3C/svg%3E");
+  -webkit-mask-size: 420px 14px;
+  mask-size: 420px 14px;
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+}
+
+/* THE MARK, NAILED TO THE BOARD.
+   The logo is a 55x96 raster and cannot be shown larger without going soft, so
+   it gets PRESENCE instead of size: a plate the colour of the sign's face, a
+   hard black edge, a degree and a half of rotation, and two nail heads. A small
+   mark that is clearly mounted reads as deliberate; the same mark floating at
+   the same size reads as a favicon. Replace this the day a vector logo exists
+   and the plate can simply grow. */
+.sign-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.55rem;
+  border: 2px solid var(--plate-edge);
+  border-radius: 7px;
+  /* THE PAGE'S OWN GROUND, not --plate-face. The plate objects elsewhere invert
+     between themes (a cream ticket on the bark page, a charcoal one on the
+     cream page), and this plate must not: it carries the logo and the wordmark,
+     whose ink follows the THEME. Painted with --plate-face it came out dark
+     charcoal in light mode with dark ink on it. Using the ground means the
+     lockup keeps its normal contrast and the plate is defined by its edge and
+     its shadow, which is what a sign plate is anyway. */
+  background: var(--background);
+  box-shadow: var(--lift-sm);
+  rotate: -1.5deg;
+  transition:
+    rotate 0.24s ease,
+    box-shadow 0.24s ease;
+}
+/* The nail heads. Decorative, so they are drawn rather than marked up. */
+.sign-badge::before,
+.sign-badge::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--foreground) 45%, transparent);
+}
+.sign-badge::before {
+  left: 5px;
+}
+.sign-badge::after {
+  right: 5px;
+}
+a:hover > .sign-badge,
+a:focus-visible > .sign-badge {
+  rotate: 0deg;
+  box-shadow: var(--lift);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sign-badge {
+    transition: none;
+  }
+}
+
+/* NAV ITEMS ARE BLAZED, NOT UNDERLINED.
+   A blaze is how a trail tells you that you are on the right one, and this site
+   already paints them beside its section headings. Using the same mark in the
+   nav means the chrome speaks the race's own language instead of the web's
+   default. Faint on hover, solid on the page you are on.
+
+   The mark is decorative: `aria-current="page"` is what actually announces the
+   current page, and it is already on the link. */
+.nav-blaze {
+  position: relative;
+}
+.nav-blaze::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -0.8rem;
+  translate: -50% 0;
+  width: 7px;
+  height: 14px;
+  border-radius: 2px 3px 2px 3px;
+  rotate: -4deg;
+  background: var(--heading-accent);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.nav-blaze:hover::before,
+.nav-blaze:focus-visible::before {
+  opacity: 0.45;
+}
+.nav-blaze[aria-current='page']::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-blaze::before {
+    transition: none;
+  }
+}
+
 /* ---------- Torn band edges --------------------------------------------- */
 /* Every surfaced band gets a ragged top edge instead of a ruled one. The race
    runs through wet leaf litter; a die-straight seam between two colours is the
