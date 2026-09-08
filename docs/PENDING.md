@@ -95,6 +95,20 @@ Still not set, and unrelated to the above: `sanity-backup.yml` wants
 `SANITY_AUTH_TOKEN` and `BACKUP_PASSPHRASE`, and its schedule is still
 commented out.
 
+### 1d2. Six WCP tools landed and want one signed-in look
+
+Ported 2026-09-07: Welcome, Checkup, Start a new race year, the first-visit
+tour, plus visual regression and link health outside the Studio. The two CI
+pieces are verified green in CI. The four Studio panes compile and the bundle
+loads clean, but panes only render after login. Worth a click-through:
+
+- Welcome lists seven task cards, and each one navigates rather than 404s.
+- Checkup runs and reports (it should currently flag the unmarked trekkers and
+  the synthetic elevation profile).
+- Start a new race year shows a live status per step.
+- The tour appears on a first visit in a fresh browser profile, and the Welcome
+  pane's "Show the welcome tour again" reopens it.
+
 ### 1d. The Studio desk needs one signed-in click-through
 
 The Help & Guide handbook replaced the starter's Start Here panes on
