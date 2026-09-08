@@ -1441,6 +1441,17 @@ body::after {
 .is-overall {
   background: color-mix(in srgb, var(--primary) 7%, transparent);
 }
+
+/* NO ARRIVAL ANIMATION ON THIS ROW, and it is worth saying why so nobody
+   spends the afternoon again. A scroll-driven wipe (`animation-timeline:
+   view()`) does not work here: the row sits inside the table's
+   `overflow-x-auto` wrapper, which is a scroll container, so view() resolves
+   the timeline against THAT box rather than the page and the progress never
+   moves. Driving it from the [data-reveal] observer instead is worse, since
+   that starts its elements at opacity 0 and this is real record data that must
+   never need JavaScript to be visible. Making it work would mean a named
+   timeline hoisted past the horizontal scroller, which exists for a real
+   reason, and that is a lot of machinery for one decorative wipe. */
 .is-overall .rec-time,
 .is-overall .rec-bracket {
   color: var(--heading-accent);

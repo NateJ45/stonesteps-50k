@@ -41,17 +41,19 @@ const shift = `${(100 / COPIES).toFixed(4)}%`;
       class="ticker border-y-2 border-black bg-primary text-primary-foreground"
       aria-hidden="true"
     >
-      <div class="ticker__track" style={`--ticker-shift: ${shift}`}>
-        {Array.from({ length: COPIES }).map(() => (
-          <ul class="ticker__row">
-            {items.map((item) => (
-              <li>
-                {item}
-                <span class="ticker__dot">&middot;</span>
-              </li>
-            ))}
-          </ul>
-        ))}
+      <div class="ticker__ease">
+        <div class="ticker__track" style={`--ticker-shift: ${shift}`}>
+          {Array.from({ length: COPIES }).map(() => (
+            <ul class="ticker__row">
+              {items.map((item) => (
+                <li>
+                  {item}
+                  <span class="ticker__dot">&middot;</span>
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -66,6 +68,24 @@ const shift = `${(100 / COPIES).toFixed(4)}%`;
     display: flex;
     width: max-content;
     animation: ticker-slide 42s linear infinite;
+  }
+
+  /* The strip eases in rather than being already at speed the moment the page
+     paints. It cannot be done on the track itself: that animation is a linear
+     infinite loop, and easing its start would either break the seam or slow the
+     whole loop. So the ease is a separate one-shot transform on a wrapper, and
+     the two transforms simply compose. */
+  .ticker__ease {
+    animation: ticker-ease 1500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes ticker-ease {
+    from {
+      transform: translateX(3.5rem);
+    }
+    to {
+      transform: none;
+    }
   }
   .ticker__row {
     display: flex;
@@ -100,6 +120,9 @@ const shift = `${(100 / COPIES).toFixed(4)}%`;
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .ticker__ease {
+      animation: none;
+    }
     .ticker__track {
       animation: none;
       /* Without the animation the duplicate row is dead weight, and the strip

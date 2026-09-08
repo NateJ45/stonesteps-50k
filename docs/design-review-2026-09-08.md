@@ -296,9 +296,34 @@ reasons matter more than the items.
   mark: off-square corners, three degrees of rotation. A second irregularity
   treatment on the same 9px object reads as fuss, not as craft.
 
-**Phase 5 — Motion.** The punch card and the elevation draw first, since those are the
-two that come from the content. Then the smaller craft. All inside the existing
-reduced-motion discipline. Section 7.
+**Phase 5 — Motion. DONE, 2026-09-08.** The two pieces that come from the
+content landed first, as planned: the elevation profile draws itself left to
+right, and the punch card punches its holes in loop order. Then the LED clock
+re-strikes on a roll-over, the topo contours drift as their band passes, and the
+ticker eases in instead of starting at speed.
+
+Three items on the list came off it, each for a reason:
+
+- **Countdown digits that flip.** A flip is a split-flap, and that component is
+  explicitly an LED race clock drawn to rhyme with the clock in the hero
+  photograph. It re-strikes its segments instead, which is what the real object
+  does.
+- **An arrival on the course-record row.** A scroll-driven wipe cannot work
+  there: the row is inside the table's `overflow-x-auto` wrapper, which is a
+  scroll container, so `view()` resolves the timeline against that box and the
+  progress never moves. Driving it from the reveal observer is worse, since that
+  starts elements at opacity 0 and this is record data that must not need
+  JavaScript to be visible. The reasoning is written into globals.css beside the
+  rule so it is not retried blindly.
+- **The stats odometer and the ticket stub tear-peel.** Both are decoration
+  rather than meaning, and the page already gained five moving parts today. They
+  are cheap to add later if the site feels static, which it no longer does.
+
+Two techniques are worth reusing. `pathLength="1"` makes a draw-on animation
+JS-free and immune to a geometry change, and `animation-timeline: view()` gives
+a scroll-driven effect with no listener at all, degrading to the static design
+where it is unsupported. Both are inside `prefers-reduced-motion: no-preference`,
+so the resting state is always the finished object.
 
 **Phase 6 — Content, unblocked parts only.** The crew and spectator guide, and using the
 photography large. Everything else in section 4 waits on Corfman.
