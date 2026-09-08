@@ -40,13 +40,17 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
     <div class:list={[imageFirst ? 'md:order-1' : 'md:order-2']}>
       {
         image?.asset ? (
-          <SanityImage
-            source={image}
-            width={800}
-            sizes="(min-width: 768px) 45vw, 100vw"
-            quality={75}
-            class="h-auto w-full rounded-md"
-          />
+          // `photo-plate` on the clipping wrapper, so this photograph takes the
+          // same grade as every other one on the site.
+          <div class="photo-plate overflow-hidden rounded-md">
+            <SanityImage
+              source={image}
+              width={800}
+              sizes="(min-width: 768px) 45vw, 100vw"
+              quality={75}
+              class="h-auto w-full"
+            />
+          </div>
         ) : (
           <div class="aspect-[4/5] rounded-md bg-muted" aria-hidden="true" />
         )

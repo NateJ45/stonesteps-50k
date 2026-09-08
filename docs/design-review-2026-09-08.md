@@ -325,8 +325,22 @@ a scroll-driven effect with no listener at all, degrading to the static design
 where it is unsupported. Both are inside `prefers-reduced-motion: no-preference`,
 so the resting state is always the finished object.
 
-**Phase 6 — Content, unblocked parts only.** The crew and spectator guide, and using the
-photography large. Everything else in section 4 waits on Corfman.
+**Phase 6 — Content, unblocked parts only. DONE, 2026-09-08.** The crew and
+spectator guide is on the course page, written from verified facts and using a
+photograph at full width, which closes both halves of this phase in one section.
+
+Its thesis is the one thing this race has that the comparators do not: a loop
+course means you stand in a single place and see your runner seven times. The
+start times, the 5.3 and 3.2 mile loops, the alternating order and the 4:30 pm
+course close are all verified. Parking, packet pickup and the briefing are named
+as unpublished rather than guessed at, in the copy itself, which is the same
+honesty rule the `confirmed` flag applies everywhere else.
+
+Two things were fixed on the way. The lodging block on the contact page was
+seeded with `headline` where the component reads `heading`, so it had been
+rendering with no title at all. And the starter's image-and-text block now
+carries `photo-plate`, so a photograph placed through the page builder takes the
+same grade as the ones the race components place.
 
 **Not in scope, deliberately:** WebGL, merch, live tracking, and the aid-station and
 cutoff table, which cannot be written honestly until the race answers.

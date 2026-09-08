@@ -413,6 +413,90 @@ docs.push({
       ],
     },
     {
+      _type: 'imageTextSection',
+      _key: key(),
+      image: img(
+        PHOTO.trailRunnersWide,
+        'Runners finishing on the path at The Oval, past the race clock and the crowd under the shelter.',
+      ),
+      imageSide: 'left',
+      eyebrow: 'Watching',
+      heading: 'Seven chances to see your runner',
+      body: [
+        {
+          _type: 'block',
+          _key: key(),
+          style: 'normal',
+          markDefs: [],
+          children: [
+            {
+              _type: 'span',
+              _key: key(),
+              marks: [],
+              text:
+                'A loop course is the easiest race there is to watch. Everything happens at ' +
+                'The Oval: the start, the finish, the aid station, and the end of every ' +
+                'single loop. Stand in one place and you see your runner seven times on the ' +
+                '50K and four times on the 27K, without moving the car.',
+            },
+          ],
+        },
+        {
+          _type: 'block',
+          _key: key(),
+          style: 'normal',
+          markDefs: [],
+          children: [
+            {
+              _type: 'span',
+              _key: key(),
+              marks: [],
+              text:
+                'The waits are short and they alternate, because the loops do. A long loop is ' +
+                '5.3 miles and a short one is 3.2, so most runners are back through in ' +
+                'somewhere between half an hour and an hour and a quarter, long, short, ' +
+                'long, short, all the way to the seventh.',
+            },
+          ],
+        },
+        {
+          _type: 'block',
+          _key: key(),
+          style: 'normal',
+          markDefs: [],
+          children: [
+            {
+              _type: 'span',
+              _key: key(),
+              marks: [],
+              text:
+                'The 50K goes at 8:00 am and the 27K at 8:30, each with an optional early ' +
+                'start an hour before. The course closes at about 4:30 pm, so the whole ' +
+                'race fits inside a single day out in the park with a chair and a flask.',
+            },
+          ],
+        },
+        {
+          _type: 'block',
+          _key: key(),
+          style: 'normal',
+          markDefs: [],
+          children: [
+            {
+              _type: 'span',
+              _key: key(),
+              marks: [],
+              text:
+                'Parking, packet pickup and the pre-race briefing are not published anywhere ' +
+                'yet, so they are not on this site either. When the race confirms them they ' +
+                'will appear here.',
+            },
+          ],
+        },
+      ],
+      cta: { _type: 'ctaBlock', label: 'Ask a question', href: '/contact' },
+    },
+    {
       _type: 'distanceTicketsSection',
       _key: key(),
       eyebrow: 'Ready?',
@@ -583,7 +667,9 @@ docs.push({
       _key: key(),
       image: img(PHOTO.runnersPortrait, 'Two runners at the finish at The Oval.'),
       eyebrow: 'Coming from out of town',
-      headline: 'Stay downtown or near CVG',
+      // `heading`, not `headline`. ImageText.astro reads `heading`, so the
+      // wrong key rendered this block with no title at all.
+      heading: 'Stay downtown or near CVG',
       body: [
         {
           _type: 'block',
