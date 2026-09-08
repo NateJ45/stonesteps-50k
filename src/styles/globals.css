@@ -1504,6 +1504,45 @@ body::after {
   }
 }
 
+/* ---------- Torn band edges --------------------------------------------- */
+/* Every surfaced band gets a ragged top edge instead of a ruled one. The race
+   runs through wet leaf litter; a die-straight seam between two colours is the
+   one detail that kept reading as stationery.
+
+   WHY IT LIVES ON THE SURFACE CLASS. Each section paints its own <section>, so
+   there is no shared shell to hang a decoration on (the same reason
+   src/lib/surfaces.ts carries no accent map). `surfaceClass()` is the one place
+   every banded section already passes through, so putting the class there gives
+   the whole site the edge in one edit and keeps it out of eleven components.
+
+   The edge is `background-color: inherit`, so it is always THIS band's colour
+   torn over the one above, and it disappears on its own between two sections
+   that share a surface, which is exactly when a seam should not be visible.
+   The tile is seamless: the path starts and ends at the same height. */
+.band-torn {
+  position: relative;
+}
+.band-torn::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: -15px;
+  height: 16px;
+  background-color: inherit;
+  pointer-events: none;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 12' preserveAspectRatio='none'%3E%3Cpath d='M0,12 L0,7.2 L9,9 L21,4.2 L37,2.9 L57,8.4 L74,5 L87,6.4 L105,7.3 L117,4.2 L130,3.7 L148,7.8 L160,8.8 L172,7 L182,4.3 L201,7.9 L210,7.1 L229,5.3 L238,3.1 L253,7.3 L267,8.5 L274,3.4 L283,4.6 L298,4.9 L300,7.2 L300,12 Z' fill='%23000'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 12' preserveAspectRatio='none'%3E%3Cpath d='M0,12 L0,7.2 L9,9 L21,4.2 L37,2.9 L57,8.4 L74,5 L87,6.4 L105,7.3 L117,4.2 L130,3.7 L148,7.8 L160,8.8 L172,7 L182,4.3 L201,7.9 L210,7.1 L229,5.3 L238,3.1 L253,7.3 L267,8.5 L274,3.4 L283,4.6 L298,4.9 L300,7.2 L300,12 Z' fill='%23000'/%3E%3C/svg%3E");
+  -webkit-mask-size: 420px 16px;
+  mask-size: 420px 16px;
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+}
+/* The first band on a page has nothing above it to tear over, and its edge
+   would land on the header instead. */
+main > .band-torn:first-child::before {
+  display: none;
+}
+
 /* ---------- The ticket -------------------------------------------------- */
 /* Entries are TICKETS, not cards: a torn perforation, punched notches, a
    tear-off stub carrying the includes list and the CTA, and a corner flag on

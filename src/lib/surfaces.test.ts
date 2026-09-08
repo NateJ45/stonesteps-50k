@@ -106,10 +106,19 @@ describe('surface pairs resolve', () => {
   });
 
   it('an unknown surface name falls back to Paper', () => {
-    assert.equal(surfaceClass(undefined), 'bg-background');
-    assert.equal(surfaceClass(null), 'bg-background');
-    assert.equal(surfaceClass('not-a-surface'), 'bg-background');
-    assert.equal(surfaceClass('muted'), 'bg-muted');
+    // Asserted against the registry rather than against a literal class string.
+    // What this gate is for is the FALLBACK: an unrecognised name must land on
+    // Paper, the one surface every contrast pair is measured against. Pinning
+    // the literal made it fail the day the bands grew a torn top edge, which is
+    // a decoration and tells us nothing about whether the fallback still works.
+    const paper = surfaceClass('background');
+    const muted = surfaceClass('muted');
+    assert.ok(paper.includes('bg-background'), 'Paper must still paint bg-background');
+    assert.ok(muted.includes('bg-muted'), 'Grit must still paint bg-muted');
+    assert.notEqual(paper, muted);
+    assert.equal(surfaceClass(undefined), paper);
+    assert.equal(surfaceClass(null), paper);
+    assert.equal(surfaceClass('not-a-surface'), paper);
   });
 });
 

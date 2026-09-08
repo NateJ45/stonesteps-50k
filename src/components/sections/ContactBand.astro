@@ -32,7 +32,7 @@ const {
   headingId = 'contact-heading',
 } = Astro.props as Props;
 
-const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
+const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 
 const raceDate = race?.raceDate ? new Date(race.raceDate) : null;
 const dateLabel =

@@ -98,7 +98,7 @@ const boards = distances
   .filter((d) => d.slug)
   .map((d) => ({ ...d, slug: d.slug as string, genders: boardFor(d.slug as string) }));
 
-const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
+const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 ---
 
 <section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>

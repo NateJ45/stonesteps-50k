@@ -33,14 +33,17 @@ const {
   headingId = 'elevation-heading',
 } = Astro.props as Props;
 
-const surfaceClass = surface === 'muted' ? 'bg-muted' : 'bg-background';
+const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 ---
 
-<section
-  class={`relative overflow-hidden py-section-lg ${surfaceClass}`}
-  aria-labelledby={headingId}
->
-  <Topo seed={29} lines={10} class="opacity-35" />
+<!-- The clip lives on an inner wrapper, not on the <section>. The section
+  needs `overflow: visible` so its torn top edge (`.band-torn`, drawn as a
+  ::before sitting 15px ABOVE the box) is not cut off; the topo still has to be
+  clipped to the band. Same result, one level down. -->
+<section class={`relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+  <div class="pointer-events-none absolute inset-0 overflow-hidden">
+    <Topo seed={29} lines={10} class="opacity-35" />
+  </div>
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
     <SectionHeading {eyebrow} {headline} {headingId} />
     {intro && <p class="mt-4 max-w-[52ch] text-muted-foreground">{intro}</p>}
