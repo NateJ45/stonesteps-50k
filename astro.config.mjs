@@ -143,6 +143,10 @@ export default defineConfig({
       filter: (page) => {
         if (page.includes('/404') || page.includes('/studio') || page.includes('/preview'))
           return false;
+        // The styleguide is the fixed-data wall the visual-regression suite
+        // shoots. It is a real built route so Playwright can load it, and it is
+        // not a page anybody should arrive at from a search.
+        if (page.includes('/styleguide')) return false;
         // Runner pages are deliberately noindex: 711 pages each titled with a
         // private individual's name and home city is a real escalation in
         // findability over a results table, and the race gains nothing from

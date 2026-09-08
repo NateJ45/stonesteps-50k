@@ -36,6 +36,7 @@ export async function getStaticPaths() {
     // random.
     'results',
     'runners',
+    'styleguide',
   ]);
   const slugs = await getAllPageSlugs().catch(() => [] as string[]);
   return slugs.filter((slug) => !RESERVED.has(slug)).map((slug) => ({ params: { slug } }));

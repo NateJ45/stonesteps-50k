@@ -16,6 +16,8 @@ export const RESERVED_SLUGS = new Set([
   '_astro',
   'results',
   'runners',
+  // The fixed-data wall the visual-regression suite shoots.
+  'styleguide',
 ]);
 
 /** Returns true when a slug collides with a built-in route. */

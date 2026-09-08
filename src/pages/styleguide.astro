@@ -1,0 +1,210 @@
+---
+// Foundation, edit with care
+//
+// THE STYLEGUIDE WALL — the fixed-data page the visual-regression suite shoots.
+//
+// WHY IT EXISTS. Three defects shipped on 2026-09-07 that every automated gate
+// was structurally blind to: the footer carried the FORKED REPO'S logo, every
+// heading in light mode was cream on cream, and the featured distance ticket
+// lost its forest stock to a CSS ordering mistake, leaving its heading at
+// 1.15:1. Types passed, unit tests passed, axe passed (a text-shadow makes it
+// report contrast as "incomplete" rather than a violation, and the suite
+// asserts on violations). All three were found by a human looking at the site.
+//
+// A screenshot diff is the only gate that can see that class of bug, and it
+// needs FIXED data or it cries wolf: the real pages carry a live countdown and
+// a results archive that grows every year, so shooting them would churn the
+// baseline on content, not design. Everything below is hardcoded here on
+// purpose. If a pixel moves, the design moved.
+//
+// WHAT BELONGS HERE: anything whose appearance is decided by the design system
+// rather than by content. Palette, type on each surface, buttons, and the
+// signature objects (ticket, punch card, ticker). The header and footer come
+// free from BaseLayout, which is what would have caught the logo.
+//
+// WHAT DOES NOT: anything time-based or data-driven. The countdown changes
+// every second and the records tables change every year; both would fail every
+// run for no reason.
+//
+// noindex, and out of the sitemap. It is a real route so Playwright can load it
+// from the built output, but it is not for visitors.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import DistanceTickets from '@/components/sections/DistanceTickets.astro';
+import LoopCard from '@/components/sections/LoopCard.astro';
+import Ticker from '@/components/sections/Ticker.astro';
+import Provisional from '@/components/race/Provisional.astro';
+import { getSiteSettings } from '@/lib/queries';
+
+const siteSettings = await getSiteSettings().catch(() => null);
+
+/** Fixed stand-ins. Never read from Sanity: that is the whole point. */
+const DISTANCES = [
+  {
+    _id: 'sg-50k',
+    name: '50K',
+    slug: '50k',
+    kicker: 'The full ultra',
+    loopStructure: 'Four 5.3 mile loops alternating with three 3.2 mile loops',
+    blurb:
+      'The original. Seven single-track loops through Mt. Airy Forest, each one returning you through the aid station at The Oval before sending you back out.',
+    includes: ['Tech t-shirt', 'Timing chip', 'Aid station every loop', 'USATF sanctioned'],
+    startTime: '8:00 am',
+    trekkerNote: 'Trekkers may start at 7:00 am.',
+    entryCap: 120,
+    featured: true,
+    confirmed: true,
+  },
+  {
+    _id: 'sg-27k',
+    name: '27K',
+    slug: '27k',
+    kicker: 'The fun run',
+    loopStructure: 'Two 5.3 mile loops alternating with two 3.2 mile loops',
+    blurb: 'Same trail, same climbs, four loops instead of seven.',
+    includes: ['T-shirt', 'Timing chip', 'Aid station every loop'],
+    startTime: '8:30 am',
+    trekkerNote: 'Trekkers may start at 8:00 am and are ineligible for awards.',
+    entryCap: 130,
+    featured: false,
+    confirmed: true,
+  },
+];
+
+const LOOPS = [
+  { _key: 'a', kind: 'long' as const, miles: '5.3', throughMiles: '5.3', inShortDistance: true },
+  { _key: 'b', kind: 'short' as const, miles: '3.2', throughMiles: '8.5', inShortDistance: true },
+  { _key: 'c', kind: 'long' as const, miles: '5.3', throughMiles: '13.8', inShortDistance: true },
+  { _key: 'd', kind: 'short' as const, miles: '3.2', throughMiles: '17', inShortDistance: true },
+  { _key: 'e', kind: 'long' as const, miles: '5.3', throughMiles: '22.3', inShortDistance: false },
+  { _key: 'f', kind: 'short' as const, miles: '3.2', throughMiles: '25.5', inShortDistance: false },
+  { _key: 'g', kind: 'long' as const, miles: '5.3', throughMiles: '50K', inShortDistance: false },
+];
+
+const TOKENS = [
+  '--color-primary',
+  '--color-tertiary',
+  '--heading-accent',
+  '--plate-face',
+  '--plate-ink',
+  '--plate-ink-soft',
+  '--gold-on-forest',
+  '--background',
+  '--foreground',
+  '--muted',
+];
+---
+
+<BaseLayout
+  title="Styleguide | Stone Steps 50K"
+  description="Fixed-data design system wall. Not for visitors."
+  {siteSettings}
+  noindex
+>
+  <section class="bg-background py-section-lg">
+    <div class="mx-auto w-full max-w-content px-6">
+      <h1 class="display text-h1">Styleguide</h1>
+      <p class="mt-3 max-w-[60ch] text-muted-foreground">
+        Fixed data. Every pixel below is decided by the design system, so a diff here means the
+        design moved, not the content.
+      </p>
+
+      <h2 class="display mt-14 text-h3">Palette</h2>
+      <ul class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {
+          TOKENS.map((t) => (
+            <li class="rounded-lg border-2 border-black p-3">
+              <span
+                class="block h-12 w-full rounded border border-black/30"
+                style={`background: var(${t})`}
+              />
+              <code class="mt-2 block font-mono text-[0.6rem] break-all">{t}</code>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2 class="display mt-14 text-h3">Type, on the page ground</h2>
+      <div class="mt-5">
+        <p class="display text-h1">Display h1</p>
+        <p class="display text-h2">Display h2</p>
+        <p class="display text-h3">Display h3</p>
+        <p class="display text-h4">Display h4</p>
+        <p class="mt-3 max-w-[60ch]">
+          Body copy on the page ground. Cincinnati's longest running ultramarathon, on the same
+          trail since 2003.
+        </p>
+        <p class="mt-2 text-sm text-muted-foreground">Muted body copy, one step down.</p>
+        <p
+          class="blaze text-heading-accent mt-4 font-mono text-[0.72rem] tracking-[0.22em] uppercase"
+        >
+          Eyebrow with a trail blaze
+        </p>
+      </div>
+
+      <h2 class="display mt-14 text-h3">Type, on a cream plate</h2>
+      {
+        /* The exact combination that failed: a heading inside a plate, where the
+          base layer's heading colour would otherwise win over the plate's ink. */
+      }
+      <div class="ticket mt-5 max-w-[30rem] p-7">
+        <h3 class="display text-h3">Heading on a plate</h3>
+        <p class="mt-2 text-sm">Body copy on a plate.</p>
+        <p class="ticket-soft mt-2 text-sm">Softened plate copy.</p>
+      </div>
+
+      <h2 class="display mt-14 text-h3">Buttons</h2>
+      <div class="mt-5 flex flex-wrap items-center gap-4">
+        <a class="btn-plate" href="#">Primary plate</a>
+        <a class="btn-plate btn-plate--cream" href="#">
+          Cream plate
+          <span class="btn-plate__arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+
+      <h2 class="display mt-14 text-h3">Markers</h2>
+      <div class="mt-5 flex flex-wrap items-center gap-6">
+        <Provisional confirmed={false} what="The race does not publish this anywhere yet." />
+        <span>
+          Gun time
+          <abbr class="source-flag text-muted-foreground" title="Gun time, not chip time">g</abbr>
+        </span>
+        <span>
+          Trekker
+          <abbr class="source-flag text-muted-foreground" title="Took the early start">T</abbr>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <Ticker items={['Mt. Airy Forest', 'Since 2003', 'USATF sanctioned', 'Seven loops']} />
+
+  <DistanceTickets
+    eyebrow="Two distances"
+    headline="Pick your day"
+    distances={DISTANCES as never}
+    race={{ registerUrl: 'https://example.com' } as never}
+  />
+
+  <LoopCard
+    eyebrow="The course"
+    headline="Seven loops out of The Oval"
+    legend="The 27K punches the first four and finishes. The 50K punches all seven."
+    sourceNote="Loop distances come from the race's own timing sheets for 2006 through 2009."
+    loops={LOOPS as never}
+    aside={[
+      {
+        _key: 'n1',
+        title: 'Aid',
+        body: 'At the end of every loop.',
+        confirmed: true,
+      },
+      {
+        _key: 'n2',
+        title: 'Cutoff',
+        body: 'The course closes at about 4:30 pm.',
+        confirmed: false,
+      },
+    ] as never}
+  />
+</BaseLayout>
