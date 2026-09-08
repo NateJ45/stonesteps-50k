@@ -50,13 +50,17 @@ export function rng(s) {
  * zones met in the middle, swallowed the whole headline band, and the field
  * rendered as a few stray specks: the marks had nowhere legal to be.
  */
-export function buildMud({ seed = 7, W = 1600, H = 933, quiet = [], density = 1 } = {}) {
+export function buildMud({ seed = 7, W = 1600, H = 933, quiet = [], density = 1, big = 1 } = {}) {
   const rand = rng(seed);
   const zones = quiet.map((r) => ({ x0: r[0] * W, y0: r[1] * H, x1: r[2] * W, y1: r[3] * H }));
 
   // The size unit, so a mark is the same size on screen whatever shape the band
   // is. Without it a narrow phone band scales its marks up to fill the width.
-  const S = Math.min(W, H) / 933;
+  // `big` scales every mark without changing where anything lands, so a field
+  // can be the same composition at a different weight. The director band uses
+  // it: fewer marks, much larger, because it sits behind a person rather than
+  // behind a headline.
+  const S = (Math.min(W, H) / 933) * big;
   const pad = 60 * S;
   const n = (count) => Math.max(1, Math.round(count * density));
 

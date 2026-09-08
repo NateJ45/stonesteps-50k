@@ -2,6 +2,7 @@
 // Page-builder block: image and text side by side. Image side is
 // editor-controlled; surface comes from SectionRenderer. Safe to edit by hand.
 import SanityImage from '@/components/SanityImage.astro';
+import MudField from '@/components/race/MudField.astro';
 import PortableText from '@/components/PortableText';
 import CtaLink from '@/components/CtaLink.astro';
 
@@ -34,7 +35,18 @@ const imageFirst = imageSide === 'left';
 const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebrow ? 'mt-m' : ''}`;
 ---
 
-<section class={bg} aria-labelledby={heading ? headingId : undefined}>
+<section
+  class:list={[bg, cutout && 'relative overflow-hidden']}
+  aria-labelledby={heading ? headingId : undefined}
+>
+  {
+    /* A CUT-OUT SUBJECT NEEDS GROUND TO STAND ON. Without it the person floats
+      on a flat band, which is the other half of the problem the frame was
+      solving badly. The mud is bigger and sparser here than on the hero: it
+      sits behind a person rather than behind a headline, so it should read as
+      ground rather than as a second texture competing with him. */
+  }
+  {cutout && <MudField field="director" />}
   <div
     class="mx-auto grid max-w-content grid-cols-1 items-center gap-l px-m py-section-lg md:grid-cols-2 md:gap-section-md"
     data-reveal

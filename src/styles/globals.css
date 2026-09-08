@@ -1515,6 +1515,33 @@ body::after {
   }
 }
 
+/* ---------- The hero's mud runs over the header -------------------------- */
+/* The mud is one event thrown across the top of the page, so it should not stop
+   at a horizontal line where the header ends. The layer therefore starts at the
+   TOP OF THE HEADER, not at the top of the hero, and paints above it.
+
+   THE HEIGHTS HERE MATCH THE BAKED ART. scripts/generate-mud.mjs draws the hero
+   field at the proportions of header + hero measured together, and its quiet
+   zones (the nav, the eyebrow, the subhead, the countdown label) are fractions
+   of THAT box. Change the header's height and both numbers have to move, or the
+   protected zones drift off the text they protect.
+
+   z-index sits above the sticky header's 50 so the mud lands ON the sign rather
+   than under it. The layer is pointer-events: none, so nothing in the header
+   stops being clickable, and as the page scrolls the mud travels up and out
+   while the header stays: the sign is muddy where the hero splashed it, and
+   clean once you have left. */
+.hero-mud {
+  --mud-top: -92px;
+  --mud-z: 60;
+}
+
+@media (min-width: 64rem) {
+  .hero-mud {
+    --mud-top: -135px;
+  }
+}
+
 /* ---------- Cut-out subjects -------------------------------------------- */
 /* A subject on transparency, standing on the page rather than sitting in a
    frame. See the `cutout` flag on the image + text block.

@@ -56,14 +56,20 @@ const words = headline.split(/\s+/).filter(Boolean);
 const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d+k$/i.test(w);
 ---
 
-<section class="relative overflow-hidden bg-background py-section-lg" aria-labelledby={headingId}>
-  <Topo seed={11} lines={16} class="opacity-70" />
+<section class="hero-band relative bg-background py-section-lg" aria-labelledby={headingId}>
+  {
+    /* The topo still needs clipping to the band; the mud deliberately does not,
+    so the clip lives on this wrapper rather than on the <section>. */
+  }
+  <div class="pointer-events-none absolute inset-0 overflow-hidden">
+    <Topo seed={11} lines={16} class="opacity-70" />
+  </div>
 
   {
     /* The mud. Baked masks rather than live SVG, and home hero only: see the
       header of MudField.astro for why, and for the two shapes it carries. */
   }
-  <MudField />
+  <MudField field="hero" class="hero-mud" />
 
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
     <div class="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">

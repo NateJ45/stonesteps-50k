@@ -29,23 +29,42 @@
 // four fifths of its width: magnified blobs, landing on the subhead.
 
 interface Props {
+  /** Which baked field to wear. See FIELDS in scripts/generate-mud.mjs. */
+  field?: 'hero' | 'director';
   class?: string;
 }
 
-const { class: className = '' } = Astro.props as Props;
+const { field = 'hero', class: className = '' } = Astro.props as Props;
 ---
 
-<div class={`mud ${className}`} aria-hidden="true" data-contrast-media>
-  <div class="mud__l mud__l--1"></div>
-  <div class="mud__l mud__l--2"></div>
-  <div class="mud__l mud__l--3"></div>
-  <div class="mud__l mud__l--trail"></div>
+<div class={`mud mud--${field} ${className}`} aria-hidden="true" data-contrast-media>
+  {
+    /* The hero lands throw by throw, so it has a file per layer. Every other
+      field is one combined image and simply fades in. */
+    field === 'hero' ? (
+      <>
+        <div class="mud__l mud__l--1" />
+        <div class="mud__l mud__l--2" />
+        <div class="mud__l mud__l--3" />
+        <div class="mud__l mud__l--trail" />
+      </>
+    ) : (
+      <div class="mud__l mud__l--solo" />
+    )
+  }
 </div>
 
 <style>
+  /* The offsets come through CUSTOM PROPERTIES, not through a class the caller
+     adds. Astro scopes this rule with a data attribute, which makes it more
+     specific than any plain class in globals.css, so a caller trying to move
+     the layer with `.hero-mud { top: -135px }` silently loses to `inset: 0`.
+     A custom property has no such fight. */
   .mud {
     position: absolute;
     inset: 0;
+    top: var(--mud-top, 0);
+    z-index: var(--mud-z, 0);
     pointer-events: none;
     color: var(--spatter-ink);
   }
@@ -82,17 +101,20 @@ const { class: className = '' } = Astro.props as Props;
     mask-repeat: no-repeat;
   }
 
-  .mud__l--1 {
-    --src: url('/mud/wide-1.png');
+  .mud--hero .mud__l--1 {
+    --src: url('/mud/hero-wide-1.png');
   }
-  .mud__l--2 {
-    --src: url('/mud/wide-2.png');
+  .mud--hero .mud__l--2 {
+    --src: url('/mud/hero-wide-2.png');
   }
-  .mud__l--3 {
-    --src: url('/mud/wide-3.png');
+  .mud--hero .mud__l--3 {
+    --src: url('/mud/hero-wide-3.png');
   }
-  .mud__l--trail {
-    --src: url('/mud/wide-4.png');
+  .mud--hero .mud__l--trail {
+    --src: url('/mud/hero-wide-4.png');
+  }
+  .mud--director .mud__l--solo {
+    --src: url('/mud/director-wide.png');
   }
 
   /* THE PHONE WEARS ONE COMBINED LAYER, and that is an accessibility decision.
@@ -110,13 +132,16 @@ const { class: className = '' } = Astro.props as Props;
      Only the applied value is ever fetched, which is why the shape is swapped
      on the custom property rather than by shipping a second set of elements. */
   @media (width < 48rem) {
-    .mud__l--1 {
-      --src: url('/mud/phone.png');
+    .mud--hero .mud__l--1 {
+      --src: url('/mud/hero-phone.png');
     }
-    .mud__l--2,
-    .mud__l--3,
-    .mud__l--trail {
+    .mud--hero .mud__l--2,
+    .mud--hero .mud__l--3,
+    .mud--hero .mud__l--trail {
       display: none;
+    }
+    .mud--director .mud__l--solo {
+      --src: url('/mud/director-phone.png');
     }
   }
 
@@ -143,6 +168,10 @@ const { class: className = '' } = Astro.props as Props;
     }
     .mud__l--trail {
       animation: mud-walk 1600ms cubic-bezier(0.4, 0, 0.3, 1) 700ms both;
+    }
+    /* A single-file field has nothing to stagger, so it simply arrives. */
+    .mud__l--solo {
+      animation: mud-land 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
     }
   }
 

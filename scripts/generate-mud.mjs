@@ -1,14 +1,25 @@
 // Foundation, edit with care
 //
-// Bakes the home hero's mud into alpha-mask PNGs. Run via `npm run mud`, and
-// commit the output: these are real assets shipped to visitors, exactly like
+// Bakes the site's mud into alpha-mask PNGs. Run via `npm run mud`, and commit
+// the output: these are real assets shipped to visitors, exactly like
 // public/og-default.png.
 //
-// Rerun it after changing anything in scripts/lib/mud.mjs, and look at the
+// Rerun it after changing anything in scripts/lib/mud.mjs, and LOOK at the
 // result. The generator is deterministic, so a rerun with no change to that
 // file rewrites byte-identical PNGs and `git status` stays clean.
+//
+// ── FIELDS AND SHAPES ───────────────────────────────────────────────────────
+// A FIELD is one place on the site that wears mud. A SHAPE is that field at one
+// breakpoint. Both exist for the same reason: the layer is `cover`ed to the box
+// it is painted into, so art drawn for a 1.57-aspect band and worn on a
+// 0.40-aspect one is scaled about four times and cropped to a sliver. Every
+// field is therefore drawn at roughly the proportions it will be worn at, and
+// every quiet zone is a fraction of THAT box.
+//
+// The numbers below are MEASURED off the rendered page, never guessed.
+// Re-measure after any layout change to the regions they protect.
 
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, readdir, unlink } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
@@ -18,93 +29,131 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 const outDir = resolve(root, 'public/mud');
 
-// The quiet zones, as fractions of the hero band. MEASURED off the rendered
-// page rather than guessed: see the note on buildMud().
-const QUIET_WIDE = [
-  [0, 0.19, 0.55, 0.27], // the eyebrow
-  [0, 0.51, 0.55, 0.81], // the subhead and the buttons
-  [0.52, 0.67, 1, 0.75], // the countdown's label, in the right-hand column
-];
-const QUIET_PHONE = [
-  [0, 0.06, 1, 0.1], // the eyebrow
-  [0, 0.18, 1, 0.35], // the subhead
-  [0, 0.78, 1, 0.85], // the countdown's label
-];
-
-// The countdown label is the one that had to be found by a failing test rather
-// than by looking. It is 12px mono on the bare band, it lives in the right-hand
-// column where neither of the other zones reach, and axe flagged it the moment
-// two mud layers overlapped behind it. Everything else down there is an opaque
-// plate or an opaque photograph, which is why nothing else needed carving out.
-
-/**
- * Two shapes, because the layer is `slice`d to cover its band. Give a
- * 0.44-aspect phone hero the 1.7-aspect desktop art and the browser scales it
- * 2.1x and crops away four fifths of its width: magnified blobs, landing on the
- * subhead.
- *
- * Resolution is chosen for weight, not for sharpness. These are soft decorative
- * masks over a flat ground, so a little softness on a high-density screen costs
- * nothing, while doubling the pixels would cost real bytes on the phones that
- * can least afford them.
- */
-const SHAPES = [
-  { name: 'wide', W: 1600, H: 933, quiet: QUIET_WIDE, density: 1 },
-  { name: 'phone', W: 760, H: 1716, quiet: QUIET_PHONE, density: 0.5 },
+const FIELDS = [
+  {
+    // The hero, INCLUDING THE HEADER above it. The mud is thrown across the top
+    // of the page as one event, so it runs over the sign and the nav instead of
+    // stopping at a horizontal line where the header ends.
+    name: 'hero',
+    shapes: [
+      {
+        suffix: 'wide',
+        W: 1600,
+        H: 1018, // 1440x916 measured, kept in proportion
+        density: 1,
+        split: true,
+        quiet: [
+          [0.44, 0.04, 0.74, 0.11], // the nav links
+          [0, 0.31, 0.55, 0.37], // the hero eyebrow
+          [0, 0.59, 0.55, 0.83], // the subhead and the buttons
+          [0.52, 0.72, 1, 0.78], // the countdown's label
+        ],
+      },
+      {
+        suffix: 'phone',
+        W: 760,
+        H: 1900, // 390x974 measured
+        density: 0.5,
+        split: false,
+        quiet: [
+          [0, 0.145, 1, 0.19], // the hero eyebrow
+          [0, 0.25, 1, 0.42], // the subhead
+          [0, 0.81, 1, 0.85], // the countdown's label
+        ],
+      },
+    ],
+  },
+  {
+    // The race director band. Fewer marks, much bigger: this one sits behind a
+    // PERSON rather than behind a headline, so it should read as the ground he
+    // is standing on rather than as a second texture competing with him.
+    name: 'director',
+    shapes: [
+      {
+        suffix: 'wide',
+        // HALF RESOLUTION on purpose. The marks in this field are enormous, so
+        // a softer mask edge is invisible, and a mask this ragged compresses
+        // badly: at full size the file was 129KB for pure decoration.
+        W: 880,
+        H: 716, // 1440x1172 measured, kept in proportion
+        density: 0.42,
+        big: 2.1,
+        split: false,
+        quiet: [
+          [0, 0.32, 0.5, 0.55], // the eyebrow, heading and body
+          [0, 0.62, 0.29, 0.71], // the button
+        ],
+      },
+      {
+        suffix: 'phone',
+        W: 420,
+        H: 1313, // 390x1219 measured, kept in proportion
+        density: 0.3,
+        big: 1.9,
+        split: false,
+        quiet: [
+          [0, 0.54, 1, 0.8], // the eyebrow, heading and body
+          [0, 0.9, 1, 0.97], // the button
+        ],
+      },
+    ],
+  },
 ];
 
 await mkdir(outDir, { recursive: true });
 
-let total = 0;
-for (const shape of SHAPES) {
-  const { layers, W, H } = buildMud({
-    seed: 7,
-    W: shape.W,
-    H: shape.H,
-    quiet: shape.quiet,
-    density: shape.density,
-  });
+// Anything left from a previous shape list would ship as a dead asset.
+for (const f of await readdir(outDir)) {
+  if (f.endsWith('.png')) await unlink(resolve(outDir, f));
+}
 
-  // The phone gets ONE combined layer as well as the separate ones, and the
-  // combined file is the one the page actually wears.
-  //
-  // This is an ACCESSIBILITY constraint rather than a weight one. axe cannot
-  // see a mask: it finds the layer elements sitting over a piece of text, reads
-  // their background colours and blends them, so four stacked semi-transparent
-  // layers model as a 57% veil across the whole hero. It flagged the
-  // countdown's 12px label below AA on the phone, where that label sits in the
-  // flow rather than off beside the photograph. One element blends once, and
-  // models what the browser really paints. The phone loses the throw-by-throw
-  // arrival to buy that, which is the cheaper thing to lose on a small screen.
-  const emit =
-    shape.name === 'phone'
-      ? [{ drops: layers.flat(), name: 'phone', rough: 9 }]
-      : layers.map((drops, i) => ({
+let total = 0;
+for (const field of FIELDS) {
+  for (const shape of field.shapes) {
+    const { layers, W, H } = buildMud({
+      seed: 7,
+      W: shape.W,
+      H: shape.H,
+      quiet: shape.quiet,
+      density: shape.density,
+      big: shape.big ?? 1,
+    });
+
+    // SPLIT means one file per layer, so the throws can land in sequence in the
+    // browser. Unsplit means one combined file, which is what a field wears
+    // when small text sits over it: axe cannot see a mask, so it reads each
+    // layer element's background colour and blends them, and four stacked
+    // semi-transparent layers model as a veil over the whole band. One element
+    // blends once, and models what is really painted.
+    const emit = shape.split
+      ? layers.map((drops, i) => ({
           drops,
-          name: `${shape.name}-${i + 1}`,
+          name: `${field.name}-${shape.suffix}-${i + 1}`,
           // The trail is layer 4, and its shapes are an order of magnitude
           // bigger than a drop, so it needs more displacement to look equally
           // chewed up.
           rough: i === 3 ? 16 : 7,
-        }));
+        }))
+      : [{ drops: layers.flat(), name: `${field.name}-${shape.suffix}`, rough: 9 }];
 
-  for (const [i, { drops, name, rough }] of emit.entries()) {
-    const svg = layerSvg(drops, W, H, 3 + i, rough);
-    const outPath = resolve(outDir, `${name}.png`);
+    for (const [i, { drops, name, rough }] of emit.entries()) {
+      const svg = layerSvg(drops, W, H, 3 + i, rough);
+      const outPath = resolve(outDir, `${name}.png`);
 
-    // A mask only needs its alpha channel, so the art is white on transparent
-    // and the PNG is written 8-bit palettised. Most of the frame is empty,
-    // which is why a field this busy still compresses to a few tens of KB.
-    const buf = await sharp(Buffer.from(svg))
-      .png({ compressionLevel: 9, palette: true, effort: 10 })
-      .toBuffer();
+      // A mask only needs its alpha channel, so the art is white on transparent
+      // and the PNG is written 8-bit palettised. Most of the frame is empty,
+      // which is why a field this busy still compresses to a few tens of KB.
+      const buf = await sharp(Buffer.from(svg))
+        .png({ compressionLevel: 9, palette: true, effort: 10 })
+        .toBuffer();
 
-    await writeFile(outPath, buf);
-    total += buf.length;
-    console.log(
-      `  ${name}.png  ${String(drops.length).padStart(4)} marks  ` +
-        `${(buf.length / 1024).toFixed(1)} KB`,
-    );
+      await writeFile(outPath, buf);
+      total += buf.length;
+      console.log(
+        `  ${name}.png  ${String(drops.length).padStart(4)} marks  ` +
+          `${(buf.length / 1024).toFixed(1)} KB`,
+      );
+    }
   }
 }
 
