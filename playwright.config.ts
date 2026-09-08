@@ -24,6 +24,12 @@ const baseURL = `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: './tests',
+  // tests/visual has its OWN config (playwright.visual.config.ts): different
+  // reporter, a screenshot threshold, reduced motion, and its own port so the
+  // two suites can run side by side. Without this ignore, `npm test` picks the
+  // visual specs up under these settings and fails them for having no
+  // baselines, which is exactly what happened the day they were added.
+  testIgnore: '**/visual/**',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
