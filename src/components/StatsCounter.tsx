@@ -96,7 +96,13 @@ export default function StatsCounter({ stats }: Props) {
             <div className="my-2 hidden w-px self-stretch bg-border md:block" aria-hidden="true" />
           )}
           <div className="text-center">
-            <span className="block font-display text-[clamp(2.5rem,6vw,3.5rem)] leading-none font-normal text-primary">
+            {/* text-[color:var(--primary)], NOT text-primary. The Tailwind utility
+                maps to the @theme brand token, which is one constant for both
+                themes; the shadcn --primary is the theme-aware one. These
+                numbers sit on paper in light mode and on bark in dark, and the
+                one brand rust cannot serve both: it measured 2.84:1 here on
+                bark, under the 3:1 large text requires. */}
+            <span className="block font-display text-[clamp(2.5rem,6vw,3.5rem)] leading-none font-normal text-[color:var(--primary)]">
               <AnimatedNumber
                 target={stat.number}
                 suffix={stat.suffix}

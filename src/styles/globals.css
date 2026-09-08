@@ -335,7 +335,17 @@
   --popover: #2f281d;
   --popover-foreground: #ffebbb;
 
-  --primary: #a83c26;
+  /* LIGHTER THAN THE LIGHT THEME'S RUST, on purpose. This was a straight
+     copy of #a83c26 until 2026-09-08, which is to say the dark theme never
+     lightened its primary the way it lightened --link and --ring. On the
+     bark ground that put the home page's big stat numbers at 2.84:1,
+     under the 3:1 large text needs, and axe never said so because the
+     display text-shadow makes it report those as incomplete.
+     #b8462f is the one value that satisfies both directions: 3.37:1 as
+     TEXT on bark, and still 4.51:1 for the cream button labels sitting ON
+     it. Anything lighter fixes the text and breaks the buttons. Re-measure
+     both if this ever moves. */
+  --primary: #b8462f;
   --primary-foreground: #ffebbb;
   --secondary: #2e5738;
   --secondary-foreground: #ffebbb;
