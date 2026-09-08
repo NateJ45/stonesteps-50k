@@ -1168,6 +1168,7 @@ export type ImageTextSection = {
     _type: 'image';
   };
   imageSide?: 'left' | 'right';
+  cutout?: boolean;
   eyebrow?: string;
   heading?: string;
   body?: Array<{

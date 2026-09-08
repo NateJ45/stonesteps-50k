@@ -93,6 +93,7 @@ const PHOTO = {
   mtAiryForest: 'image-b27a7b16969285e8d9624a4f79c1d174162623bd-2560x1707-webp',
   courseMap: 'image-56ce0fcfe8fda80cdf1a6ffac247e33376b05368-1495x1112-jpg',
   runnersPortrait: 'image-c55575dc6a7a60d39a5d93c89fc8a3daa25f1aed-768x1024-webp',
+  raceDirector: 'image-dfd6d59c54e094be6f3d675123b6863e4207f333-541x861-png',
 };
 
 const docs = [];
@@ -227,6 +228,56 @@ docs.push({
         'runnable for everyone who uses it the rest of the year.',
       caption: 'Mt. Airy Forest, Cincinnati',
       showDirector: true,
+    },
+    {
+      _type: 'imageTextSection',
+      _key: key(),
+      image: img(
+        PHOTO.raceDirector,
+        'David Corfman, the race director, grinning with one arm raised to show his watch.',
+      ),
+      imageSide: 'right',
+      cutout: true,
+      eyebrow: 'Who runs it',
+      heading: 'Your race director',
+      body: [
+        {
+          _type: 'block',
+          _key: key(),
+          style: 'normal',
+          markDefs: [],
+          children: [
+            {
+              _type: 'span',
+              _key: key(),
+              marks: [],
+              text:
+                'David Corfman has directed this race for over twenty years, which is most ' +
+                'of the time it has existed. He is also the 34th runner in history to finish ' +
+                'a hundred hundred-mile races, so the person setting the cutoffs has stood ' +
+                'where you will be standing at four in the afternoon.',
+            },
+          ],
+        },
+        {
+          _type: 'block',
+          _key: key(),
+          style: 'normal',
+          markDefs: [],
+          children: [
+            {
+              _type: 'span',
+              _key: key(),
+              marks: [],
+              text:
+                'Everything the site cannot answer yet, he can. Parking, packet pickup, ' +
+                'the briefing, whether you can bring a dog: ask, and the answer goes on ' +
+                'this site.',
+            },
+          ],
+        },
+      ],
+      cta: { _type: 'ctaBlock', label: 'Ask David a question', href: '/contact' },
     },
     {
       _type: 'sponsorPatchesSection',

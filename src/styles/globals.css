@@ -1515,6 +1515,20 @@ body::after {
   }
 }
 
+/* ---------- Cut-out subjects -------------------------------------------- */
+/* A subject on transparency, standing on the page rather than sitting in a
+   frame. See the `cutout` flag on the image + text block.
+
+   THE BOTTOM FADE IS NOT DECORATION. A cut-out person is almost always cropped
+   by the edge of the photograph they came from: this one touches the bottom of
+   its frame across 479 of its 541 pixels. Left alone that is a hard horizontal
+   line through someone's legs, which reads as "cut off" rather than "cut out".
+   Fading the last fifth lets them meet the band instead. */
+.photo-cutout {
+  -webkit-mask-image: linear-gradient(to bottom, #000 76%, transparent 99%);
+  mask-image: linear-gradient(to bottom, #000 76%, transparent 99%);
+}
+
 /* ---------- Photographs, graded into the palette ------------------------ */
 /* A photograph dropped in untreated reads as stock sitting ON the design; the
    same photograph pulled a little toward the page's own colour reads as part of

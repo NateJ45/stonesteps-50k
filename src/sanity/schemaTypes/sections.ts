@@ -205,6 +205,17 @@ export const imageTextSection = defineType({
       // read the same way. See src/lib/layout-variants.ts.
       options: { list: sideOptions('Image'), layout: 'radio' },
     }),
+    defineField({
+      name: 'cutout',
+      title: 'The image is a cut-out',
+      type: 'boolean',
+      initialValue: false,
+      description:
+        'On for a subject on a transparent background, like a person cut out of their ' +
+        'photo. It drops the frame, the rounded corners and the colour wash, so the ' +
+        'subject stands on the page instead of sitting in a box with an invisible ' +
+        'rectangle around it. Leave off for an ordinary photograph.',
+    }),
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
     defineField({ name: 'heading', title: 'Heading', type: 'string' }),
     proseBody('body', 'Text'),

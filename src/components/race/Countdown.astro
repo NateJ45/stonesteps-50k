@@ -225,7 +225,41 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
       clock.setAttribute('aria-label', `${total} seconds remaining`);
     };
 
+    // A SELF-CORRECTING TIMER, NOT setInterval.
+    //
+    // Two things stop a 1000ms interval from keeping time. A background tab is
+    // throttled to roughly one tick a minute, and a page put into the back /
+    // forward cache is frozen outright, so a visitor who leaves the tab and
+    // comes back finds a clock showing whatever second it was when they left.
+    // setInterval also drifts, because each tick is scheduled a whole second
+    // after the last one actually ran rather than on the second boundary.
+    //
+    // So: schedule to the NEXT WHOLE SECOND every time, and re-read the clock
+    // the moment the page becomes visible again or is restored from bfcache.
+    // The throttling still happens, it just stops being visible.
+    let timer = 0;
+    const schedule = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(
+        () => {
+          tick();
+          schedule();
+        },
+        1000 - (Date.now() % 1000),
+      );
+    };
+
+    const resync = () => {
+      if (document.hidden) return;
+      tick();
+      schedule();
+    };
+
+    document.addEventListener('visibilitychange', resync);
+    // Fires on a bfcache restore, where visibilitychange alone may not.
+    window.addEventListener('pageshow', resync);
+
     tick();
-    setInterval(tick, 1000);
+    schedule();
   });
 </script>

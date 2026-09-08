@@ -10,6 +10,7 @@ interface Props {
   imageSide?: 'left' | 'right';
   eyebrow?: string;
   heading?: string;
+  cutout?: boolean;
   body?: any;
   cta?: any;
   surface?: 'background' | 'muted';
@@ -21,6 +22,7 @@ const {
   imageSide = 'left',
   eyebrow,
   heading,
+  cutout = false,
   body,
   cta,
   surface = 'background',
@@ -40,17 +42,30 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
     <div class:list={[imageFirst ? 'md:order-1' : 'md:order-2']}>
       {
         image?.asset ? (
-          // `photo-plate` on the clipping wrapper, so this photograph takes the
-          // same grade as every other one on the site.
-          <div class="photo-plate overflow-hidden rounded-md">
+          cutout ? (
+            // A CUT-OUT GETS NO FRAME. The subject is already on transparency,
+            // so a rounded box and a colour wash would draw an invisible
+            // rectangle around them and undo the only reason to cut them out.
             <SanityImage
               source={image}
               width={800}
               sizes="(min-width: 768px) 45vw, 100vw"
-              quality={75}
-              class="h-auto w-full"
+              quality={80}
+              class="photo-cutout h-auto w-full"
             />
-          </div>
+          ) : (
+            // `photo-plate` on the clipping wrapper, so this photograph takes
+            // the same grade as every other one on the site.
+            <div class="photo-plate overflow-hidden rounded-md">
+              <SanityImage
+                source={image}
+                width={800}
+                sizes="(min-width: 768px) 45vw, 100vw"
+                quality={75}
+                class="h-auto w-full"
+              />
+            </div>
+          )
         ) : (
           <div class="aspect-[4/5] rounded-md bg-muted" aria-hidden="true" />
         )

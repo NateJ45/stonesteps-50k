@@ -41,13 +41,25 @@ function contour(offset: number, amp: number, phase: number, freq: number) {
     const y = offset + Math.sin(t) * amp + Math.sin(t * 2.3) * (amp * 0.35);
     pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
   }
-  // Convert the point list into a smooth cubic path.
+  // Convert the point list into a smooth path.
+  //
+  // Each segment curves THROUGH a point and ends on the midpoint to the next
+  // one, which is the usual trick for smoothing a polyline with quadratics.
+  // The last segment must not do that: ending on the midpoint leaves the
+  // contour half a step short of the edge, and at 24 steps that is 25 units of
+  // 1200. Every line on the site stopped about 2% shy of the right-hand side,
+  // which read as the background being cut off rather than running under the
+  // page. The final segment therefore ends ON the last point.
   let d = `M ${pts[0]}`;
   for (let i = 1; i < pts.length; i++) {
     const [px, py] = pts[i - 1].split(',').map(Number);
     const [cx, cy] = pts[i].split(',').map(Number);
-    const mx = (px + cx) / 2;
-    d += ` Q ${px.toFixed(1)},${py.toFixed(1)} ${mx.toFixed(1)},${((py + cy) / 2).toFixed(1)}`;
+    if (i === pts.length - 1) {
+      d += ` Q ${px.toFixed(1)},${py.toFixed(1)} ${cx.toFixed(1)},${cy.toFixed(1)}`;
+    } else {
+      const mx = (px + cx) / 2;
+      d += ` Q ${px.toFixed(1)},${py.toFixed(1)} ${mx.toFixed(1)},${((py + cy) / 2).toFixed(1)}`;
+    }
   }
   return d;
 }

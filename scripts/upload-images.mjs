@@ -44,6 +44,11 @@ const client = createClient({ projectId, dataset, token, apiVersion: '2026-05-01
 // Sourced from the race's own WordPress media library via the design mockup.
 const SRC = resolve(root, '..', 'stonesteps-astro', 'public', 'img');
 
+// Images that arrived after the mockup, checked into THIS repo. The mockup is a
+// throwaway sibling and will not be around forever, so anything sourced later
+// lives here and is looked up first.
+const LOCAL_SRC = resolve(root, 'scripts', 'data', 'photos');
+
 const IMAGES = {
   hero: {
     file: 'photos/trail-runners-wide.jpg',
@@ -73,12 +78,19 @@ const IMAGES = {
   parks: { file: 'logos/cincinnati-parks.png', alt: 'Cincinnati Parks' },
   altra: { file: 'logos/altra.png', alt: 'Altra Running' },
   usatf: { file: 'logos/usatf.png', alt: 'USATF sanctioned event' },
+  // From the race's own media library, already cut out against transparency,
+  // which is why he can stand on the page's own ground instead of in a box.
+  raceDirector: {
+    file: 'photos/race-director.png',
+    alt: 'David Corfman, the race director, grinning with one arm raised to show his watch',
+  },
 };
 
 /** Upload once, reuse forever. Keyed on the original filename. */
 async function assetFor(key) {
   const spec = IMAGES[key];
-  const path = resolve(SRC, spec.file);
+  const local = resolve(LOCAL_SRC, basename(spec.file));
+  const path = existsSync(local) ? local : resolve(SRC, spec.file);
   if (!existsSync(path)) {
     console.warn(`  ! missing source file: ${spec.file}`);
     return null;
