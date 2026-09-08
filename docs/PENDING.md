@@ -95,6 +95,25 @@ Still not set, and unrelated to the above: `sanity-backup.yml` wants
 `SANITY_AUTH_TOKEN` and `BACKUP_PASSPHRASE`, and its schedule is still
 commented out.
 
+### 1d. The Studio desk needs one signed-in click-through
+
+The Help & Guide handbook replaced the starter's Start Here panes on
+2026-09-07. The Studio bundle loads with zero console errors, which proves the
+new module parses, but the desk itself only builds after login and the Chrome
+connection dropped before it could be walked. Open /studio and check: Help &
+Guide lists five category headings with twelve guides under them, a guide opens
+and renders its blocks, and the "Where in the Studio" cards navigate rather than 404. A structure error shows as a broken pane, not a build failure.
+
+### 1e. Four starter Studio components are now dead code
+
+StudioGuide.tsx, BusinessOverview.tsx, BrandKit.tsx and StudioPlaybook.tsx have
+no desk entry any more, and their three schema types (studioGuide, studioNotes,
+studioPlaybook) have no documents in this dataset. They stay registered and
+hidden from the desk root, so nothing floats loose and nothing is broken. They
+were left in place rather than deleted because they are starter surface and
+removing schema types is a bigger change than the tidy-up is worth. Delete them
+in a session that is already touching the schema registry.
+
 ### 1c. Nobody knows who the trekkers are after 2016
 
 Trekkers take the optional early start and the race makes them ineligible for
