@@ -1812,6 +1812,43 @@ main > .band-torn:first-child::before {
     inset 0 2px 5px rgb(0 0 0 / 0.95),
     inset 0 0 0 1px rgb(0 0 0 / 0.35);
 }
+
+/* The card punches itself.
+   The punch card is the site's best metaphor: the 27K is the 50K with three
+   loops not punched. Stamping the holes in loop order, one after another, is
+   the page saying that out loud, and it is the reason to animate this object
+   rather than a decorative one. Each hole carries `--i`, its own row index, so
+   the sequence follows the running order rather than the DOM happening to agree.
+
+   Only the punched holes move. The dashed outlines are the loops a 27K entrant
+   does not run, and an empty hole has nothing to stamp.
+
+   Inside a no-preference query, so the resting state is the finished card. */
+@media (prefers-reduced-motion: no-preference) {
+  .punch[data-reveal] .punch__hole.is-punched {
+    opacity: 0;
+    transform: scale(0.15);
+  }
+  .punch[data-reveal].is-visible .punch__hole.is-punched {
+    animation: punch-stamp 360ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: calc(var(--i, 0) * 110ms + 220ms);
+  }
+}
+
+@keyframes punch-stamp {
+  from {
+    opacity: 0;
+    transform: scale(0.15);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 @media (max-width: 900px) {
   .punch {
     transform: none;

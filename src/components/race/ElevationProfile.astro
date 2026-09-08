@@ -137,7 +137,7 @@ if (measured) {
 }
 ---
 
-<figure class="elev">
+<figure class="elev" data-reveal>
   <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="elev-title elev-desc">
     <title id="elev-title">Stone Steps 50K elevation profile</title>
     <desc id="elev-desc">
@@ -156,15 +156,15 @@ if (measured) {
     {
       !measured &&
         markers.map((m) => (
-          <g class="elev__aid">
+          <g class="elev__aid" style={`--t:${(m.x / W).toFixed(3)}`}>
             <line x1={m.x} y1={PEAK - 20} x2={m.x} y2={BASE} />
             <circle cx={m.x} cy={BASE} r="4" />
           </g>
         ))
     }
 
-    <path d={measured ? mArea : area} fill="url(#elevFill)"></path>
-    <path d={measured ? mLine : line} class="elev__line"></path>
+    <path d={measured ? mArea : area} class="elev__area" fill="url(#elevFill)"></path>
+    <path d={measured ? mLine : line} class="elev__line" pathLength="1"></path>
     <line x1="0" y1={BASE} x2={W} y2={BASE} class="elev__base"></line>
 
     {
@@ -251,6 +251,61 @@ if (measured) {
 
   .elev__aid circle {
     fill: var(--foreground);
+  }
+
+  /* ---- The profile draws itself -------------------------------------- */
+  /* The line is the shape of the race: seven climbs out of The Oval and seven
+     drops back into it. Drawing it left to right says that in a way a static
+     chart cannot, and it is the reason to animate this rather than a decorative
+     one.
+
+     `pathLength="1"` is what makes it JS-free. It renormalises the path's
+     length to 1 for dash purposes, so a dasharray of 1 and a dashoffset of 1
+     hide exactly the whole line whatever the real geometry is. No measuring, no
+     resize handler, and it keeps working when the loop lengths change.
+
+     Aid markers pop as the line reaches them: each carries `--t`, its own
+     fraction along the x axis, so its delay is that fraction of the draw.
+
+     The whole thing is inside a no-preference query, so the resting state is
+     the FINISHED chart. Under reduced motion, and under the reveal observer's
+     own reduced-motion branch, nothing here applies at all. */
+  @media (prefers-reduced-motion: no-preference) {
+    .elev[data-reveal] .elev__line {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+    }
+    .elev[data-reveal].is-visible .elev__line {
+      transition: stroke-dashoffset 1900ms cubic-bezier(0.33, 0, 0.15, 1);
+      stroke-dashoffset: 0;
+    }
+
+    .elev[data-reveal] .elev__area {
+      opacity: 0;
+    }
+    .elev[data-reveal].is-visible .elev__area {
+      transition: opacity 900ms ease-out 900ms;
+      opacity: 1;
+    }
+
+    .elev[data-reveal] .elev__aid {
+      opacity: 0;
+    }
+    .elev[data-reveal].is-visible .elev__aid {
+      animation: elev-aid 460ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation-delay: calc(var(--t, 0) * 1900ms);
+    }
+  }
+
+  @keyframes elev-aid {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .elev__lbl {
