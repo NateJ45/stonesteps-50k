@@ -75,29 +75,25 @@ migration (PORTS.md card 10, phase 2).
 
 ---
 
-### 1b. Three repo secrets, and then the site runs itself
+### 1b. DONE 2026-09-07. CI deploys, and the results import is live
 
-`.github/workflows/results-import.yml` is committed and dormant. It imports each
-year's results from RunSignUp and redeploys, daily through October and November,
-so nobody has to remember after the race. Verified dormant on 2026-09-07: the
-gate warns and the import job skips, and the run is green rather than red.
+`.github/workflows/results-import.yml` is active. All three secrets are set
+(`SANITY_API_WRITE_TOKEN`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`), and
+a forced run proved the whole chain end to end on 2026-09-07: gate passed, the
+importer reached RunSignUp and reported 1961 before and 1961 after (idempotent,
+as designed), typegen and build ran, and wrangler deployed the `stonesteps-50k`
+Worker. The deployed site was then re-checked and serves real content, which is
+the thing that could have gone wrong: a CI build with no Sanity env would have
+shipped a green, empty site over a good one.
 
-It activates when these exist. Nothing else is needed, and no code changes:
+This was also the first deploy of this project that did not come from a laptop.
+A content edit published in the Studio still needs a rebuild to go live, and
+nothing yet triggers one on publish. A Sanity webhook pointed at a
+`repository_dispatch` is the obvious next step if that becomes annoying.
 
-| Kind   | Name                     | What it is                                                                                 |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------ |
-| secret | `SANITY_API_WRITE_TOKEN` | A Sanity **Editor** token. Without it the import skips.                                    |
-| secret | `CLOUDFLARE_API_TOKEN`   | Workers deploy permission. Without it the results still import and only the rebuild skips. |
-| secret | `CLOUDFLARE_ACCOUNT_ID`  | Same.                                                                                      |
-
-The two repo variables it also reads, `PUBLIC_SANITY_PROJECT_ID` and
-`PUBLIC_SANITY_DATASET`, are already set.
-
-The same three secrets are what the rest of CI has been waiting on: there is
-currently NO deploy from CI at all, so every deploy of this site has been run by
-hand, and a content edit published in the Studio sits there until someone
-rebuilds. `sanity-backup.yml` wants `SANITY_AUTH_TOKEN` and `BACKUP_PASSPHRASE`
-on top, and its schedule is still commented out.
+Still not set, and unrelated to the above: `sanity-backup.yml` wants
+`SANITY_AUTH_TOKEN` and `BACKUP_PASSPHRASE`, and its schedule is still
+commented out.
 
 ### 1c. Nobody knows who the trekkers are after 2016
 
