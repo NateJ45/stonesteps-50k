@@ -75,6 +75,44 @@ migration (PORTS.md card 10, phase 2).
 
 ---
 
+### 1b. Three repo secrets, and then the site runs itself
+
+`.github/workflows/results-import.yml` is committed and dormant. It imports each
+year's results from RunSignUp and redeploys, daily through October and November,
+so nobody has to remember after the race. Verified dormant on 2026-09-07: the
+gate warns and the import job skips, and the run is green rather than red.
+
+It activates when these exist. Nothing else is needed, and no code changes:
+
+| Kind   | Name                     | What it is                                                                                 |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------ |
+| secret | `SANITY_API_WRITE_TOKEN` | A Sanity **Editor** token. Without it the import skips.                                    |
+| secret | `CLOUDFLARE_API_TOKEN`   | Workers deploy permission. Without it the results still import and only the rebuild skips. |
+| secret | `CLOUDFLARE_ACCOUNT_ID`  | Same.                                                                                      |
+
+The two repo variables it also reads, `PUBLIC_SANITY_PROJECT_ID` and
+`PUBLIC_SANITY_DATASET`, are already set.
+
+The same three secrets are what the rest of CI has been waiting on: there is
+currently NO deploy from CI at all, so every deploy of this site has been run by
+hand, and a content edit published in the Studio sits there until someone
+rebuilds. `sanity-backup.yml` wants `SANITY_AUTH_TOKEN` and `BACKUP_PASSPHRASE`
+on top, and its schedule is still commented out.
+
+### 1c. Nobody knows who the trekkers are after 2016
+
+Trekkers take the optional early start and the race makes them ineligible for
+age group and overall awards, so `src/lib/age-brackets.ts` excludes them from
+every derived record. Only 2004 to 2007 carry the flag, because those years came
+from spreadsheets with a Trekkers column. RunSignUp does not tell the importer
+who they are, so of 1,032 results from 2017 on, none are marked.
+
+An unflagged trekker can therefore take a record they were not eligible to win.
+Ask David Corfman, or the timer, how the early start is recorded in RunSignUp.
+If it is a bib range or a separate event, `scripts/import-results.mjs` can read
+it and this closes itself. If it lives only in his head, someone has to tick the
+box in the Studio each year.
+
 ## Known gaps, deliberately open
 
 ### 0. Two archive years are still lost, and the results pages now say so
