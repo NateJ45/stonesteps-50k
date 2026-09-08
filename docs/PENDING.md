@@ -133,6 +133,38 @@ checked at 4.5:1 or better before shipping, and the two combinations it warns
 against measure 1.15 and 1.09, which are the two contrast bugs that actually
 shipped on 2026-09-07.
 
+### 1f. The Studio publish webhook exists but does NOT deliver
+
+Tested 2026-09-08 rather than assumed. `npx sanity hooks list` shows the hook is
+there and correctly aimed:
+
+    Name: Studio Publish
+    URL:  https://api.github.com/repos/NateJ45/stonesteps-50k/dispatches
+    POST, dataset production
+
+But **no `repository_dispatch` event has ever reached GitHub**. Every one of the
+last 25 workflow runs was triggered by a push. A no-op publish to `siteSettings`
+(writing the existing tagline back, which changes `_updatedAt` and nothing else)
+produced no run after two minutes.
+
+So an editor publishing in the Studio does NOT get their change on the live
+site. That is the exact failure the Help guide warns about, and it is silent
+from both ends: Sanity reports the hook as configured, GitHub simply never hears
+from it.
+
+**How to find out which of three it is.** Open the webhook in the Sanity manage
+UI and read its **Attempts** tab. The status code names the cause:
+
+| Code          | Cause                                                                                                                                                                |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 401           | The `Authorization` header is missing or malformed. It must be `Bearer <token>`, the word, a space, then the token.                                                  |
+| 400           | The **Projection** is missing or wrong. GitHub needs a body of exactly `{"event_type": "sanity-publish"}`, which must match `types: [sanity-publish]` in deploy.yml. |
+| 404           | The token lacks **Contents: write** on this repo. GitHub returns 404 rather than 403 for permissions it will not confirm exist.                                      |
+| (no attempts) | The trigger settings are not firing. Check the dataset is `production` and that create/update/delete are ticked.                                                     |
+
+Until this delivers, a Studio publish reaches the live site only on the next
+push or the next scheduled results import.
+
 ### 1c. Nobody knows who the trekkers are after 2016
 
 Trekkers take the optional early start and the race makes them ineligible for
