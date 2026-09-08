@@ -64,7 +64,7 @@ const anyUnconfirmed = items.some((i) => i.confirmed !== true);
               {items.map((item) => (
                 <li class="grid grid-cols-[6.5rem_1fr] items-baseline gap-x-4 gap-y-0.5 border-b border-black/10 py-2.5 last:border-b-0 sm:grid-cols-[6.5rem_minmax(0,1fr)_auto]">
                   <span
-                    class={`tabular text-sm ${item.time ? 'text-[color:var(--primary)]' : 'text-[color:var(--plate-ink-soft)]'}`}
+                    class={`tabular text-sm ${item.time ? 'text-[color:var(--plate-accent)]' : 'text-[color:var(--plate-ink-soft)]'}`}
                   >
                     {item.time ?? 'TBC'}
                   </span>

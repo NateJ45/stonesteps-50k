@@ -1185,11 +1185,22 @@ body::before {
   --lift-sm: 2px 3px 0 rgb(0 0 0 / 0.5);
   --lift: 3px 4px 0 rgb(0 0 0 / 0.55);
   --lift-lg: 5px 7px 0 rgb(0 0 0 / 0.5);
-  /* The plate: a cream sign face with dark lettering, quoted from the logo's
-     "Trail Run" badge. Fixed in both themes, because a plate is an object
-     sitting ON the page, not part of it. */
-  --plate-face: #ffebbb;
-  --plate-ink: #1a1712;
+  /* THE PLATE, AND WHY IT FLIPS WITH THE THEME.
+     A plate is an object sitting ON the page, and it only reads as one when
+     there is real value distance between it and the ground. These were FIXED
+     cream in both themes until 2026-09-08, on the reasoning that an object
+     should not change with the page. Measured, that reasoning fails: cream on
+     bark separates at 15.19:1 and reads as a physical card; cream on the cream
+     page separates at 1.09:1 and disappears, leaving the border and a heavy
+     drop shadow to do all the work. That shadow is why dark text on the light
+     plates looked muddy. The two complaints were one problem.
+     Lightening the page cannot fix it, because two light colours cannot make a
+     figure/ground: even a deep putty ground only reaches 1.51:1. So the light
+     theme inverts the object instead. Warm charcoal stock, cream lettering,
+     11.80:1 against the page, and the hard shadow becomes correct again because
+     the lettering is now the lighter of the two. */
+  --plate-face: #3a3128;
+  --plate-ink: #ffebbb;
   /* Secondary ink ON a plate. A real colour, NOT the ink at reduced opacity.
      Tailwind's opacity-* utilities looked like the obvious way to soften a
      label on cream and quietly broke contrast: bark at 50% over #FFEBBB
@@ -1197,8 +1208,15 @@ body::before {
      @theme contrast gate nor the surfaces gate can see that, because the
      TOKENS are fine and the dilution happens in a utility class. Only the axe
      sweep caught it. This value is bark at 70%, resolved to a literal, which
-     measures 6.08:1 on the plate. */
-  --plate-ink-soft: #5f5745;
+     measures 6.08:1 on the plate.
+     Light theme: cream softened toward the charcoal stock, 6.36:1, the same
+     footing the dark theme's 6.08:1 gives on cream. */
+  --plate-ink-soft: #c4b698;
+  /* The ACCENT on a plate: the rust family, but a plate-stock-aware member of
+     it. Brand rust #a83c26 measures 5.35:1 on the cream stock and 2.02:1 on the
+     charcoal one, so there is no single value that serves both and it has to be
+     a token. Light theme, on charcoal: a warm clay at 4.86:1. */
+  --plate-accent: #e08a6b;
   /* Gold, for small labels on the forest band. Measured 6.11:1 on #2E5738.
      A solid value, because the last three contrast failures on this site were
      all a correct colour diluted with an opacity utility. */
@@ -1213,6 +1231,14 @@ body::before {
   --lift-sm: 2px 3px 0 rgb(0 0 0 / 0.7);
   --lift: 3px 4px 0 rgb(0 0 0 / 0.75);
   --lift-lg: 5px 7px 0 rgb(0 0 0 / 0.7);
+
+  /* On bark the plate is the LIGHT object: cream stock, dark lettering. The
+     original treatment, and the one the design was drawn around. */
+  --plate-face: #ffebbb;
+  --plate-ink: #1a1712;
+  --plate-ink-soft: #5f5745;
+  /* Dark theme, on the cream stock: brand rust itself, 5.35:1. */
+  --plate-accent: #a83c26;
 }
 
 /* ---------- Display type ------------------------------------------------ */
@@ -1225,17 +1251,44 @@ body::before {
   text-transform: uppercase;
   line-height: 0.84;
   letter-spacing: -0.015em;
-  text-shadow: var(--lift-sm);
+  text-shadow: var(--display-shadow, none);
 }
 
-/* The lift is tuned for dark grounds. On a cream plate the same heavy shadow
-   reads as a misregistered print, so anything display-sized on a light surface
-   takes this instead. */
-.display.on-light,
-.ticket .display,
-.punch .display,
-.clip__sheet .display {
-  text-shadow: 1px 2px 0 rgb(0 0 0 / 0.13);
+/* THE SHADOW RULE.
+   An offset drop shadow is only ever correct when the text is LIGHTER than the
+   surface behind it. Behind cream lettering on bark it is a drop shadow; behind
+   dark lettering on cream it is dark-on-dark, which thickens the letterforms
+   and reads as misregistered printing.
+   This used to be a fixed `var(--lift-sm)` on `.display` with a softened
+   override for plates, which meant every heading in light mode carried a hard
+   black shadow behind dark type. `--display-shadow` makes it a property of the
+   SURFACE instead: off by default, and switched on by any surface whose text is
+   the lighter of the two. Every dark ground opts in below; nothing else has to
+   think about it. */
+:root {
+  --display-shadow: none;
+}
+.dark {
+  --display-shadow: var(--lift-sm);
+}
+/* A plate carries the opposite treatment to the page it sits on, so it flips
+   the rule back. Light theme: charcoal stock, cream lettering, shadow ON.
+   Dark theme: cream stock, dark lettering, shadow OFF. */
+.ticket,
+.punch,
+.clip__sheet,
+.qa {
+  --display-shadow: var(--lift-sm);
+}
+.dark .ticket,
+.dark .punch,
+.dark .clip__sheet,
+.dark .qa {
+  --display-shadow: none;
+}
+/* Forest stock with gold lettering in BOTH themes, so it always wants it. */
+.ticket--feature {
+  --display-shadow: var(--lift-sm);
 }
 
 /* Preserve the logo's lowercase k inside uppercased display type.
@@ -1400,9 +1453,15 @@ body::before {
   box-shadow: 0 0 0 rgb(0 0 0 / 0.55);
 }
 /* A direct quote of the "Trail Run" badge: cream face, dark lettering. */
+/* THE CREAM BUTTON DOES NOT FOLLOW THE PLATE TOKENS, deliberately. It is small
+   and carries a 2px black border, so it never had the figure/ground problem the
+   big plates had; and inverting it in light mode would hand it the same visual
+   weight as the primary rust button it is meant to sit beside. Literal values,
+   so a future change to the plate stock cannot quietly restyle every secondary
+   CTA on the site. */
 .btn-plate--cream {
-  background: var(--plate-face);
-  color: var(--plate-ink);
+  background: #ffebbb;
+  color: #1a1712;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1456,8 +1515,14 @@ body::before {
 .ticket {
   --ticket-ink-soft: var(--plate-ink-soft);
 }
+/* Literal cream, NOT var(--plate-face). The featured ticket is forest stock in
+   both themes, so its ink has to be cream in both themes. Borrowing the plate
+   token worked only while that token happened to be cream: the moment the light
+   theme inverted it to charcoal, this became charcoal on forest at 1.54:1. The
+   contrast gate caught it on the first run after the inversion. A token
+   borrowed for its incidental VALUE rather than its meaning is a trap. */
 .ticket--feature {
-  --ticket-ink-soft: var(--plate-face);
+  --ticket-ink-soft: #e8dcb8;
 }
 .ticket-soft {
   color: var(--ticket-ink-soft);
@@ -1470,10 +1535,11 @@ body::before {
    featured card kept the cream stock and its gold heading landed on cream. */
 .ticket--feature {
   background: var(--color-tertiary);
-  color: var(--plate-face);
+  /* Cream, literally. See the note on --ticket-ink-soft above. */
+  color: #ffebbb;
 }
 .ticket--feature .ticket__stub {
-  border-top-color: color-mix(in srgb, var(--plate-face) 45%, transparent);
+  border-top-color: color-mix(in srgb, #ffebbb 45%, transparent);
 }
 .ticket--feature :is(h1, h2, h3, h4, h5, h6) {
   color: var(--gold-on-forest);

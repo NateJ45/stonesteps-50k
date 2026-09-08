@@ -118,10 +118,15 @@ const {
 <style>
   /* Forest ground with cream ink, fixed in both themes: this band is a
      photograph of a forest with a colour field behind it, not a page surface
-     that should follow the reader's theme. */
+     that should follow the reader's theme.
+     LITERAL CREAM, not var(--plate-face). That token used to be cream in both
+     themes and was borrowed here for its value; when the light theme inverted
+     the plate stock to charcoal on 2026-09-08 this band went charcoal-on-forest
+     at 1.54:1. The contrast gate caught it. A band that is fixed in both themes
+     needs fixed colours, not a token that happens to look right today. */
   .parks {
     background: var(--color-tertiary);
-    color: var(--plate-face);
+    color: #ffebbb;
   }
   /* Gold for the small labels. A solid token, measured at 6.11:1 on forest,
      rather than cream at an opacity nobody checked. */
@@ -129,6 +134,6 @@ const {
     color: var(--gold-on-forest);
   }
   .parks__rule {
-    border-color: color-mix(in srgb, var(--plate-face) 30%, transparent);
+    border-color: color-mix(in srgb, #ffebbb 30%, transparent);
   }
 </style>
