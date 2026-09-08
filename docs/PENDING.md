@@ -118,15 +118,20 @@ connection dropped before it could be walked. Open /studio and check: Help &
 Guide lists five category headings with twelve guides under them, a guide opens
 and renders its blocks, and the "Where in the Studio" cards navigate rather than 404. A structure error shows as a broken pane, not a build failure.
 
-### 1e. Four starter Studio components are now dead code
+### 1e. DONE 2026-09-08. The dead starter panes are gone
 
-StudioGuide.tsx, BusinessOverview.tsx, BrandKit.tsx and StudioPlaybook.tsx have
-no desk entry any more, and their three schema types (studioGuide, studioNotes,
-studioPlaybook) have no documents in this dataset. They stay registered and
-hidden from the desk root, so nothing floats loose and nothing is broken. They
-were left in place rather than deleted because they are starter surface and
-removing schema types is a bigger change than the tidy-up is worth. Delete them
-in a session that is already touching the schema registry.
+Three deleted with their schema types (studioGuide, studioNotes,
+studioPlaybook): BusinessOverview, StudioGuide and StudioPlaybook were all
+written for a design studio and none had a document in this dataset.
+
+BrandKit was kept and rewritten. It is genuinely useful for a race, a flyer or a
+Facebook post needs the right colours, but it shipped carrying the STARTER'S
+slate-and-ink palette. It was never wired into the desk, which is the only
+reason nobody was ever handed those as "the Stone Steps brand". It now carries
+the real values and sits in the menu. All nine of its swatch pairings were
+checked at 4.5:1 or better before shipping, and the two combinations it warns
+against measure 1.15 and 1.09, which are the two contrast bugs that actually
+shipped on 2026-09-07.
 
 ### 1c. Nobody knows who the trekkers are after 2016
 

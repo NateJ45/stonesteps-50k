@@ -36,9 +36,6 @@ import { service } from './service';
 import { servicesPage } from './servicesPage';
 import { siteSettings } from './siteSettings';
 import { sponsor } from './sponsor';
-import { studioGuide } from './studioGuide';
-import { studioNotes } from './studioNotes';
-import { studioPlaybook } from './studioPlaybook';
 import { testimonial } from './testimonial';
 
 export const schemaTypes = [
@@ -66,9 +63,6 @@ export const schemaTypes = [
   notFoundPage,
   privacyPage,
   // Start Here editable singletons
-  studioGuide,
-  studioNotes,
-  studioPlaybook,
   // The one document describing this year's edition.
   race,
 

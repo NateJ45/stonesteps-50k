@@ -23,6 +23,7 @@ import {
   BellIcon,
   BlockElementIcon,
   CogIcon,
+  ColorWheelIcon,
   HomeIcon,
   InfoOutlineIcon,
   EnvelopeIcon,
@@ -43,6 +44,7 @@ import { guides, GUIDE_CATEGORIES } from './guides/content';
 import { WelcomePane } from './components/WelcomePane';
 import { CheckupTool } from './components/CheckupTool';
 import { RaceYearTool } from './components/RaceYearTool';
+import BrandKit from './components/BrandKit';
 
 const SINGLETON_TYPES = [
   'siteSettings',
@@ -57,9 +59,6 @@ const SINGLETON_TYPES = [
   'journalPage',
   'notFoundPage',
   'privacyPage',
-  'studioGuide',
-  'studioNotes',
-  'studioPlaybook',
   // The race's own singleton: date, venue, links, fee tiers.
   'race',
 ] as const;
@@ -156,6 +155,19 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
           S.component(RaceYearTool as never)
             .id('race-year-pane')
             .title('Start a new race year'),
+        ),
+
+      // BRAND COLOURS. Not a website job, which is exactly why it is here: the
+      // flyer and the Facebook post are made somewhere else, and this is the
+      // only place the race's actual values are written down in one list.
+      S.listItem()
+        .id('brand-kit')
+        .title('Brand colours (for flyers and posts)')
+        .icon(ColorWheelIcon)
+        .child(
+          S.component(BrandKit as never)
+            .id('brand-kit-pane')
+            .title('Brand colours'),
         ),
 
       S.divider(),

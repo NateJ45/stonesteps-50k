@@ -516,77 +516,6 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type StudioPlaybook = {
-  _id: string;
-  _type: 'studioPlaybook';
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
-  intro?: string;
-  guides?: Array<{
-    title?: string;
-    summary?: string;
-    sections?: Array<{
-      heading?: string;
-      tone?: 'default' | 'primary' | 'positive' | 'caution';
-      body?: string;
-      bullets?: Array<string>;
-      links?: Array<{
-        label?: string;
-        url?: string;
-        _type: 'playbookLink';
-        _key: string;
-      }>;
-      _type: 'playbookSection';
-      _key: string;
-    }>;
-    _type: 'playbookGuide';
-    _key: string;
-  }>;
-};
-
-export type StudioNotes = {
-  _id: string;
-  _type: 'studioNotes';
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  businessSummary?: string;
-  idealClient?: string;
-  voiceSummary?: string;
-  wordsToAvoid?: Array<string>;
-};
-
-export type StudioGuide = {
-  _id: string;
-  _type: 'studioGuide';
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  guideTitle?: string;
-  guideIntro?: string;
-  studioMap?: Array<{
-    area?: string;
-    description?: string;
-    _type: 'mapRow';
-    _key: string;
-  }>;
-  howTos?: Array<{
-    title?: string;
-    steps?: Array<string>;
-    _type: 'howTo';
-    _key: string;
-  }>;
-  tips?: Array<{
-    heading?: string;
-    tone?: 'default' | 'primary' | 'caution' | 'positive';
-    body?: string;
-    _type: 'tip';
-    _key: string;
-  }>;
-};
-
 export type NotFoundPage = {
   _id: string;
   _type: 'notFoundPage';
@@ -2815,9 +2744,6 @@ export type AllSanitySchemaTypes =
   | Distance
   | Race
   | Geopoint
-  | StudioPlaybook
-  | StudioNotes
-  | StudioGuide
   | NotFoundPage
   | BusinessInfo
   | SiteSettings

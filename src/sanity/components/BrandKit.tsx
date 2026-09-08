@@ -1,245 +1,172 @@
-// BrandKit.tsx — Panel 3 of the Start Here handbook.
-// Quick-reference card for the studio brand colors and fonts, built for copying into Canva.
-// Renders color swatches inline using a small Box with a backgroundColor style.
-// Static content — no data fetching.
-// Safe to edit by hand.
+import { Box, Card, Flex, Grid, Stack, Text } from '@sanity/ui';
+import { ToolHeading } from './ToolHeading';
 
-import React from 'react';
-import { Box, Card, Container, Heading, Stack, Text } from '@sanity/ui';
+// =============================================================================
+// BrandKit — the race's colours and type, for anything made outside the website
+// =============================================================================
+// A flyer, a Facebook post, a race-day sign. The values below are the ones the
+// website actually uses, written out so they can be typed into Canva or handed
+// to a printer without anyone guessing.
+//
+// IT USED TO BE WRONG. This file shipped with the starter and carried the
+// STARTER'S palette: slate, ink, cool gray, a cool neutral scheme with nothing
+// to do with this race. It was never wired into the desk, which is the only
+// reason nobody was ever handed those colours as "the Stone Steps brand". Now
+// it carries the real ones and it is in the menu.
+//
+// KEEP IN STEP WITH brand/brand.config.json. That file is the source of truth
+// and `npm run apply-brand` writes it into globals.css; this panel is a
+// human-readable copy of the handful of values that matter off the website.
+// There is no build-time link between the two, so a rebrand means editing both.
+// =============================================================================
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface ColorSwatch {
+interface Swatch {
   name: string;
   hex: string;
   note: string;
+  /** Text colour to print ON this swatch, so the label stays readable. */
+  ink?: string;
 }
 
-interface ColorGroup {
-  label: string;
-  colors: ColorSwatch[];
-}
-
-interface FontEntry {
-  name: string;
-  role: string;
-  note: string;
-}
-
-// ─── Data ────────────────────────────────────────────────────────────────────
-
-const colorGroups: ColorGroup[] = [
+const GROUPS: { label: string; swatches: Swatch[] }[] = [
   {
-    label: 'Primary and links',
-    colors: [
+    label: 'The two you will use most',
+    swatches: [
       {
-        name: 'Slate',
-        hex: '#586577',
-        note: 'Buttons, primary CTAs, links, and accent elements throughout the site.',
+        name: 'Rust',
+        hex: '#A83C26',
+        note: 'Buttons, the ticker strip, the blaze',
+        ink: '#FFEBBB',
       },
-      {
-        name: 'Slate Dark',
-        hex: '#434E5C',
-        note: 'Button hover state. Also used for link text in body copy.',
-      },
+      { name: 'Cream', hex: '#FFEBBB', note: 'Card faces, text on dark', ink: '#1A1712' },
     ],
   },
   {
-    label: 'Text',
-    colors: [
+    label: 'Grounds',
+    swatches: [
       {
-        name: 'Ink',
-        hex: '#2A2D31',
-        note: 'Primary text color for headings and body copy on light backgrounds.',
+        name: 'Bark',
+        hex: '#1A1712',
+        note: 'The dark background, and all dark text',
+        ink: '#FFEBBB',
       },
-      {
-        name: 'Ink Dark',
-        hex: '#1E2024',
-        note: 'Footer background and occasional dark section panels.',
-      },
+      { name: 'Paper', hex: '#FBF6EA', note: 'The light background', ink: '#1A1712' },
+      { name: 'Soft paper', hex: '#F4EBD6', note: 'The alternating band', ink: '#1A1712' },
     ],
   },
   {
-    label: 'Surfaces',
-    colors: [
-      { name: 'Paper', hex: '#FBFBFA', note: 'The main page background. A clean near-white.' },
-      {
-        name: 'Soft Paper',
-        hex: '#F3F4F2',
-        note: 'Alternating section background. Slightly cooler than Paper.',
-      },
-      {
-        name: 'White',
-        hex: '#FFFFFF',
-        note: 'Text overlaid on dark or photographic surfaces. Hero text, button labels.',
-      },
-    ],
-  },
-  {
-    label: 'Accents and lines',
-    colors: [
-      { name: 'Cool Gray', hex: '#AAB0B8', note: 'Borders, dividers, and eyebrow labels.' },
-      {
-        name: 'Muted Sage',
-        hex: '#9DB0A6',
-        note: 'Used sparingly for process step icons and occasional tag accents.',
-      },
-      {
-        name: 'Faint Divider',
-        hex: '#E6E7E5',
-        note: 'Input field underlines and the lightest dividers.',
-      },
+    label: 'Accents, sparingly',
+    swatches: [
+      { name: 'Forest', hex: '#2E5738', note: 'The featured 50K ticket', ink: '#FED89B' },
+      { name: 'Gold', hex: '#FED89B', note: 'Type on forest, and only there', ink: '#1A1712' },
+      { name: 'Deep rust', hex: '#8F3323', note: 'Headings and links on light', ink: '#FFEBBB' },
+      { name: 'Stone', hex: '#8A7F66', note: 'Quiet lines and rules', ink: '#1A1712' },
     ],
   },
 ];
 
-const fonts: FontEntry[] = [
+const FONTS = [
   {
-    name: 'Libre Baskerville',
-    role: 'Headings (display)',
-    note: 'The serif used for all headings (H1 through H6). It gives the site its editorial, considered feel. Use it for headlines in Canva designs.',
+    role: 'Headlines',
+    name: 'Staatliches',
+    note: 'Free on Google Fonts. CAPITALS ONLY, one weight. The lowercase k in "50k" is the logo, not a typo.',
   },
   {
-    name: 'Inter',
-    role: 'Body text, buttons, labels',
-    note: 'The clean, readable sans-serif used for all body copy, button labels, and small UI text. Reliable and legible at any size.',
+    role: 'Body text',
+    name: 'Archivo',
+    note: 'Free on Google Fonts. Use regular for copy and semibold for emphasis.',
+  },
+  {
+    role: 'Numbers and labels',
+    name: 'JetBrains Mono',
+    note: 'The small spaced-out capitals over a heading, and any table of times.',
   },
 ];
 
-// ─── Sub-component: color swatch ─────────────────────────────────────────────
-
-interface SwatchProps {
-  color: ColorSwatch;
-}
-
-function Swatch({ color }: SwatchProps) {
+function SwatchCard({ s }: { s: Swatch }) {
   return (
-    <Box
-      style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '12px',
-      }}
-    >
-      {/* The color box */}
-      <Box
-        style={{
-          width: '48px',
-          height: '48px',
-          borderRadius: '6px',
-          backgroundColor: color.hex,
-          border: '1px solid rgba(0,0,0,0.10)',
-          flexShrink: 0,
-          marginTop: '2px',
-        }}
-      />
-      {/* Name, hex, note */}
-      <Stack space={1} style={{ minWidth: 0 }}>
-        <Text size={1} weight="semibold">
-          {color.name}
+    <Card padding={0} radius={3} border overflow="hidden">
+      <Box padding={4} style={{ background: s.hex, color: s.ink ?? '#1A1712' }}>
+        <Stack space={2}>
+          <Text size={2} weight="semibold" style={{ color: 'inherit' }}>
+            {s.name}
+          </Text>
+          <Text size={1} muted={false} style={{ color: 'inherit', fontFamily: 'monospace' }}>
+            {s.hex}
+          </Text>
+        </Stack>
+      </Box>
+      <Box padding={3}>
+        <Text size={1} muted style={{ lineHeight: 1.4 }}>
+          {s.note}
         </Text>
-        {/* Hex displayed as selectable text for easy copy-paste */}
-        <Text size={1} style={{ fontFamily: 'monospace', letterSpacing: '0.02em' }}>
-          {color.hex}
-        </Text>
-        <Text size={1} muted>
-          {color.note}
-        </Text>
-      </Stack>
-    </Box>
+      </Box>
+    </Card>
   );
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
-
 export default function BrandKit() {
   return (
-    <Container width={1} padding={4}>
-      <Stack space={6}>
-        {/* Header */}
-        <Box>
-          <Heading as="h1" size={3}>
-            Brand kit
-          </Heading>
-          <Box marginTop={3}>
-            <Text muted size={1}>
-              Colors and fonts for Studio Starter. Built so you can copy values directly into Canva
-              when you need to make a social graphic or marketing material.
+    <Box padding={4}>
+      <Stack space={5} style={{ maxWidth: 720, margin: '0 auto' }}>
+        <Stack space={3}>
+          <ToolHeading emoji="🎨">Brand colours and type</ToolHeading>
+          <Text size={2} muted style={{ lineHeight: 1.6 }}>
+            For anything made away from the website: a flyer, a Facebook post, a sign at The Oval.
+            These are the values the site itself uses, so something made with them will look like it
+            belongs to the same race.
+          </Text>
+        </Stack>
+
+        {GROUPS.map((g) => (
+          <Stack key={g.label} space={3}>
+            <Text size={1} weight="semibold" muted style={{ textTransform: 'uppercase' }}>
+              {g.label}
             </Text>
-          </Box>
-        </Box>
-
-        {/* ── Colors ────────────────────────────────────────────────────── */}
-        <Box>
-          <Heading as="h2" size={1} style={{ marginBottom: '1rem' }}>
-            Brand colors
-          </Heading>
-          <Stack space={4}>
-            {colorGroups.map((group) => (
-              <Card key={group.label} padding={4} radius={2} shadow={1} tone="default">
-                <Stack space={4}>
-                  <Text size={1} weight="semibold" muted>
-                    {group.label.toUpperCase()}
-                  </Text>
-                  <Stack space={4}>
-                    {group.colors.map((color) => (
-                      <Swatch key={color.hex} color={color} />
-                    ))}
-                  </Stack>
-                </Stack>
-              </Card>
-            ))}
+            <Grid columns={[1, 2, 2]} gap={3}>
+              {g.swatches.map((s) => (
+                <SwatchCard key={s.hex} s={s} />
+              ))}
+            </Grid>
           </Stack>
-        </Box>
+        ))}
 
-        {/* ── Fonts ─────────────────────────────────────────────────────── */}
-        <Box>
-          <Heading as="h2" size={1} style={{ marginBottom: '1rem' }}>
-            Fonts
-          </Heading>
-          <Stack space={3}>
-            {fonts.map((font) => (
-              <Card key={font.name} padding={4} radius={2} shadow={1} tone="default">
-                <Stack space={2}>
-                  <Text size={1} weight="semibold">
-                    {font.name}
+        <Stack space={3}>
+          <Text size={1} weight="semibold" muted style={{ textTransform: 'uppercase' }}>
+            Type
+          </Text>
+          {FONTS.map((f) => (
+            <Card key={f.name} padding={4} radius={3} border>
+              <Stack space={2}>
+                <Flex align="baseline" gap={3}>
+                  <Text size={2} weight="semibold">
+                    {f.name}
                   </Text>
                   <Text size={1} muted>
-                    Role: {font.role}
+                    {f.role}
                   </Text>
-                  <Text size={1}>{font.note}</Text>
-                </Stack>
-              </Card>
-            ))}
-          </Stack>
-          <Box marginTop={3}>
-            <Text size={1} muted>
-              All three fonts are free Google Fonts. Find them by name in Canva's font picker.
-            </Text>
-          </Box>
-        </Box>
+                </Flex>
+                <Text size={1} muted style={{ lineHeight: 1.5 }}>
+                  {f.note}
+                </Text>
+              </Stack>
+            </Card>
+          ))}
+        </Stack>
 
-        {/* ── Using this in Canva ───────────────────────────────────────── */}
-        <Card padding={4} radius={2} shadow={1} tone="primary">
-          <Stack space={3}>
-            <Heading as="h2" size={1}>
-              Using this in Canva
-            </Heading>
-            <Text size={1}>
-              In your Canva Brand Kit, add the hex codes above as your brand colors. Then search
-              each font name in Canva's font picker and save them as your brand fonts.
+        <Card padding={4} radius={3} tone="caution" border>
+          <Stack space={2}>
+            <Text size={1} weight="semibold">
+              Two pairings to avoid.
             </Text>
-            <Text size={1}>
-              The quick reference: Libre Baskerville for headings, Inter for body text and labels,
-              Slate (#586577) for buttons and accents, Ink (#2A2D31) for text, Paper (#FBFBFA) for
-              backgrounds.
-            </Text>
-            <Text size={1}>
-              When in doubt, Slate + Ink + Paper is the full Studio Starter palette in three colors.
+            <Text size={1} style={{ lineHeight: 1.5 }}>
+              Gold on cream and cream on paper are both close to invisible. Gold belongs on forest,
+              cream belongs on bark. If a combination looks washed out on your screen it will be
+              worse in print.
             </Text>
           </Stack>
         </Card>
       </Stack>
-    </Container>
+    </Box>
   );
 }
