@@ -56,7 +56,7 @@ const hasImage = Boolean(image?.asset);
         >
           {hasImage && (
             <figure class="lg:sticky lg:top-28 lg:self-start">
-              <div class="overflow-hidden rounded-xl border-2 border-black shadow-[var(--lift-lg)]">
+              <div class="photo-plate overflow-hidden rounded-xl border-2 border-black shadow-[var(--lift-lg)]">
                 <SanityImage
                   source={image}
                   width={1000}
@@ -95,10 +95,9 @@ const hasImage = Boolean(image?.asset);
 }
 
 <style>
-  /* Pulled slightly toward the page's own palette so the photograph sits in the
-     design rather than on top of it. The mockup used the same treatment. */
+  /* The grade itself now lives on `.photo-plate` in globals.css, so every
+     photograph on the site gets the same treatment. This only sizes the frame. */
   .course-photo {
-    filter: saturate(0.82) contrast(1.06);
     height: clamp(22rem, 46vw, 34rem);
     object-fit: cover;
   }

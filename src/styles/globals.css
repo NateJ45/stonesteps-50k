@@ -1504,6 +1504,47 @@ body::after {
   }
 }
 
+/* ---------- Photographs, graded into the palette ------------------------ */
+/* A photograph dropped in untreated reads as stock sitting ON the design; the
+   same photograph pulled a little toward the page's own colour reads as part of
+   it. The grade is deliberately mild and NOT a duotone: this is a race site,
+   and the orange cones, the autumn canopy and what people are wearing are half
+   of why the pictures are worth showing. Flattening them to two colours would
+   be a stronger graphic and a worse race photograph.
+
+   `.photo-plate` goes on the CLIPPING wrapper (the one with the radius and the
+   border), so the wash is clipped to the same corners as the image. */
+.photo-plate {
+  position: relative;
+}
+.photo-plate :is(img, video) {
+  filter: saturate(0.84) contrast(1.06);
+}
+/* A warm wash, weighted to the bottom of the frame like light falling off under
+   a canopy. Multiply in the light theme so it darkens the picture toward bark;
+   a plain dark veil in the dark theme, where multiply over a near-black page
+   turns the shadows to mud. */
+.photo-plate::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    170deg,
+    transparent 30%,
+    color-mix(in srgb, #3a2c1c 16%, transparent) 100%
+  );
+  mix-blend-mode: multiply;
+}
+.dark .photo-plate::after {
+  background: linear-gradient(
+    170deg,
+    transparent 25%,
+    color-mix(in srgb, #1a1712 34%, transparent) 100%
+  );
+  mix-blend-mode: normal;
+}
+
 /* ---------- Torn band edges --------------------------------------------- */
 /* Every surfaced band gets a ragged top edge instead of a ruled one. The race
    runs through wet leaf litter; a die-straight seam between two colours is the
