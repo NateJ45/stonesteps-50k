@@ -18,6 +18,7 @@
 // heading chopped into 30 spans is announced letter by letter by some readers.
 
 import SanityImage from '@/components/SanityImage.astro';
+import Spatter from '@/components/race/Spatter.astro';
 import CtaLink from '@/components/CtaLink.astro';
 import Topo from '@/components/race/Topo.astro';
 import Countdown from '@/components/race/Countdown.astro';
@@ -57,6 +58,19 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
 
 <section class="relative overflow-hidden bg-background py-section-lg" aria-labelledby={headingId}>
   <Topo seed={11} lines={16} class="opacity-70" />
+
+  {
+    /* ONE arc of mud, thrown up behind the headline, home hero only. See the
+      header of Spatter.astro for why it is used exactly once. Hidden on small
+      screens: at phone width it would sit under the type rather than beside it,
+      and a decorative mark that fights the headline is worth nothing. */
+  }
+  <div
+    class="pointer-events-none absolute top-[16%] left-[-2%] z-0 hidden w-[min(40rem,52%)] text-[color:var(--spatter-ink)] opacity-[var(--spatter-opacity)] md:block"
+    aria-hidden="true"
+  >
+    <Spatter seed={4} drops={190} />
+  </div>
 
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
     <div class="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
