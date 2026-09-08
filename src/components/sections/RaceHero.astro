@@ -3,7 +3,9 @@
 //
 // The hero. Topographic backdrop, display wordmark, and the race clock.
 //
-// SELF_CONTAINED: paints its own ground, never receives a surface prop.
+// SELF_CONTAINED: never receives a surface prop. It no longer paints its own
+// ground either, because the body's ground is the same colour AND carries the
+// grain; see the note on the section element.
 //
 // The headline is split per character into spans so `.hand` can give each
 // letter a fraction of a degree of rotation.
@@ -56,7 +58,16 @@ const words = headline.split(/\s+/).filter(Boolean);
 const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d+k$/i.test(w);
 ---
 
-<section class="hero-band relative bg-background py-section-lg" aria-labelledby={headingId}>
+{
+  /* NO `bg-background` HERE, deliberately. The body already paints exactly this
+  colour, and it also carries the paper grain and the mottle layer. A background
+  on this section covers those, which was invisible while the header was solid
+  and became a clear tonal step across the page the moment the header went
+  transparent: grain above the line, none below. Letting the body's surface show
+  through makes the top of the page one continuous ground, which is the whole
+  point of the overlay. */
+}
+<section class="hero-band relative py-section-lg" aria-labelledby={headingId}>
   {
     /* The topo still needs clipping to the band; the mud deliberately does not,
     so the clip lives on this wrapper rather than on the <section>. */
@@ -69,7 +80,7 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
     /* The mud. Baked masks rather than live SVG, and home hero only: see the
       header of MudField.astro for why, and for the two shapes it carries. */
   }
-  <MudField field="hero" />
+  <MudField field="hero" class="hero-mud" />
 
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
     <div class="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -108,7 +119,14 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
           </span>
         </h1>
 
-        {subhead && <p class="mt-6 max-w-[46ch] text-lg text-muted-foreground">{subhead}</p>}
+        {
+          /* FULL-STRENGTH INK, not muted. This is the one paragraph on the site
+            that sits on the mud, and axe measured it at 4.11:1 against AA's 4.5
+            once the field ran the width of the band. It is also the line that
+            tells a visitor what the race IS, so softening it was the wrong
+            economy twice over. Same call as the countdown's label. */
+          subhead && <p class="mt-6 max-w-[46ch] text-lg text-foreground">{subhead}</p>
+        }
 
         <div class="mt-8 flex flex-wrap items-center gap-4">
           {primaryCta && <CtaLink cta={primaryCta} class="btn-plate" />}

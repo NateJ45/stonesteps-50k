@@ -44,6 +44,8 @@ interface Props {
   ogType?: 'website' | 'article';
   /** Article metadata. Only used when ogType is 'article'. */
   ogArticle?: { publishedAt?: string; author?: string };
+  /** Let the page run up behind a background-less header. See Header.astro. */
+  headerOverlay?: boolean;
 }
 
 const {
@@ -56,6 +58,7 @@ const {
   noindex = false,
   ogType = 'website',
   ogArticle,
+  headerOverlay = false,
 } = Astro.props as Props;
 
 const canonical = new URL(Astro.url.pathname, site.url).toString();
@@ -286,7 +289,7 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
       </div>
     )}
 
-    <Header siteSettings={siteSettings} />
+    <Header siteSettings={siteSettings} overlay={headerOverlay} />
 
     <main id="main" class="flex-1">
       <slot />
@@ -489,6 +492,15 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
                 header.setAttribute('data-state', 'hidden');
               } else if (dy < -4) {
                 header.removeAttribute('data-state');
+              }
+
+              // An overlay header has no background of its own, so it needs one
+              // back the moment the page moves: past the hero it would be
+              // sitting on whatever content happens to be underneath.
+              if (y > 8) {
+                header.setAttribute('data-scrolled', '');
+              } else {
+                header.removeAttribute('data-scrolled');
               }
               lastY = y;
               ticking = false;

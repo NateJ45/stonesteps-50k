@@ -35,6 +35,11 @@ const eventSchema = raceEventSchema(race, site.url);
 const schemas = eventSchema ? [JSON.stringify(eventSchema)] : [];
 ---
 
-<BaseLayout {title} {description} {siteSettings} seoImage={page?.seoImage} {schemas}>
+{
+  /* The header overlays this page: the hero runs up behind it so the mud
+  carries across the chrome rather than stopping at it. Only the home page does
+  this, because only the home page opens with a full band the header can sit on. */
+}
+<BaseLayout {title} {description} {siteSettings} seoImage={page?.seoImage} {schemas} headerOverlay>
   <SectionRenderer {sections} idPrefix="home" />
 </BaseLayout>

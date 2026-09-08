@@ -39,61 +39,27 @@ const FIELDS = [
       {
         suffix: 'wide',
         W: 1600,
-        H: 1018, // 1440x916 measured, kept in proportion
+        H: 1087, // 1440x978 measured, kept in proportion
         density: 1,
         split: true,
         quiet: [
-          [0.44, 0.04, 0.74, 0.11], // the nav links
-          [0, 0.31, 0.55, 0.37], // the hero eyebrow
-          [0, 0.59, 0.55, 0.83], // the subhead and the buttons
-          [0.52, 0.72, 1, 0.78], // the countdown's label
+          [0.44, 0.03, 0.74, 0.1], // the nav links
+          [0, 0.35, 0.55, 0.41], // the hero eyebrow
+          [0, 0.61, 0.55, 0.85], // the subhead and the buttons
+          [0.52, 0.74, 1, 0.8], // the countdown's label
         ],
       },
       {
         suffix: 'phone',
         W: 760,
-        H: 1900, // 390x974 measured
+        H: 2013, // 390x1033 measured
         density: 0.5,
         split: false,
         quiet: [
-          [0, 0.145, 1, 0.19], // the hero eyebrow
-          [0, 0.25, 1, 0.42], // the subhead
-          [0, 0.81, 1, 0.85], // the countdown's label
+          [0, 0.19, 1, 0.24], // the hero eyebrow
+          [0, 0.29, 1, 0.54], // the subhead and the buttons
+          [0, 0.82, 1, 0.87], // the countdown's label
         ],
-      },
-    ],
-  },
-  {
-    // THE HEADER, which wears its own mud rather than borrowing the hero's.
-    //
-    // The hero's layer cannot reach it: <main> carries `view-transition-name:
-    // main-content`, which forms a stacking context, so any z-index inside main
-    // is scoped to main, and main paints below a sticky positioned header. No
-    // z-index on the mud can win that. Giving the header its own field also
-    // behaves better on scroll, since the sign stays muddy instead of wiping
-    // clean the moment you move.
-    //
-    // A 10:1 strip, so this is speckle and a couple of small hits rather than a
-    // throw: an arc drawn across a band this shallow reads as a smear.
-    name: 'chrome',
-    shapes: [
-      {
-        suffix: 'wide',
-        W: 1440,
-        H: 135, // measured
-        density: 0.5,
-        big: 0.85,
-        split: false,
-        quiet: [[0.44, 0, 0.75, 1]], // the nav links, full height of the strip
-      },
-      {
-        suffix: 'phone',
-        W: 390,
-        H: 92, // measured
-        density: 0.35,
-        big: 0.7,
-        split: false,
-        quiet: [],
       },
     ],
   },

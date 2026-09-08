@@ -1605,6 +1605,53 @@ body::after {
    pointing down: this is a board laid OVER the page, so the page shows through
    where the board is torn. `background-color: inherit` again, so it is always
    the header's own colour and never needs a second token. */
+/* ---------- The overlay header ------------------------------------------ */
+/* On the home page the header paints NO BACKGROUND and the hero runs up behind
+   it, which is the only way the hero's mud carries on across the chrome instead
+   of stopping at it. Every other approach fails on paint order: <main> carries
+   `view-transition-name: main-content`, which forms a stacking context, so no
+   z-index inside main can lift anything above a sticky positioned header. A
+   header with nothing to paint has nothing to cut off.
+
+   It takes its background back as soon as the page moves. Past the hero the nav
+   would otherwise sit on whatever content scrolled under it, which is both ugly
+   and a real contrast problem. `data-scrolled` is set in BaseLayout's scroll
+   listener at 8px. */
+.site-header[data-overlay]:not([data-scrolled]) {
+  background: transparent;
+}
+.site-header {
+  transition:
+    transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 220ms ease;
+}
+
+/* The band the header sits over has to make room for it, or the hero copy
+   starts underneath the nav. These heights are the header's, measured. */
+.hero-band {
+  padding-top: calc(92px + 2rem);
+}
+
+@media (min-width: 64rem) {
+  .hero-band {
+    padding-top: calc(135px + 2.5rem);
+  }
+}
+
+/* The hero's mud starts at the top of the PAGE, not the top of the hero, so it
+   runs behind the transparent header. It is painted by main, which sits below
+   the header in paint order, and that is fine precisely because the header has
+   no background to hide it. */
+.hero-mud {
+  --mud-top: -92px;
+}
+
+@media (min-width: 64rem) {
+  .hero-mud {
+    --mud-top: -135px;
+  }
+}
+
 /* NO `position` HERE, and that is the whole point of this comment.
    It used to say `position: relative`, which looked harmless and was not: this
    rule is defined later in the file than `.site-header { position: sticky }`,

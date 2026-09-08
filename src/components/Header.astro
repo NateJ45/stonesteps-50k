@@ -19,7 +19,6 @@ import { site } from '@/data/site';
 import { Mail, Phone } from 'lucide-react';
 import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
 import ThemeToggle from './ThemeToggle';
-import MudField from '@/components/race/MudField.astro';
 import MobileNav from './MobileNav';
 import { ChevronDown } from 'lucide-react';
 import logoLightAsset from '@/assets/logo-light.svg';
@@ -41,6 +40,8 @@ const logoLightWebpMobile = logoLightImg;
 const logoDarkWebpMobile = logoDarkImg;
 
 interface Props {
+  /** Paint no background and let the page run up behind. See the note below. */
+  overlay?: boolean;
   siteSettings?:
     | (RawChromeSettings & {
         siteName?: string;
@@ -58,6 +59,15 @@ interface Props {
 const { siteSettings } = Astro.props as Props;
 
 const brandName = siteSettings?.siteName ?? siteSettings?.title ?? site.name;
+
+/**
+ * OVERLAY MODE. The header paints no background and the page runs up behind it,
+ * which is what lets the home hero's mud carry on across the chrome instead of
+ * being cut off at it. It restores its background the moment the page scrolls
+ * (`data-scrolled`, set in BaseLayout), because past the hero the nav would
+ * otherwise be sitting on whatever content happens to be underneath.
+ */
+const { overlay = false } = Astro.props;
 const availability = siteSettings?.availabilityStatus ?? '';
 
 // The chrome (menu, header button, logo, the show/hide switches) resolves
@@ -151,15 +161,7 @@ function isGroupActive(items: { href: string }[]) {
 }
 ---
 
-<header class="site-header sign-board bg-background">
-  {
-    /* The sign got splashed too. It carries its OWN field rather than the
-      hero's: <main> forms a stacking context (view-transition-name), so no
-      z-index on the hero's layer can lift it over a sticky header. Keeping it
-      here also means the sign stays muddy as you scroll instead of wiping
-      clean the moment you move. */
-  }
-  <MudField field="chrome" />
+<header class="site-header sign-board bg-background" data-overlay={overlay ? '' : undefined}>
   {
     /* Eyebrow strip (desktop only). Carries the locked positioning line and
       utility controls (email + social icons + theme toggle). Mobile gets
@@ -176,7 +178,13 @@ function isGroupActive(items: { href: string }[]) {
       layout would squish, so mobile-style header stays in use. */
   }
   <div
-    class="relative mx-auto flex max-w-content items-center justify-center border-b border-border px-l py-m lg:justify-between"
+    class:list={[
+      'relative mx-auto flex max-w-content items-center justify-center px-l py-m lg:justify-between',
+      // The board's torn bottom edge terminates the header now, so this rule is
+      // redundant on a solid header and a floating hairline across the hero on
+      // an overlay one.
+      !overlay && 'border-b border-border',
+    ]}
   >
     {
       /* Mobile-only availability pill, mirroring the hamburger menu's

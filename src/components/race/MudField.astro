@@ -30,7 +30,7 @@
 
 interface Props {
   /** Which baked field to wear. See FIELDS in scripts/generate-mud.mjs. */
-  field?: 'hero' | 'chrome' | 'director';
+  field?: 'hero' | 'director';
   class?: string;
 }
 
@@ -116,9 +116,6 @@ const { field = 'hero', class: className = '' } = Astro.props as Props;
   .mud--director .mud__l--solo {
     --src: url('/mud/director-wide.png');
   }
-  .mud--chrome .mud__l--solo {
-    --src: url('/mud/chrome-wide.png');
-  }
 
   /* THE PHONE WEARS ONE COMBINED LAYER, and that is an accessibility decision.
      axe cannot see a mask: it finds these elements over a piece of text, reads
@@ -145,9 +142,6 @@ const { field = 'hero', class: className = '' } = Astro.props as Props;
     }
     .mud--director .mud__l--solo {
       --src: url('/mud/director-phone.png');
-    }
-    .mud--chrome .mud__l--solo {
-      --src: url('/mud/chrome-phone.png');
     }
   }
 
