@@ -1607,11 +1607,14 @@ body::after {
    mark that is clearly mounted reads as deliberate; the same mark floating at
    the same size reads as a favicon. Replace this the day a vector logo exists
    and the plate can simply grow. */
+/* The plate grows with the sign it holds. On a phone the header is a logo and
+   a hamburger, and a full-size plate takes 80% of the width and crowds the
+   menu button off the edge. */
 .sign-badge {
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding: 0.4rem 0.55rem;
+  padding: 0.35rem 0.5rem;
   border: 2px solid var(--plate-edge);
   border-radius: 7px;
   /* THE PAGE'S OWN GROUND, not --plate-face. The plate objects elsewhere invert
@@ -1640,11 +1643,23 @@ body::after {
   background: color-mix(in srgb, var(--foreground) 45%, transparent);
 }
 .sign-badge::before {
-  left: 5px;
+  left: 7px;
 }
 .sign-badge::after {
-  right: 5px;
+  right: 7px;
 }
+@media (min-width: 64rem) {
+  .sign-badge {
+    padding: 0.55rem 0.8rem;
+  }
+  .sign-badge::before,
+  .sign-badge::after {
+    top: 6px;
+    width: 5px;
+    height: 5px;
+  }
+}
+
 a:hover > .sign-badge,
 a:focus-visible > .sign-badge {
   rotate: 0deg;
@@ -1657,43 +1672,68 @@ a:focus-visible > .sign-badge {
   }
 }
 
-/* NAV ITEMS ARE BLAZED, NOT UNDERLINED.
-   A blaze is how a trail tells you that you are on the right one, and this site
-   already paints them beside its section headings. Using the same mark in the
-   nav means the chrome speaks the race's own language instead of the web's
-   default. Faint on hover, solid on the page you are on.
+/* A PAINTED UNDERLINE, NOT A RULE.
+   The nav briefly used trail blazes above each label. It did not work: a blaze
+   is a big confident mark and at nav size it read as a stray dash floating over
+   the word, with nothing tying it to the label. The line came back, but painted
+   rather than ruled: an irregular brush stroke, masked so its edges wobble the
+   way the rest of the site's marks do.
 
-   The mark is decorative: `aria-current="page"` is what actually announces the
-   current page, and it is already on the link. */
-.nav-blaze {
+   It grows from the centre on hover and sits full width on the current page,
+   so the motion says "this one" rather than merely decorating. The mark is
+   decorative; `aria-current="page"` is what announces the page. */
+.nav-stroke {
   position: relative;
 }
-.nav-blaze::before {
+.nav-stroke::after {
   content: '';
   position: absolute;
-  left: 50%;
-  top: -0.8rem;
-  translate: -50% 0;
-  width: 7px;
-  height: 14px;
-  border-radius: 2px 3px 2px 3px;
-  rotate: -4deg;
+  left: 0;
+  right: 0;
+  bottom: -0.45rem;
+  height: 7px;
   background: var(--heading-accent);
-  opacity: 0;
-  transition: opacity 0.18s ease;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 210 14' preserveAspectRatio='none'%3E%3Cpath d='M0,7 C14,2.5 30,3.4 46,5.2 C62,7 74,8.6 90,7.4 C104,6.4 118,3.2 134,3.8 C150,4.4 164,7.6 180,7.1 C192,6.7 200,5.4 210,4.6 L210,11 C198,11.6 188,12 176,11.4 C160,10.6 146,8.4 130,9 C114,9.6 102,12 86,12.2 C70,12.4 56,10.6 40,9.6 C26,8.7 12,9.4 0,11 Z' fill='%23000'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 210 14' preserveAspectRatio='none'%3E%3Cpath d='M0,7 C14,2.5 30,3.4 46,5.2 C62,7 74,8.6 90,7.4 C104,6.4 118,3.2 134,3.8 C150,4.4 164,7.6 180,7.1 C192,6.7 200,5.4 210,4.6 L210,11 C198,11.6 188,12 176,11.4 C160,10.6 146,8.4 130,9 C114,9.6 102,12 86,12.2 C70,12.4 56,10.6 40,9.6 C26,8.7 12,9.4 0,11 Z' fill='%23000'/%3E%3C/svg%3E");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  scale: 0 1;
+  transform-origin: center;
+  transition: scale 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.nav-blaze:hover::before,
-.nav-blaze:focus-visible::before {
-  opacity: 0.45;
+.nav-stroke:hover::after,
+.nav-stroke:focus-visible::after {
+  scale: 0.7 1;
 }
-.nav-blaze[aria-current='page']::before {
-  opacity: 1;
+.nav-stroke[aria-current='page']::after {
+  scale: 1 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nav-blaze::before {
+  .nav-stroke::after {
     transition: none;
   }
+}
+
+/* ---------- The register plate ------------------------------------------ */
+/* The header's one job beyond navigation is getting somebody to enter, so its
+   button is the site's own sign plate rather than a rounded rectangle: black
+   edge, hard offset shadow, and press physics that lift it up and left under
+   the pointer and drive it down and right when clicked.
+
+   The small variant exists because the header row is 64px of sign and a
+   full-size plate next to it reads as two competing objects. */
+.btn-plate--sm {
+  padding: 0.62rem 1.15rem;
+  font-size: 0.9rem;
+  gap: 0.5rem;
+}
+
+/* You are already on the page it points at, so it stops shouting. */
+.btn-plate--is-current {
+  background: var(--accent-dark, var(--primary));
 }
 
 /* ---------- Torn band edges --------------------------------------------- */

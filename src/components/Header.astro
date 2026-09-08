@@ -159,98 +159,6 @@ function isGroupActive(items: { href: string }[]) {
       appear once there's room for the full nav + CTA without squishing
       the logo. */
   }
-  <div class="hidden border-b border-border-soft bg-muted lg:block">
-    <div class="mx-auto flex max-w-content items-center justify-between px-l py-2">
-      <div class="flex items-center gap-m">
-        <p class="text-xs tracking-eyebrow text-foreground/80 uppercase">
-          {siteSettings?.tagline ?? site.name}
-        </p>
-        {
-          /* Availability status, mirroring the mobile pill. Same pulsing dot
-            and link to /contact, so the trust signal is consistent at every
-            width (compact "Open" on phones, full status from md up). */
-        }
-        {
-          availability && (
-            <>
-              <span class="h-3 w-px bg-border-soft" aria-hidden="true" />
-              <a
-                href="/contact"
-                class="inline-flex items-center gap-1.5 text-xs font-semibold tracking-eyebrow text-foreground uppercase transition-colors hover:text-link"
-                aria-label={`${availability}. Get in touch.`}
-              >
-                <span class="relative flex h-2 w-2 shrink-0" aria-hidden="true">
-                  <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-tertiary opacity-60" />
-                  <span class="relative inline-flex h-2 w-2 rounded-full bg-tertiary" />
-                </span>
-                {availability}
-              </a>
-            </>
-          )
-        }
-      </div>
-      <div class="flex items-center gap-m">
-        {
-          email && (
-            <a
-              href={`mailto:${email}`}
-              class="inline-flex items-center gap-xs text-xs text-foreground transition-colors hover:text-link"
-            >
-              <Mail size={12} aria-hidden="true" />
-              {email}
-            </a>
-          )
-        }
-        {
-          phone && (
-            <a
-              href={telHref(phone)}
-              class="inline-flex items-center gap-xs text-xs text-foreground transition-colors hover:text-link"
-            >
-              <Phone size={12} aria-hidden="true" />
-              {phone}
-            </a>
-          )
-        }
-        {
-          (ig || fb) && (
-            <div class="flex items-center gap-1">
-              {ig && (
-                <a
-                  href={ig}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  class="inline-flex h-7 w-7 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent hover:text-link"
-                >
-                  <IconBrandInstagram size={14} stroke={1.5} />
-                </a>
-              )}
-              {fb && (
-                <a
-                  href={fb}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  class="inline-flex h-7 w-7 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent hover:text-link"
-                >
-                  <IconBrandFacebook size={14} stroke={1.5} />
-                </a>
-              )}
-            </div>
-          )
-        }
-        {
-          /* Hydrate when idle, not on load — the anti-FOUC inline script in
-            BaseLayout already applies the correct theme class before first
-            paint, so this React island only needs to be live by the time the
-            visitor moves to click it. Demoting from client:load shaves real
-            TBT off mobile Lighthouse runs. */
-        }
-        <ThemeToggle client:idle />
-      </div>
-    </div>
-  </div>
 
   {
     /* Main nav row. Mobile (and tablet) center the logo; desktop ≥1024 px
@@ -329,7 +237,7 @@ function isGroupActive(items: { href: string }[]) {
               srcset={logoSrcset}
               sizes="280px"
               alt={logo.alt || brandName}
-              class="h-12 w-auto"
+              class="h-11 w-auto lg:h-16"
               loading="eager"
               decoding="async"
             />
@@ -338,7 +246,7 @@ function isGroupActive(items: { href: string }[]) {
               alt={brandName}
               width={280}
               height={60}
-              class="h-12 w-auto"
+              class="h-11 w-auto lg:h-16"
               loading="eager"
               decoding="async"
               data-theme-logo
@@ -385,7 +293,7 @@ function isGroupActive(items: { href: string }[]) {
               <a
                 href={item.href}
                 class:list={[
-                  'nav-blaze text-sm tracking-wide transition-colors',
+                  'nav-stroke text-sm tracking-wide transition-colors',
                   isActive(item.href)
                     ? 'font-semibold text-link'
                     : 'text-foreground hover:text-link',
@@ -444,19 +352,22 @@ function isGroupActive(items: { href: string }[]) {
           )
         }
       </nav>
+      {/* The theme toggle moved down here when the tagline strip went. */}
+      <ThemeToggle client:idle />
       <span class="h-6 w-px bg-border-soft" aria-hidden="true"></span>
       {
         headerCta.show && (
           <a
             href={headerCta.href}
             class:list={[
-              'press-tactile inline-flex items-center rounded-md px-m py-2 text-sm font-semibold tracking-eyebrow uppercase',
-              isActive(headerCta.href)
-                ? 'bg-accent-dark text-white'
-                : 'bg-primary-dark text-white hover:bg-accent-dark',
+              'btn-plate btn-plate--sm',
+              isActive(headerCta.href) && 'btn-plate--is-current',
             ]}
           >
             {headerCta.label}
+            <span class="btn-plate__arrow" aria-hidden="true">
+              &rarr;
+            </span>
           </a>
         )
       }
