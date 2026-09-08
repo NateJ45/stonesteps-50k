@@ -24,11 +24,13 @@ const baseURL = `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: './tests',
-  // tests/visual has its OWN config (playwright.visual.config.ts): different
-  // reporter, a screenshot threshold, reduced motion, and its own port so the
-  // two suites can run side by side. Without this ignore, `npm test` picks the
-  // visual specs up under these settings and fails them for having no
-  // baselines, which is exactly what happened the day they were added.
+  // A visual-regression suite (PORTS.md card 37) lives at tests/visual/** with
+  // its OWN config: different reporter, a screenshot threshold, reduced motion,
+  // and its own port so the two can run side by side. Without this ignore, this
+  // config sweeps those specs up under the wrong settings and fails them for
+  // having no baselines, which is exactly what happened the day stonesteps-50k
+  // added them. Harmless in a repo with no tests/visual folder, which is why it
+  // lives in the canonical copy rather than in each site.
   testIgnore: '**/visual/**',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
