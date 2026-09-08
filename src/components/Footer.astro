@@ -40,7 +40,7 @@ import {
 import { Mail, Phone } from 'lucide-react';
 import CopyEmailButton from '@/components/CopyEmailButton';
 import NewsletterSignup from '@/components/NewsletterSignup';
-import { getAllProjects, type CoreProjectCard } from '@/lib/queries';
+import { getAllProjects, getRace, type CoreProjectCard } from '@/lib/queries';
 // THE SVG, NOT THE PNG. The .png files in src/assets were the REID DESIGN
 // wordmark, inherited from the repo this project was forked from, and this
 // footer was still importing them: another client's logo sat at the bottom of
@@ -58,6 +58,34 @@ import { telHref } from '@/lib/phone';
 // width variants and no webp: these are SVGs, so a single file is sharp at
 // every size and asking the optimizer to rasterise them would be a downgrade.
 // The BaseLayout anti-FOUC script swaps src on theme change, same as the header.
+// THE RACE BAND. Site-specific, and deliberately so: this footer is otherwise
+// the family's generic one, but a race footer that does not say when the race
+// is has wasted the most valuable line on the page. Everything here is read
+// from the `race` singleton, so the day it is edited in the Studio the footer
+// follows and nobody has to remember this file exists.
+const race = await getRace().catch(() => null);
+const raceDate = race?.raceDate ? new Date(race.raceDate) : null;
+const raceDateLabel = raceDate
+  ? raceDate.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC', // the date is a race day, not an instant; UTC keeps it from sliding a day
+    })
+  : null;
+const raceIsUpcoming = raceDate ? raceDate.getTime() > Date.now() : false;
+/** "23rd" without a lookup table, and correct for 11th/12th/13th. */
+function ordinal(n: number): string {
+  const rem100 = n % 100;
+  if (rem100 >= 11 && rem100 <= 13) return `${n}th`;
+  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
+}
+const editionLabel = race?.editionNumber ? `${ordinal(race.editionNumber)} running` : null;
+const wherePlace = [race?.venue, [race?.city, race?.region].filter(Boolean).join(', ')]
+  .filter(Boolean)
+  .join(' · ');
+
 const footerLogoLight = await getImage({ src: logoLightAsset });
 const footerLogoDark = await getImage({ src: logoDarkAsset });
 
@@ -173,6 +201,37 @@ const latestProjects = allProjects.slice(0, 3);
 ---
 
 <footer class="bg-muted text-foreground">
+  {
+    /* Next running, and the one button that matters. Only while the date is
+      still ahead: a footer advertising a race that already happened is worse
+      than one that says nothing, and this is the line nobody would remember to
+      take down. */
+  }
+  {
+    raceDateLabel && raceIsUpcoming && (
+      <div class="border-b border-border">
+        <div class="mx-auto flex max-w-content flex-col gap-m px-m py-l md:flex-row md:items-end md:justify-between">
+          <div>
+            <p class="blaze text-heading-accent mb-2 font-mono text-[0.7rem] font-semibold tracking-[0.22em] uppercase">
+              Next running
+            </p>
+            <p class="display text-[clamp(1.75rem,4vw,2.75rem)]">{raceDateLabel}</p>
+            <p class="mt-2 text-sm text-foreground/80">
+              {[editionLabel, wherePlace].filter(Boolean).join(' · ')}
+            </p>
+          </div>
+          {race?.registerUrl && (
+            <a class="btn-plate btn-plate--cream self-start md:self-auto" href={race.registerUrl}>
+              Register
+              <span class="btn-plate__arrow" aria-hidden="true">
+                &rarr;
+              </span>
+            </a>
+          )}
+        </div>
+      </div>
+    )
+  }
   {/* Brand accent stripe — matches header + mobile drawer. */}
   <div class="h-1 bg-primary" aria-hidden="true"></div>
 
@@ -428,9 +487,25 @@ const latestProjects = allProjects.slice(0, 3);
           )
         }
       </div>
-      <p class="mt-s text-sm text-foreground/75">
-        {site.name}
-      </p>
+      {
+        /* Without an email or phone on file this column used to render the
+          brand name and nothing else, which is not a way to get in touch. The
+          race takes questions through the contact page, so point at it. */
+      }
+      {
+        !email && !phone && (
+          <p class="text-sm">
+            <a class="text-link underline-offset-2 hover:underline" href="/contact">
+              Ask the race director
+            </a>
+          </p>
+        )
+      }
+      {
+        race?.directorName && (
+          <p class="mt-s text-sm text-foreground/75">{race.directorName}, race director</p>
+        )
+      }
       {
         socialLinksToRender.length > 0 && (
           <ul class="mt-m flex list-none justify-center gap-s p-0 text-sm md:justify-start">

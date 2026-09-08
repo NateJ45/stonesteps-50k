@@ -631,6 +631,8 @@ docs.push({
     label: 'Register',
     link: { _type: 'navLink', label: 'Register', linkType: 'external', externalUrl: REGISTER },
   },
+  // Sits under the footer's centred logo. One line, no adjectives doing work.
+  tagline: "Cincinnati's longest running ultramarathon, on the same trail since 2003.",
   footerColumns: [
     {
       _type: 'footerColumn',
