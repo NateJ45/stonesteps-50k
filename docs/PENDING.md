@@ -95,7 +95,7 @@ Still not set, and unrelated to the above: `sanity-backup.yml` wants
 `SANITY_AUTH_TOKEN` and `BACKUP_PASSPHRASE`, and its schedule is still
 commented out.
 
-### 1d2. Six WCP tools landed and want one signed-in look
+### 1d2. DONE 2026-09-08. The six WCP tools are verified signed in
 
 Ported 2026-09-07: Welcome, Checkup, Start a new race year, the first-visit
 tour, plus visual regression and link health outside the Studio. The two CI
@@ -109,7 +109,7 @@ loads clean, but panes only render after login. Worth a click-through:
 - The tour appears on a first visit in a fresh browser profile, and the Welcome
   pane's "Show the welcome tour again" reopens it.
 
-### 1d. The Studio desk needs one signed-in click-through
+### 1d. DONE 2026-09-08. The desk is verified signed in
 
 The Help & Guide handbook replaced the starter's Start Here panes on
 2026-09-07. The Studio bundle loads with zero console errors, which proves the
@@ -132,6 +132,16 @@ the real values and sits in the menu. All nine of its swatch pairings were
 checked at 4.5:1 or better before shipping, and the two combinations it warns
 against measure 1.15 and 1.09, which are the two contrast bugs that actually
 shipped on 2026-09-07.
+
+### 1g. Design review: light mode needs a real decision
+
+`docs/design-review-2026-09-08.md` is the full write-up. The headline: the brand's
+language is a high-contrast object on a ground, and it measures 15.19:1 in dark
+mode against 1.09:1 in light, so in light mode the objects vanish into the page.
+The heavy drop shadows exist to compensate, which is what makes dark text look
+muddy. Lightening the page cannot fix it (two light colours top out around
+1.5:1); inverting the objects to forest and charcoal on cream restores 7.7 to
+11.8:1 and makes the shadow correct again. Ordered plan is in section 6.
 
 ### 1f. The Studio publish webhook exists but does NOT deliver
 
