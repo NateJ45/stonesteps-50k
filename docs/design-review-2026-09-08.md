@@ -279,9 +279,22 @@ dark surfaces opting back in. Section 1 and 2.
 **Phase 3 — The contrast gate upgrade.** Sample real pixels behind text so phase 4 is
 safe. Section 8.
 
-**Phase 4 — Texture.** Coarser earthy grain plus a mottle layer, duotone photo treatment,
-deckled plate edges and ragged section dividers, rubber-stamp eyebrows, and one boot
-spatter on the home hero. Section 6.
+**Phase 4 — Texture. DONE, 2026-09-08.** Landed in three commits: an earthy
+grain plus a slow mottle layer under it, one deterministic arc of mud on the home
+hero, torn edges between every band, and a shared photograph grade.
+
+Two items on this list were dropped after looking at them properly, and the
+reasons matter more than the items.
+
+- **Deckled edges on the plates.** A ticket is die-cut stock and already carries
+  a torn perforation, which is the one element on the page that reads as handled
+  rather than drawn. Roughening its outline too would have meant masking an
+  element that also carries a 2px border and a lift shadow, both of which a mask
+  clips, so the cost was a real risk of a broken-looking object for a second
+  helping of an idea the band edges now carry across the whole site.
+- **Rubber-stamp bleed on the eyebrows.** The trail blaze is already the hand-made
+  mark: off-square corners, three degrees of rotation. A second irregularity
+  treatment on the same 9px object reads as fuss, not as craft.
 
 **Phase 5 — Motion.** The punch card and the elevation draw first, since those are the
 two that come from the content. Then the smaller craft. All inside the existing
