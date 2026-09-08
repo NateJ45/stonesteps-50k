@@ -1950,10 +1950,36 @@ main > .band-torn:first-child::before {
    always renders the same ridge: zero runtime cost, zero image weight. */
 .topo {
   position: absolute;
-  inset: 0;
+  /* Oversized top and bottom so the parallax drift below never pulls an edge
+     into view inside the clipping band. */
+  inset: -3% 0;
   pointer-events: none;
   opacity: 0.5;
   z-index: 0;
+}
+
+/* The contours drift as the band passes.
+   Scroll-driven, with no scroll listener and no JS at all: `animation-timeline:
+   view()` ties the animation to the element's own progress through the
+   viewport. Browsers without it simply get the static topo, which is the
+   current design, so this is a pure enhancement rather than something that
+   needs a fallback. Inside both a reduced-motion guard and a @supports. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .topo {
+      animation: topo-drift linear both;
+      animation-timeline: view();
+    }
+  }
+}
+
+@keyframes topo-drift {
+  from {
+    translate: 0 -2.5%;
+  }
+  to {
+    translate: 0 2.5%;
+  }
 }
 .topo path {
   fill: none;

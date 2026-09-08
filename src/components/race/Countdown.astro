@@ -145,6 +145,28 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
     .clock__val[data-unit='seconds'] {
       animation: led 1s steps(2, end) infinite;
     }
+
+    /* A roll-over re-strikes the segments.
+       The design review asked for digits that FLIP. They should not: a flip is
+       a split-flap, a mechanical object, and this one is explicitly an LED race
+       clock drawn to rhyme with the clock in the photograph beside it. What an
+       LED display does when a digit changes is light new segments, so that is
+       what this does, brief and bright.
+
+       Seconds are excluded on purpose. They already blink, a flare every second
+       would be noise, and the moment worth marking is a minute rolling over. */
+    .clock__val:not([data-unit='seconds']).is-lit {
+      animation: led-strike 420ms ease-out;
+    }
+  }
+
+  @keyframes led-strike {
+    0% {
+      filter: brightness(1.85);
+    }
+    100% {
+      filter: none;
+    }
   }
   @keyframes led {
     0%,
@@ -181,7 +203,19 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
         seconds: total % 60,
       };
       for (const [key, el] of Object.entries(cells)) {
-        if (el) el.textContent = String(parts[key as keyof typeof parts]).padStart(2, '0');
+        if (!el) continue;
+        const next = String(parts[key as keyof typeof parts]).padStart(2, '0');
+        if (el.textContent === next) continue;
+        el.textContent = next;
+        // Seconds are excluded from the strike (they already blink), so do not
+        // put a class on them that no rule reads.
+        if (key === 'seconds') continue;
+        // Restart the strike: remove, force a reflow, re-add. Without the
+        // reflow the browser coalesces the two class changes and the animation
+        // never replays.
+        el.classList.remove('is-lit');
+        void el.offsetWidth;
+        el.classList.add('is-lit');
       }
       clock.setAttribute('aria-label', `${total} seconds remaining`);
     };
