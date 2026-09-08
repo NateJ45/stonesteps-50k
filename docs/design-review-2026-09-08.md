@@ -173,15 +173,122 @@ What would lift it from "good build" to "premium piece":
 
 ---
 
-## 6. Suggested order
+---
 
-1. Light-mode inversion and the shadow rule (sections 1 and 2). Biggest visual return,
-   and it is a genuine design decision rather than a tweak.
-2. The type floor (section 3). Cheap, and it removes an easy criticism.
-3. Photography (section 5.2). The largest perceived-quality lever available.
-4. The crew and spectator guide (section 4.3). The best content we can write unaided.
-5. Motion and a signature moment (5.3, 5.4).
-6. Everything blocked on Corfman, whenever he answers.
+## 6. Texture: the craft says letterpress, the race says mud
 
-Verification for each: both themes, both viewports, the contrast gate
-(`tests/contrast.spec.ts`), and a refreshed visual baseline in the same change.
+There is already a texture layer, and reading it explains the gap exactly. The body grain
+is `feTurbulence` at **4% opacity** on a 220px tile, and the comment above it calls it
+"reading-room paper grain… quiet enough not to read as a pattern". The topo contours are
+hairlines. The vocabulary is **stationery**: fine paper, contour maps, ticket stock,
+rubber stamps.
+
+That is a beautifully made print object. It is not roots, wet leaf litter, mud and late
+October in Mt. Airy Forest. The craft says letterpress studio; the race says you will
+finish filthy.
+
+**The moves, in order of how much they actually deliver.**
+
+1. **Photography is the primary texture.** Real grit in a website comes from photographs
+   far more than from patterns. Full-bleed bands rather than bordered boxes: leaf litter,
+   mud, and the stone steps the race is named after. Section 4 reached the same conclusion
+   from the competitive direction, which is a good sign.
+2. **Treat the photography into the palette.** A bark-and-cream duotone makes an image
+   read as part of the design rather than as stock, and lets a photograph sit _behind_
+   type at low opacity as texture rather than as a picture. There is already a hint of
+   this: `filter: saturate(0.82) contrast(1.06)` on the course photo.
+3. **Make the grain earthy rather than papery.** Lower the turbulence frequency so the
+   grain coarsens, raise the opacity, and add a second very slow mottle layer: large soft
+   irregular patches, like damp ground rather than uniform noise.
+4. **Stop the edges being clean.** Every object has a crisp 2px border and a tidy radius.
+   Grit is irregularity: deckled edges on the plates via an SVG mask, section dividers as
+   a ragged tear rather than a straight rule, eyebrows and badges with a slight
+   rubber-stamp bleed and a degree of rotation. The ticket perforation already does this,
+   and it is the one element that feels handled rather than drawn.
+5. **A boot spatter on the hero.** Requested, and worth doing on one condition: **once**.
+   Drawn properly as an SVG, placed on the home hero only, low opacity, in bark or rust,
+   sitting behind the headline rather than decorating it. Used twice it becomes a clip-art
+   race t-shirt, which is the fastest way to make a premium piece look cheap.
+
+---
+
+## 7. Motion: more, but no WebGL
+
+Existing: Lenis smooth scroll, scroll reveal, a ken-burns hero, the marquee ticker,
+count-up stats, reading progress. Seven keyframe animations with **twelve
+`prefers-reduced-motion` guards**, which is unusually disciplined. Lighthouse is
+100/100/100/100.
+
+**WebGL is declined, and the reasons are worth recording.** The art direction is
+analogue: painted signs, perforated tickets, punch cards, kraft paper. WebGL's native
+look is glossy, volumetric and digital, so it would fight the one thing that makes this
+site distinctive rather than a template with a logo on it. The audience is trail runners
+checking a date on a phone, often on poor signal. Three.js is ~150KB gzipped before
+anything is drawn, and "100s across the board with this much movement" is a stronger
+claim than a WebGL hero that costs the Performance score. And the site has to keep
+working for years with nobody maintaining it.
+
+WebGL earns its place when the 3D **is** the content. A terrain flythrough of the actual
+course would qualify, and is worth revisiting if a GPX ever arrives.
+
+**What to build instead, motion that comes from the content:**
+
+- **The punch card punches itself** as you scroll the loop list, each hole stamping in
+  with a slight overshoot. This is the signature moment: the site's best metaphor, and
+  currently completely static.
+- **The elevation profile draws itself** via `stroke-dashoffset`, with the aid-station
+  markers pulsing once as the line passes each return to The Oval.
+- Countdown digits that flip rather than swap.
+- Stats that read as mechanical odometers rather than a plain number tween.
+- The ticker easing in instead of starting at full speed.
+- A slow parallax on the topo background. It is already an SVG, so this is nearly free.
+- A tear-and-peel on the ticket stub on hover.
+- The course-record row on `/records` getting a proper arrival rather than being one of
+  forty table rows.
+
+---
+
+## 8. The contrast gate has to grow first
+
+`tests/contrast.spec.ts` deliberately **skips elements sitting on a background image**,
+because a single colour is not an honest answer there. That exemption is fine today and
+becomes a hole the moment we put type over photographs and texture, which is exactly what
+sections 6 and 7 propose.
+
+Before the texture work lands, the gate should sample the **actual rendered pixels**
+behind the text rather than skipping. That is what makes ambitious backgrounds safe
+instead of a gamble, and it is the difference between adding grit and undoing a day spent
+fixing contrast.
+
+---
+
+## 9. The phased plan
+
+Each phase ends green on: `npm run check`, `npm run test:unit`, `npm test` (including the
+contrast gate), both themes, both viewports, and a refreshed visual baseline in the same
+commit when the pixels are meant to move.
+
+**Phase 1 — Light mode, and the shadow rule.** The gate on all the visual work, because
+texture and motion both sit on surfaces this phase changes. Invert the plates to forest
+and warm charcoal on the cream page. Introduce `--display-shadow`, default `none`, with
+dark surfaces opting back in. Section 1 and 2.
+
+**Phase 2 — The type floor.** Nothing below 11px, eyebrows 12px, the Register button
+14px, keeping the tracking. Cheap, and it removes an easy criticism. Section 3.
+
+**Phase 3 — The contrast gate upgrade.** Sample real pixels behind text so phase 4 is
+safe. Section 8.
+
+**Phase 4 — Texture.** Coarser earthy grain plus a mottle layer, duotone photo treatment,
+deckled plate edges and ragged section dividers, rubber-stamp eyebrows, and one boot
+spatter on the home hero. Section 6.
+
+**Phase 5 — Motion.** The punch card and the elevation draw first, since those are the
+two that come from the content. Then the smaller craft. All inside the existing
+reduced-motion discipline. Section 7.
+
+**Phase 6 — Content, unblocked parts only.** The crew and spectator guide, and using the
+photography large. Everything else in section 4 waits on Corfman.
+
+**Not in scope, deliberately:** WebGL, merch, live tracking, and the aid-station and
+cutoff table, which cannot be written honestly until the race answers.
