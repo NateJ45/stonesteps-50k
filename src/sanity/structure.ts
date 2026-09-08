@@ -31,10 +31,6 @@ import {
   HeartIcon,
   ThListIcon,
   PinIcon,
-  PresentationIcon,
-  ThumbsUpIcon,
-  ColorWheelIcon,
-  RocketIcon,
   ArrowRightIcon,
   StarFilledIcon,
   CalendarIcon,
@@ -42,10 +38,8 @@ import {
   UsersIcon,
   ActivityIcon,
 } from '@sanity/icons';
-import StudioGuide from './components/StudioGuide';
-import BusinessOverview from './components/BusinessOverview';
-import BrandKit from './components/BrandKit';
-import StudioPlaybook from './components/StudioPlaybook';
+import { makeGuideView } from './components/GuideView';
+import { guides, GUIDE_CATEGORIES } from './guides/content';
 
 const SINGLETON_TYPES = [
   'siteSettings',
@@ -122,82 +116,73 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
   S.list()
     .title('Stone Steps 50K')
     .items([
-      // Start Here — three-panel handbook for the editor. First item so it is always visible.
-      // Panel 1: how the Studio works and step-by-step how-tos (static).
-      // Panel 2: live business overview (services + site settings fetched from Sanity).
-      // Panel 3: brand kit — colors + fonts for Canva (static).
+      // HELP & GUIDE — the handbook, first item so it is always in reach.
+      //
+      // This replaced the starter's "Start Here" panes on 2026-09-07. Those were
+      // written for a design studio ("Your business at a glance", "Brand kit",
+      // "Grow your studio"), which means nothing to a race director, and all
+      // three of their documents were never seeded for this project, so every
+      // one of those panes opened empty.
+      //
+      // The pattern is ported from west-chester-preschool, where it was worked
+      // out with a volunteer who had never used a CMS. The guides are DATA in
+      // src/sanity/guides/content.ts, held in the repo rather than in Sanity so
+      // they cannot be deleted by accident and the next person inherits them.
       S.listItem()
-        .title('Start Here')
+        .id('help-and-guide')
+        .title('Help & Guide')
         .icon(InfoOutlineIcon)
         .child(
           S.list()
-            .title('Start Here')
-            .items([
-              S.listItem()
-                .title('How the website works')
-                .icon(PresentationIcon)
-                .child(
-                  S.document()
-                    .schemaType('studioGuide')
-                    .documentId('studioGuide')
-                    .views([
-                      S.view.component(StudioGuide).title('Guide'),
-                      S.view.form().title('Edit'),
-                    ]),
-                ),
-              S.listItem()
-                .title('Your business at a glance')
-                .icon(ThumbsUpIcon)
-                .child(
-                  S.document()
-                    .schemaType('studioNotes')
-                    .documentId('studioNotes')
-                    .views([
-                      S.view.component(BusinessOverview).title('Overview'),
-                      S.view.form().title('Edit notes'),
-                    ]),
-                ),
-              S.listItem()
-                .title('Brand kit')
-                .icon(ColorWheelIcon)
-                .child(S.component(BrandKit).title('Brand kit')),
-              S.listItem()
-                .title('Grow your studio')
-                .icon(RocketIcon)
-                .child(
-                  S.document()
-                    .schemaType('studioPlaybook')
-                    .documentId('studioPlaybook')
-                    .views([
-                      S.view.component(StudioPlaybook).title('Guides'),
-                      S.view.form().title('Edit'),
-                    ]),
-                ),
-            ]),
+            .id('help-and-guide-list')
+            .title('Help & Guide')
+            .items(
+              GUIDE_CATEGORIES.flatMap((category) => {
+                const mine = guides.filter((g) => g.category === category);
+                return mine.length === 0
+                  ? []
+                  : [
+                      S.divider().title(category),
+                      ...mine.map((g) =>
+                        S.listItem()
+                          .id(`guide-${g.slug}`)
+                          .title(g.title)
+                          .icon(() => g.icon)
+                          .child(
+                            S.component(makeGuideView(g.slug) as never)
+                              .id(`guide-view-${g.slug}`)
+                              .title(g.title),
+                          ),
+                      ),
+                    ];
+              }),
+            ),
         ),
 
       S.divider(),
 
       // Site Settings — pinned singleton (no preview; not a page)
-      singletonWithPreview(S, 'siteSettings', 'Site Settings', CogIcon),
+      singletonWithPreview(S, 'siteSettings', 'Site setup (menus, footer)', CogIcon),
 
       S.divider(),
 
-      // The Race. Everything about the event itself, kept together so an editor
-      // preparing next year's edition never has to hunt through Content.
+      // THIS YEAR'S RACE. Everything that changes from one running to the next,
+      // in one place, so preparing next year is one visit rather than a hunt.
+      // Named for WHEN you touch it rather than for what it holds: "The Race"
+      // was accurate and told a first-time editor nothing.
       //
       // Athletes and Results are listed but are not day-to-day editing surfaces:
       // both are written by scripts/import-results.mjs from the RunSignUp API.
       // They are here so a name can be corrected at its single source, which is
       // the whole reason results reference an athlete rather than repeating one.
       S.listItem()
-        .title('The Race')
+        .title("This year's race")
         .icon(ActivityIcon)
         .child(
           S.list()
-            .title('The Race')
+            .title("This year's race")
             .items([
-              singletonWithPreview(S, 'race', 'This year', CalendarIcon),
+              singletonWithPreview(S, 'race', 'Race day (date, times, fees)', CalendarIcon),
               orderableDocumentListDeskItem({
                 type: 'distance',
                 title: 'Distances',
@@ -328,9 +313,9 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                     // taking Results away entirely.
                     .catch(() => S.documentTypeList('raceResult').title('All results')),
                 ),
-              S.documentTypeListItem('athlete').title('Athletes').icon(UsersIcon),
+              S.documentTypeListItem('athlete').title('Runners (fix a name here)').icon(UsersIcon),
               S.documentTypeListItem('recordEntry')
-                .title('Historical records')
+                .title('Records the results cannot prove')
                 .icon(StarFilledIcon),
             ]),
         ),
@@ -352,7 +337,12 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               // does not have those pages. Listing a page an editor can fill in
               // and then never see published is worse than not offering it.
               singletonWithPreview(S, 'homePage', 'Home', HomeIcon),
-              singletonWithPreview(S, 'notFoundPage', '404 Page', DocumentTextIcon),
+              singletonWithPreview(
+                S,
+                'notFoundPage',
+                'The "page not found" page',
+                DocumentTextIcon,
+              ),
 
               S.divider(),
 
