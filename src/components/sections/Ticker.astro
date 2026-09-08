@@ -17,6 +17,22 @@
 
 type Props = { items?: string[] };
 const { items = [] } = Astro.props as Props;
+
+// HOW MANY COPIES OF THE LIST TO RENDER.
+//
+// The loop translates the track left by exactly ONE copy's width and starts
+// over, so copy 2 lands where copy 1 was and the seam is invisible. That only
+// holds while the track stays wider than the viewport for the whole cycle. With
+// two copies and a 971px list on a 1600px screen it ran out at the halfway
+// point and the strip showed empty red before snapping back.
+//
+// So: enough copies to repeat the list to a comfortable length, never fewer
+// than four, which keeps the strip full past 3x the list width (about 3,000px
+// here) and so past any ordinary screen. The shift is 100/copies, making the
+// cycle exactly one copy, and the duration is per-copy, so the speed is
+// identical no matter how many copies there are.
+const COPIES = Math.max(4, Math.ceil(24 / Math.max(items.length, 1)));
+const shift = `${(100 / COPIES).toFixed(4)}%`;
 ---
 
 {
@@ -25,8 +41,8 @@ const { items = [] } = Astro.props as Props;
       class="ticker border-y-2 border-black bg-primary text-primary-foreground"
       aria-hidden="true"
     >
-      <div class="ticker__track">
-        {[0, 1].map(() => (
+      <div class="ticker__track" style={`--ticker-shift: ${shift}`}>
+        {Array.from({ length: COPIES }).map(() => (
           <ul class="ticker__row">
             {items.map((item) => (
               <li>
@@ -72,13 +88,14 @@ const { items = [] } = Astro.props as Props;
     opacity: 0.55;
   }
 
-  /* Two identical rows, so the reset at -50% is invisible. */
+  /* Identical rows, so the reset after exactly one row is invisible. The shift
+     comes in from COPIES; the fallback keeps this sane if it ever goes missing. */
   @keyframes ticker-slide {
     from {
       transform: translateX(0);
     }
     to {
-      transform: translateX(-50%);
+      transform: translateX(calc(-1 * var(--ticker-shift, 25%)));
     }
   }
 
@@ -90,7 +107,7 @@ const { items = [] } = Astro.props as Props;
       width: 100%;
       overflow-x: auto;
     }
-    .ticker__row:last-child {
+    .ticker__row:not(:first-child) {
       display: none;
     }
   }

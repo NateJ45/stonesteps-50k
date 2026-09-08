@@ -401,6 +401,18 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* HEADINGS INHERIT THEIR COLOUR. They used to be pinned to
+     `var(--color-accent)`, with a `.dark` override to `--foreground`. In this
+     brand `--accent` is a CREAM (#f0e6ce) meant for headings on the dark
+     ground, so in LIGHT mode every heading on the page was cream on paper:
+     the home hero read "STONE STEPS 50K" in near-invisible type, saved only
+     by the display shadow behind it.
+     Inheriting is what every paragraph on this site already does, and
+     paragraphs are legible on every surface in both themes, because each
+     surface sets its own text colour: the dark bands, the cream plates and the
+     page itself. Headings had simply opted out of that.
+     Anything that genuinely wants a brand-coloured heading asks for it with
+     `.heading-accent`, and the featured ticket overrides this by name. */
   h1,
   h2,
   h3,
@@ -409,17 +421,9 @@
   h6 {
     font-family: var(--font-display);
     font-weight: 500;
-    color: var(--color-accent);
+    color: inherit;
     line-height: 1.1;
     letter-spacing: -0.01em;
-  }
-  .dark h1,
-  .dark h2,
-  .dark h3,
-  .dark h4,
-  .dark h5,
-  .dark h6 {
-    color: var(--foreground);
   }
 }
 
@@ -1351,20 +1355,6 @@ body::before {
   font-weight: 700;
 }
 
-/* The featured entry is a DIFFERENT OBJECT, not the same ticket with a flag on
-   it: forest stock, cream ink, gold lettering on the distance. */
-.ticket--feature {
-  background: var(--color-tertiary);
-  color: var(--plate-face);
-}
-.ticket--feature .ticket__stub {
-  border-top-color: color-mix(in srgb, var(--plate-face) 45%, transparent);
-}
-.ticket--feature .display.on-light {
-  color: var(--gold-on-forest);
-  text-shadow: var(--lift-sm);
-}
-
 /* ---------- Sign-plate buttons ------------------------------------------ */
 /* Every CTA is a sibling of the logo's badge: rounded rectangle, solid fill,
    black outline, offset shadow. The press physics matter: hover lifts the
@@ -1431,6 +1421,96 @@ body::before {
     transform 0.24s ease,
     box-shadow 0.24s ease;
 }
+/* HEADINGS ON A PLATE TAKE THE PLATE'S INK.
+   The base layer colours every h1-h6 `var(--color-accent)`, a light cream meant
+   for headings on the dark ground, and an explicit colour on the heading beats
+   inheritance from `.ticket`. So a heading sitting on a cream plate came out
+   cream on cream: the 50K and 27K on the distance tickets measured 1.15:1 and
+   1.06:1, which is not "hard to read", it is invisible. Every plate object gets
+   this, not just the ticket, because the same trap waits on each of them.
+   Unlayered, so it beats the base layer AND `.dark h3` in either theme. */
+.ticket :is(h1, h2, h3, h4, h5, h6),
+.punch :is(h1, h2, h3, h4, h5, h6),
+.clip__sheet :is(h1, h2, h3, h4, h5, h6),
+.kiosk :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--plate-ink);
+}
+
+/* SOFTENED TEXT ON A TICKET, without an opacity utility.
+   The labels and notes want less weight than the body, and `opacity-70` was how
+   they got it. Opacity dilutes whatever is behind it, which the token-pair
+   contrast gates cannot see, so it passed every check until the featured card
+   actually became forest and four elements failed axe at once. Both stocks get
+   a real colour instead, and hierarchy comes from size and letter-spacing,
+   which it should have anyway. */
+.ticket {
+  --ticket-ink-soft: var(--plate-ink-soft);
+}
+.ticket--feature {
+  --ticket-ink-soft: var(--plate-face);
+}
+.ticket-soft {
+  color: var(--ticket-ink-soft);
+}
+
+/* The featured entry is a DIFFERENT OBJECT, not the same ticket with a flag on
+   it: forest stock, cream ink, gold lettering on the distance.
+   MUST STAY AFTER `.ticket`. It sat before it until 2026-09-07, and the two
+   selectors have equal specificity, so `.ticket` won on source order: the
+   featured card kept the cream stock and its gold heading landed on cream. */
+.ticket--feature {
+  background: var(--color-tertiary);
+  color: var(--plate-face);
+}
+.ticket--feature .ticket__stub {
+  border-top-color: color-mix(in srgb, var(--plate-face) 45%, transparent);
+}
+.ticket--feature :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--gold-on-forest);
+  text-shadow: var(--lift-sm);
+}
+
+/* ---------- The board the tickets sit on -------------------------------- */
+/* Two tickets floating in space read as two unrelated objects. Sitting them on
+   one board, overlapping slightly, reads as a pair you choose between, which is
+   what the section is for. The overlap is desktop-only: in one column an
+   overlap is just two cards covering each other. */
+.ticket-board {
+  position: relative;
+  border: 2px solid var(--plate-edge);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--plate-face) 8%, transparent), transparent 60%),
+    color-mix(in srgb, var(--ground) 92%, #000);
+  box-shadow: var(--lift-lg);
+  padding: clamp(1.25rem, 4vw, 2.75rem);
+}
+@media (min-width: 768px) {
+  .ticket-board__row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+  }
+  .ticket-board__row > * {
+    flex: 0 1 26rem;
+  }
+  /* The overlap. The tickets are already rotated in opposite directions, so
+     tucking them together reads as two tickets dropped on a desk rather than a
+     layout mistake. The featured one sits on top.
+     THE OVERLAP MUST STAY SMALLER THAN THE CARD'S OWN PADDING (p-7, 1.75rem).
+     At -2.25rem the top card ate 8px of the one behind it and clipped the first
+     letter of every line: "turning for home" rendered as "urning for home". An
+     overlap that covers content is not a style, it is a defect. */
+  .ticket-board__row > * + * {
+    margin-left: -1rem;
+  }
+  .ticket-board__row > .ticket--feature {
+    position: relative;
+    z-index: 2;
+  }
+}
+
 .ticket:nth-of-type(even) {
   transform: rotate(1.6deg);
 }

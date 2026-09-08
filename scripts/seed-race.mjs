@@ -258,18 +258,51 @@ features.forEach((f, i) => {
 });
 
 // ── Sponsors ─────────────────────────────────────────────────────────────
-// Logos are uploaded separately: an image asset cannot be seeded from a path.
+// The logo FILES are uploaded separately (an image asset cannot be seeded from
+// a path), but the reference to the uploaded asset belongs here. It did not
+// used to: the four sponsor documents were seeded with a name and nothing else,
+// so four logos sat in the media library while the band on the home page
+// rendered text-only patches. Uploading an asset and attaching it are two
+// different jobs and only one of them was being done.
 const sponsors = [
-  { id: 'fleet-feet', name: 'Fleet Feet' },
-  { id: 'cincinnati-parks', name: 'Cincinnati Parks' },
-  { id: 'altra', name: 'Altra Running' },
-  { id: 'usatf', name: 'USATF Sanctioned Event' },
+  {
+    id: 'fleet-feet',
+    name: 'Fleet Feet',
+    logo: 'image-92185fc8e2adcd29b8b8708f38a86fbeb0d45533-1000x204-png',
+  },
+  {
+    id: 'cincinnati-parks',
+    name: 'Cincinnati Parks',
+    logo: 'image-5106de23eac526b4d09fc8b10b92f9514685e036-828x1556-png',
+  },
+  {
+    id: 'altra',
+    name: 'Altra Running',
+    logo: 'image-89340d4d65c1633a3a471727210dd35e2f4c6c4b-1594x434-png',
+  },
+  {
+    id: 'usatf',
+    name: 'USATF Sanctioned Event',
+    logo: 'image-07e53d1bbdb1dd6f7e2e3b54d82b487c36764b53-1168x1168-png',
+  },
 ];
 sponsors.forEach((s, i) => {
   docs.push({
     _id: `sponsor-${s.id}`,
     _type: 'sponsor',
     name: s.name,
+    ...(s.logo
+      ? {
+          logo: {
+            _type: 'image',
+            asset: { _type: 'reference', _ref: s.logo },
+            // The sponsor's name is already rendered beside the mark, so the
+            // logo is decorative here and an alt repeating the name would make
+            // a screen reader say it twice.
+            alt: '',
+          },
+        }
+      : {}),
     orderRank: rank(i + 1),
   });
 });

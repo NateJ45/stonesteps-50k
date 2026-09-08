@@ -73,6 +73,28 @@ const cta = (label, href) => {
 };
 const REGISTER = 'https://runsignup.com/Race/OH/Cincinnati/StoneSteps50KTrailRun';
 
+// ── Photographs ───────────────────────────────────────────────────────────
+// Uploaded by scripts/upload-images.mjs and referenced by asset id, so a
+// re-seed re-attaches the SAME asset rather than orphaning it.
+//
+// Alt text is required by the schema and is written here rather than left to
+// whoever seeds next: "describe what is happening in the photo, not the file
+// name". These are the photographs the page was designed around; without them
+// the hero is a topo pattern and the course sections are walls of text.
+const img = (assetId, alt) => ({
+  _type: 'image',
+  asset: { _type: 'reference', _ref: assetId },
+  alt,
+});
+
+const PHOTO = {
+  trailRunnersWide: 'image-d875998171580db8c002fa107bc9c6fcd486c9a8-1920x1272-jpg',
+  trailDescent: 'image-afc15f9784165f632733a8c5f98c53708e6d2024-1920x1272-jpg',
+  mtAiryForest: 'image-b27a7b16969285e8d9624a4f79c1d174162623bd-2560x1707-webp',
+  courseMap: 'image-56ce0fcfe8fda80cdf1a6ffac247e33376b05368-1495x1112-jpg',
+  runnersPortrait: 'image-c55575dc6a7a60d39a5d93c89fc8a3daa25f1aed-768x1024-webp',
+};
+
 const docs = [];
 
 // ── Home ──────────────────────────────────────────────────────────────────
@@ -87,6 +109,10 @@ docs.push({
     {
       _type: 'raceHeroSection',
       _key: key(),
+      image: img(
+        PHOTO.trailRunnersWide,
+        'Runners on single track through Mt. Airy Forest, autumn leaf litter underfoot.',
+      ),
       eyebrow: 'Sunday, October 25, 2026',
       headline: 'Stone Steps 50k',
       subhead:
@@ -153,6 +179,10 @@ docs.push({
     {
       _type: 'courseFeaturesSection',
       _key: key(),
+      image: img(
+        PHOTO.trailDescent,
+        'A runner dropping down a rooted descent on the Stone Steps course.',
+      ),
       eyebrow: 'What to expect',
       headline: 'Roots, rocks, and one very good park',
       cta: cta('The full course', '/course'),
@@ -175,6 +205,10 @@ docs.push({
     {
       _type: 'parksSection',
       _key: key(),
+      image: img(
+        PHOTO.mtAiryForest,
+        'Mature woodland in Mt. Airy Forest, the park the race runs through.',
+      ),
       eyebrow: 'Why it exists',
       headline: 'to Cincinnati Parks',
       body:
@@ -338,6 +372,7 @@ docs.push({
     {
       _type: 'courseFeaturesSection',
       _key: key(),
+      image: img(PHOTO.courseMap, 'The Stone Steps course map, showing the loops out of The Oval.'),
       eyebrow: 'The terrain',
       headline: 'What you are running on',
     },
@@ -546,6 +581,7 @@ docs.push({
     {
       _type: 'imageTextSection',
       _key: key(),
+      image: img(PHOTO.runnersPortrait, 'Two runners at the finish at The Oval.'),
       eyebrow: 'Coming from out of town',
       headline: 'Stay downtown or near CVG',
       body: [
@@ -585,13 +621,10 @@ docs.push({
     { _type: 'navLink', _key: key(), label: 'Course', linkType: 'internal', href: '/course' },
     { _type: 'navLink', _key: key(), label: 'Records', linkType: 'internal', href: '/records' },
     { _type: 'navLink', _key: key(), label: 'Results', linkType: 'internal', href: '/results' },
-    {
-      _type: 'navLink',
-      _key: key(),
-      label: 'Results',
-      linkType: 'external',
-      externalUrl: 'https://runsignup.com/Race/Results/15282',
-    },
+    // The RunSignUp link used to sit here too, also labelled "Results", which
+    // put the word in the header twice, side by side. The archive at /results is
+    // the better destination and RunSignUp is still one click away in the
+    // footer's "Elsewhere" column.
   ],
   headerCta: {
     show: true,
