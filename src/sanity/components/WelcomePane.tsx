@@ -1,6 +1,7 @@
-import { Box, Card, Flex, Stack, Text } from '@sanity/ui';
+import { Box, Button, Card, Flex, Stack, Text } from '@sanity/ui';
 import { ToolHeading } from './ToolHeading';
 import { useStudioLink, type StudioTarget } from './studioLink';
+import { OPEN_EVENT } from './StudioTour';
 
 // =============================================================================
 // WelcomePane — the Studio landing screen
@@ -140,6 +141,17 @@ export function WelcomePane() {
             </Text>
           </Stack>
         </Card>
+
+        {/* The tour greets you once per browser and then never again, so this
+            is the only way back to it. Cheap to offer, and the alternative is
+            an editor who half-remembers it and cannot find it. */}
+        <Flex>
+          <Button
+            text="Show the welcome tour again"
+            mode="ghost"
+            onClick={() => window.dispatchEvent(new Event(OPEN_EVENT))}
+          />
+        </Flex>
       </Stack>
     </Box>
   );

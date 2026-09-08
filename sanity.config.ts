@@ -32,6 +32,7 @@ import { deskStructure } from './src/sanity/structure';
 import { resolve } from './src/sanity/resolve';
 import { PreviewNavigator } from './src/sanity/components/PreviewNavigator';
 import { envVal } from './src/sanity/urls';
+import { StudioLayout } from './src/sanity/components/StudioLayout';
 import StudioLogo from './src/sanity/components/StudioLogo';
 import { CharacterCountInput } from './src/sanity/components/CharacterCountInput';
 import { documentBadges } from './src/sanity/components/documentBadges';
@@ -108,6 +109,9 @@ export default defineConfig({
   studio: {
     components: {
       logo: StudioLogo,
+      // The layout wrapper exists to mount the first-visit tour; Sanity has no
+      // "on open" hook of its own. See StudioLayout.tsx.
+      layout: StudioLayout,
     },
   },
 
