@@ -1447,11 +1447,18 @@ body::after {
 }
 
 /* Arrows nudge on hover, so a button reads as pointing somewhere. */
+/* Arrows nudge on hover, so a button reads as pointing somewhere.
+   THE ARROW IS COUNTER-SKEWED. Everything else in the plate is lettering, and
+   lettering leaning forward reads as italic, which is the effect we want. An
+   arrowhead leaning forward just reads as a broken arrow: its two barbs stop
+   being symmetrical about the shaft. So it takes the opposite angle and comes
+   out true, while still travelling with the plate. */
 .btn-plate__arrow {
+  transform: skewX(calc(-1 * var(--plate-skew)));
   transition: transform 0.16s ease;
 }
 .btn-plate:hover .btn-plate__arrow {
-  transform: translateX(4px);
+  transform: translateX(4px) skewX(calc(-1 * var(--plate-skew)));
 }
 
 /* The footnote marker on a record the published source reports two ways. A
@@ -1501,7 +1508,22 @@ body::after {
    black outline, offset shadow. The press physics matter: hover lifts the
    plate up and left and grows the shadow, active drives it down and right and
    zeroes it, so the button behaves like a physical thing. */
+/* THE SKEW, AND WHY IT IS A VARIABLE RATHER THAN A LITERAL.
+   The live WordPress site's one genuinely kinetic device is its buttons: red
+   parallelograms leaning forward. It is a better place for speed than the
+   headline, because it puts the motion on the thing someone is about to click
+   instead of on type they are trying to read.
+
+   `transform` is a single property, so the skew CANNOT be declared once and
+   forgotten: :hover and :active both set transform for the press physics and
+   would drop it. Every one of those rules composes the translate with
+   `skewX(var(--plate-skew))`, and the angle lives in a token so the lean can be
+   tuned in one place instead of four. A plate that un-skews on hover would read
+   as a rendering bug, which is exactly what happens if a fifth rule is added
+   later and forgets. */
 .btn-plate {
+  --plate-skew: -7deg;
+  transform: skewX(var(--plate-skew));
   display: inline-flex;
   align-items: center;
   gap: 0.7rem;
@@ -1523,11 +1545,11 @@ body::after {
 }
 .btn-plate:hover {
   background: var(--primary-accent);
-  transform: translate(-2px, -2px);
+  transform: translate(-2px, -2px) skewX(var(--plate-skew));
   box-shadow: 5px 6px 0 rgb(0 0 0 / 0.55);
 }
 .btn-plate:active {
-  transform: translate(2px, 3px);
+  transform: translate(2px, 3px) skewX(var(--plate-skew));
   box-shadow: 0 0 0 rgb(0 0 0 / 0.55);
 }
 /* A direct quote of the "Trail Run" badge: cream face, dark lettering. */
@@ -1542,12 +1564,15 @@ body::after {
   color: #1a1712;
 }
 
+/* Reduced motion kills the PRESS TRAVEL, not the lean. The skew is a static
+   shape, not an animation, so `transform: none` here would have flattened the
+   button for exactly the people it was not meant to affect. */
 @media (prefers-reduced-motion: reduce) {
   .btn-plate,
   .btn-plate:hover,
   .btn-plate:active {
     transition: none;
-    transform: none;
+    transform: skewX(var(--plate-skew));
   }
 }
 
