@@ -40,6 +40,9 @@ import {
 } from '@sanity/icons';
 import { makeGuideView } from './components/GuideView';
 import { guides, GUIDE_CATEGORIES } from './guides/content';
+import { WelcomePane } from './components/WelcomePane';
+import { CheckupTool } from './components/CheckupTool';
+import { RaceYearTool } from './components/RaceYearTool';
 
 const SINGLETON_TYPES = [
   'siteSettings',
@@ -116,7 +119,48 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
   S.list()
     .title('Stone Steps 50K')
     .items([
-      // HELP & GUIDE — the handbook, first item so it is always in reach.
+      // WELCOME — the landing screen. First, because the desk used to open on
+      // nothing at all: a menu, and no indication of which entry answers the
+      // question you arrived with. Ported from west-chester-preschool.
+      S.listItem()
+        .id('welcome')
+        .title('Welcome')
+        .icon(HomeIcon)
+        .child(
+          S.component(WelcomePane as never)
+            .id('welcome-pane')
+            .title('Welcome'),
+        ),
+
+      // CHECKUP and START A NEW RACE YEAR. Both read-only, both ported from
+      // west-chester-preschool (HealthTool and SetupWizard). They sit here
+      // rather than in the top toolbar on purpose: the toolbar already holds
+      // Presentation, Media and Releases, and a tool nobody notices is a tool
+      // nobody runs. This site is edited twice a year by one person, so the
+      // things that tell him what needs doing belong where he already is.
+      S.listItem()
+        .id('checkup')
+        .title('Checkup (what needs attention)')
+        .icon(ActivityIcon)
+        .child(
+          S.component(CheckupTool as never)
+            .id('checkup-pane')
+            .title('Checkup'),
+        ),
+
+      S.listItem()
+        .id('race-year')
+        .title('Start a new race year')
+        .icon(CalendarIcon)
+        .child(
+          S.component(RaceYearTool as never)
+            .id('race-year-pane')
+            .title('Start a new race year'),
+        ),
+
+      S.divider(),
+
+      // HELP & GUIDE — the handbook, kept high so it is always in reach.
       //
       // This replaced the starter's "Start Here" panes on 2026-09-07. Those were
       // written for a design studio ("Your business at a glance", "Brand kit",
