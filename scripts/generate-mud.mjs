@@ -64,6 +64,40 @@ const FIELDS = [
     ],
   },
   {
+    // THE HEADER, which wears its own mud rather than borrowing the hero's.
+    //
+    // The hero's layer cannot reach it: <main> carries `view-transition-name:
+    // main-content`, which forms a stacking context, so any z-index inside main
+    // is scoped to main, and main paints below a sticky positioned header. No
+    // z-index on the mud can win that. Giving the header its own field also
+    // behaves better on scroll, since the sign stays muddy instead of wiping
+    // clean the moment you move.
+    //
+    // A 10:1 strip, so this is speckle and a couple of small hits rather than a
+    // throw: an arc drawn across a band this shallow reads as a smear.
+    name: 'chrome',
+    shapes: [
+      {
+        suffix: 'wide',
+        W: 1440,
+        H: 135, // measured
+        density: 0.5,
+        big: 0.85,
+        split: false,
+        quiet: [[0.44, 0, 0.75, 1]], // the nav links, full height of the strip
+      },
+      {
+        suffix: 'phone',
+        W: 390,
+        H: 92, // measured
+        density: 0.35,
+        big: 0.7,
+        split: false,
+        quiet: [],
+      },
+    ],
+  },
+  {
     // The race director band. Fewer marks, much bigger: this one sits behind a
     // PERSON rather than behind a headline, so it should read as the ground he
     // is standing on rather than as a second texture competing with him.
@@ -76,8 +110,8 @@ const FIELDS = [
         // badly: at full size the file was 129KB for pure decoration.
         W: 880,
         H: 716, // 1440x1172 measured, kept in proportion
-        density: 0.42,
-        big: 2.1,
+        density: 0.55,
+        big: 1.25,
         split: false,
         quiet: [
           [0, 0.32, 0.5, 0.55], // the eyebrow, heading and body
@@ -88,8 +122,8 @@ const FIELDS = [
         suffix: 'phone',
         W: 420,
         H: 1313, // 390x1219 measured, kept in proportion
-        density: 0.3,
-        big: 1.9,
+        density: 0.4,
+        big: 1.15,
         split: false,
         quiet: [
           [0, 0.54, 1, 0.8], // the eyebrow, heading and body

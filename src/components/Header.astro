@@ -19,6 +19,7 @@ import { site } from '@/data/site';
 import { Mail, Phone } from 'lucide-react';
 import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
 import ThemeToggle from './ThemeToggle';
+import MudField from '@/components/race/MudField.astro';
 import MobileNav from './MobileNav';
 import { ChevronDown } from 'lucide-react';
 import logoLightAsset from '@/assets/logo-light.svg';
@@ -151,6 +152,14 @@ function isGroupActive(items: { href: string }[]) {
 ---
 
 <header class="site-header sign-board bg-background">
+  {
+    /* The sign got splashed too. It carries its OWN field rather than the
+      hero's: <main> forms a stacking context (view-transition-name), so no
+      z-index on the hero's layer can lift it over a sticky header. Keeping it
+      here also means the sign stays muddy as you scroll instead of wiping
+      clean the moment you move. */
+  }
+  <MudField field="chrome" />
   {
     /* Eyebrow strip (desktop only). Carries the locked positioning line and
       utility controls (email + social icons + theme toggle). Mobile gets

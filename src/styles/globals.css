@@ -1531,15 +1531,12 @@ body::after {
    stops being clickable, and as the page scrolls the mud travels up and out
    while the header stays: the sign is muddy where the hero splashed it, and
    clean once you have left. */
-.hero-mud {
-  --mud-top: -92px;
-  --mud-z: 60;
-}
-
-@media (min-width: 64rem) {
-  .hero-mud {
-    --mud-top: -135px;
-  }
+/* The hero's own field stays inside the hero. It cannot reach the header: main
+   carries `view-transition-name: main-content`, which forms a stacking context,
+   so a z-index inside main is scoped to main and main paints below a sticky
+   positioned header. The header wears its own `chrome` field instead. */
+.mud--chrome {
+  --mud-z: 0;
 }
 
 /* ---------- Cut-out subjects -------------------------------------------- */
@@ -1608,8 +1605,18 @@ body::after {
    pointing down: this is a board laid OVER the page, so the page shows through
    where the board is torn. `background-color: inherit` again, so it is always
    the header's own colour and never needs a second token. */
+/* NO `position` HERE, and that is the whole point of this comment.
+   It used to say `position: relative`, which looked harmless and was not: this
+   rule is defined later in the file than `.site-header { position: sticky }`,
+   so it quietly UNSTUCK the header. The header stopped sticking, and its
+   hide-on-scroll-down behaviour stopped with it, from the commit that
+   introduced the sign until this one. Nothing failed: the types were fine, axe
+   was fine, and a screenshot of the top of the page looks identical either way.
+
+   `position: sticky` is already a positioned element, so the torn edge below
+   has the containing block it needs without any help. */
 .sign-board {
-  position: relative;
+  isolation: isolate;
 }
 .sign-board::after {
   content: '';
