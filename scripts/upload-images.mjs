@@ -50,9 +50,29 @@ const SRC = resolve(root, '..', 'stonesteps-astro', 'public', 'img');
 const LOCAL_SRC = resolve(root, 'scripts', 'data', 'photos');
 
 const IMAGES = {
+  // THE HERO IS THE STONE STEPS THEMSELVES, and it took until the race's own
+  // media library was walked over the Novamira MCP to find a frame of them.
+  // The race is named after this staircase; the first thing a visitor saw was
+  // a finish-line clock. IMGP3833 in the library, shot up the steps in autumn
+  // with a runner mid-climb. Portrait, which is why the hero bleeds it off the
+  // right edge full height rather than framing it.
   hero: {
+    file: 'photos/stone-steps-climb.jpg',
+    alt: 'A runner climbing the stone steps through Mt. Airy Forest, the staircase cut into the hillside below her and autumn canopy overhead',
+  },
+  // The old hero, kept: it is the only finish-line frame in the library and the
+  // clock reading 3:43:52 is a fact about the race, not decoration.
+  finishClock: {
     file: 'photos/trail-runners-wide.jpg',
     alt: 'Runners coming through the aid station at The Oval, the race clock overhead',
+  },
+  stepsCrest: {
+    file: 'photos/stone-steps-crest.jpg',
+    alt: 'A runner cresting the top of the stone steps, hands on knees, the valley behind him',
+  },
+  singletrackLine: {
+    file: 'photos/runners-line-singletrack.jpg',
+    alt: 'A line of four runners strung out along narrow single track, climbing away from the camera',
   },
   courseMap: {
     file: 'photos/course-map.jpg',

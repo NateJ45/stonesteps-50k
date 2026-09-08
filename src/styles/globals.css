@@ -1630,6 +1630,11 @@ body::after {
    starts underneath the nav. These heights are the header's, measured. */
 .hero-band {
   padding-top: calc(92px + 2rem);
+  /* A column purely so `.hero-photo` can be re-ordered below the copy on
+     phones. The absolutely-positioned layers (topo, mud, and the photo itself
+     at lg) are out of flow and unaffected. */
+  display: flex;
+  flex-direction: column;
 }
 
 @media (min-width: 64rem) {
@@ -1638,12 +1643,96 @@ body::after {
   }
 }
 
+/* ---------- The hero photograph, bled off the right edge ---------------- */
+/* The live WordPress site opens on full-bleed photography of the race, and that
+   is the one thing it does better than a framed thumbnail in a side column: a
+   visitor knows within a second what this event looks like. This brings the
+   TREATMENT across without the 20-second 720p slideshow video that carries it
+   there.
+
+   It is not a background-image on the section, deliberately. It stays a real
+   <img> so Astro's Sanity pipeline still emits srcset, the alt text still
+   describes the picture, and the countdown and copy never sit on top of it.
+
+   BELOW lg it is a band UNDER the copy, not behind it. The text column and the
+   photo never overlap at any width, which is why there is no scrim anywhere in
+   this file: a scrim is what you add when you have put type over a photograph,
+   and the contrast gate would be measuring a moving target if we had. */
+.hero-photo {
+  position: relative;
+  margin-top: 2.5rem;
+  /* The figure is a direct child of the band, which is already full width, so
+     it bleeds to both edges without a 100vw trick. (100vw would have been a
+     scrollbar-width horizontal overflow waiting to happen.) */
+  height: min(58vh, 26rem);
+  /* AFTER the copy on phones, though it is before it in the DOM. It has to be
+     before it in the DOM so that on desktop it can be the z-0 layer under the
+     mud; it has to be after it on a phone because otherwise the picture lands
+     directly under the transparent header and the nav ends up sitting on a
+     photograph. Source order serves the desktop layer stack, `order` serves the
+     phone reading order, and neither compromises for the other. */
+  order: 2;
+  /* Fade into the page at top and bottom so the band has no hard edges. The
+     mud crosses it either way, which is what stops it reading as a pasted-in
+     rectangle. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 18%,
+    #000 82%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%);
+}
+
+@media (min-width: 64rem) {
+  .hero-photo {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inset-inline-start: auto;
+    width: 46%;
+    height: auto;
+    margin: 0;
+    translate: none;
+    z-index: 0;
+    /* THREE EDGES HAVE TO DISSOLVE, not one. The left fade is the obvious one:
+       it hands the picture off to the copy rather than butting a photograph
+       against a column of type with a seam between them. But the band's top and
+       bottom are hard horizontals too, and the top one lands exactly where the
+       header's band ends, which read as a photo pasted below the nav.
+
+       Two gradients composited with `intersect` (the alpha is multiplied), so
+       the picture only reaches full strength where it is inside all three
+       fades. The right edge is left alone: that one is meant to run off the
+       page. */
+    -webkit-mask-image:
+      linear-gradient(to right, transparent 0%, #000 34%),
+      linear-gradient(to bottom, transparent 0%, #000 14%, #000 88%, transparent 100%);
+    mask-image:
+      linear-gradient(to right, transparent 0%, #000 34%),
+      linear-gradient(to bottom, transparent 0%, #000 14%, #000 88%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+}
+
+.hero-photo img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
 /* The hero's mud starts at the top of the PAGE, not the top of the hero, so it
    runs behind the transparent header. It is painted by main, which sits below
    the header in paint order, and that is fine precisely because the header has
    no background to hide it. */
 .hero-mud {
   --mud-top: -92px;
+  /* ABOVE the photograph (z-index 0), below the copy (z-index 10). The whole
+     reason the photo is not a scrimmed background is so the spatter can run
+     across the join between picture and page. */
+  --mud-z: 1;
 }
 
 @media (min-width: 64rem) {

@@ -82,8 +82,25 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
   }
   <MudField field="hero" class="hero-mud" />
 
+  {
+    /* The photograph. OUTSIDE the z-10 content wrapper on purpose: on desktop it
+      is an absolute layer at z-0 so the mud (z-1) crosses it and the copy
+      (z-10) stays clear of it. See `.hero-photo` in globals.css. */
+    image?.asset && (
+      <figure class="photo-plate hero-photo">
+        <SanityImage
+          source={image}
+          width={1400}
+          sizes="(min-width: 1024px) 48vw, 100vw"
+          alt={image.alt ?? ''}
+          loading="eager"
+        />
+      </figure>
+    )
+  }
+
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
-    <div class="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+    <div class="lg:max-w-[52%]">
       <div>
         {
           eyebrow && (
@@ -134,29 +151,17 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
         </div>
       </div>
 
-      <div>
-        {
-          image?.asset && (
-            <figure class="photo-plate overflow-hidden rounded-xl border-2 border-black shadow-[var(--lift-lg)]">
-              <SanityImage
-                source={image}
-                width={1200}
-                sizes="(min-width: 1024px) 45vw, 100vw"
-                alt={image.alt ?? ''}
-                loading="eager"
-                class="w-full"
-              />
-            </figure>
-          )
-        }
-        {
-          showCountdown && race?.raceDate && (
-            <div class="border-heading-accent mt-6 border-t-2 pt-5">
-              <Countdown target={race.raceDate} />
-            </div>
-          )
-        }
-      </div>
+      {
+        /* The countdown moved out of the old right-hand column and under the
+          buttons when the photograph took that column. It reads better here
+          anyway: date, then the two things you can do about it, then how long
+          you have. */
+        showCountdown && race?.raceDate && (
+          <div class="border-heading-accent mt-10 max-w-[30rem] border-t-2 pt-5">
+            <Countdown target={race.raceDate} />
+          </div>
+        )
+      }
     </div>
   </div>
 </section>
