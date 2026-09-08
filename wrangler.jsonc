@@ -8,6 +8,29 @@
   // request time. global_fetch_strictly_public predates it.
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "name": "stonesteps-50k",
+
+  // ── The contact endpoint's bindings (src/pages/api/contact.ts) ────────────
+  // Commented out until the resources exist: an active binding with a
+  // placeholder id fails the deploy. See PORTS.md card 45 in the starter.
+  //
+  //   1. npx wrangler d1 create stonesteps-contact
+  //   2. Paste the id below, uncomment, then:
+  //      npx wrangler d1 migrations apply stonesteps-contact --remote
+  //   3. npx wrangler secret put CONTACT_TO   (verified destination address)
+  //      npx wrangler secret put CONTACT_FROM (address on a sending domain)
+  //
+  // EMAIL SENDING IS NOT AVAILABLE TO THIS DOMAIN TODAY. stonesteps50k.com is on
+  // GoDaddy DNS (ns13/ns14.domaincontrol.com) and Cloudflare Email Service
+  // requires Cloudflare DNS; its mail is on Microsoft 365, so Email Routing is
+  // out too. Until that changes, set WEB3FORMS_KEY as a Worker secret and the
+  // endpoint stores the submission in D1 and notifies through Web3Forms, with
+  // the key out of the client bundle.
+  //
+  // "d1_databases": [
+  //   { "binding": "CONTACT_DB", "database_name": "stonesteps-contact", "database_id": "<id>" }
+  // ],
+  // "send_email": [{ "name": "EMAIL", "destination_address": "<owner>@example.com" }],
+
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
     // @astrojs/cloudflare v14 splits the build into dist/client (static assets)

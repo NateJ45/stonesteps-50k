@@ -14,9 +14,13 @@
 // mockup's version posted nowhere at all and said so in small print; this one
 // either works or tells you it does not.
 
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
+import { sendContactSubmission } from '@/lib/contact-transport';
 
 const ACCESS_KEY = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
+
+// The site's own /api/contact endpoint is tried first; Web3Forms is only the
+// fallback for a build with no Worker. See src/lib/contact-transport.ts.
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
@@ -38,9 +42,14 @@ const DEFAULT_SUBJECTS = [
 export default function RaceContactForm({ subjects, fallbackUrl }: Props) {
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
+  // When the form was rendered, for the endpoint's timing check. A ref, because
+  // reading it must never cause a re-render.
+  const renderedAtRef = useRef<number>(Date.now());
 
   const options = subjects?.length ? subjects : DEFAULT_SUBJECTS;
-  const configured = Boolean(ACCESS_KEY);
+  // The form is usable whenever there is somewhere for it to go, and the site's
+  // own endpoint needs no client-side key at all.
+  const configured = true;
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -50,19 +59,41 @@ export default function RaceContactForm({ subjects, fallbackUrl }: Props) {
     setError(null);
 
     const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+    const subject = String(data.subject ?? 'website enquiry');
 
     try {
-      const res = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          access_key: ACCESS_KEY,
-          subject: `Stone Steps 50K: ${data.subject ?? 'website enquiry'}`,
-          ...data,
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok || !json.success) throw new Error(json.message ?? 'Submission failed');
+      const result = await sendContactSubmission(
+        {
+          name: String(data.name ?? ''),
+          email: String(data.email ?? ''),
+          message: String(data.message ?? ''),
+          subject,
+          // This form's honeypot is Web3Forms' `botcheck`, kept because the
+          // fallback still uses it natively. The endpoint's own honeypot field
+          // is `company`, so the one value feeds both.
+          company: String(data.botcheck ?? data.company ?? ''),
+          renderedAt: renderedAtRef.current,
+        },
+        async () => {
+          if (!ACCESS_KEY) {
+            return { ok: false, error: 'This form is not connected yet. Please try again later.' };
+          }
+          const res = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({
+              access_key: ACCESS_KEY,
+              subject: `Stone Steps 50K: ${subject}`,
+              ...data,
+            }),
+          });
+          const json = await res.json().catch(() => ({}));
+          return res.ok && json.success
+            ? { ok: true }
+            : { ok: false, error: json.message ?? 'Submission failed' };
+        },
+      );
+      if (!result.ok) throw new Error(result.error ?? 'Submission failed');
       setStatus('sent');
     } catch (err) {
       // Say what went wrong and leave the typed message on screen. Clearing a
