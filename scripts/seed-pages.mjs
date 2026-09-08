@@ -568,6 +568,7 @@ docs.push({
     { _type: 'navLink', _key: key(), label: 'The Race', linkType: 'internal', href: '/' },
     { _type: 'navLink', _key: key(), label: 'Course', linkType: 'internal', href: '/course' },
     { _type: 'navLink', _key: key(), label: 'Records', linkType: 'internal', href: '/records' },
+    { _type: 'navLink', _key: key(), label: 'Results', linkType: 'internal', href: '/results' },
     {
       _type: 'navLink',
       _key: key(),
@@ -590,6 +591,7 @@ docs.push({
         { _type: 'footerLink', _key: key(), label: 'The Race', href: '/' },
         { _type: 'footerLink', _key: key(), label: 'Course', href: '/course' },
         { _type: 'footerLink', _key: key(), label: 'Records', href: '/records' },
+        { _type: 'footerLink', _key: key(), label: 'Results archive', href: '/results' },
       ],
     },
     {

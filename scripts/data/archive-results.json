@@ -335,47 +335,52 @@
   {
     "year": 2004,
     "distance": "50k",
-    "name": "Arthur Moore Trek",
-    "slug": "arthur-moore-trek",
+    "name": "Arthur Moore",
+    "slug": "arthur-moore",
     "timeSeconds": 29038,
     "age": 67,
-    "gender": "M"
+    "gender": "M",
+    "trekker": true
   },
   {
     "year": 2004,
     "distance": "50k",
-    "name": "Frank Fenton Trek",
-    "slug": "frank-fenton-trek",
+    "name": "Frank Fenton",
+    "slug": "frank-fenton",
     "timeSeconds": 29235,
     "age": 47,
-    "gender": "M"
+    "gender": "M",
+    "trekker": true
   },
   {
     "year": 2004,
     "distance": "50k",
-    "name": "Rosemary Evans Trek",
-    "slug": "rosemary-evans-trek",
+    "name": "Rosemary Evans",
+    "slug": "rosemary-evans",
     "timeSeconds": 29235,
     "age": 51,
-    "gender": "X"
+    "gender": "X",
+    "trekker": true
   },
   {
     "year": 2004,
     "distance": "50k",
-    "name": "Wesley Fenton Trek",
-    "slug": "wesley-fenton-trek",
+    "name": "Wesley Fenton",
+    "slug": "wesley-fenton",
     "timeSeconds": 29235,
     "age": 43,
-    "gender": "M"
+    "gender": "M",
+    "trekker": true
   },
   {
     "year": 2004,
     "distance": "50k",
-    "name": "Rob Apple Trek",
-    "slug": "rob-apple-trek",
+    "name": "Rob Apple",
+    "slug": "rob-apple",
     "timeSeconds": 29235,
     "age": 43,
-    "gender": "M"
+    "gender": "M",
+    "trekker": true
   },
   {
     "year": 2005,
@@ -390,7 +395,7 @@
   {
     "year": 2005,
     "distance": "50k",
-    "name": "Jeff Mcpherson",
+    "name": "Jeff McPherson",
     "slug": "jeff-mcpherson",
     "timeSeconds": 17145,
     "place": 2,
@@ -540,62 +545,68 @@
   {
     "year": 2005,
     "distance": "50k",
-    "name": "Wesley Fenton Trek",
-    "slug": "wesley-fenton-trek",
+    "name": "Wesley Fenton",
+    "slug": "wesley-fenton",
     "timeSeconds": 28470,
     "place": 17,
     "age": 44,
-    "gender": "X"
+    "gender": "X",
+    "trekker": true
   },
   {
     "year": 2005,
     "distance": "50k",
-    "name": "Rob Apple Trek",
-    "slug": "rob-apple-trek",
+    "name": "Rob Apple",
+    "slug": "rob-apple",
     "timeSeconds": 28470,
     "place": 18,
     "age": 44,
-    "gender": "M"
+    "gender": "M",
+    "trekker": true
   },
   {
     "year": 2005,
     "distance": "50k",
-    "name": "James Mcgruder Trek",
-    "slug": "james-mcgruder-trek",
+    "name": "James McGruder",
+    "slug": "james-mcgruder",
     "timeSeconds": 28714,
     "place": 19,
     "age": 57,
-    "gender": "M"
+    "gender": "M",
+    "trekker": true
   },
   {
     "year": 2005,
     "distance": "50k",
-    "name": "Arthur Moore Trek",
-    "slug": "arthur-moore-trek",
+    "name": "Arthur Moore",
+    "slug": "arthur-moore",
     "timeSeconds": 31055,
     "place": 20,
     "age": 68,
-    "gender": "M"
+    "gender": "M",
+    "trekker": true
   },
   {
     "year": 2005,
     "distance": "50k",
-    "name": "Rosemary Evans Trek",
-    "slug": "rosemary-evans-trek",
+    "name": "Rosemary Evans",
+    "slug": "rosemary-evans",
     "timeSeconds": 32095,
     "place": 21,
     "age": 52,
-    "gender": "F"
+    "gender": "F",
+    "trekker": true
   },
   {
     "year": 2005,
     "distance": "50k",
-    "name": "Bill Whipp Trek",
-    "slug": "bill-whipp-trek",
+    "name": "Bill Whipp",
+    "slug": "bill-whipp",
     "timeSeconds": 32095,
     "place": 22,
     "age": 61,
-    "gender": "M"
+    "gender": "M",
+    "trekker": true
   },
   {
     "year": 2006,
@@ -1583,7 +1594,7 @@
   {
     "year": 2007,
     "distance": "50k",
-    "name": "Gary Mcgowan",
+    "name": "Gary McGowan",
     "slug": "gary-mcgowan",
     "timeSeconds": 26398,
     "place": 46,
@@ -2991,7 +3002,7 @@
   {
     "year": 2010,
     "distance": "50k",
-    "name": "Vincent O\u2019Sullivan",
+    "name": "Vincent O'Sullivan",
     "slug": "vincent-osullivan",
     "timeSeconds": 18776,
     "age": 53,
@@ -3287,7 +3298,7 @@
   {
     "year": 2010,
     "distance": "50k",
-    "name": "Andy Mcgarvey",
+    "name": "Andy McGarvey",
     "slug": "andy-mcgarvey",
     "timeSeconds": 22973,
     "age": 51,
@@ -3605,7 +3616,7 @@
   {
     "year": 2010,
     "distance": "50k",
-    "name": "Sean Mccormick",
+    "name": "Sean McCormick",
     "slug": "sean-mccormick",
     "timeSeconds": 28148,
     "age": 39,
@@ -3704,7 +3715,7 @@
   {
     "year": 2011,
     "distance": "50k",
-    "name": "Harvey Lewis Iii",
+    "name": "Harvey Lewis III",
     "slug": "harvey-lewis-iii",
     "timeSeconds": 16111,
     "age": 35,
@@ -3913,7 +3924,7 @@
   {
     "year": 2011,
     "distance": "50k",
-    "name": "Rich Mccrea",
+    "name": "Rich McCrea",
     "slug": "rich-mccrea",
     "timeSeconds": 21256,
     "age": 57,
@@ -6061,7 +6072,7 @@
   {
     "year": 2013,
     "distance": "50k",
-    "name": "Jared Mcfaddin",
+    "name": "Jared McFaddin",
     "slug": "jared-mcfaddin",
     "timeSeconds": 25493,
     "place": 64,
@@ -6598,7 +6609,7 @@
   {
     "year": 2014,
     "distance": "50k",
-    "name": "Reggie Manimal O\u2019Hara",
+    "name": "Reggie Manimal O'Hara",
     "slug": "reggie-manimal-ohara",
     "timeSeconds": 22196,
     "age": 46,
@@ -7071,7 +7082,7 @@
   {
     "year": 2014,
     "distance": "50k",
-    "name": "Dave Mckernan",
+    "name": "Dave McKernan",
     "slug": "dave-mckernan",
     "timeSeconds": 26518,
     "age": 38,
@@ -7115,7 +7126,7 @@
   {
     "year": 2014,
     "distance": "50k",
-    "name": "Patrick Mcgilvray",
+    "name": "Patrick McGilvray",
     "slug": "patrick-mcgilvray",
     "timeSeconds": 26873,
     "age": 47,
@@ -7443,7 +7454,7 @@
   {
     "year": 2015,
     "distance": "27k",
-    "name": "John Mcdonnell",
+    "name": "John McDonnell",
     "slug": "john-mcdonnell",
     "timeSeconds": 9797,
     "place": 10,
@@ -7599,7 +7610,7 @@
   {
     "year": 2015,
     "distance": "27k",
-    "name": "Matt Mcclanahan",
+    "name": "Matt McClanahan",
     "slug": "matt-mcclanahan",
     "timeSeconds": 11076,
     "place": 23,
@@ -8151,7 +8162,7 @@
   {
     "year": 2015,
     "distance": "50k",
-    "name": "Benjamin Mcglothlin",
+    "name": "Benjamin McGlothlin",
     "slug": "benjamin-mcglothlin",
     "timeSeconds": 18522,
     "place": 8,
@@ -8355,7 +8366,7 @@
   {
     "year": 2015,
     "distance": "50k",
-    "name": "Chris Mcmahon",
+    "name": "Chris McMahon",
     "slug": "chris-mcmahon",
     "timeSeconds": 22306,
     "place": 25,
@@ -8703,7 +8714,7 @@
   {
     "year": 2015,
     "distance": "50k",
-    "name": "James Mcgruder",
+    "name": "James McGruder",
     "slug": "james-mcgruder",
     "timeSeconds": 26746,
     "place": 54,
@@ -8883,7 +8894,7 @@
   {
     "year": 2016,
     "distance": "27k",
-    "name": "Misha Mccormick",
+    "name": "Misha McCormick",
     "slug": "misha-mccormick",
     "timeSeconds": 8023,
     "place": 2,
@@ -9338,7 +9349,7 @@
   {
     "year": 2016,
     "distance": "27k",
-    "name": "Kelly Mcmahan",
+    "name": "Kelly McMahan",
     "slug": "kelly-mcmahan",
     "timeSeconds": 14148,
     "place": 40,
@@ -10322,7 +10333,7 @@
   {
     "year": 2016,
     "distance": "50k",
-    "name": "Chris Mckee",
+    "name": "Chris McKee",
     "slug": "chris-mckee",
     "timeSeconds": 29292,
     "place": 61,

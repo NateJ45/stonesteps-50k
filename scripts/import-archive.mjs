@@ -59,6 +59,7 @@ import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { createClient } from '@sanity/client';
 import { loadEnv } from './lib/loadEnv.mjs';
+import { canonicalSlug, canonicalName } from '../src/lib/athlete-aliases.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -86,7 +87,11 @@ const athletes = new Map();
 const results = [];
 
 for (const r of rows) {
-  const athleteId = `athlete-${r.slug}`;
+  // One runner, one document, even where the race spelled them two ways.
+  // src/lib/athlete-aliases.ts carries the evidence for each merge.
+  const slug = canonicalSlug(r.slug);
+  const name = canonicalName(r.slug, r.name);
+  const athleteId = `athlete-${slug}`;
 
   // An athlete may already exist from the API import. Only fill in what the
   // archive knows and the API did not, rather than overwriting a recent city
@@ -96,15 +101,15 @@ for (const r of rows) {
     athletes.set(athleteId, {
       _id: athleteId,
       _type: 'athlete',
-      name: r.name,
-      slug: { _type: 'slug', current: r.slug },
+      name,
+      slug: { _type: 'slug', current: slug },
       ...(r.city ? { city: r.city } : {}),
       ...(r.region ? { region: r.region } : {}),
     });
   }
 
   results.push({
-    _id: `archive-${r.year}-${r.distance}-${r.slug}`,
+    _id: `archive-${r.year}-${r.distance}-${slug}`,
     _type: 'raceResult',
     athlete: { _type: 'reference', _ref: athleteId },
     distance: { _type: 'reference', _ref: `distance-${r.distance}` },

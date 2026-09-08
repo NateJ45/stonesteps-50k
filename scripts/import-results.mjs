@@ -39,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
 import { loadEnv } from './lib/loadEnv.mjs';
 import { parseRaceTime, titleCaseName } from '../src/lib/race-time.ts';
+import { canonicalSlug, canonicalName } from '../src/lib/athlete-aliases.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -134,8 +135,14 @@ function mapResult(row, { year, distanceSlug }) {
   const timeSeconds = chip ?? gun;
   if (!timeSeconds) return null;
 
-  const slug = slugify(name);
-  if (!slug) return null;
+  const rawSlug = slugify(name);
+  if (!rawSlug) return null;
+
+  // Collapse the handful of runners the race spelled two ways onto one
+  // identity, so their history does not arrive split in half. See
+  // src/lib/athlete-aliases.ts for the evidence behind each entry.
+  const slug = canonicalSlug(rawSlug);
+  const displayName = canonicalName(rawSlug, name);
 
   const gender = row.gender === 'M' || row.gender === 'F' ? row.gender : 'X';
   const age = Number.isFinite(Number(row.age)) && Number(row.age) > 0 ? Number(row.age) : undefined;
@@ -144,7 +151,7 @@ function mapResult(row, { year, distanceSlug }) {
     athlete: {
       _id: `athlete-${slug}`,
       _type: 'athlete',
-      name,
+      name: displayName,
       slug: { _type: 'slug', current: slug },
       ...(row.city ? { city: String(row.city) } : {}),
       ...(row.state ? { region: String(row.state) } : {}),

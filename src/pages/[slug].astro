@@ -31,6 +31,11 @@ export async function getStaticPaths() {
     '404',
     'sitemap-index.xml',
     'og',
+    // The results archive is a real file route (src/pages/results/), so a page
+    // document called "results" would be built by BOTH and one would win at
+    // random.
+    'results',
+    'runners',
   ]);
   const slugs = await getAllPageSlugs().catch(() => [] as string[]);
   return slugs.filter((slug) => !RESERVED.has(slug)).map((slug) => ({ params: { slug } }));

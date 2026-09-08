@@ -421,6 +421,46 @@ export async function getRunnerIndex() {
   );
 }
 
+/**
+ * The whole results archive, in one query, for the /results pages.
+ *
+ * ONE FETCH, NOT ONE PER YEAR. There are 22 editions and 1,961 rows. Fetching
+ * per year would be 22 round trips to build 22 pages; fetching once and passing
+ * the rows through getStaticPaths props is a single request. The runner pages
+ * taught this the expensive way: a per-page query there turned a fourteen
+ * second build into seven minutes.
+ *
+ * The slice is explicit because GROQ has no implicit ceiling worth relying on,
+ * and a silently truncated archive is the kind of bug that looks like missing
+ * history rather than a missing limit.
+ */
+export async function getAllResults() {
+  return sanityFetch(
+    `*[_type == "raceResult"] | order(year desc, place asc)[0...6000]{
+      year, place, age, gender, timeSeconds, timeSource, trekker, sourceNote,
+      "name": athlete->name,
+      "slug": athlete->slug.current,
+      "city": athlete->city,
+      "region": athlete->region,
+      "distance": distance->name,
+      "distanceSlug": distance->slug.current
+    }`,
+    {},
+    [],
+  );
+}
+
+/** The distances, in the order the race lists them. Drives column order. */
+export async function getDistanceRefs() {
+  return sanityFetch(
+    `*[_type == "distance"] | order(orderRank asc){
+      name, "slug": slug.current
+    }`,
+    {},
+    [],
+  );
+}
+
 export async function getRace() {
   return sanityFetch(
     `*[_type == "race"][0]{

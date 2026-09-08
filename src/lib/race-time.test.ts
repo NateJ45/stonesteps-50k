@@ -91,3 +91,44 @@ describe('titleCaseName', () => {
     assert.equal(titleCaseName(''), '');
   });
 });
+
+describe('titleCaseName: the casing plain title case gets wrong', () => {
+  it('capitalises the letter after Mc', () => {
+    assert.equal(titleCaseName('STEVEN MCMILLIAN'), 'Steven McMillian');
+    assert.equal(titleCaseName('misha mccormick'), 'Misha McCormick');
+    assert.equal(titleCaseName('Patrick McGilvray'), 'Patrick McGilvray');
+  });
+
+  it('leaves Mac alone, because Mackey is not MacKey', () => {
+    assert.equal(titleCaseName('BEN MACKEY'), 'Ben Mackey');
+    assert.equal(titleCaseName('ROY MACDONALD'), 'Roy Macdonald');
+  });
+
+  it('uppercases a generational suffix', () => {
+    assert.equal(titleCaseName('HARVEY LEWIS III'), 'Harvey Lewis III');
+    assert.equal(titleCaseName('john smith ii'), 'John Smith II');
+  });
+
+  it('does not uppercase a two-token name that ends in one', () => {
+    // "Iv" is a plausible given name; a surname is not worth the risk.
+    assert.equal(titleCaseName('IV JONES'), 'Iv Jones');
+  });
+
+  it('leaves other trailing tokens alone', () => {
+    assert.equal(titleCaseName('RICK CORCORAN JR'), 'Rick Corcoran Jr');
+    assert.equal(titleCaseName('MATTHEW VAN CLEAVE'), 'Matthew Van Cleave');
+  });
+
+  it('does not change identity: the fixes all slug the same', () => {
+    // The whole athlete model rests on one runner producing one slug. A casing
+    // change that moved a slug would fork somebody's history in half.
+    const slug = (n: string) =>
+      titleCaseName(n)
+        .toLowerCase()
+        .replace(/['\u2019.]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+    assert.equal(slug('STEVEN MCMILLIAN'), slug('Steven Mcmillian'));
+    assert.equal(slug('HARVEY LEWIS III'), slug('Harvey Lewis Iii'));
+  });
+});

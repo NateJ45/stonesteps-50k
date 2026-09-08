@@ -13,16 +13,13 @@
     "allowedTypes: a type that trips the personal-data heuristics but is genuinely",
     "publishable, listing the exact fields that are allowed."
   ],
-
   "_forkNote": [
     "The template's \"noDataset\": true line is deleted here, as the template says a",
     "fork must. This site has a real project (7iynvqq6) and a real public dataset,",
     "so the audit has something to audit and an audit that skips would report a",
     "pass it did not earn."
   ],
-
   "blockedTypes": ["directoryEntry", "familyRecord", "student", "enrollment", "formSubmission"],
-
   "allowedTypes": {
     "race": {
       "fields": ["streetAddress", "<street-address>"],
@@ -34,7 +31,7 @@
     },
     "athlete": {
       "fields": ["name", "city", "region"],
-      "reason": "Race results. 721 finishers, each carrying the name, city and state their timer recorded, imported from RunSignUp's own PUBLIC results pages where the identical data already sits. Publishing finishing times under a runner's name is what a results archive is, and entrants supply it knowing that. Recorded here deliberately rather than left to the heuristics: the audit does not currently flag a bare `name` field, so without this entry the decision would never have been made in daylight. NOTE for whoever reads this next: no date of birth, no email, no address, and no ages beyond the age-on-race-day the results already publish. If a runner ever asks to be removed, delete their athlete document and re-run the import with their result_id excluded, because a plain re-import would restore them."
+      "reason": "Race results. 1,266 finishers across 22 runnings, each carrying the name, city and state their timer recorded, imported from RunSignUp's own PUBLIC results pages and from the race's own published per-year results, where the identical data already sat. Publishing finishing times under a runner's name is what a results archive is, and entrants supply it knowing that. Recorded here deliberately rather than left to the heuristics: the audit does not currently flag a bare `name` field, so without this entry the decision would never have been made in daylight. WHERE IT SURFACES, and the two different judgements made: /results and /results/<year> are INDEXED, because a per-year results table is exactly what the race published for twenty years and what a visitor comes for, and those pages deliberately show name, age, place and time but NOT the runner's city, which adds nothing to a result. /runners/<slug> is noindex and out of the sitemap, because a page per person, titled with their name, is a real escalation in findability over a table. NOTE for whoever reads this next: no date of birth, no email, no address, and no ages beyond the age-on-race-day the results already publish. If a runner ever asks to be removed, delete their athlete document and re-run the imports with their row excluded, because a plain re-import would restore them."
     },
     "siteSettings": {
       "fields": ["phone", "address", "<email>", "<street-address>"],

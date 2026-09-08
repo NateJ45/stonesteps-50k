@@ -68,8 +68,42 @@ export function formatRaceTime(seconds: number | null | undefined): string {
  */
 export function titleCaseName(raw: string | null | undefined): string {
   if (typeof raw !== 'string') return '';
-  return raw
+  const titled = raw
     .trim()
     .toLocaleLowerCase()
     .replace(/(^|[\s\-'’])([a-z])/g, (_, sep: string, ch: string) => sep + ch.toLocaleUpperCase());
+  return fixNameCasing(titled);
+}
+
+/**
+ * The two places plain title casing gets a real name wrong.
+ *
+ * Folding a shouted name to Title Case is right about almost everything and
+ * confidently wrong about these, and both are visible: /results lists 1,961
+ * names in full, so "Mcmillian" and "Lewis Iii" are on the page rather than
+ * buried in a database.
+ *
+ * NEITHER CHANGES IDENTITY. Slugs lowercase everything, so "McCane" and
+ * "Mccane" slug identically and no athlete document splits in two. That is
+ * asserted in race-time.test.ts, because a future "improvement" here that did
+ * move a slug would silently fork a runner's history.
+ *
+ * Mac is deliberately NOT touched. Mc is followed by a capital in essentially
+ * every surname that carries it, but Mac is not: Mackey, Macey and Machado are
+ * all in this archive or one like it, and "MacKey" would be a new error
+ * introduced to fix an old one.
+ */
+function fixNameCasing(name: string): string {
+  let out = name.replace(/\bMc([a-z])/g, (_, ch: string) => 'Mc' + ch.toLocaleUpperCase());
+
+  // Generational suffixes, only as the last token of a name that has one to
+  // spare. Restricted to II, III and IV on purpose: "Iv" and "Vi" are plausible
+  // given names, and uppercasing someone's first name is a worse failure than
+  // leaving a rare suffix lowercase.
+  const parts = out.split(' ');
+  if (parts.length >= 3 && /^(ii|iii|iv)$/i.test(parts[parts.length - 1])) {
+    parts[parts.length - 1] = parts[parts.length - 1].toLocaleUpperCase();
+    out = parts.join(' ');
+  }
+  return out;
 }

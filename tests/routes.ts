@@ -25,6 +25,11 @@ export const routes: string[] = [
   '/course',
   '/records',
   '/contact',
+  // The results archive. `/results/2025` stands in for the 22 year pages, which
+  // are all one template; listing every year would slow the suite to prove the
+  // same thing 22 times.
+  '/results',
+  '/results/2025',
 ];
 
 /**

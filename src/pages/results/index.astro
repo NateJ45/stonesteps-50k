@@ -1,0 +1,147 @@
+---
+// Safe to edit by hand
+//
+// The results archive, edition by edition.
+//
+// WHY THIS PAGE EXISTS. The race published per-year results at /results-2003/
+// through /results-2020/ for two decades, then deleted every one of them in a
+// redesign. They were recovered from the Wayback Machine and the race's own
+// timing spreadsheets (scripts/import-archive.mjs). Until this page there was
+// no route on the site that showed a single finisher: the records board only
+// draws the fastest, so a year in which nobody set a record left no trace.
+//
+// EVERYTHING HERE IS DERIVED from the results themselves, through
+// src/lib/editions.ts. The entrant counts, the winners, the span of years and
+// the holes in it are all computed, so no one can type a number here that
+// disagrees with the rows it counts.
+//
+// THE GAPS ARE RENDERED, NOT SKIPPED. 2020 was run and its results are lost.
+// Dropping the year would say the race did not happen that autumn, which is a
+// worse error than an empty row.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getAllResults, getDistanceRefs, getSiteSettings } from '@/lib/queries';
+import { summariseEditions, type ResultRow, type DistanceRef } from '@/lib/editions';
+import { formatRaceTime } from '@/lib/race-time';
+
+const [results, distances, siteSettings] = await Promise.all([
+  getAllResults().catch(() => []),
+  getDistanceRefs().catch(() => []),
+  getSiteSettings().catch(() => null),
+]);
+
+const editions = summariseEditions(results as ResultRow[], distances as DistanceRef[]);
+const ran = editions.filter((e) => !e.missing);
+const totalFinishers = ran.reduce((n, e) => n + e.total, 0);
+const span = editions.length ? `${editions.at(-1)!.year} to ${editions[0].year}` : '';
+
+const title = 'Results archive | Stone Steps 50K';
+const description = `Every Stone Steps 50K and 27K result on file, ${span}.`;
+---
+
+<BaseLayout {title} {description} {siteSettings}>
+  <section class="bg-background py-section-lg">
+    <div class="mx-auto w-full max-w-content px-6">
+      <p
+        class="blaze text-heading-accent mb-4 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase"
+      >
+        Results
+      </p>
+      <h1 class="display text-[clamp(2.5rem,7vw,4.5rem)]">Every running</h1>
+
+      {
+        ran.length > 0 && (
+          <p class="mt-6 max-w-[60ch] text-muted-foreground">
+            {totalFinishers.toLocaleString()} finishes across {ran.length} runnings, {span}. Pick a
+            year to see the full field.
+          </p>
+        )
+      }
+
+      {
+        editions.length === 0 && (
+          <p class="mt-6 max-w-[60ch] text-muted-foreground">
+            No results are on file yet. Run <code>node scripts/import-results.mjs</code> to pull
+            them from RunSignUp.
+          </p>
+        )
+      }
+
+      <ul class="mt-12 grid gap-px">
+        {
+          editions.map((e) => (
+            <li class="border-t border-border py-6 first:border-t-0 first:pt-0">
+              {/* The missing-year row carries NO opacity utility.
+                  `text-muted-foreground` already sits near the AA floor and
+                  diluting it puts the row under, which is how this exact line
+                  failed axe the first time. It is set apart by not being a
+                  link and by carrying its own sentence, not by being faded. */}
+              {e.missing ? (
+                <div class="flex flex-wrap items-baseline gap-x-5 gap-y-2">
+                  <span class="display tabular text-h3 text-muted-foreground">{e.year}</span>
+                  <span class="text-sm text-muted-foreground">
+                    Run, but no results on file. See the note below.
+                  </span>
+                </div>
+              ) : (
+                <a
+                  class="group grid gap-3 sm:grid-cols-[7rem_1fr] sm:items-baseline"
+                  href={`/results/${e.year}`}
+                >
+                  <span class="display tabular text-heading-accent text-h3 group-hover:underline">
+                    {e.year}
+                  </span>
+                  <span class="grid gap-2">
+                    {e.distances.map((d) => (
+                      <span class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
+                        <span class="lc font-mono text-[0.7rem] tracking-[0.16em] text-muted-foreground uppercase">
+                          {d.name}
+                        </span>
+                        <span class="tabular text-muted-foreground">
+                          {d.finishers} {d.finishers === 1 ? 'finisher' : 'finishers'}
+                        </span>
+                        {d.winners.map((w) => (
+                          <span class="text-muted-foreground">
+                            {w.gender === 'F' ? "Women's" : "Men's"} win{' '}
+                            <span class="text-foreground">{w.row.name}</span>{' '}
+                            <span class="tabular">{formatRaceTime(w.row.timeSeconds)}</span>
+                          </span>
+                        ))}
+                      </span>
+                    ))}
+                  </span>
+                </a>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+
+      {
+        /* The archive's own gaps, stated on the page rather than left for a
+          visitor to notice and assume the site is broken. */
+      }
+      <div class="mt-14 max-w-[62ch] border-t border-border pt-6 text-sm text-muted-foreground">
+        <h2 class="display text-h4 text-foreground">What is missing</h2>
+        <p class="mt-3">
+          2020 was run, and its results are gone. The race deleted its own results pages in a
+          redesign, RunSignUp holds no result set for that year, and the one surviving archive
+          capture is an empty page shell. If you have a copy, the race would like it back.
+        </p>
+        <p class="mt-3">
+          The 27K before 2015 is missing for a different reason: it was timed on runningtime.net,
+          which no longer exists. Everything else here was recovered from the Wayback Machine and
+          from the race's own timing spreadsheets, and checked against RunSignUp on the year the two
+          overlap.
+        </p>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-4">
+        <a class="btn-plate btn-plate--cream" href="/records">
+          All-time records
+          <span class="btn-plate__arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

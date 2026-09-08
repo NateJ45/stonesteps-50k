@@ -7,7 +7,9 @@
         "http://localhost/index.html",
         "http://localhost/course/index.html",
         "http://localhost/records/index.html",
-        "http://localhost/contact/index.html"
+        "http://localhost/contact/index.html",
+        "http://localhost/results/index.html",
+        "http://localhost/results/2025/index.html"
       ],
       "numberOfRuns": 3,
       "settings": {

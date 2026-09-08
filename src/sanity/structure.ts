@@ -227,7 +227,107 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                 context,
               }),
               S.divider(),
-              S.documentTypeListItem('raceResult').title('Results').icon(ThListIcon),
+              // Results, drilled down by year and then by distance.
+              //
+              // WHY THIS IS NOT A PLAIN documentTypeListItem. There are 1,961
+              // result documents across 22 runnings. Sanity's default list is
+              // virtualised so it does not fall over, but it is one infinite
+              // scroll with no structure: finding the 2011 field means
+              // scrolling past a decade, and the ordering options can only sort
+              // the whole archive at once. Splitting on year turns that into 22
+              // lists, each of which is one race.
+              //
+              // AND THEN ON DISTANCE, because a year holds two separate races.
+              // Ordering a mixed year by time interleaves them and puts a fast
+              // 27K above a slow 50K, which reads as a results table that has
+              // gone wrong. Sorting the list on the distance REFERENCE was the
+              // first attempt and the Studio rejects it: `distance._ref` is a
+              // valid GROQ sort but not a schema field path, and the pane fails
+              // with "Could not fetch list items". A second level is clearer
+              // than a clever sort would have been anyway.
+              //
+              // Both levels are QUERIED, not hardcoded, so importing a
+              // recovered edition adds it to the desk without anyone editing
+              // this file, and a year that only ever ran one distance shows
+              // only that one. The query is inside the child callback, so it
+              // runs when an editor opens Results rather than on every boot.
+              S.listItem()
+                .title('Results')
+                .icon(ThListIcon)
+                .child(() =>
+                  context
+                    .getClient({ apiVersion: '2026-05-01' })
+                    .fetch<string[]>(
+                      // "2011|50k" per year-and-distance that actually exists.
+                      'array::unique(*[_type == "raceResult" && defined(year) && defined(distance)]' +
+                        '{"k": string(year) + "|" + distance->slug.current}.k)',
+                    )
+                    .then((keys) => {
+                      const byYear = new Map<number, string[]>();
+                      for (const key of keys) {
+                        const [year, slug] = key.split('|');
+                        if (!year || !slug) continue;
+                        const list = byYear.get(Number(year)) ?? [];
+                        if (!list.includes(slug)) list.push(slug);
+                        byYear.set(Number(year), list);
+                      }
+
+                      const yearItems = [...byYear.keys()]
+                        .sort((a, b) => b - a)
+                        .map((year) => {
+                          const slugs = (byYear.get(year) ?? []).sort();
+                          return S.listItem()
+                            .id(`results-${year}`)
+                            .title(String(year))
+                            .child(
+                              S.list()
+                                .id(`results-year-${year}`)
+                                .title(`${year} results`)
+                                .items(
+                                  slugs.map((slug) =>
+                                    S.listItem()
+                                      .id(`results-${year}-${slug}`)
+                                      .title(slug.toUpperCase())
+                                      .child(
+                                        S.documentList()
+                                          .id(`results-list-${year}-${slug}`)
+                                          .title(`${year} ${slug.toUpperCase()}`)
+                                          .schemaType('raceResult')
+                                          .filter(
+                                            '_type == "raceResult" && year == $year && ' +
+                                              'distance->slug.current == $slug',
+                                          )
+                                          .params({ year, slug })
+                                          .defaultOrdering([
+                                            { field: 'timeSeconds', direction: 'asc' },
+                                          ]),
+                                      ),
+                                  ),
+                                ),
+                            );
+                        });
+
+                      return S.list()
+                        .title('Results by year')
+                        .items([
+                          // The escape hatch. Search and cross-year ordering
+                          // still need a flat list, and a desk that removes the
+                          // only way to do something is worse than one that
+                          // buries it a click down.
+                          S.listItem()
+                            .id('all-results')
+                            .title('All results')
+                            .icon(ThListIcon)
+                            .child(S.documentTypeList('raceResult').title('All results')),
+                          S.divider(),
+                          ...yearItems,
+                        ]);
+                    })
+                    // A desk pane that throws renders as a broken Studio, so a
+                    // failed query falls back to the flat list rather than
+                    // taking Results away entirely.
+                    .catch(() => S.documentTypeList('raceResult').title('All results')),
+                ),
               S.documentTypeListItem('athlete').title('Athletes').icon(UsersIcon),
               S.documentTypeListItem('recordEntry')
                 .title('Historical records')

@@ -77,6 +77,28 @@ migration (PORTS.md card 10, phase 2).
 
 ## Known gaps, deliberately open
 
+### 0. Two archive years are still lost, and the results pages now say so
+
+/results renders every edition from 2003 to 2025, including 2020 as a row that
+says the race was run and the results are gone. The 27K before 2015 is missing
+for a different reason: it was timed on runningtime.net, which no longer exists.
+Both gaps are stated on the page rather than hidden by skipping the year.
+
+Two things would close them, and neither is code:
+
+- 2020: ask David Corfman whether a copy survives anywhere. RunSignUp holds no
+  result set and the single Wayback capture is an empty page shell.
+- the pre-2015 27K: same question, same person.
+
+### 0a. Two near-duplicate athletes were examined and NOT merged
+
+`REJECTED_ALIASES` in `src/lib/athlete-aliases.ts` carries Garry/Gary Blair and
+Jerry Swartzel/Swatzel. Both look like one person spelled two ways and neither
+carries an age on both sides to prove it. If a source ever turns up that settles
+one, move it into `ATHLETE_ALIASES`, run `node scripts/repair-athletes.mjs`, then
+re-run both importers. Do not merge on the strength of the names alone: merging
+two people states someone else's finishing times as fact under a real name.
+
 ### 2. `npm run parity compare` is not a CI step
 
 The baselines in `scripts/.parity/` are captured on a developer machine, and nobody in

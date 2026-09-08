@@ -1,0 +1,240 @@
+---
+// Safe to edit by hand
+//
+// One year's full field, both distances.
+//
+// PRERENDERED, unlike the runner pages. There are 22 of these and there will
+// never be many more (one a year), each is a page a visitor might actually
+// search for, and all 22 are built from a SINGLE query whose rows are passed
+// through getStaticPaths props. That is the fix the runner pages needed: a
+// per-page query there meant 711 round trips and a seven minute build.
+//
+// WHAT IS DELIBERATELY NOT HERE: the runner's home city. The race published
+// city and state alongside every name for twenty years and RunSignUp still
+// does, so this is not hiding anything that is not already public. But a
+// search-indexed page is a real step up in findability from a results table,
+// and the city adds nothing a visitor to a RACE RESULT needs. Name, age, place
+// and time are the result. See public-data-policy.json.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getAllResults, getDistanceRefs, getSiteSettings } from '@/lib/queries';
+import { editionFor, summariseEditions, type ResultRow, type DistanceRef } from '@/lib/editions';
+import { formatRaceTime } from '@/lib/race-time';
+
+export async function getStaticPaths() {
+  const [results, distances] = await Promise.all([
+    getAllResults().catch(() => []),
+    getDistanceRefs().catch(() => []),
+  ]);
+
+  const rows = results as ResultRow[];
+  const dists = distances as DistanceRef[];
+
+  // Only the years that HAVE results get a route. A missing year is listed on
+  // /results with an explanation; giving it a page would mean building an empty
+  // one that says nothing the index does not already say better.
+  return summariseEditions(rows, dists)
+    .filter((e) => !e.missing)
+    .map((e, i, all) => ({
+      params: { year: String(e.year) },
+      props: {
+        edition: editionFor(rows, e.year, dists)!,
+        // Neighbours for the prev/next links, in chronological terms rather
+        // than list terms: `all` is newest first, so the NEWER edition is the
+        // one before it in the array.
+        newer: i > 0 ? all[i - 1].year : null,
+        older: i < all.length - 1 ? all[i + 1].year : null,
+      },
+    }));
+}
+
+const { edition, newer, older } = Astro.props;
+const siteSettings = await getSiteSettings().catch(() => null);
+
+/** Gun time until the race started publishing chip times in 2024. */
+const anyGun = edition.distances.some((d) => d.rows.some((r) => r.timeSource === 'gun'));
+const anyTrekker = edition.distances.some((d) => d.rows.some((r) => r.trekker));
+
+const title = `${edition.year} results | Stone Steps 50K`;
+const description = `Every finisher of the ${edition.year} Stone Steps 50K and 27K, with times.`;
+---
+
+<BaseLayout {title} {description} {siteSettings}>
+  <section class="bg-background py-section-lg">
+    <div class="mx-auto w-full max-w-content px-6">
+      <p
+        class="blaze text-heading-accent mb-4 font-mono text-[0.72rem] font-semibold tracking-[0.22em] uppercase"
+      >
+        <a class="hover:underline" href="/results">Results</a>
+      </p>
+      <h1 class="display text-[clamp(2.5rem,7vw,4.5rem)]">{edition.year}</h1>
+
+      <p class="mt-4 text-muted-foreground">
+        {edition.total}{' '}
+        {edition.total === 1 ? 'finisher' : 'finishers'}{
+          edition.distances.length > 1 && (
+            <>, across the {edition.distances.map((d) => d.name).join(' and the ')}</>
+          )
+        }.
+      </p>
+
+      {
+        edition.distances.map((d) => (
+          <div class="mt-14">
+            <div class="flex flex-wrap items-baseline gap-x-4">
+              <h2 class="display text-h3">{d.name}</h2>
+              <p class="tabular text-sm text-muted-foreground">{d.finishers} finishers</p>
+            </div>
+
+            {d.winners.length > 0 && (
+              <ul class="mt-5 grid gap-4 sm:grid-cols-2">
+                {d.winners.map((w) => (
+                  <li class="border-l-[3px] border-[color:var(--heading-accent)] pl-5">
+                    <p class="font-mono text-[0.62rem] tracking-[0.2em] text-muted-foreground uppercase">
+                      {w.gender === 'F' ? 'Women' : 'Men'}
+                    </p>
+                    <p class="display mt-1 text-h4">
+                      {w.row.slug ? (
+                        <a class="hover:underline" href={`/runners/${w.row.slug}`}>
+                          {w.row.name}
+                        </a>
+                      ) : (
+                        w.row.name
+                      )}
+                    </p>
+                    <p class="tabular text-heading-accent mt-1 text-xl font-bold">
+                      {formatRaceTime(w.row.timeSeconds)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div class="mt-8 overflow-x-auto">
+              <table class="w-full border-collapse text-sm">
+                <caption class="pb-2 text-left font-mono text-[0.6rem] tracking-[0.18em] text-muted-foreground uppercase">
+                  {edition.year} {d.name}, every finisher on file
+                </caption>
+                <thead>
+                  <tr class="border-b border-primary/30">
+                    <th
+                      scope="col"
+                      class="pb-2 text-right font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                    >
+                      #
+                    </th>
+                    <th
+                      scope="col"
+                      class="pb-2 pl-3 text-left font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                    >
+                      Name
+                    </th>
+                    <th
+                      scope="col"
+                      class="pb-2 text-right font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                    >
+                      Age
+                    </th>
+                    <th
+                      scope="col"
+                      class="pb-2 text-right font-mono text-[0.6rem] tracking-[0.18em] uppercase"
+                    >
+                      Time
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {d.rows.map((row, i) => (
+                    <tr class="border-b border-border/60">
+                      <td class="tabular py-2 text-right text-muted-foreground">
+                        {row.place ?? i + 1}
+                      </td>
+                      <th scope="row" class="py-2 pl-3 text-left font-normal">
+                        {row.slug ? (
+                          <a
+                            class="underline-offset-2 hover:text-link hover:underline"
+                            href={`/runners/${row.slug}`}
+                          >
+                            {row.name}
+                          </a>
+                        ) : (
+                          row.name
+                        )}
+                        {row.trekker && (
+                          <abbr
+                            class="source-flag text-muted-foreground"
+                            title="Trekker: took the optional early start, not eligible for awards"
+                          >
+                            T
+                          </abbr>
+                        )}
+                      </th>
+                      <td class="tabular py-2 text-right text-muted-foreground">{row.age ?? ''}</td>
+                      <td class="tabular py-2 text-right font-bold whitespace-nowrap">
+                        {formatRaceTime(row.timeSeconds)}
+                        {row.timeSource === 'gun' && (
+                          <abbr
+                            class="source-flag text-muted-foreground"
+                            title="Gun time, not chip time"
+                          >
+                            g
+                          </abbr>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))
+      }
+
+      {
+        (anyGun || anyTrekker) && (
+          <ul class="mt-10 grid max-w-[62ch] gap-2 border-t border-border pt-6 text-sm text-muted-foreground">
+            {anyGun && (
+              <li>
+                <span class="source-flag" aria-hidden="true">
+                  g
+                </span>{' '}
+                Gun time. The race did not publish chip times until 2024, so these are the clock
+                from the start, not from crossing the mat.
+              </li>
+            )}
+            {anyTrekker && (
+              <li>
+                <span class="source-flag" aria-hidden="true">
+                  T
+                </span>{' '}
+                Trekker. Took the optional early start, which the race makes ineligible for age
+                group and overall awards. The time is real and counts nowhere in the records.
+              </li>
+            )}
+          </ul>
+        )
+      }
+
+      <nav class="mt-12 flex flex-wrap items-center gap-4" aria-label="Other years">
+        {
+          older && (
+            <a class="btn-plate btn-plate--cream" href={`/results/${older}`}>
+              <span aria-hidden="true">&larr;</span> {older}
+            </a>
+          )
+        }
+        <a class="btn-plate btn-plate--cream" href="/results">All years</a>
+        {
+          newer && (
+            <a class="btn-plate btn-plate--cream" href={`/results/${newer}`}>
+              {newer}{' '}
+              <span class="btn-plate__arrow" aria-hidden="true">
+                &rarr;
+              </span>
+            </a>
+          )
+        }
+      </nav>
+    </div>
+  </section>
+</BaseLayout>
