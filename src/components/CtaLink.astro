@@ -24,6 +24,8 @@ interface CtaBlock {
   label?: string;
   linkType?: 'internal' | 'external' | 'email' | 'phone';
   internalLink?: { _type?: string; slug?: string } | null;
+  /** For internal routes with no document to reference, like /results. */
+  internalPath?: string;
   externalUrl?: string;
   emailAddress?: string;
   phoneNumber?: string;
@@ -69,7 +71,9 @@ function resolveHref(c?: CtaBlock | null): string {
   switch (c.linkType) {
     case 'internal': {
       const t = c.internalLink?._type;
-      if (!t) return fallbackHref;
+      // A reference wins: it survives a slug change. The typed path is the
+      // escape hatch for file routes like /results that have no document.
+      if (!t) return c.internalPath || fallbackHref;
       // Slug-based types need the slug appended. Singletons use a fixed path.
       if (t === 'journalEntry' && c.internalLink?.slug) {
         return `/journal/${c.internalLink.slug}`;
@@ -78,7 +82,7 @@ function resolveHref(c?: CtaBlock | null): string {
       if (t === 'page' && c.internalLink?.slug) {
         return `/${c.internalLink.slug}`;
       }
-      return TYPE_TO_PATH[t] ?? fallbackHref;
+      return TYPE_TO_PATH[t] ?? c.internalPath ?? fallbackHref;
     }
     case 'external':
       return c.externalUrl ?? fallbackHref;

@@ -38,13 +38,39 @@ const client = createClient({ projectId, dataset, token, apiVersion: '2026-05-01
 
 let n = 0;
 const key = () => `seed-${(n += 1)}`;
-const cta = (label, href) => ({
-  _type: 'ctaBlock',
-  label,
-  linkType: 'external',
-  externalUrl: href,
-  openInNewTab: false,
-});
+// Page documents a CTA can REFERENCE. A reference survives a slug change; a
+// typed path does not, so prefer it wherever the destination is a document.
+const PAGE_DOC_BY_PATH = {
+  '/course': 'page-course',
+  '/records': 'page-records',
+  '/contact': 'page-contact',
+};
+
+// Build the right ctaBlock shape for a destination.
+//
+// This used to stamp every CTA as `linkType: 'external'` with the path in
+// `externalUrl`, which produced two separate bugs: an absolute-URL validation
+// error in the Studio on "/course", and internal links rendered with
+// target="_blank" as though they left the site. Anything starting with "/" is
+// internal, and becomes a reference when a document exists for it.
+const cta = (label, href) => {
+  if (!href.startsWith('/')) {
+    return {
+      _type: 'ctaBlock',
+      label,
+      linkType: 'external',
+      externalUrl: href,
+      openInNewTab: false,
+    };
+  }
+  const ref = PAGE_DOC_BY_PATH[href];
+  return {
+    _type: 'ctaBlock',
+    label,
+    linkType: 'internal',
+    ...(ref ? { internalLink: { _type: 'reference', _ref: ref } } : { internalPath: href }),
+  };
+};
 const REGISTER = 'https://runsignup.com/Race/OH/Cincinnati/StoneSteps50KTrailRun';
 
 const docs = [];
@@ -129,12 +155,7 @@ docs.push({
       _key: key(),
       eyebrow: 'What to expect',
       headline: 'Roots, rocks, and one very good park',
-      cta: {
-        _type: 'ctaBlock',
-        label: 'The full course',
-        linkType: 'internal',
-        externalUrl: '/course',
-      },
+      cta: cta('The full course', '/course'),
     },
     {
       _type: 'raceScheduleSection',
@@ -149,12 +170,7 @@ docs.push({
       _key: key(),
       eyebrow: 'The fast ones',
       headline: 'The names on the board',
-      cta: {
-        _type: 'ctaBlock',
-        label: 'All-time records',
-        linkType: 'internal',
-        externalUrl: '/records',
-      },
+      cta: cta('All-time records', '/records'),
     },
     {
       _type: 'parksSection',

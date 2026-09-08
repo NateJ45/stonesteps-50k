@@ -1556,6 +1556,7 @@ export type CtaBlock = {
     | JournalPageReference
     | JournalEntryReference
     | PageReference;
+  internalPath?: string;
   externalUrl?: string;
   emailAddress?: string;
   phoneNumber?: string;
