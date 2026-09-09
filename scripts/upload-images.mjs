@@ -74,6 +74,10 @@ const IMAGES = {
     file: 'photos/runners-line-singletrack.jpg',
     alt: 'A line of four runners strung out along narrow single track, climbing away from the camera',
   },
+  goldenSingletrack: {
+    file: 'photos/golden-singletrack.jpg',
+    alt: 'A runner on packed single track under a canopy of yellow maple, the trail ankle-deep in fallen leaves',
+  },
   courseMap: {
     file: 'photos/course-map.jpg',
     alt: 'Cincinnati Parks trail map of Mt. Airy Forest showing the loop network',
@@ -166,12 +170,22 @@ async function main() {
   // whole pageBuilder, so an editor's other changes to the page survive.
   const homeHero = await client.fetch('*[_id == "homePage"][0]{ pageBuilder[]{ _key, _type } }');
   const heroKey = homeHero?.pageBuilder?.find((b) => b._type === 'raceHeroSection')?._key;
-  if (heroKey && ids.hero) {
-    await client
-      .patch('homePage')
-      .set({ [`pageBuilder[_key=="${heroKey}"].image`]: imageField(ids.hero, IMAGES.hero.alt) })
-      .commit();
-    console.log('  homePage hero image');
+  // THE HERO IS A LIST NOW, and the order is the whole argument. The stone
+  // steps go first because they are what the race is named after and what most
+  // people will ever see of this slideshow; the other two are the same trail on
+  // the same day, so the cross-fade reads as one race rather than a gallery.
+  const heroSlides = ['hero', 'goldenSingletrack', 'singletrackLine'];
+  if (heroKey) {
+    const value = heroSlides
+      .filter((k) => ids[k])
+      .map((k, i) => ({ _key: `slide-${i}`, ...imageField(ids[k], IMAGES[k].alt) }));
+    if (value.length) {
+      await client
+        .patch('homePage')
+        .set({ [`pageBuilder[_key=="${heroKey}"].images`]: value })
+        .commit();
+      console.log(`  homePage hero slideshow (${value.length})`);
+    }
   }
 
   // Page headers on the two builder pages.

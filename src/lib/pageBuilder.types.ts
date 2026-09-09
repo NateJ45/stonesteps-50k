@@ -448,6 +448,8 @@ export interface ProjectedRaceHeroSection {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  images?: ProjectedImage[];
+  /** Pre-slideshow documents. Read as a single slide when `images` is empty. */
   image?: ProjectedImage;
   showCountdown?: boolean;
   primaryCta?: ProjectedCtaBlock;

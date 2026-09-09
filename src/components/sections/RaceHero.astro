@@ -30,6 +30,7 @@ type Props = {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  images?: ProjectedRaceHeroSection['images'];
   image?: ProjectedRaceHeroSection['image'];
   showCountdown?: boolean;
   primaryCta?: ProjectedRaceHeroSection['primaryCta'];
@@ -42,6 +43,7 @@ const {
   eyebrow,
   headline = '',
   subhead,
+  images,
   image,
   showCountdown = true,
   primaryCta,
@@ -49,6 +51,23 @@ const {
   race,
   headingId = 'race-hero-heading',
 } = Astro.props as Props;
+
+// THE SLIDES. `images` is the field editors see; `image` is the single-photo
+// field it replaced, read here so a document written before the slideshow
+// existed still shows its photograph instead of nothing.
+//
+// One slide is a still hero. The cross-fade, the drift and the whole animation
+// block below are skipped entirely at a length of one, so the common case pays
+// nothing for the feature.
+const slides = (images?.length ? images : image ? [image] : []).filter((i) => i?.asset);
+
+/* The cycle has to be shared between the markup and the CSS: each slide is
+   held, then cross-faded, and the nth slide starts (n/total) of the way
+   through a loop that never restarts. Expressed once here and handed to CSS as
+   custom properties, so adding a fifth slide in the Studio cannot desynchronise
+   the timing from the number of pictures. */
+const SLIDE_SECONDS = 7;
+const cycleSeconds = SLIDE_SECONDS * slides.length;
 
 // Split into words, then characters, so a word never breaks mid-rotation
 // across a line end.
@@ -83,18 +102,38 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
   <MudField field="hero" class="hero-mud" />
 
   {
-    /* The photograph. OUTSIDE the z-10 content wrapper on purpose: on desktop it
-      is an absolute layer at z-0 so the mud (z-1) crosses it and the copy
-      (z-10) stays clear of it. See `.hero-photo` in globals.css. */
-    image?.asset && (
-      <figure class="photo-plate hero-photo">
-        <SanityImage
-          source={image}
-          width={1400}
-          sizes="(min-width: 1024px) 48vw, 100vw"
-          alt={image.alt ?? ''}
-          loading="eager"
-        />
+    /* The photographs. OUTSIDE the z-10 content wrapper on purpose: on desktop
+      this is an absolute layer at z-0 so the mud (z-1) crosses it and the copy
+      (z-10) stays clear of it. See `.hero-photo` in globals.css.
+
+      ONLY THE FIRST SLIDE IS DESCRIBED. The rest are more pictures of the same
+      thing, and a screen reader announcing four descriptions of a decorative
+      backdrop is worse than one. They are marked alt="" so they are skipped,
+      which is the correct markup for an image that adds nothing a caption has
+      not already said.
+
+      Priority is explicit for the same reason. The first photograph is a real
+      LCP candidate and asks for the bandwidth; the others are behind it in the
+      same paint and would otherwise compete with it for the connection. */
+    slides.length > 0 && (
+      <figure
+        class:list={[
+          'photo-plate',
+          'hero-photo',
+          slides.length > 1 && `hero-photo--cycling hero-photo--n${slides.length}`,
+        ]}
+        style={`--slide-cycle:${cycleSeconds}s`}
+      >
+        {slides.map((img, i) => (
+          <SanityImage
+            source={img}
+            width={1400}
+            sizes="(min-width: 1024px) 48vw, 100vw"
+            alt={i === 0 ? (img.alt ?? '') : ''}
+            loading="eager"
+            fetchpriority={i === 0 ? 'high' : 'low'}
+          />
+        ))}
       </figure>
     )
   }

@@ -1779,9 +1779,156 @@ body::after {
 }
 
 .hero-photo img {
+  position: absolute;
+  inset: 0;
   height: 100%;
   width: 100%;
   object-fit: cover;
+}
+
+/* ---------- The hero slideshow ------------------------------------------ */
+/* A slow cross-fade with a drifting zoom, which is what the live site's hero
+   video was doing at 20 seconds of 720p. Done in CSS it costs the pictures and
+   nothing else: no player, no decode loop, no autoplay policy to fight, and it
+   shows more of the race than one still could.
+
+   FOUR THINGS ARE DELIBERATE HERE.
+
+   1. THE SLIDES ARE STACKED, NOT SWAPPED. Every photograph is in the document
+      from the first paint and the animation only moves opacity and transform,
+      both of which the compositor handles without touching layout or paint.
+      That is also the cost: a CSS cross-fade cannot fetch the next picture on
+      demand, so the schema caps the list at four.
+
+   2. THE ZOOM RESETS WHILE THE SLIDE IS INVISIBLE. Each image grows across its
+      own window, then travels back to scale(1) between its fade-out and its
+      fade-in, where nobody can see it move. Without that return leg the stack
+      would either snap or need a second animation to reset it.
+
+   3. THE TIMING IS SHARED, NOT REPEATED. The cycle length is written once by
+      the component as --slide-cycle and the nth slide simply starts a negative
+      fraction of it into an animation that never restarts, so all of them stay
+      locked to one clock however many there are.
+
+   4. THE HOLD PERCENTAGES DEPEND ON THE COUNT, so there is one keyframe set per
+      supported length. CSS cannot compute a keyframe offset from a custom
+      property, and faking it with a single set plus per-slide delays gives a
+      visible stutter where the windows overlap unevenly. Three explicit sets is
+      the honest version. */
+.hero-photo--cycling img {
+  animation: var(--slide-cycle) linear infinite both;
+}
+.hero-photo--n2 img {
+  animation-name: hero-slide-2;
+}
+.hero-photo--n3 img {
+  animation-name: hero-slide-3;
+}
+.hero-photo--n4 img {
+  animation-name: hero-slide-4;
+}
+
+/* Negative delays, so slide n is already (n / count) into the loop at load
+   rather than waiting its turn on a blank frame. */
+.hero-photo--cycling img:nth-child(2) {
+  animation-delay: calc(-1 * var(--slide-cycle) / 2);
+}
+.hero-photo--n3 img:nth-child(2) {
+  animation-delay: calc(-1 * var(--slide-cycle) / 3);
+}
+.hero-photo--n3 img:nth-child(3) {
+  animation-delay: calc(-2 * var(--slide-cycle) / 3);
+}
+.hero-photo--n4 img:nth-child(2) {
+  animation-delay: calc(-1 * var(--slide-cycle) / 4);
+}
+.hero-photo--n4 img:nth-child(3) {
+  animation-delay: calc(-2 * var(--slide-cycle) / 4);
+}
+.hero-photo--n4 img:nth-child(4) {
+  animation-delay: calc(-3 * var(--slide-cycle) / 4);
+}
+
+@keyframes hero-slide-2 {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  44.0% {
+    opacity: 1;
+  }
+  50.0% {
+    opacity: 0;
+    transform: scale(1.09) translateY(-1.2%);
+  }
+  94% {
+    opacity: 0;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes hero-slide-3 {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  27.33% {
+    opacity: 1;
+  }
+  33.33% {
+    opacity: 0;
+    transform: scale(1.09) translateY(-1.2%);
+  }
+  94% {
+    opacity: 0;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes hero-slide-4 {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  19.0% {
+    opacity: 1;
+  }
+  25.0% {
+    opacity: 0;
+    transform: scale(1.09) translateY(-1.2%);
+  }
+  94% {
+    opacity: 0;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* A slow push-in across a photograph is the exact motion a vestibular disorder
+   reacts to, and unlike the button press there is no version of this that is
+   still the effect. It stops completely: the first photograph, held still. The
+   later slides are not hidden with display:none, because they are already
+   downloaded by then and a still hero is better served by the one chosen to be
+   first. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-photo--cycling img {
+    animation: none;
+    opacity: 0;
+  }
+  .hero-photo--cycling img:first-child {
+    opacity: 1;
+  }
 }
 
 /* The hero's mud starts at the top of the PAGE, not the top of the hero, so it

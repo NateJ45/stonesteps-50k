@@ -117,6 +117,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
     // exactly what happened on the site this one replaces.
     _type == "raceHeroSection" => {
       ...,
+      images[]${IMAGE_PROJECTION},
       image${IMAGE_PROJECTION},
       primaryCta${CTA_PROJECTION},
       secondaryCta${CTA_PROJECTION},

@@ -1396,6 +1396,15 @@ export type RaceHeroSection = {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  images?: Array<{
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+    _key: string;
+  }>;
   image?: {
     asset?: SanityImageAssetReference;
     media?: unknown;

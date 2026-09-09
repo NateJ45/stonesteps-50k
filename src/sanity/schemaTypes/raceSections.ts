@@ -73,20 +73,53 @@ export const raceHeroSection = defineType({
         },
       },
     }),
+    // THE HERO IS A SLIDESHOW, and the cap is the point of the field rather
+    // than a limitation of it. Every photograph here loads on the first paint,
+    // because a CSS cross-fade has no way to fetch the next one on demand; four
+    // large images is already most of the page's weight. The old WordPress site
+    // solved the same wish with a 20-second 720p video, which cost far more and
+    // showed no more of the race.
+    //
+    // ONE PHOTOGRAPH IS A COMPLETE ANSWER. Leave a single image here and the
+    // hero renders it still, with no animation and nothing to cross-fade to.
     defineField({
-      name: 'image',
-      title: 'Hero photograph',
-      type: 'image',
-      options: { hotspot: true },
-      fields: [
-        defineField({
-          name: 'alt',
-          title: 'Alt text',
-          type: 'string',
-          description: 'Describe what is happening in the photo, not the file name.',
-          validation: (Rule) => Rule.required(),
+      name: 'images',
+      title: 'Hero photographs',
+      description:
+        'One photograph, or up to four to cross-fade slowly between. Tall shots ' +
+        'work best: on a wide screen this is a full-height column down the right ' +
+        'of the page. The first one is what most people see, so make it the good one.',
+      type: 'array',
+      validation: (Rule) => Rule.max(4),
+      of: [
+        defineArrayMember({
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            defineField({
+              name: 'alt',
+              title: 'Alt text',
+              type: 'string',
+              description:
+                'Describe what is happening in the photo, not the file name. Only ' +
+                'the first photograph is announced to a screen reader: the rest are ' +
+                'the same subject again and reading all four would be noise.',
+              validation: (Rule) => Rule.required(),
+            }),
+          ],
         }),
       ],
+    }),
+    // The single-image field this replaced. Kept OUT of the Studio but still
+    // read by the query, so a document written before the slideshow existed
+    // renders its photograph instead of going blank. Nothing writes it now.
+    defineField({
+      name: 'image',
+      title: 'Hero photograph (replaced by the list above)',
+      type: 'image',
+      hidden: true,
+      options: { hotspot: true },
+      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     }),
     defineField({
       name: 'showCountdown',
