@@ -65,7 +65,7 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
       Unlike the hero's field, this one has no reason to escape its band: it is
       ground under a person, not a throw across the top of the page. */
     cutout && (
-      <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <div class="mud-edge-fade pointer-events-none absolute inset-0 overflow-hidden">
         <MudField field="director" />
       </div>
     )
@@ -84,11 +84,15 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
             // marks in front of him put him in the scene instead. See
             // `.subject-stage` in globals.css.
             //
-            // THE HEIGHT IS CAPPED. Left to its own aspect this photograph came
-            // out 948px tall and dragged the whole band to 1172px, which is
-            // half again what the four paragraphs beside it need. The cap is on
-            // the image rather than the section so the band goes back to being
-            // sized by its content.
+            // THE SIZE IS CAPPED BY WIDTH, NOT HEIGHT, and that is not a style
+            // preference. Left to its own aspect this photograph came out 948px
+            // tall and dragged the band to 1172px, half again what the four
+            // paragraphs beside it need. Capping it with max-height and
+            // width:auto did fix that and cost something quieter: an unloaded
+            // lazy image with width:auto has no width to compute a height FROM,
+            // so the band reserved nothing and jumped when the picture arrived.
+            // Capping the width instead lets the intrinsic aspect ratio hold
+            // the space open. Same rendered size, no shift.
             <div class="subject-stage">
               <span class="subject-stage__pool" aria-hidden="true">
                 <Topo seed={5} lines={9} />
@@ -98,7 +102,7 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
                 width={800}
                 sizes="(min-width: 768px) 45vw, 100vw"
                 quality={80}
-                class="photo-cutout h-auto max-h-[30rem] w-auto"
+                class="photo-cutout h-auto w-full max-w-[19rem]"
               />
               <MudField field="director-fore" class="subject-stage__mud" />
             </div>

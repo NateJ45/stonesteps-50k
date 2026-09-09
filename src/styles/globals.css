@@ -1727,6 +1727,29 @@ body::before {
   mask-composite: intersect;
 }
 
+/* ---------- Mud that stops without a seam ------------------------------- */
+/* A band-level mud field HAS to be clipped, or its arrival animation scales it
+   past the viewport and puts a scrollbar on the page. But a clip is a straight
+   line, and a straight line through a footprint reads as a printing fault: the
+   prints along the band's top edge came out sliced in half against the ridge.
+   This is the wrapper that clips, wearing a mask that fades the field out
+   before the clip reaches it, so the marks thin out and stop rather than being
+   cut. The clip still does its job; nobody sees where it happens.
+
+   The fade is short at the top and longer at the bottom because the top edge of
+   a band is a ridge, which is already an interesting line, and the bottom is
+   usually plain. */
+.mud-edge-fade {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 9%,
+    #000 82%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 9%, #000 82%, transparent 100%);
+}
+
 /* ---------- A stage for a cut-out subject ------------------------------- */
 /* A person on transparency has nothing behind them, so they float. The fix is
    NOT a frame: a rounded box with a colour wash draws the rectangle back and
