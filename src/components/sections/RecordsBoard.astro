@@ -23,6 +23,7 @@
 // to guess which row it is in.
 
 import SectionHeading from '@/components/SectionHeading.astro';
+import GhostPhoto from '@/components/race/GhostPhoto.astro';
 import { bracketRecords, courseRecord, type RecordRow } from '@/lib/age-brackets';
 import { formatRaceTime } from '@/lib/race-time';
 import type { ProjectedRecordsBoardSection } from '@/lib/pageBuilder.types';
@@ -101,8 +102,15 @@ const boards = distances
 const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 ---
 
-<section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
-  <div class="mx-auto w-full max-w-content px-6">
+<section class={`relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+  {
+    /* Clipped by a wrapper, never by the section: the band's ridge lives above
+    its own box. See GhostPhoto's header. */
+  }
+  <div class="pointer-events-none absolute inset-0 overflow-hidden">
+    <GhostPhoto image={race?.atmosphere?.[1] ?? race?.atmosphere?.[0]} side="right" />
+  </div>
+  <div class="relative z-10 mx-auto w-full max-w-content px-6">
     <SectionHeading {eyebrow} {headline} {headingId} />
     {intro && <p class="mt-4 max-w-[52ch] text-muted-foreground">{intro}</p>}
 

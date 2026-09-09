@@ -14,11 +14,13 @@
 // that is precisely the failure this is built to prevent.
 
 import type { ProjectedRaceScheduleSection } from '@/lib/pageBuilder.types';
+import GhostPhoto from '@/components/race/GhostPhoto.astro';
 
 type Props = {
   eyebrow?: string;
   headline?: string;
   items?: ProjectedRaceScheduleSection['items'];
+  race?: ProjectedRaceScheduleSection['race'];
   headingId?: string;
 };
 
@@ -26,16 +28,26 @@ const {
   eyebrow,
   headline = 'Race day',
   items = [],
+  race,
   headingId = 'schedule-heading',
 } = Astro.props as Props;
+
+// Atmosphere sits in the LEFT margin here and in the right margin on the
+// records board, so two bands on one page never mirror each other.
+const ghost = race?.atmosphere?.[0];
 
 const anyUnconfirmed = items.some((i) => i.confirmed !== true);
 ---
 
 {
   items.length > 0 && (
-    <section class="band-torn bg-background py-section-lg" aria-labelledby={headingId}>
-      <div class="mx-auto w-full max-w-content px-6">
+    <section class="band-torn relative bg-background py-section-lg" aria-labelledby={headingId}>
+      {/* Clipped by a wrapper, never by the section: the band's ridge lives
+        above its own box. See GhostPhoto's header. */}
+      <div class="pointer-events-none absolute inset-0 overflow-hidden">
+        <GhostPhoto image={ghost} side="left" />
+      </div>
+      <div class="relative z-10 mx-auto w-full max-w-content px-6">
         {eyebrow && (
           <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
             {eyebrow}

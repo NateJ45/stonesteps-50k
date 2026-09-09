@@ -92,6 +92,23 @@ export const race = defineType({
       group: 'where',
       description: 'Drives the JSON-LD location. Verified from RunSignUp: 39.17275, -84.568806.',
     }),
+    // ATMOSPHERE PHOTOGRAPHS. Not illustrations of anything: these are laid
+    // into the OUTER MARGIN of a band, faint and faded off at the edges, so a
+    // wide screen shows the race behind the content instead of empty paper.
+    // They are chosen per band by position rather than by subject, so any
+    // photograph of the race works and none of them needs a caption.
+    defineField({
+      name: 'atmosphere',
+      title: 'Atmosphere photographs',
+      description:
+        'Race photographs used very faintly behind the wide margins of some bands. ' +
+        'They are decoration, not content: nothing here is announced to a screen ' +
+        'reader, and nothing about the page depends on them. Two or three is plenty.',
+      type: 'array',
+      group: 'where',
+      validation: (Rule) => Rule.max(4),
+      of: [defineArrayMember({ type: 'image', options: { hotspot: true } })],
+    }),
     defineField({
       name: 'registerUrl',
       title: 'Register (RunSignUp)',

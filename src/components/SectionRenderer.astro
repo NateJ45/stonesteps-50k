@@ -349,6 +349,7 @@ const wrapAttrs = (key: string | undefined) =>
             headline={s.headline}
             items={s.items ?? []}
             headingId={headingId}
+            race={s.race}
           />
         ) : s._type === 'courseFeaturesSection' ? (
           <CourseFeatures

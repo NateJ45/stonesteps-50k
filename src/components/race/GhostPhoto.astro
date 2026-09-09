@@ -1,0 +1,127 @@
+---
+// Safe to edit by hand
+//
+// A race photograph laid into the OUTER MARGIN of a band, very faint, faded off
+// at every edge that touches the content.
+//
+// WHY IT EXISTS. On a wide screen the content column stops at max-w-content and
+// everything past it is empty paper. That emptiness is what makes a band read
+// as a text block sitting on a background rather than as a designed surface.
+// A photograph out there gives the margin something to be without competing
+// with anything, because it never reaches the column.
+//
+// THREE RULES, and the first two are the difference between atmosphere and a
+// mistake.
+//
+// 1. IT IS DECORATION, SO IT IS SILENT. alt="" and aria-hidden, because it
+//    illustrates nothing: it is chosen by position, not by subject, and a
+//    screen reader announcing "runner on a trail" here tells nobody anything.
+// 2. IT NEVER MEETS TEXT. It lives outside the content column and fades to
+//    nothing before it gets there, so no contrast ratio depends on it. The
+//    moment a design puts type over one of these it needs a scrim and a
+//    measurement, and that is a different component.
+// 3. IT MUST BE CLIPPED BY ITS CALLER. Sections here cannot clip themselves,
+//    because the band ridge is a ::before living above the box, so the caller
+//    wraps this in `absolute inset-0 overflow-hidden`. Unclipped it widens the
+//    document and puts a horizontal scrollbar on the page.
+//
+// Its width is the REAL gutter, computed from --container-content, not a
+// percentage. A percentage does not know where the content column ends: the
+// first version was 34% and ran a third of the way under the records table on a
+// 1600px screen, which is rule 2 broken. Below 90rem the gutter is too narrow
+// to hold a photograph rather than a stripe, so it does not render at all.
+
+import SanityImage from '@/components/SanityImage.astro';
+import type { ProjectedImage } from '@/lib/pageBuilder.types';
+
+interface Props {
+  /** The same projected shape every other image on the site is handed. */
+  image?: ProjectedImage | null;
+  /** Which margin to sit in. */
+  side?: 'left' | 'right';
+  class?: string;
+}
+
+const { image, side = 'right', class: className = '' } = Astro.props as Props;
+---
+
+{
+  image?.asset && (
+    <div class:list={['ghost-photo', `ghost-photo--${side}`, className]} aria-hidden="true">
+      <SanityImage source={image} width={900} sizes="34vw" alt="" loading="lazy" quality={70} />
+    </div>
+  )
+}
+
+<style>
+  .ghost-photo {
+    position: absolute;
+    inset-block: 0;
+    /* EXACTLY THE GUTTER, plus the content column's own 1.5rem of padding,
+       which is empty by definition. --container-content is the column's max
+       width, so this resolves to the real empty space at any viewport and the
+       picture cannot reach a line of text at any width. A percentage (34% was
+       the first attempt) has no idea where the column ends: on a 1600px screen
+       it ran a third of the way under the records table. */
+    width: min(34rem, calc((100% - var(--container-content)) / 2 + 1.5rem));
+    pointer-events: none;
+    display: none;
+  }
+
+  /* Below this the gutter is too narrow to hold a photograph rather than a
+     stripe, and on a phone there is no gutter at all. */
+  @media (min-width: 90rem) {
+    .ghost-photo {
+      display: block;
+    }
+  }
+
+  .ghost-photo--right {
+    inset-inline-end: 0;
+  }
+  .ghost-photo--left {
+    inset-inline-start: 0;
+  }
+
+  .ghost-photo :global(img) {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    /* Pulled most of the way to the page's own value range before the opacity
+       is applied. A full-colour photograph at 14% still reads as a colour
+       photograph someone turned down; a desaturated one reads as part of the
+       paper. */
+    filter: saturate(0.35) contrast(0.9);
+    opacity: 0.15;
+  }
+
+  :global(.dark) .ghost-photo :global(img) {
+    /* A dark ground eats a faint image, so it takes a little more. */
+    opacity: 0.22;
+  }
+
+  /* Fades on three edges: the inner one so it dissolves before the column, and
+     top and bottom so it does not butt against the band's own ridges. The outer
+     edge is left alone, because that one runs off the page. */
+  .ghost-photo--right :global(img) {
+    -webkit-mask-image:
+      linear-gradient(to right, transparent 0%, #000 62%),
+      linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
+    mask-image:
+      linear-gradient(to right, transparent 0%, #000 62%),
+      linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+
+  .ghost-photo--left :global(img) {
+    -webkit-mask-image:
+      linear-gradient(to left, transparent 0%, #000 62%),
+      linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
+    mask-image:
+      linear-gradient(to left, transparent 0%, #000 62%),
+      linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+</style>

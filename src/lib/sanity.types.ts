@@ -479,6 +479,14 @@ export type Race = {
   region?: string;
   postalCode?: string;
   geo?: Geopoint;
+  atmosphere?: Array<{
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: 'image';
+    _key: string;
+  }>;
   registerUrl?: string;
   resultsUrl?: string;
   facebookUrl?: string;

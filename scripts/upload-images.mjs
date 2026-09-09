@@ -188,6 +188,18 @@ async function main() {
     }
   }
 
+  // ATMOSPHERE. Two photographs the bands lay into their outer margins. They
+  // are picked by position rather than subject (see GhostPhoto), so what
+  // matters is only that they are the race and that they are different from
+  // each other and from the hero.
+  const atmosphere = ['stepsCrest', 'singletrackLine']
+    .filter((k) => ids[k])
+    .map((k, i) => ({ _key: `atmo-${i}`, ...imageField(ids[k], IMAGES[k].alt) }));
+  if (atmosphere.length) {
+    await client.patch('race').set({ atmosphere }).commit();
+    console.log(`  race atmosphere (${atmosphere.length})`);
+  }
+
   // Page headers on the two builder pages.
   const headers = [
     ['page-course', 'courseMap'],

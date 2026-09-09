@@ -481,7 +481,7 @@ export interface ProjectedRecordsBoardSection {
   distances?: { _id: string; name?: string; slug?: string }[];
   results?: ProjectedRaceResult[];
   historical?: ProjectedRecordEntry[];
-  race?: { resultsUrl?: string } | null;
+  race?: { resultsUrl?: string; atmosphere?: ProjectedImage[] } | null;
 }
 
 export interface ProjectedRaceScheduleSection {
@@ -496,6 +496,7 @@ export interface ProjectedRaceScheduleSection {
     detail?: string;
     confirmed?: boolean;
   }[];
+  race?: { atmosphere?: ProjectedImage[] } | null;
 }
 
 export interface ProjectedCourseFeaturesSection {

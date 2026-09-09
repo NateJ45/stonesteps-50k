@@ -153,13 +153,14 @@ export function sectionsProjection(field = 'pageBuilder'): string {
         "distance": distance->slug.current,
         "athlete": { "name": athlete->name, "slug": athlete->slug.current }
       },
-      "race": *[_type == "race"][0]{ resultsUrl }
+      "race": *[_type == "race"][0]{ resultsUrl, atmosphere[]${IMAGE_PROJECTION} }
     },
     _type == "raceScheduleSection" => {
       ...,
       "items": *[_type == "scheduleItem"] | order(orderRank asc){
         _id, label, time, detail, confirmed
-      }
+      },
+      "race": *[_type == "race"][0]{ atmosphere[]${IMAGE_PROJECTION} }
     },
     _type == "courseFeaturesSection" => {
       ...,
