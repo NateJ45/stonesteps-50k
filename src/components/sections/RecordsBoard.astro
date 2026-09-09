@@ -375,7 +375,19 @@ const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
   // second board on the same page cannot steal the first one's keyboard focus.
   // Home and End are handled because a tablist that only answers arrows is a
   // half-implemented widget.
-  document.querySelectorAll<HTMLElement>('[role="tablist"]').forEach((list) => {
+  //
+  // RE-BOUND ON EVERY NAVIGATION, for the same reason the countdown is: a
+  // module runs once per full page load, and the ClientRouter swaps the
+  // document without re-executing it. Leaving this page and coming back
+  // otherwise gave you a tablist whose buttons did nothing, which is worse than
+  // a stopped clock because it looks like a working control.
+  //
+  // No teardown needed here, unlike the countdown: every listener is attached
+  // to an element inside the swapped subtree and goes with it. Nothing is
+  // registered on `document` or `window`, and there is no timer.
+  const bindTablist = (list: HTMLElement) => {
+    if (list.dataset.tablistBound === '1') return;
+    list.dataset.tablistBound = '1';
     const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
     if (tabs.length < 2) return;
 
@@ -403,5 +415,12 @@ const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
         next.focus();
       });
     });
-  });
+  };
+
+  const setupTablists = () => {
+    document.querySelectorAll<HTMLElement>('[role="tablist"]').forEach(bindTablist);
+  };
+
+  setupTablists();
+  document.addEventListener('astro:page-load', setupTablists);
 </script>

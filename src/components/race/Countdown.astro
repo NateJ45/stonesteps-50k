@@ -188,7 +188,23 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
 <script>
   // Progressive enhancement only. The markup above is already correct as of
   // build time, so a failure here leaves a stale countdown, never a broken one.
-  document.querySelectorAll<HTMLElement>('.clock[data-target]').forEach((clock) => {
+  //
+  // IT MUST RE-BIND ON EVERY NAVIGATION. This is a module, and a module runs
+  // ONCE per full page load: the ClientRouter swaps the document on a
+  // client-side navigation and does not re-execute it. So leaving the home
+  // page and coming back gave you a brand new clock element with nothing
+  // driving it, showing whatever second the page was BUILT at, frozen. It
+  // looked exactly like the throttling bug the self-correcting timer below
+  // already fixes, and is a completely different cause.
+  //
+  // `astro:page-load` fires on the first load as well as after every swap, and
+  // the dataset flag makes binding idempotent, so this is correct whether or
+  // not the ClientRouter is present.
+  const cleanups: Array<() => void> = [];
+
+  const bind = (clock: HTMLElement) => {
+    if (clock.dataset.clockBound === '1') return;
+    clock.dataset.clockBound = '1';
     const target = new Date(clock.dataset.target ?? '');
     if (Number.isNaN(target.getTime())) return;
 
@@ -259,7 +275,26 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
     // Fires on a bfcache restore, where visibilitychange alone may not.
     window.addEventListener('pageshow', resync);
 
+    // THE TEARDOWN IS NOT OPTIONAL. Without it every navigation leaves behind a
+    // timer ticking against a detached element and two listeners that can never
+    // fire usefully again, and they accumulate for as long as the visit lasts.
+    cleanups.push(() => {
+      window.clearTimeout(timer);
+      document.removeEventListener('visibilitychange', resync);
+      window.removeEventListener('pageshow', resync);
+    });
+
     tick();
     schedule();
+  };
+
+  const setup = () => {
+    document.querySelectorAll<HTMLElement>('.clock[data-target]').forEach(bind);
+  };
+
+  setup();
+  document.addEventListener('astro:page-load', setup);
+  document.addEventListener('astro:before-swap', () => {
+    for (const stop of cleanups.splice(0)) stop();
   });
 </script>
