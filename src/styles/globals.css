@@ -1034,26 +1034,24 @@ body::before {
   mix-blend-mode: screen;
 }
 
-/* A SECOND, SLOWER LAYER: damp ground rather than uniform noise.
-   The grain above is fine and even, which reads as paper stock. Real dirt is
-   blotchy at a much larger scale, so this adds soft irregular patches roughly
-   the size of a puddle. Very low opacity, very large scale: it should never be
-   identifiable as a pattern, only felt as unevenness across a big flat area. */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.07;
-  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='0.008' numOctaves='3' seed='11'/><feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23m)'/></svg>");
-  background-size: 900px 900px;
-  mix-blend-mode: multiply;
-}
-.dark body::after {
-  opacity: 0.13;
-  mix-blend-mode: screen;
-}
+/* THE MOTTLE LAYER IS GONE, AND IT IS NOT COMING BACK IN THIS FORM.
+   It was a second, slower texture over the grain: soft irregular patches about
+   the size of a puddle, meant to be felt as unevenness rather than seen as a
+   pattern. It was seen as a pattern.
+
+   Two things made it visible, and they compounded. The noise was very LOW
+   frequency (baseFrequency 0.008) on a 900px tile, so the tile repeat was
+   large, soft shapes with a seam down the join, which reads as a crease. And
+   the layer was `position: fixed`, so those creases held still on the glass
+   while the whole page slid past them. Anything fixed and patterned reads as a
+   mark on the screen rather than a texture in the paper, which is why it got
+   MORE obvious on scroll and not less.
+
+   The fine grain above stays: at baseFrequency 0.85 on a 300px tile there is no
+   visible repeat to hold still, which is the whole difference.
+
+   If a second layer is ever wanted, it has to scroll with the document and be
+   large enough not to tile inside a viewport, not be fixed and repeated. */
 
 /* ---------- Reduced motion -------------------------------------------- */
 /* Disables animations, transitions, and smooth scroll for users who
