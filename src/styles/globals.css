@@ -1609,9 +1609,116 @@ body::after {
    its frame across 479 of its 541 pixels. Left alone that is a hard horizontal
    line through someone's legs, which reads as "cut off" rather than "cut out".
    Fading the last fifth lets them meet the band instead. */
+/* A VALLEY, NOT A HEM. The first version faded only the bottom, on the theory
+   that a cut-out is cropped by the frame it came from. Measured on the actual
+   asset that was half the story: the alpha touches the left edge of the file
+   for 155 rows, all of them in the bottom 18%, so the fade cleared his feet and
+   left a hard vertical cut through his hip.
+
+   Two masks, intersected, instead of one:
+   - A wide ellipse centred on his torso, which falls away toward every edge, so
+     the corners dissolve INTO the picture rather than being sliced off at a
+     rectangle. That is what removes the vertical cut, and it removes any future
+     one on the other side without anyone having to measure again.
+   - A deeper bottom ramp, so he still stands ON the band rather than being
+     stamped onto it.
+
+   Deliberately generous at the top. The vignette centre sits high, because the
+   one part of a person that must never dissolve is their face. */
 .photo-cutout {
-  -webkit-mask-image: linear-gradient(to bottom, #000 76%, transparent 99%);
-  mask-image: linear-gradient(to bottom, #000 76%, transparent 99%);
+  -webkit-mask-image:
+    radial-gradient(125% 96% at 60% 26%, #000 52%, rgba(0, 0, 0, 0.4) 84%, transparent 100%),
+    linear-gradient(to bottom, #000 58%, transparent 99%);
+  mask-image:
+    radial-gradient(125% 96% at 60% 26%, #000 52%, rgba(0, 0, 0, 0.4) 84%, transparent 100%),
+    linear-gradient(to bottom, #000 58%, transparent 99%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+/* ---------- A stage for a cut-out subject ------------------------------- */
+/* A person on transparency has nothing behind them, so they float. The fix is
+   NOT a frame: a rounded box with a colour wash draws the rectangle back and
+   undoes the only reason to cut them out. What is needed is GROUND.
+
+   Three layers do it, and each is doing a different job:
+   - `__pool` is a soft warm disc behind him, low and wide, so light and earth
+     gather where he is standing. It is the framing device, and it has no edge
+     to see.
+   - The photograph.
+   - `__mud` is a SECOND field of marks IN FRONT of him, masked so it exists
+     only across the bottom third. That is the whole depth trick: marks behind
+     him put him in a scene, marks in front of him put him IN it. The mask keeps
+     them off his face, which is the one place a splatter would read as damage
+     rather than as ground. */
+.subject-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.subject-stage__pool {
+  position: absolute;
+  z-index: 0;
+  overflow: hidden;
+  /* Wider than tall and sunk below centre, because it is a pool of ground, not
+     a halo. A circle centred on the subject reads as a religious portrait. */
+  inset: 10% -10% -6% -10%;
+  border-radius: 50%;
+  /* NO HARD CIRCLE. The disc is the framing device, but an edge you can trace
+     is just a rectangle with the corners knocked off: it would sit ON the band
+     the same way the old rounded frame did. Fading the disc out before it ends
+     gives the shape without the outline. */
+  -webkit-mask-image: radial-gradient(closest-side, #000 52%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 52%, transparent 100%);
+  /* --tint-rgb is the polish layer's own tint, and it is a BARE TRIPLET rather
+     than a colour, so it composes with rgba() and not with color-mix(). Using
+     it means the pool is rust on the cream theme and cream on the bark theme
+     without a second token: warm ground under him in one, a pool of light in
+     the other. */
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--tint-rgb), 0.22) 0%,
+    rgba(var(--tint-rgb), 0.09) 58%,
+    rgba(var(--tint-rgb), 0) 100%
+  );
+  pointer-events: none;
+}
+
+/* THE DISC IS A PIECE OF THE MAP. A plain wash was too quiet to frame anybody:
+   at the opacity that keeps a photograph readable there is nothing left to see.
+   Contour lines give it structure at the same weight, and they are not a new
+   motif invented for one band. It is the same topography the course is drawn
+   on, enlarged until it reads as a detail rather than a backdrop, which is the
+   trick a section background has to pull off to look like it belongs to the
+   content instead of having been slid in behind it. */
+.subject-stage__pool .topo {
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  /* The band's own topo runs at 0.5 opacity over 12% ink, which is about 6% and
+     is meant to be barely there. Inside the disc it is the subject, not the
+     wallpaper, so it takes the full opacity and a heavier line. Enlarged and
+     darkened it reads as a map detail someone put behind him on purpose. */
+  opacity: 1;
+}
+.subject-stage__pool .topo path {
+  stroke: color-mix(in srgb, var(--foreground) 24%, transparent);
+  stroke-width: 1.6;
+}
+
+.subject-stage :is(img, picture) {
+  position: relative;
+  z-index: 1;
+}
+
+/* The foreground marks. `--mud-z` lifts them over the photograph, and the mask
+   is what stops that being vandalism: full strength along the bottom, gone by
+   the time it reaches his chest. */
+.subject-stage__mud {
+  --mud-z: 2;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 52%, #000 88%);
+  mask-image: linear-gradient(to bottom, transparent 52%, #000 88%);
 }
 
 /* ---------- Photographs, graded into the palette ------------------------ */

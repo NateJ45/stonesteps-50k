@@ -30,7 +30,7 @@
 
 interface Props {
   /** Which baked field to wear. See FIELDS in scripts/generate-mud.mjs. */
-  field?: 'hero' | 'director';
+  field?: 'hero' | 'director' | 'director-fore';
   class?: string;
 }
 
@@ -115,6 +115,12 @@ const { field = 'hero', class: className = '' } = Astro.props as Props;
   }
   .mud--director .mud__l--solo {
     --src: url('/mud/director-wide.png');
+  }
+  /* The foreground scatter has ONE shape rather than two, because it is worn on
+     the photograph rather than on the band, and the photograph keeps its aspect
+     at every width. There is nothing to swap at the breakpoint. */
+  .mud--director-fore .mud__l--solo {
+    --src: url('/mud/director-fore-wide.png');
   }
 
   /* THE PHONE WEARS ONE COMBINED LAYER, and that is an accessibility decision.

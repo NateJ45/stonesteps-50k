@@ -64,37 +64,63 @@ const FIELDS = [
     ],
   },
   {
-    // The race director band. Fewer marks, much bigger: this one sits behind a
-    // PERSON rather than behind a headline, so it should read as the ground he
-    // is standing on rather than as a second texture competing with him.
+    // The race director band.
+    //
+    // THIS FIELD WAS TOO BIG AND TOO SPARSE. The marks were drawn enormous on
+    // the theory that a field behind a PERSON should read as ground rather than
+    // compete with him. In practice a handful of huge blobs reads as neither:
+    // too few to be a surface, too large to be a footprint. Smaller marks, more
+    // of them, and it becomes ground again.
     name: 'director',
     shapes: [
       {
         suffix: 'wide',
-        // HALF RESOLUTION on purpose. The marks in this field are enormous, so
-        // a softer mask edge is invisible, and a mask this ragged compresses
-        // badly: at full size the file was 129KB for pure decoration.
+        // HALF RESOLUTION on purpose. A softer mask edge is invisible at this
+        // scale, and a mask this ragged compresses badly: at full size the file
+        // was 129KB for pure decoration.
         W: 880,
-        H: 716, // 1440x1172 measured, kept in proportion
-        density: 0.55,
-        big: 1.25,
+        H: 470, // 1440x769 measured after the height cap, kept in proportion
+        density: 1.45,
+        big: 0.62,
         split: false,
         quiet: [
-          [0, 0.32, 0.5, 0.55], // the eyebrow, heading and body
-          [0, 0.62, 0.29, 0.71], // the button
+          [0, 0.26, 0.48, 0.62], // the eyebrow, heading and body
+          [0, 0.68, 0.28, 0.82], // the button
         ],
       },
       {
         suffix: 'phone',
         W: 420,
-        H: 1313, // 390x1219 measured, kept in proportion
-        density: 0.4,
-        big: 1.15,
+        H: 1090, // 390x1012 measured after the height cap, kept in proportion
+        density: 1.1,
+        big: 0.6,
         split: false,
         quiet: [
-          [0, 0.54, 1, 0.8], // the eyebrow, heading and body
-          [0, 0.9, 1, 0.97], // the button
+          [0, 0.5, 1, 0.79], // the eyebrow, heading and body
+          [0, 0.83, 1, 0.91], // the button
         ],
+      },
+    ],
+  },
+  {
+    // The marks that land IN FRONT of the race director, masked in CSS to the
+    // bottom third of his photograph. Drawn at the photograph's own proportions
+    // rather than the band's, because it is worn on the picture.
+    //
+    // NO QUIET ZONES, and that is not an oversight: nothing on this layer sits
+    // over text. It is over a person, and the CSS mask is what keeps it off his
+    // face.
+    name: 'director-fore',
+    seed: 23,
+    shapes: [
+      {
+        suffix: 'wide',
+        W: 560,
+        H: 700,
+        density: 0.85,
+        big: 0.7,
+        split: false,
+        quiet: [],
       },
     ],
   },
@@ -111,7 +137,11 @@ let total = 0;
 for (const field of FIELDS) {
   for (const shape of field.shapes) {
     const { layers, W, H } = buildMud({
-      seed: 7,
+      // Per field, so two fields worn on the same subject are not the same
+      // marks at two sizes. The foreground scatter over the race director sits
+      // directly on top of the background one; sharing a seed would have read
+      // as a printing fault rather than as two handfuls of mud.
+      seed: field.seed ?? 7,
       W: shape.W,
       H: shape.H,
       quiet: shape.quiet,

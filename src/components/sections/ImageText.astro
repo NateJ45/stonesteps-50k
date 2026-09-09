@@ -3,6 +3,7 @@
 // editor-controlled; surface comes from SectionRenderer. Safe to edit by hand.
 import SanityImage from '@/components/SanityImage.astro';
 import MudField from '@/components/race/MudField.astro';
+import Topo from '@/components/race/Topo.astro';
 import PortableText from '@/components/PortableText';
 import CtaLink from '@/components/CtaLink.astro';
 
@@ -55,16 +56,30 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
       {
         image?.asset ? (
           cutout ? (
-            // A CUT-OUT GETS NO FRAME. The subject is already on transparency,
-            // so a rounded box and a colour wash would draw an invisible
-            // rectangle around them and undo the only reason to cut them out.
-            <SanityImage
-              source={image}
-              width={800}
-              sizes="(min-width: 768px) 45vw, 100vw"
-              quality={80}
-              class="photo-cutout h-auto w-full"
-            />
+            // A CUT-OUT GETS NO FRAME, but it does get GROUND. A rounded box
+            // and a colour wash would draw the rectangle back and undo the only
+            // reason to cut him out; a soft pool behind him and a scatter of
+            // marks in front of him put him in the scene instead. See
+            // `.subject-stage` in globals.css.
+            //
+            // THE HEIGHT IS CAPPED. Left to its own aspect this photograph came
+            // out 948px tall and dragged the whole band to 1172px, which is
+            // half again what the four paragraphs beside it need. The cap is on
+            // the image rather than the section so the band goes back to being
+            // sized by its content.
+            <div class="subject-stage">
+              <span class="subject-stage__pool" aria-hidden="true">
+                <Topo seed={5} lines={9} />
+              </span>
+              <SanityImage
+                source={image}
+                width={800}
+                sizes="(min-width: 768px) 45vw, 100vw"
+                quality={80}
+                class="photo-cutout h-auto max-h-[30rem] w-auto"
+              />
+              <MudField field="director-fore" class="subject-stage__mud" />
+            </div>
           ) : (
             // `photo-plate` on the clipping wrapper, so this photograph takes
             // the same grade as every other one on the site.
