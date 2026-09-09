@@ -1798,6 +1798,17 @@ body::after {
    starts underneath the nav. These heights are the header's, measured. */
 .hero-band {
   padding-top: calc(92px + 2rem);
+  /* CLIP, NOT HIDDEN, AND ONLY ON ONE AXIS. The mud's arrival scales each throw
+     slightly past its resting size, which puts the layer ~50px past the
+     viewport for the length of the animation and widens the document. The
+     vertical bleed is the entire point of this band, though: the mud has to
+     escape upward over the header.
+
+     `overflow-x: hidden` cannot express that. It forces the other axis to
+     become a scroll container, so the mud would be trimmed at the top of the
+     hero, which is the effect this band exists for. `clip` has no such
+     side-effect and leaves overflow-y visible. */
+  overflow-x: clip;
   /* A column purely so `.hero-photo` can be re-ordered below the copy on
      phones. The absolutely-positioned layers (topo, mud, and the photo itself
      at lg) are out of flow and unaffected. */
