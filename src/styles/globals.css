@@ -1405,6 +1405,37 @@ body::after {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- The section label, at display scale ------------------------- */
+/* An outlined word in the display face, standing in for the 12px eyebrow on
+   bands that have room for it. See `labelDisplay` on SectionHeading for why
+   outlined rather than solid: this site's eyebrows are phrases, not single
+   nouns, and two solid lines stacked would compete instead of ranking.
+
+   -webkit-text-stroke rather than a border or an SVG, because it follows the
+   letterforms of a caps-only display face for free and is the same device the
+   logo's lowercase k already uses. Note the stroke is drawn CENTRED on the
+   glyph edge, so at this size it needs to be thin: 2px reads as a heavy slab,
+   1.5px as drawn lettering. */
+.section-label {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.9;
+  letter-spacing: 0.005em;
+  font-size: clamp(2.25rem, 5.5vw, 4.25rem);
+  margin-bottom: 0.15em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--foreground) 42%, transparent);
+}
+
+/* The stroke is the only thing drawing this word, so it cannot thin out on a
+   phone the way a border could: below this width the size drops instead. */
+@media (width < 48rem) {
+  .section-label {
+    -webkit-text-stroke-width: 1.2px;
+  }
+}
+
 /* ---------- The trail blaze --------------------------------------------- */
 /* A section label leads with the painted rectangle that marks a route on a
    tree. Off-square corners and a three-degree rotation, because a blaze is
