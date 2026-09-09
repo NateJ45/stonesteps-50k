@@ -63,9 +63,17 @@ function AnimatedNumber({
     return () => cancelAnimationFrame(rafRef.current);
   }, [run, target, duration, reduceMotion, factor]);
 
+  /* GROUPED, because the rest of the site writes 10,726 ft and a figure table
+     that says 10724 looks like a different number rather than the same one
+     mid-count. toLocaleString does the separator; the min/max fraction digits
+     keep 30.8 at one decimal and 10,726 at none, which is what `decimals`
+     already worked out from whether the target is a whole number. */
   return (
     <span>
-      {value.toFixed(decimals)}
+      {value.toLocaleString('en-US', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
       {suffix && <span className="align-super text-[0.6em] text-secondary">{suffix}</span>}
     </span>
   );
@@ -92,24 +100,32 @@ export default function StatsCounter({ stats }: Props) {
   }, []);
 
   return (
+    /* A TABLE OF FIGURES, NOT A ROW OF BADGES. Centred numbers separated by
+       vertical hairlines is the default treatment on every small business site,
+       and it reads as a widget dropped into the page. Ranging them left under a
+       rule each turns them into what they actually are: four measurements of
+       the same race, set the way a broadsheet sets data. It also lets the
+       labels wrap without knocking the numbers out of alignment, which the
+       centred version could not do.
+
+       The rule is per figure rather than one line across the row, so the
+       reading order is unambiguous at every breakpoint: two columns on a phone,
+       four on a desktop, and each number owns the line above it. */
     <div
       ref={ref}
-      className="flex flex-wrap justify-center gap-8 md:gap-12"
-      aria-label="Studio statistics"
+      className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-4 md:gap-x-12"
+      aria-label="Race statistics"
     >
-      {stats.map((stat, i) => (
+      {stats.map((stat) => (
         <React.Fragment key={stat.label}>
-          {i > 0 && (
-            <div className="my-2 hidden w-px self-stretch bg-border md:block" aria-hidden="true" />
-          )}
-          <div className="text-center">
+          <div className="border-t-2 border-[color:var(--plate-edge)] pt-4 text-left">
             {/* text-[color:var(--primary)], NOT text-primary. The Tailwind utility
                 maps to the @theme brand token, which is one constant for both
                 themes; the shadcn --primary is the theme-aware one. These
                 numbers sit on paper in light mode and on bark in dark, and the
                 one brand rust cannot serve both: it measured 2.84:1 here on
                 bark, under the 3:1 large text requires. */}
-            <span className="block font-display text-[clamp(2.5rem,6vw,3.5rem)] leading-none font-normal text-[color:var(--primary)]">
+            <span className="block font-display text-[clamp(2.75rem,6.5vw,4rem)] leading-none font-normal text-[color:var(--primary)] tabular-nums">
               <AnimatedNumber
                 target={stat.number}
                 suffix={stat.suffix}
@@ -117,7 +133,7 @@ export default function StatsCounter({ stats }: Props) {
                 run={visible}
               />
             </span>
-            <span className="mt-2 block text-[0.6875rem] tracking-eyebrow text-muted-foreground uppercase">
+            <span className="mt-3 block max-w-[22ch] text-[0.6875rem] leading-snug tracking-eyebrow text-muted-foreground uppercase">
               {stat.label}
             </span>
           </div>
