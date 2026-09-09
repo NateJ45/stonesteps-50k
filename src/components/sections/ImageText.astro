@@ -31,15 +31,23 @@ const {
   headingId,
 } = Astro.props as Props;
 
-const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
+// `band-torn` here too, so this band is cut into the page like every other
+// one. It was the only surface-painting section that bypassed the shared
+// class, which is why the boundary above the race director was the one flat
+// horizontal line left on the home page.
+const bg = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 const imageFirst = imageSide === 'left';
 const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebrow ? 'mt-m' : ''}`;
 ---
 
-<section
-  class:list={[bg, cutout && 'relative overflow-hidden']}
-  aria-labelledby={heading ? headingId : undefined}
->
+<!-- NO CLIP ON THIS SECTION, and it took two tries to get there. The ground
+  pool behind a cut-out subject used to need trimming, so the section clipped;
+  but the band's ridge is a ::before sitting ABOVE the box, and clipping ate it,
+  leaving the one flat boundary on the page. `overflow-x: clip` did not save it
+  either, whatever the spec says about the other axis staying visible.
+  The pool is now drawn small enough to stay inside the section on its own, so
+  there is nothing to clip and the ridge survives. -->
+<section class:list={[bg, cutout && 'relative']} aria-labelledby={heading ? headingId : undefined}>
   {
     /* A CUT-OUT SUBJECT NEEDS GROUND TO STAND ON. Without it the person floats
       on a flat band, which is the other half of the problem the frame was
@@ -47,7 +55,21 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
       sits behind a person rather than behind a headline, so it should read as
       ground rather than as a second texture competing with him. */
   }
-  {cutout && <MudField field="director" />}
+  {
+    /* CLIPPED BY A WRAPPER, NOT BY THE SECTION. The mud's arrival scales each
+      throw slightly past its resting size, so unclipped it widens the document
+      and puts a scrollbar on the page. The section itself must stay unclipped
+      because its ridge is a ::before living above the box, so the clip goes one
+      level down. Same shape as ElevationBand and ParksBand.
+
+      Unlike the hero's field, this one has no reason to escape its band: it is
+      ground under a person, not a throw across the top of the page. */
+    cutout && (
+      <div class="pointer-events-none absolute inset-0 overflow-hidden">
+        <MudField field="director" />
+      </div>
+    )
+  }
   <div
     class="mx-auto grid max-w-content grid-cols-1 items-center gap-l px-m py-section-lg md:grid-cols-2 md:gap-section-md"
     data-reveal

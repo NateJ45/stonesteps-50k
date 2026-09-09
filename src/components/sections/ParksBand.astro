@@ -48,8 +48,12 @@ const {
 } = Astro.props as Props;
 ---
 
-<section class="parks relative overflow-hidden py-section-lg" aria-labelledby={headingId}>
-  <Topo seed={53} lines={12} class="opacity-30" />
+<!-- The clip moved to an inner wrapper so the band's ridge, a ::before sitting
+  above the box, is not cut off. Same shape as ElevationBand. -->
+<section class="parks band-torn relative py-section-lg" aria-labelledby={headingId}>
+  <div class="pointer-events-none absolute inset-0 overflow-hidden">
+    <Topo seed={53} lines={12} class="opacity-30" />
+  </div>
 
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
     <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
