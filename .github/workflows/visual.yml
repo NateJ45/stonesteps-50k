@@ -63,7 +63,15 @@ jobs:
         run: npm ci
 
       - name: Install Playwright chromium
-        run: npx playwright install --with-deps chromium
+        # `--with-deps` runs `apt-get update`, which fails outright when the
+        # runner's third-party Chrome/Microsoft apt sources are mid-sync and
+        # report a "Hash Sum mismatch" (that killed a WCP deploy 2026-09-09).
+        # Playwright's system libraries come from Ubuntu's own archive, so drop
+        # those sources first, then retry once for transient network failures.
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome* /etc/apt/sources.list.d/microsoft*
+          npx playwright install --with-deps chromium ||
+            npx playwright install --with-deps chromium
 
       - name: Generate Sanity types
         run: npm run typegen
