@@ -1820,11 +1820,11 @@ body::before {
   inset: 0;
   height: 100%;
   width: 100%;
-  /* The band's own topo runs at 0.5 opacity over 12% ink, which is about 6% and
-     is meant to be barely there. Inside the disc it is the subject, not the
-     wallpaper, so it takes the full opacity and a heavier line. Enlarged and
-     darkened it reads as a map detail someone put behind him on purpose. */
-  opacity: 1;
+  /* The band's own topo runs faint over 12% ink and is meant to be barely
+     there. Inside the disc it is the subject, not the wallpaper, so it takes
+     the full opacity and a heavier line. Enlarged and darkened it reads as a
+     map detail someone put behind him on purpose. */
+  --topo-opacity: 1;
 }
 .subject-stage__pool .topo path {
   stroke: color-mix(in srgb, var(--foreground) 24%, transparent);
@@ -2823,7 +2823,10 @@ main > .band-torn:first-child::before {
      into view inside the clipping band. */
   inset: -3% 0;
   pointer-events: none;
-  opacity: 0.5;
+  /* Read from a custom property so a caller can actually change it. See the
+     `opacity` prop on Topo.astro: a utility class here loses to this rule on
+     source order and silently does nothing. */
+  opacity: var(--topo-opacity, 0.5);
   z-index: 0;
 }
 

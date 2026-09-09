@@ -42,7 +42,7 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
   clipped to the band. Same result, one level down. -->
 <section class={`relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
   <div class="pointer-events-none absolute inset-0 overflow-hidden">
-    <Topo seed={29} lines={10} class="opacity-35" />
+    <Topo seed={29} lines={10} opacity={0.35} />
     {
       /* THE BAND'S BACKGROUND IS THE BAND'S SUBJECT. The same profile, from the
       same data, drawn once across the bottom of the whole band and once again

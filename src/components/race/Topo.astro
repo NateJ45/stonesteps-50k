@@ -12,10 +12,26 @@
 interface Props {
   seed?: number;
   lines?: number;
+  /**
+   * How present the contours are, 0 to 1.
+   *
+   * A PROP AND A CUSTOM PROPERTY, NEVER A UTILITY CLASS. Callers used to pass
+   * `class="opacity-35"`, and it did nothing: `.topo { opacity: 0.5 }` in
+   * globals.css has the same specificity as Tailwind's `.opacity-35` and comes
+   * later in the sheet, so it won every time. Four components were each tuning
+   * this and every one of them rendered at 0.5, including a band that asked for
+   * 0.30 and the hero that asked for 0.70. Nothing failed and nothing looked
+   * broken, which is why it survived: the lines were simply at a weight nobody
+   * had chosen.
+   *
+   * MudField's header documents the mirror image of this trap. Same rule, and
+   * the same fix: a custom property has no specificity fight to lose.
+   */
+  opacity?: number;
   class?: string;
 }
 
-const { seed = 7, lines = 14, class: className = '' } = Astro.props;
+const { seed = 7, lines = 14, opacity, class: className = '' } = Astro.props;
 
 const W = 1200;
 const H = 700;
@@ -75,6 +91,7 @@ const paths = Array.from({ length: lines }, (_, i) => {
 
 <svg
   class={`topo ${className}`}
+  style={opacity === undefined ? undefined : `--topo-opacity:${opacity}`}
   viewBox={`0 0 ${W} ${H}`}
   preserveAspectRatio="none"
   aria-hidden="true"
