@@ -40,9 +40,20 @@ interface Props {
     highFt?: number;
     points?: { mile?: number; ft?: number }[];
   } | null;
+  /**
+   * `watermark` draws ONLY the ridge line, oversized and silent, for a band to
+   * lay behind its own copy. It is the same path from the same data as the
+   * readable chart: the section's background is then literally the section's
+   * subject, rather than a texture chosen to sit behind it.
+   *
+   * It carries no title, no axis, no caption and no aria: the real chart below
+   * it is the accessible one, and announcing the same profile twice would be a
+   * screen-reader tax for a decoration.
+   */
+  variant?: 'chart' | 'watermark';
 }
 
-const { totalGain = '10,726 ft', gpxUrl, profile } = Astro.props;
+const { totalGain = '10,726 ft', gpxUrl, profile, variant = 'chart' } = Astro.props;
 
 const measured =
   Array.isArray(profile?.points) && profile.points.length > 8
@@ -137,80 +148,123 @@ if (measured) {
 }
 ---
 
-<figure class="elev" data-reveal>
-  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="elev-title elev-desc">
-    <title id="elev-title">Stone Steps 50K elevation profile</title>
-    <desc id="elev-desc">
-      Seven loops from The Oval: four long loops alternating with three short loops of just over
-      three miles, totalling 10,726 feet of elevation change across 31 miles.
-    </desc>
+{
+  /* THE SAME PATH FROM THE SAME DATA AS THE CHART BELOW IT. That is the whole
+    point: the band's background IS the band's subject, rather than a texture
+    picked to sit behind it. Stretched with preserveAspectRatio="none" because
+    it is being read as a shape, not as a measurement; the readable one keeps
+    its aspect.
 
-    <defs>
-      <linearGradient id="elevFill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" class="elev__stop-top"></stop>
-        <stop offset="100%" class="elev__stop-bottom"></stop>
-      </linearGradient>
-    </defs>
+    IT SHOWS ONLY THE FIRST THIRD OF THE COURSE, blown up to fill the band. At
+    full width it came out the same scale as the chart drawn over it and the two
+    read as one badly printed graph. A watermark has to be unmistakably a
+    different size from the thing it sits behind, or it looks like a mistake
+    rather than a decision. */
+  variant === 'watermark' ? (
+    <svg
+      class="elev-mark"
+      viewBox={`0 0 ${Math.round(W * 0.34)} ${H}`}
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d={measured ? mArea : area} class="elev-mark__area" />
+      <path d={measured ? mLine : line} class="elev-mark__line" />
+    </svg>
+  ) : (
+    <figure class="elev" data-reveal>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="elev-title elev-desc">
+        <title id="elev-title">Stone Steps 50K elevation profile</title>
+        <desc id="elev-desc">
+          Seven loops from The Oval: four long loops alternating with three short loops of just over
+          three miles, totalling 10,726 feet of elevation change across 31 miles.
+        </desc>
 
-    <!-- Aid-station verticals: you pass through The Oval at the end of every loop. -->
-    {
-      !measured &&
-        markers.map((m) => (
-          <g class="elev__aid" style={`--t:${(m.x / W).toFixed(3)}`}>
-            <line x1={m.x} y1={PEAK - 20} x2={m.x} y2={BASE} />
-            <circle cx={m.x} cy={BASE} r="4" />
-          </g>
-        ))
-    }
+        <defs>
+          <linearGradient id="elevFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" class="elev__stop-top" />
+            <stop offset="100%" class="elev__stop-bottom" />
+          </linearGradient>
+        </defs>
 
-    <path d={measured ? mArea : area} class="elev__area" fill="url(#elevFill)"></path>
-    <path d={measured ? mLine : line} class="elev__line" pathLength="1"></path>
-    <line x1="0" y1={BASE} x2={W} y2={BASE} class="elev__base"></line>
+        {/* Aid-station verticals: you pass through The Oval at the end of every loop. */}
+        {!measured &&
+          markers.map((m) => (
+            <g class="elev__aid" style={`--t:${(m.x / W).toFixed(3)}`}>
+              <line x1={m.x} y1={PEAK - 20} x2={m.x} y2={BASE} />
+              <circle cx={m.x} cy={BASE} r="4" />
+            </g>
+          ))}
 
-    {
-      !measured &&
-        markers.map((m, i) => (
-          <text
-            x={m.x}
-            y={BASE + 26}
-            class={`elev__lbl ${m.kind === 'long' ? 'is-long' : ''}`}
-            text-anchor="middle"
-          >
-            {i + 1}
-          </text>
-        ))
-    }
-  </svg>
+        <path d={measured ? mArea : area} class="elev__area" fill="url(#elevFill)" />
+        <path d={measured ? mLine : line} class="elev__line" pathLength="1" />
+        <line x1="0" y1={BASE} x2={W} y2={BASE} class="elev__base" />
 
-  <figcaption class="elev__cap">
-    <span class="mono">
-      <b>{measured && profile?.gainFt ? `${profile.gainFt.toLocaleString()} ft` : totalGain}</b> total
-      elevation change
-    </span>
-    {
-      measured ? (
-        <span class="elev__note">
-          Measured from USGS 1 m LiDAR along the recorded course
-          {profile?.miles ? `, ${profile.miles} miles` : ''}
+        {!measured &&
+          markers.map((m, i) => (
+            <text
+              x={m.x}
+              y={BASE + 26}
+              class={`elev__lbl ${m.kind === 'long' ? 'is-long' : ''}`}
+              text-anchor="middle"
+            >
+              {i + 1}
+            </text>
+          ))}
+      </svg>
+
+      <figcaption class="elev__cap">
+        <span class="mono">
+          <b>{measured && profile?.gainFt ? `${profile.gainFt.toLocaleString()} ft` : totalGain}</b>{' '}
+          total elevation change
         </span>
-      ) : (
-        <span class="elev__note">Shape illustrates the loop structure. Not surveyed GPS data</span>
-      )
-    }
-    {
-      gpxUrl && (
-        <a class="elev__note" href={gpxUrl} rel="noopener">
-          Download the course GPX
-        </a>
-      )
-    }
-    <span class="elev__key">
-      <span class="elev__dot"></span> Aid station at the end of every loop
-    </span>
-  </figcaption>
-</figure>
+        {measured ? (
+          <span class="elev__note">
+            Measured from USGS 1 m LiDAR along the recorded course
+            {profile?.miles ? `, ${profile.miles} miles` : ''}
+          </span>
+        ) : (
+          <span class="elev__note">
+            Shape illustrates the loop structure. Not surveyed GPS data
+          </span>
+        )}
+        {gpxUrl && (
+          <a class="elev__note" href={gpxUrl} rel="noopener">
+            Download the course GPX
+          </a>
+        )}
+        <span class="elev__key">
+          <span class="elev__dot" /> Aid station at the end of every loop
+        </span>
+      </figcaption>
+    </figure>
+  )
+}
 
 <style>
+  /* ---- The watermark ---------------------------------------------------
+     Only ever the ridge. No axis, no markers, no labels: at this size those
+     would be a second chart competing with the real one, and the eye would try
+     to read numbers off something that is deliberately stretched. */
+  .elev-mark {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    height: 78%;
+    width: 100%;
+    pointer-events: none;
+  }
+  .elev-mark__area {
+    fill: color-mix(in srgb, var(--heading-accent) 6%, transparent);
+  }
+  .elev-mark__line {
+    fill: none;
+    stroke: color-mix(in srgb, var(--heading-accent) 16%, transparent);
+    stroke-width: 2.5;
+    /* The stretch would otherwise thin the line wherever the profile is steep. */
+    vector-effect: non-scaling-stroke;
+  }
+
   .elev svg {
     width: 100%;
     height: auto;

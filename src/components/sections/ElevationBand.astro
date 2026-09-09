@@ -43,6 +43,20 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
 <section class={`relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
   <div class="pointer-events-none absolute inset-0 overflow-hidden">
     <Topo seed={29} lines={10} class="opacity-35" />
+    {
+      /* THE BAND'S BACKGROUND IS THE BAND'S SUBJECT. The same profile, from the
+      same data, drawn once across the bottom of the whole band and once again
+      below as the chart people actually read. A background that is a blown-up
+      piece of the content is the thing that stops a section looking like copy
+      dropped onto a texture; a generic shape behind a heading is what reads as
+      added afterwards. */
+    }
+    <ElevationProfile
+      variant="watermark"
+      totalGain={totalGain}
+      gpxUrl={race?.gpxUrl}
+      profile={race?.elevationProfile}
+    />
   </div>
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
     <SectionHeading {eyebrow} {headline} {headingId} />
