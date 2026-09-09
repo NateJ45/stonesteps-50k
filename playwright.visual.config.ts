@@ -8,6 +8,16 @@
    Windows run diffs against Linux baselines and fails. That is EXPECTED. CI is
    the arbiter, exactly as it is for the a11y sweeps.
 
+   REGENERATING MEANS ALL OF THEM. `npm run test:visual:update` passes
+   --update-snapshots=all, not the bare flag. Since Playwright 1.51 the bare
+   flag means "changed", which only rewrites baselines whose comparison FAILED,
+   so a real visual change that lands UNDER maxDiffPixelRatio is left behind in
+   the baseline: the run goes green, nothing is committed, and the stored image
+   quietly stops matching the site. That happened here the day the CTAs gained
+   their skew. An explicit regenerate has to mean what its name says, or the
+   drift accumulates until some unrelated change finally trips the gate and gets
+   blamed for all of it.
+
    Baselines are generated IN CI by .github/workflows/update-visual-baselines.yml
    and committed under tests/visual/__screenshots__/. Regenerate them
    (workflow_dispatch) only when a visual change is INTENDED, in the same commit
