@@ -34,6 +34,7 @@ import {
   ClockIcon,
   ComponentIcon,
   HeartIcon,
+  ImageIcon,
   PinIcon,
   StarFilledIcon,
   TrendUpwardIcon,
@@ -764,6 +765,75 @@ export const gearSection = defineType({
   },
 });
 
+/**
+ * A band that is nothing but a photograph, edge to edge.
+ *
+ * WHY A BLOCK AND NOT A SETTING ON ANOTHER ONE. Its job is to be a BREAK: the
+ * page runs dense band, dense band, dense band, and the eye needs somewhere to
+ * rest that is not more paper. That makes it a thing an editor places between
+ * two sections, which is exactly what a page-builder block is for.
+ *
+ * It carries no heading and no copy on purpose. The moment type goes on top of
+ * it, it needs a scrim and a measured contrast ratio, and it stops being a
+ * breath and becomes another content section with a photographic background.
+ * There is already a component for that.
+ */
+export const photoBandSection = defineType({
+  name: 'photoBandSection',
+  title: 'Photograph band',
+  type: 'object',
+  icon: ImageIcon,
+  fields: [
+    defineField({
+      name: 'image',
+      title: 'Photograph',
+      type: 'image',
+      options: { hotspot: true },
+      description:
+        'Runs the full width of the page. Use the hotspot to say what must stay ' +
+        'in frame: this band is cropped hard on a phone.',
+      validation: (Rule) => Rule.required(),
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          description:
+            'Describe what is happening in the photo. This one is NOT decoration: ' +
+            'it is the only thing in its band, so a reader who cannot see it should ' +
+            'be told what it shows.',
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
+    }),
+    defineField({
+      name: 'caption',
+      title: 'Caption (optional)',
+      type: 'string',
+      description:
+        'A short line set into the corner. Good for a credit or a place. Leave it ' +
+        'empty and the band is only the photograph.',
+    }),
+    defineField({
+      name: 'height',
+      title: 'Height',
+      type: 'string',
+      initialValue: 'standard',
+      options: {
+        list: [
+          { title: 'Standard', value: 'standard' },
+          { title: 'Tall', value: 'tall' },
+        ],
+        layout: 'radio',
+      },
+    }),
+  ],
+  preview: {
+    select: { media: 'image', subtitle: 'caption' },
+    prepare: ({ media, subtitle }) => ({ title: 'Photograph band', subtitle, media }),
+  },
+});
+
 /** Every race block, in the order they appear in the insert menu. */
 export const raceSectionSchemas = [
   raceHeroSection,
@@ -781,6 +851,7 @@ export const raceSectionSchemas = [
   parksSection,
   dynastiesSection,
   gearSection,
+  photoBandSection,
 ];
 
 export const RACE_SECTION_TYPES = raceSectionSchemas.map((s) => ({ type: s.name }));

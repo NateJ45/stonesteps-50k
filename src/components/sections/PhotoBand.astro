@@ -1,0 +1,137 @@
+---
+// Foundation, edit with care
+//
+// A band that is only a photograph, edge to edge.
+//
+// SELF_CONTAINED: it has no surface for the cadence to assign, and it is kept
+// out of the cadence entirely so that placing one does not flip every band
+// after it. See sectionCadence.ts.
+//
+// THE RIDGE IS CUT INTO THE PHOTOGRAPH, not painted above it. Every other band
+// draws its top edge as a ::before in its own background colour; a photograph
+// has no background colour, so the same trick would paint a flat bar of
+// nothing over the band above. Instead the picture itself wears the ridge as a
+// mask, which is better than the equivalent: the photograph is what cuts into
+// the page, rather than a coloured strip standing in for it.
+//
+// TWO MASK LAYERS, unioned. The ridge at the top at its own fixed height, and
+// a plain block for everything below it. Mask layers composite with `add` by
+// default, so the two together are the full band with a torn top. Doing it with
+// one stretched SVG would scale the ridge with the band height and it would be
+// a different shape at every size.
+//
+// NO TYPE OVER IT, and the schema says why: the moment a heading goes on a
+// photograph it needs a scrim and a measured ratio, and it stops being a
+// breath in the page. The optional caption sits in a plate in the corner, on
+// its own opaque ground, so it is measured against that and not against
+// whatever the photograph happens to be doing behind it.//
+// THE RIDGE COMES FROM `--ridge-mask` IN globals.css, and it has to. Prettier
+// reformats a long url() inside a component's scoped <style> by breaking it
+// across lines, which corrupts a data URI: the first attempt shipped with no
+// mask at all, 1080px tall, and read as a layout bug rather than a mangled
+// string. Keeping the shape in one token also means the boundary this band cuts
+// is the same line every other band draws.
+
+import SanityImage from '@/components/SanityImage.astro';
+import type { ProjectedPhotoBandSection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  image?: ProjectedPhotoBandSection['image'];
+  caption?: string;
+  height?: ProjectedPhotoBandSection['height'];
+};
+
+const { image, caption, height = 'standard' } = Astro.props as Props;
+---
+
+{
+  image?.asset && (
+    <section class:list={['photo-band', height === 'tall' && 'photo-band--tall']}>
+      <SanityImage
+        source={image}
+        width={2000}
+        sizes="100vw"
+        alt={image.alt ?? ''}
+        loading="lazy"
+        quality={72}
+      />
+      {caption && <p class="photo-band__cap">{caption}</p>}
+    </section>
+  )
+}
+
+<style>
+  .photo-band {
+    position: relative;
+    /* Deliberately not full height. A break should read as a pause in the page,
+       and a band you have to scroll through twice is a destination. */
+    height: min(46vh, 24rem);
+    /* The ridge overlaps the band above by the same amount every other band
+       uses, so the seam lands where the eye already expects it. */
+    margin-top: -34px;
+    overflow: hidden;
+    /* TWO MASK LAYERS, UNIONED: the ridge at the top at a fixed height, and a
+       plain block for everything below it. Layers composite with `add`, so the
+       pair is the whole band with a torn top. One stretched SVG instead would
+       scale the ridge with the band's height and give a different shape at
+       every size. */
+    -webkit-mask-image: var(--ridge-mask), linear-gradient(#000, #000);
+    mask-image: var(--ridge-mask), linear-gradient(#000, #000);
+    -webkit-mask-size:
+      100% 35px,
+      100% calc(100% - 34px);
+    mask-size:
+      100% 35px,
+      100% calc(100% - 34px);
+    -webkit-mask-position: top, bottom;
+    mask-position: top, bottom;
+    -webkit-mask-repeat: no-repeat, no-repeat;
+    mask-repeat: no-repeat, no-repeat;
+  }
+
+  .photo-band--tall {
+    height: min(72vh, 38rem);
+  }
+
+  @media (width < 48rem) {
+    .photo-band {
+      height: min(40vh, 18rem);
+      margin-top: -20px;
+      -webkit-mask-size:
+        100% 21px,
+        100% calc(100% - 20px);
+      mask-size:
+        100% 21px,
+        100% calc(100% - 20px);
+    }
+    .photo-band--tall {
+      height: min(56vh, 26rem);
+    }
+  }
+
+  .photo-band :global(img) {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  /* The caption gets its own opaque plate rather than sitting on the picture,
+     so its contrast is a fixed number instead of whatever the photograph is
+     doing behind it that day. */
+  .photo-band__cap {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0.5rem 0.9rem;
+    background: var(--background);
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-top: 2px solid var(--plate-edge);
+    border-left: 2px solid var(--plate-edge);
+    border-top-left-radius: 10px;
+  }
+</style>

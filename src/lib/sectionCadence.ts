@@ -54,6 +54,10 @@ export const SELF_CONTAINED_TYPES = new Set([
   // ground; neither takes part in the alternating body cadence.
   'tickerSection',
   'parksSection',
+  // A photograph band has no surface to alternate: it is a picture. Leaving it
+  // in the cadence would also make it COUNT as a band, which would flip every
+  // section after it and undo the page's rhythm for a section that is a pause.
+  'photoBandSection',
 ]);
 
 /** _type strings for blocks that receive alternating surface assignment. */

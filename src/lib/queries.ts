@@ -155,6 +155,10 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       },
       "race": *[_type == "race"][0]{ resultsUrl, atmosphere[]${IMAGE_PROJECTION} }
     },
+    _type == "photoBandSection" => {
+      ...,
+      image${IMAGE_PROJECTION}
+    },
     _type == "raceScheduleSection" => {
       ...,
       "items": *[_type == "scheduleItem"] | order(orderRank asc){

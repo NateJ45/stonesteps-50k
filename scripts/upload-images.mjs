@@ -188,6 +188,34 @@ async function main() {
     }
   }
 
+  // THE PHOTOGRAPH BAND. Placed once, on the home page, between the run of
+  // data-heavy bands (tickets, elevation, course, race day) and the storytelling
+  // that follows. That is the point in the page where the eye has been reading
+  // tables for four screens and needs somewhere to rest that is not more paper.
+  //
+  // Inserted rather than seeded, and only when it is absent, so re-running this
+  // script cannot stack up copies and an editor who moves or deletes it keeps
+  // their decision.
+  const homeDoc = await client.fetch('*[_id == "homePage"][0]{ pageBuilder[]{ _key, _type } }');
+  const blocks = homeDoc?.pageBuilder ?? [];
+  if (ids.stepsCrest && !blocks.some((b) => b._type === 'photoBandSection')) {
+    const before = blocks.findIndex((b) => b._type === 'dynastiesSection');
+    const at = before === -1 ? blocks.length : before;
+    await client
+      .patch('homePage')
+      .insert('before', `pageBuilder[${at}]`, [
+        {
+          _key: 'photo-band-1',
+          _type: 'photoBandSection',
+          height: 'standard',
+          image: imageField(ids.stepsCrest, IMAGES.stepsCrest.alt),
+          caption: 'The steps, near the top of the long loop',
+        },
+      ])
+      .commit();
+    console.log('  homePage photograph band');
+  }
+
   // ATMOSPHERE. Two photographs the bands lay into their outer margins. They
   // are picked by position rather than subject (see GhostPhoto), so what
   // matters is only that they are the race and that they are different from

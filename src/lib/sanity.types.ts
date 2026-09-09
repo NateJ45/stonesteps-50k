@@ -99,6 +99,9 @@ export type SectionPreset = {
       } & GearSection)
     | ({
         _key: string;
+      } & PhotoBandSection)
+    | ({
+        _key: string;
       } & HeroSection)
     | ({
         _key: string;
@@ -1247,6 +1250,20 @@ export type HeroSection = {
   size?: 'tall' | 'short';
 };
 
+export type PhotoBandSection = {
+  _type: 'photoBandSection';
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  caption?: string;
+  height?: 'standard' | 'tall';
+};
+
 export type GearSection = {
   _type: 'gearSection';
   eyebrow?: string;
@@ -1566,6 +1583,9 @@ export type Page = {
     | ({
         _key: string;
       } & GearSection)
+    | ({
+        _key: string;
+      } & PhotoBandSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -2007,6 +2027,9 @@ export type ProcessPage = {
       } & GearSection)
     | ({
         _key: string;
+      } & PhotoBandSection)
+    | ({
+        _key: string;
       } & HeroSection)
     | ({
         _key: string;
@@ -2109,6 +2132,9 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & GearSection)
+    | ({
+        _key: string;
+      } & PhotoBandSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -2253,6 +2279,9 @@ export type AboutPage = {
     | ({
         _key: string;
       } & GearSection)
+    | ({
+        _key: string;
+      } & PhotoBandSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -2456,6 +2485,9 @@ export type HomePage = {
     | ({
         _key: string;
       } & GearSection)
+    | ({
+        _key: string;
+      } & PhotoBandSection)
     | ({
         _key: string;
       } & HeroSection)
@@ -2801,6 +2833,7 @@ export type AllSanitySchemaTypes =
   | ImageTextSection
   | RichTextSection
   | HeroSection
+  | PhotoBandSection
   | GearSection
   | DynastiesSection
   | ParksSection

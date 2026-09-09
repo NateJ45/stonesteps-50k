@@ -627,6 +627,7 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
         'parksSection',
         'dynastiesSection',
         'gearSection',
+        'photoBandSection',
       ],
     },
     {

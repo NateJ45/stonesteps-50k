@@ -484,6 +484,14 @@ export interface ProjectedRecordsBoardSection {
   race?: { resultsUrl?: string; atmosphere?: ProjectedImage[] } | null;
 }
 
+export interface ProjectedPhotoBandSection {
+  _type: 'photoBandSection';
+  _key: string;
+  image?: ProjectedImage;
+  caption?: string;
+  height?: 'standard' | 'tall';
+}
+
 export interface ProjectedRaceScheduleSection {
   _type: 'raceScheduleSection';
   _key: string;
@@ -664,6 +672,7 @@ export type PageBuilderBlock =
   | ProjectedRaceHeroSection
   | ProjectedDistanceTicketsSection
   | ProjectedRecordsBoardSection
+  | ProjectedPhotoBandSection
   | ProjectedRaceScheduleSection
   | ProjectedCourseFeaturesSection
   | ProjectedLoopCardSection

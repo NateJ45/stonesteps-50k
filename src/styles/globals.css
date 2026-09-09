@@ -122,6 +122,19 @@
   --spacing-section-md: clamp(3rem, 6vw, 5rem); /* was --spacing-xl */
   --spacing-section-lg: clamp(4rem, 8vw, 7rem); /* was --spacing-2xl */
 
+  /* THE RIDGE, ONCE. Two places wear this shape: the boundary every band draws
+     above itself, and the photograph band, which cuts the same line into the
+     picture instead of painting a coloured strip. A token rather than two
+     copies, because a ridge that differs between the two would read as two
+     different design ideas.
+
+     It also has to live HERE rather than in a component's <style> block.
+     Prettier reformats a long url() inside a scoped block by breaking it across
+     lines, which corrupts a data URI: the first attempt shipped a band with no
+     mask at all, 1080px tall, and it looked like a layout bug rather than a
+     mangled string. */
+  --ridge-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 40' preserveAspectRatio='none'%3E%3Cpath d='M0,40 L0,26 C40,22 80,14 130,17 C180,20 210,30 260,28 C310,26 340,12 400,10 C460,8 490,22 545,24 C600,26 630,16 690,13 C750,10 780,24 840,26 C900,28 930,18 985,15 C1040,12 1080,22 1130,25 C1165,27 1185,24 1200,22 L1200,40 Z' fill='%23000'/%3E%3C/svg%3E");
+
   --container-content: 82.5rem;
 
   /* Default interaction motion. Tailwind transition utilities (transition,
@@ -2287,8 +2300,8 @@ a:focus-visible > .sign-badge {
   height: 35px;
   background-color: inherit;
   pointer-events: none;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 40' preserveAspectRatio='none'%3E%3Cpath d='M0,40 L0,26 C40,22 80,14 130,17 C180,20 210,30 260,28 C310,26 340,12 400,10 C460,8 490,22 545,24 C600,26 630,16 690,13 C750,10 780,24 840,26 C900,28 930,18 985,15 C1040,12 1080,22 1130,25 C1165,27 1185,24 1200,22 L1200,40 Z' fill='%23000'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 40' preserveAspectRatio='none'%3E%3Cpath d='M0,40 L0,26 C40,22 80,14 130,17 C180,20 210,30 260,28 C310,26 340,12 400,10 C460,8 490,22 545,24 C600,26 630,16 690,13 C750,10 780,24 840,26 C900,28 930,18 985,15 C1040,12 1080,22 1130,25 C1165,27 1185,24 1200,22 L1200,40 Z' fill='%23000'/%3E%3C/svg%3E");
+  -webkit-mask-image: var(--ridge-mask);
+  mask-image: var(--ridge-mask);
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;

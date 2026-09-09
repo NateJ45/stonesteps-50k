@@ -37,6 +37,7 @@ import RaceHero from '@/components/sections/RaceHero.astro';
 import DistanceTickets from '@/components/sections/DistanceTickets.astro';
 import RecordsBoard from '@/components/sections/RecordsBoard.astro';
 import RaceSchedule from '@/components/sections/RaceSchedule.astro';
+import PhotoBand from '@/components/sections/PhotoBand.astro';
 import CourseFeatures from '@/components/sections/CourseFeatures.astro';
 import LoopCard from '@/components/sections/LoopCard.astro';
 import ElevationBand from '@/components/sections/ElevationBand.astro';
@@ -343,6 +344,8 @@ const wrapAttrs = (key: string | undefined) =>
             surface={surface ?? 'background'}
             headingId={headingId}
           />
+        ) : s._type === 'photoBandSection' ? (
+          <PhotoBand image={s.image} caption={s.caption} height={s.height} />
         ) : s._type === 'raceScheduleSection' ? (
           <RaceSchedule
             eyebrow={s.eyebrow}
