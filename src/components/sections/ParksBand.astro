@@ -22,7 +22,7 @@
 //    opacity-80/90 version measured 2.4 to 2.7 and failed axe.
 
 import SanityImage from '@/components/SanityImage.astro';
-import Topo from '@/components/race/Topo.astro';
+import MudField from '@/components/race/MudField.astro';
 import type { ProjectedParksSection } from '@/lib/pageBuilder.types';
 
 type Props = {
@@ -51,8 +51,8 @@ const {
 <!-- The clip moved to an inner wrapper so the band's ridge, a ::before sitting
   above the box, is not cut off. Same shape as ElevationBand. -->
 <section class="parks band-torn relative py-section-lg" aria-labelledby={headingId}>
-  <div class="pointer-events-none absolute inset-0 overflow-hidden">
-    <Topo seed={53} lines={12} opacity={0.3} />
+  <div class="mud-edge-fade pointer-events-none absolute inset-0 overflow-hidden">
+    <MudField field="walk" class="parks__walk" />
   </div>
 
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
@@ -139,5 +139,15 @@ const {
   }
   .parks__rule {
     border-color: color-mix(in srgb, #ffebbb 30%, transparent);
+  }
+  /* THE WALK NEEDS ITS OWN INK HERE, for the same reason the copy does. This
+     band is a fixed forest green in BOTH themes, and --spatter-ink is not: it
+     is bark on the cream page and cream on the bark page. Inherited, the prints
+     would be near-black on dark green in light mode, which is invisible, and
+     would flip to visible in dark mode for no reason anyone chose. Fixed cream,
+     at a whisper: any stronger on this ground and it reads as chalk. */
+  .parks__walk {
+    --spatter-ink: #ffebbb;
+    --spatter-opacity: 0.13;
   }
 </style>
