@@ -23,6 +23,7 @@
 // to guess which row it is in.
 
 import SectionHeading from '@/components/SectionHeading.astro';
+import DataMark from '@/components/race/DataMark.astro';
 import GhostPhoto from '@/components/race/GhostPhoto.astro';
 import { bracketRecords, courseRecord, type RecordRow } from '@/lib/age-brackets';
 import { formatRaceTime } from '@/lib/race-time';
@@ -100,6 +101,24 @@ const boards = distances
   .map((d) => ({ ...d, slug: d.slug as string, genders: boardFor(d.slug as string) }));
 
 const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
+
+// THE COURSE RECORD FOR THE LONG DISTANCE, and the distance filter is the
+// whole care in this line. Taking the fastest time across EVERY board gave
+// 1:58:36, which is the 27K record: correct as "fastest on file", and a lie the
+// moment it is set at 15rem beside a table headed Men 50K, because nobody reads
+// a number that size as anything but the course record.
+//
+// Derived from the same rows the boards are built from rather than stored, so
+// it cannot disagree with the table beneath it: import a faster run tomorrow
+// and this moves with it. It is also printed in full a few hundred pixels away,
+// which is the rule for every mark like this - the big version is never the
+// only place a value appears.
+const longBoard = boards.find((b) => /50/.test(b.slug)) ?? boards[0];
+const fastestSeconds = (longBoard?.genders ?? [])
+  .map((g) => g.course?.timeSeconds)
+  .filter((t): t is number => typeof t === 'number' && t > 0)
+  .reduce<number | null>((a, t) => (a === null || t < a ? t : a), null);
+const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
 ---
 
 <section class={`relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
@@ -109,6 +128,7 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
   }
   <div class="pointer-events-none absolute inset-0 overflow-hidden">
     <GhostPhoto image={race?.atmosphere?.[1] ?? race?.atmosphere?.[0]} side="right" />
+    <DataMark text={fastestMark} align="left" />
   </div>
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
     <SectionHeading {eyebrow} {headline} {headingId} />

@@ -1,0 +1,113 @@
+---
+// Safe to edit by hand
+//
+// An oversized, near-silent piece of the section's OWN DATA, laid behind it.
+//
+// THE RULE THIS COMPONENT EXISTS TO ENFORCE. A big shape behind a heading is
+// decoration, and decoration is what makes a band look like copy dropped onto a
+// texture. A big piece of the section's own content is something else: the
+// background and the content are then the same fact at two sizes, which is why
+// it reads as designed rather than applied. So the `text` passed in must be
+// DERIVED from what the section is showing, never chosen to look good. The
+// records board passes the fastest time on file; the loop band passes how many
+// loops there are.
+//
+// It carries `data-contrast-decorative` as well as aria-hidden, which is how
+// the contrast gate is told this is WCAG's "Incidental" case: pure decoration,
+// no contrast requirement. The gate demands both halves, so the attribute
+// cannot be used to hide real text.
+//
+// It is aria-hidden and it is never the only place a value appears. Every mark
+// this draws is stated properly in the copy a few pixels away, so a screen
+// reader loses nothing by skipping it and nobody has to read a number off
+// something set at 20rem.
+//
+// CLIPPED BY ITS CALLER, like GhostPhoto: a section here cannot clip itself,
+// because the band ridge is a ::before that lives above the box.
+
+interface Props {
+  /** Derived from the section's own content. See the note above. */
+  text?: string | number | null;
+  /** Which side it hangs off. */
+  align?: 'left' | 'right';
+  /**
+   * `bleed` hangs the mark off the band's bottom edge, which is right when
+   * there is open space down there for it to run out of. `inset` keeps it
+   * inside, for a band whose content reaches the bottom: the loop card fills
+   * its width, so a bleeding mark was three quarters cropped and read as a
+   * rendering fault rather than as a watermark.
+   */
+  position?: 'bleed' | 'inset';
+  class?: string;
+}
+
+const { text, align = 'right', position = 'bleed', class: className = '' } = Astro.props as Props;
+const value = text == null ? '' : String(text).trim();
+---
+
+{
+  value && (
+    <span
+      class:list={['data-mark', `data-mark--${align}`, `data-mark--${position}`, className]}
+      aria-hidden="true"
+      data-contrast-decorative
+    >
+      {value}
+    </span>
+  )
+}
+
+<style>
+  .data-mark {
+    position: absolute;
+    /* Low in the band and hanging off its own edge. Anchored to a corner rather
+       than centred, because a centred watermark sits behind the middle of the
+       copy, which is the one place it cannot be faint enough to ignore and
+       large enough to see. */
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 0.78;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    /* Big enough to read as a graphic rather than as text someone forgot to
+       style, capped so it does not swallow the band on a very wide screen. */
+    font-size: clamp(7rem, 17vw, 15rem);
+    color: color-mix(in srgb, var(--foreground) 6.5%, transparent);
+  }
+
+  .data-mark--bleed {
+    bottom: -0.18em;
+  }
+  .data-mark--inset {
+    bottom: 1rem;
+  }
+
+  :global(.dark) .data-mark {
+    /* A dark ground swallows a faint mark, so it takes a little more. */
+    color: color-mix(in srgb, var(--foreground) 9%, transparent);
+  }
+
+  .data-mark--right {
+    right: -0.06em;
+  }
+  .data-mark--left {
+    left: -0.06em;
+  }
+  .data-mark--inset.data-mark--right {
+    right: 2rem;
+  }
+  .data-mark--inset.data-mark--left {
+    left: 2rem;
+  }
+
+  /* GONE ON A PHONE. There is no spare room beside the content at that width,
+     so the mark would sit directly under the copy, and at a size like this it
+     is either visible enough to interfere or faint enough to be pointless. */
+  @media (width < 64rem) {
+    .data-mark {
+      display: none;
+    }
+  }
+</style>

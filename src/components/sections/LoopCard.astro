@@ -27,6 +27,7 @@
 // carries a sourceNote saying where the numbers came from. Do not drop it.
 
 import Provisional from '@/components/race/Provisional.astro';
+import DataMark from '@/components/race/DataMark.astro';
 import type { ProjectedLoopCardSection } from '@/lib/pageBuilder.types';
 
 type Props = {
@@ -52,7 +53,13 @@ const {
 
 {
   loops.length > 0 && (
-    <section class="band-torn bg-muted py-section-lg" aria-labelledby={headingId}>
+    <section class="band-torn relative bg-muted py-section-lg" aria-labelledby={headingId}>
+      {/* How many loops there are, taken from the loops themselves rather than
+        typed, so it cannot drift from the card below it. Clipped by a wrapper,
+        because the section's ridge lives above its own box. */}
+      <div class="pointer-events-none absolute inset-0 overflow-hidden">
+        <DataMark text={loops.length} align="right" position="inset" />
+      </div>
       <div class="mx-auto w-full max-w-content px-6">
         {eyebrow && (
           <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
