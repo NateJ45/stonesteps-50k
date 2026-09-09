@@ -124,6 +124,29 @@ const FIELDS = [
       },
     ],
   },
+  {
+    // A WALK, NOT A THROW. The band fields above are an impact: something was
+    // kicked up and landed. This one is a route: one line of prints crossing a
+    // quiet band on the diagonal, and nothing else.
+    //
+    // WHY NOT "LOTS OF TINY PRINTS", WHICH IS THE OBVIOUS IDEA. The trail
+    // generator already carries the answer in its own comment: a row of small
+    // prints reads as a decorative border, a few larger ones read as somebody
+    // having run through here. Tiled small prints are a pattern, and a pattern
+    // behind copy is wallpaper. Sparse and mid-sized on a diagonal is what
+    // reads as a trail.
+    //
+    // No quiet zones. It is worn at a low enough opacity to pass under copy,
+    // and the route already crosses the band rather than sitting in the middle
+    // of it.
+    name: 'walk',
+    seed: 41,
+    only: 'trail',
+    shapes: [
+      { suffix: 'wide', W: 1000, H: 480, density: 1.1, big: 0.62, split: false, quiet: [] },
+      { suffix: 'phone', W: 420, H: 760, density: 0.8, big: 0.6, split: false, quiet: [] },
+    ],
+  },
 ];
 
 await mkdir(outDir, { recursive: true });
@@ -147,6 +170,7 @@ for (const field of FIELDS) {
       quiet: shape.quiet,
       density: shape.density,
       big: shape.big ?? 1,
+      only: field.only ?? 'all',
     });
 
     // SPLIT means one file per layer, so the throws can land in sequence in the

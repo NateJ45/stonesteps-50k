@@ -1727,6 +1727,12 @@ body::before {
   mask-composite: intersect;
 }
 
+/* The walk worn as a page-header backdrop: quieter than the hero's field,
+   because a page header is mostly type and the route is passing behind it. */
+.header-walk {
+  --spatter-opacity: 0.1;
+}
+
 /* ---------- Mud that stops without a seam ------------------------------- */
 /* A band-level mud field HAS to be clipped, or its arrival animation scales it
    past the viewport and puts a scrollbar on the page. But a clip is a straight

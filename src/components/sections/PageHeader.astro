@@ -12,7 +12,7 @@
 // abused.
 
 import SanityImage from '@/components/SanityImage.astro';
-import Topo from '@/components/race/Topo.astro';
+import MudField from '@/components/race/MudField.astro';
 import type { ProjectedPageHeaderSection } from '@/lib/pageBuilder.types';
 
 type Props = {
@@ -42,7 +42,18 @@ const hasImage = Boolean(image?.asset);
   class="relative overflow-hidden border-b border-border bg-background py-section-lg"
   aria-labelledby={headingId}
 >
-  <Topo {seed} lines={13} class="opacity-50" />
+  {
+    /* A WALK, NOT CONTOUR LINES. The topo here was thirteen hairlines at half
+    opacity, which at that weight stops reading as a map and starts reading as
+    stray marks on the paper: interesting enough to notice, not confident
+    enough to be anything. One route of prints crossing the band says the same
+    thing (this is a trail race, this is terrain) and says it deliberately.
+
+    The contours are kept where they are a deliberate object rather than a
+    whisper: dense behind the hero, and inside the disc behind the race
+    director, where they are enlarged into a map detail. */
+  }
+  <MudField field="walk" class="header-walk" />
 
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
     <div class={hasImage ? 'grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center' : ''}>

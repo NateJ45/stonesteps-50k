@@ -30,7 +30,7 @@
 
 interface Props {
   /** Which baked field to wear. See FIELDS in scripts/generate-mud.mjs. */
-  field?: 'hero' | 'director' | 'director-fore';
+  field?: 'hero' | 'director' | 'director-fore' | 'walk';
   class?: string;
 }
 
@@ -122,6 +122,11 @@ const { field = 'hero', class: className = '' } = Astro.props as Props;
   .mud--director-fore .mud__l--solo {
     --src: url('/mud/director-fore-wide.png');
   }
+  /* The walk: one route of prints crossing a quiet band, standing in for the
+     contour lines that used to whisper there. */
+  .mud--walk .mud__l--solo {
+    --src: url('/mud/walk-wide.png');
+  }
 
   /* THE PHONE WEARS ONE COMBINED LAYER, and that is an accessibility decision.
      axe cannot see a mask: it finds these elements over a piece of text, reads
@@ -148,6 +153,9 @@ const { field = 'hero', class: className = '' } = Astro.props as Props;
     }
     .mud--director .mud__l--solo {
       --src: url('/mud/director-phone.png');
+    }
+    .mud--walk .mud__l--solo {
+      --src: url('/mud/walk-phone.png');
     }
   }
 

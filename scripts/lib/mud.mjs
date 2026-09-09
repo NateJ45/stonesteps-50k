@@ -50,7 +50,18 @@ export function rng(s) {
  * zones met in the middle, swallowed the whole headline band, and the field
  * rendered as a few stray specks: the marks had nowhere legal to be.
  */
-export function buildMud({ seed = 7, W = 1600, H = 933, quiet = [], density = 1, big = 1 } = {}) {
+export function buildMud({
+  seed = 7,
+  W = 1600,
+  H = 933,
+  quiet = [],
+  density = 1,
+  big = 1,
+  // 'all' is the thrown field: spatter, kicks, speckle, then the trail.
+  // 'trail' is the walk on its own, for a band that wants a route crossing it
+  // rather than an impact. See the FIELDS note in scripts/generate-mud.mjs.
+  only = 'all',
+} = {}) {
   const rand = rng(seed);
   const zones = quiet.map((r) => ({ x0: r[0] * W, y0: r[1] * H, x1: r[2] * W, y1: r[3] * H }));
 
@@ -272,32 +283,38 @@ export function buildMud({ seed = 7, W = 1600, H = 933, quiet = [], density = 1,
     layers.push(out);
   };
 
-  // 1. The big throw, low left up through the headline, and the splat it leaves.
-  throwMud(0.1 * W, 0.43 * H, 14, 0.78 * W, n(170), 23 * S);
-  splat(0.25 * W, 0.42 * H, 21 * S, n(12));
-  cut();
+  if (only === 'all') {
+    // 1. The big throw, low left up through the headline, and the splat it leaves.
+    throwMud(0.1 * W, 0.43 * H, 14, 0.78 * W, n(170), 23 * S);
+    splat(0.25 * W, 0.42 * H, 21 * S, n(12));
+    cut();
+  }
 
   // 2. Back the other way across the top, and the splat by the photograph.
   //    Both are placed where they clear the copy in BOTH band shapes. At
   //    0.19/0.30 they landed inside the phone's subhead zone and this layer
   //    baked out completely empty, which would have shipped a blank request.
-  throwMud(0.93 * W, 0.13 * H, 172, 0.53 * W, n(105), 17 * S);
-  splat(0.73 * W, 0.44 * H, 23 * S, n(12));
-  cut();
+  if (only === 'all') {
+    throwMud(0.93 * W, 0.13 * H, 172, 0.53 * W, n(105), 17 * S);
+    splat(0.73 * W, 0.44 * H, 23 * S, n(12));
+    cut();
+  }
 
   // 3. The two kicks off the far foot, the low splat, and the speckle that
   //    settles over everything.
-  throwMud(0.55 * W, 0.94 * H, -84, 0.35 * W, n(85), 14 * S);
-  throwMud(0.84 * W, 0.9 * H, -128, 0.32 * W, n(70), 12 * S);
-  splat(0.88 * W, 0.86 * H, 14 * S, n(8));
-  speckle(n(220));
-  cut();
+  if (only === 'all') {
+    throwMud(0.55 * W, 0.94 * H, -84, 0.35 * W, n(85), 14 * S);
+    throwMud(0.84 * W, 0.9 * H, -128, 0.32 * W, n(70), 12 * S);
+    splat(0.88 * W, 0.86 * H, 14 * S, n(8));
+    speckle(n(220));
+    cut();
+  }
 
   // 4. The trail, on its own layer so the page can wipe it in and the prints
   //    appear in walking order rather than all at once. FEWER AND BIGGER: a
   //    row of small prints reads as a decorative border, a few large ones read
   //    as somebody having run through here.
-  trail(9);
+  trail(only === 'trail' ? n(9) : 9);
   cut();
 
   return { layers, W, H, S };
