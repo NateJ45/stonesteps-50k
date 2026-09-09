@@ -1828,6 +1828,14 @@ body::after {
    and the contrast gate would be measuring a moving target if we had. */
 .hero-photo {
   position: relative;
+  /* THE ZOOM HAS TO BE CLIPPED. Each slide animates to scale(1.09), which is
+     about 30px past the figure on a desktop column and pushes the document's
+     scrollWidth past the viewport: a horizontal scrollbar on every page of the
+     site, caused by an element nobody can see moving. A transform does not
+     affect layout, so nothing about the page LOOKED wrong; only the scrollbar
+     said so. Clipping here also means the mask and the crop agree about where
+     the picture ends. */
+  overflow: hidden;
   margin-top: 2.5rem;
   /* The figure is a direct child of the band, which is already full width, so
      it bleeds to both edges without a 100vw trick. (100vw would have been a
