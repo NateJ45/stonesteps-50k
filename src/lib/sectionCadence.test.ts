@@ -5,8 +5,6 @@ import { classifySections, CONTENT_TYPES, SELF_CONTAINED_TYPES } from './section
 // Helpers
 const block = (type: string, extra: Record<string, unknown> = {}) => ({ _type: type, ...extra });
 const surfaces = (rows: ReturnType<typeof classifySections>) => rows.map((r) => r.surface);
-const dividers = (rows: ReturnType<typeof classifySections>) =>
-  rows.map((r) => r.insertDividerBefore);
 
 test('empty array returns empty rows', () => {
   assert.deepEqual(classifySections([]), []);
@@ -60,29 +58,17 @@ test('image hero does not shift cadence', () => {
   assert.deepEqual(surfaces(rows), [null, 'background', 'muted']);
 });
 
-test('divider inserted between adjacent content blocks of differing surface', () => {
+// The classifier never marks a divider. The surface change is the division;
+// the ornament in the seam read as a stray mark. An editor who wants a rule
+// inserts a spacerSection.
+test('rows carry no divider marker', () => {
   const rows = classifySections([
     block('richTextSection'), // background
-    block('imageTextSection'), // muted -> divider before this
+    block('imageTextSection'), // muted
   ]);
-  assert.deepEqual(dividers(rows), [false, true]);
-});
-
-test('no divider between two blocks with the same surface', () => {
-  // Edge case: if the cadence somehow produces same-surface adjacency (e.g., after
-  // a block type that resets), no divider. In practice this does not occur with the
-  // standard alternating logic, but the rule should hold.
-  const rows = classifySections([block('richTextSection')]);
-  assert.deepEqual(dividers(rows), [false]);
-});
-
-test('no divider between content block and self-contained block', () => {
-  const rows = classifySections([
-    block('richTextSection'), // background
-    block('heroSection'), // self-contained, no divider
-    block('imageTextSection'), // muted, divider should appear before this (different surface from richText)
-  ]);
-  assert.deepEqual(dividers(rows), [false, false, true]);
+  for (const row of rows) {
+    assert.ok(!('insertDividerBefore' in row), 'rows must not carry a divider marker');
+  }
 });
 
 test('headingId uses idPrefix and index', () => {
@@ -158,14 +144,6 @@ test('all 8 new rich types appear in SELF_CONTAINED_TYPES or CONTENT_TYPES', () 
     );
     assert.ok(!(inSelf && inContent), `${type} cannot be in both sets`);
   }
-});
-
-test('divider inserted between storySection and serviceAreaSection (different surfaces)', () => {
-  const rows = classifySections([
-    block('storySection'), // background
-    block('serviceAreaSection'), // muted -> divider before
-  ]);
-  assert.deepEqual(dividers(rows), [false, true]);
 });
 
 // ── U7: new page-builder blocks — all SELF_CONTAINED ─────────────────────

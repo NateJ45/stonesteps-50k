@@ -14,7 +14,6 @@
 // siteSettings is optional. Defaults render cleanly so the header works
 // even before Sanity content is wired up.
 
-import { getImage } from 'astro:assets';
 import { site } from '@/data/site';
 import { Mail, Phone } from 'lucide-react';
 import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
@@ -27,17 +26,18 @@ import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings'
 import { telHref } from '@/lib/phone';
 import { urlFor } from '@/lib/sanity';
 
-// SVG logos are passed through Astro's image pipeline for cache-busted URLs.
-// SVGs are resolution-independent so no 1x/2x variants are needed — one URL
-// serves all pixel densities. The same URL is used for both desktop and mobile.
-const logoLightImg = await getImage({ src: logoLightAsset });
-const logoDarkImg = await getImage({ src: logoDarkAsset });
-const logoLightSrcset = logoLightImg.src;
-const logoDarkSrcset = logoDarkImg.src;
-
-// Mobile drawer logos — same SVG URLs, passed as plain strings into MobileNav.
-const logoLightWebpMobile = logoLightImg;
-const logoDarkWebpMobile = logoDarkImg;
+// THE IMPORTED ASSET'S OWN URL, NOT getImage(). These used to run through
+// Astro's image pipeline for a cache-busted URL, which they do not need: an
+// imported asset is already emitted to /_astro with a content hash, and an SVG
+// is resolution-independent so there are no 1x/2x variants to generate. The
+// pipeline actively broke them in dev: @astrojs/cloudflare with
+// `imageService: 'compile'` answers /_image?...&f=svg with a plain
+// "400 Unsupported format: svg", so the header and footer logos were a piece
+// of alt text on every `npm run dev` page while `astro build` was fine. One
+// URL serves both desktop and mobile, and both themes are still two files so a
+// dark-ground variant stays possible.
+const logoLightSrc = logoLightAsset.src;
+const logoDarkSrc = logoDarkAsset.src;
 
 interface Props {
   /** Paint no background and let the page run up behind. See the note below. */
@@ -239,9 +239,11 @@ function isGroupActive(items: { href: string }[]) {
         Lighthouse no longer sees a dark-variant in light-mode DOM (or
         vice-versa).
 
-        Dimensions and aspect ratio (100×106) match the source 378:400,
+        Dimensions and aspect ratio (108×180) match the source mark exactly,
         so the browser reserves the right layout box before the file lands
-        — no CLS.
+        — no CLS. The mark is PORTRAIT: it is the race's own painted trail
+        sign standing on its own, not a wide lockup, so it is sized by
+        height and its width follows.
       */
         }
         {
@@ -261,16 +263,16 @@ function isGroupActive(items: { href: string }[]) {
           ) : (
             <img
               alt={brandName}
-              width={280}
-              height={60}
-              class="h-11 w-auto lg:h-16"
+              width={108}
+              height={180}
+              class="h-[4.5rem] w-auto lg:h-24"
               loading="eager"
               decoding="async"
               data-theme-logo
-              data-logo-light-src={logoLightImg.src}
-              data-logo-light-srcset={logoLightSrcset}
-              data-logo-dark-src={logoDarkImg.src}
-              data-logo-dark-srcset={logoDarkSrcset}
+              data-logo-light-src={logoLightSrc}
+              data-logo-light-srcset={logoLightSrc}
+              data-logo-dark-src={logoDarkSrc}
+              data-logo-dark-srcset={logoDarkSrc}
             />
           )
         }
@@ -394,8 +396,8 @@ function isGroupActive(items: { href: string }[]) {
       client:only="react"
       links={NAV_LINKS}
       siteSettings={mobileNavSettings}
-      logoLightUrl={logoLightWebpMobile.src}
-      logoDarkUrl={logoDarkWebpMobile.src}
+      logoLightUrl={logoLightSrc}
+      logoDarkUrl={logoDarkSrc}
       {...mobileCtaProps}
     />
   </div>

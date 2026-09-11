@@ -1383,6 +1383,83 @@ body::before {
 .hand > span {
   display: inline-block;
 }
+
+/* ---------- The stamp ---------------------------------------------------- */
+/* The hero wordmark is PRINTED onto the page, one word at a time. The read is
+   a press coming down: the word falls from above the page, out of focus and
+   far too big, hits, squashes wide against the paper, rebounds once and sets.
+
+   IT ANIMATES `scale`, `translate` AND `rotate`, NOT `transform`, and that is
+   load-bearing. `.hand > span` already spends `transform` on the per-word
+   hand-cut rotation, and an animation on the shorthand wins over it outright:
+   every word would straighten up for the length of the animation and then snap
+   back a degree at the end. The individual transform properties compose with
+   the shorthand instead, so the stamp rides on top of the rotation each word
+   already has. The reveal system two hundred lines up makes the same choice
+   for the same reason.
+
+   The impact frames are not decoration. A scale that eases smoothly to rest
+   reads as a zoom; what makes it read as a STRIKE is that the approach is
+   fast, the arrival is abrupt, and the shape deforms on contact. Hence the
+   squash at 58% (wider and shorter, as ink spreads under pressure) and the
+   single light rebound after it. */
+@keyframes word-stamp {
+  0% {
+    opacity: 0;
+    scale: 2.4;
+    translate: 0 -0.1em;
+    filter: blur(6px);
+    /* Gravity: the word is still gathering speed the whole way down. */
+    animation-timing-function: cubic-bezier(0.8, 0, 0.9, 0.25);
+  }
+  42% {
+    opacity: 1;
+    filter: blur(2px);
+    /* No deceleration into the page. It is travelling when it lands. */
+    animation-timing-function: linear;
+  }
+  /* Contact. */
+  58% {
+    opacity: 1;
+    scale: 1.1 0.88;
+    translate: 0 0;
+    filter: blur(0);
+    animation-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+  }
+  /* Rebound, then set. */
+  72% {
+    scale: 0.97 1.04;
+    animation-timing-function: ease-in-out;
+  }
+  86% {
+    scale: 1.01 0.99;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+.stamp-word {
+  /* --wi is the word's index, written inline by RaceHero. One word lands every
+     170ms: fast enough that the line does not keep a reader waiting, slow
+     enough that each impact is its own event rather than a ripple. */
+  /* linear here because the shape of each segment is set inside the keyframes
+     above: one easing across the whole thing would soften the landing, which is
+     the only frame that matters. */
+  animation: word-stamp 620ms linear both;
+  animation-delay: calc(var(--wi, 0) * 170ms);
+}
+
+/* A press with no press. The words are simply there, at full size, in their
+   resting rotation. */
+@media (prefers-reduced-motion: reduce) {
+  .stamp-word {
+    animation: none;
+  }
+}
 .hand > span:nth-child(3n) {
   transform: rotate(-1.1deg) translateY(1px);
 }
@@ -1725,6 +1802,27 @@ body::before {
     linear-gradient(to bottom, #000 58%, transparent 99%);
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
+  /* THE SECOND PLATE. The same move the display type makes (see --display-echo
+     above): a hard, un-blurred copy of the subject offset down and right in the
+     other ink, so he reads as a two-pass print rather than a photograph dropped
+     onto a band. It is what gives a cut-out an edge to stand against without
+     putting a frame around him.
+
+     A drop-shadow, NOT a second image masked into a colour. The obvious build
+     is a duplicate of the photograph used as a CSS mask over a flat swatch, and
+     it cannot work here at any price: cdn.sanity.io sends no
+     Access-Control-Allow-Origin, CSS mask images are fetched in CORS mode, and
+     the mask fails on the live origin exactly as it fails locally, leaving a
+     plain rotated rectangle behind him. drop-shadow reads the element's own
+     alpha, so it costs no request, cannot fail, and needs no colour maths.
+
+     Filters run BEFORE masks, so the plate is struck from the photograph's full
+     cut-out alpha and then dissolves under the two gradients above along with
+     him. That is why it never outlives his fading feet.
+
+     Offset in px rather than em: this is a photograph at a capped width, not
+     type that scales with a clamp. */
+  filter: drop-shadow(11px 13px 0 var(--display-echo));
 }
 
 /* The walk worn as a page-header backdrop: quieter than the hero's field,
@@ -2770,11 +2868,22 @@ main > .band-torn:first-child::before {
    strip, which is the most common generated-design default in existence.
    Logos show in full colour, because patches are colourful, and because a
    sponsor who paid deserves their actual mark. */
+/* THE PATCH IS THE ONE PLATE OBJECT THAT DOES NOT FLIP WITH THE THEME.
+   Every other plate inverts in light mode (see --plate-face above) so it keeps
+   a figure/ground against the page. A patch is different: it is a physical
+   object with a sponsor's full-colour mark sewn onto it, and those marks are
+   drawn for light stock. On the charcoal light-theme plate the wordmarks lost
+   their ground and read as floating ink. So the stock stays cream in both
+   themes and the border plus the hard shadow carry the separation on the light
+   page, which is what a real patch on a cream banner looks like anyway. */
 .patch {
+  --patch-face: #ffebbb;
+  --patch-ink: #1a1712;
   position: relative;
   display: grid;
   place-items: center;
-  background: var(--plate-face);
+  background: var(--patch-face);
+  color: var(--patch-ink);
   border: 2px solid var(--plate-edge);
   border-radius: 14px;
   box-shadow: var(--lift);

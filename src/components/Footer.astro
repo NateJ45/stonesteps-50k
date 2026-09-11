@@ -25,7 +25,6 @@
 // Latest projects pull from Sanity. Gracefully degrades to a "see portfolio"
 // message when nothing is published yet.
 
-import { getImage } from 'astro:assets';
 import { site } from '@/data/site';
 import {
   IconBrandInstagram,
@@ -86,8 +85,10 @@ const wherePlace = [race?.venue, [race?.city, race?.region].filter(Boolean).join
   .filter(Boolean)
   .join(' · ');
 
-const footerLogoLight = await getImage({ src: logoLightAsset });
-const footerLogoDark = await getImage({ src: logoDarkAsset });
+// The imported asset's own hashed URL. See the note in Header.astro: routing an
+// SVG through getImage() gains nothing and 400s in dev under this adapter.
+const footerLogoLight = logoLightAsset.src;
+const footerLogoDark = logoDarkAsset.src;
 
 interface NewsletterConfig {
   enabled?: boolean;
@@ -540,25 +541,25 @@ const latestProjects = allProjects.slice(0, 3);
       class="inline-block transition-opacity hover:opacity-80"
     >
       {
-        /* The mark is a wide lockup (214x60), not the square badge the old PNG
-          was, so it is sized by WIDTH here. An unloaded lazy image with
-          width:auto shrink-wraps to 0x0, never intersects the viewport and
-          never loads, which is how the sponsor logos vanished earlier in this
-          build: give it real dimensions. */
+        /* The mark is the race's own painted trail sign, portrait at 108x180,
+          so it is sized by HEIGHT and its width follows. An unloaded lazy
+          image with width:auto shrink-wraps to 0x0, never intersects the
+          viewport and never loads, which is how the sponsor logos vanished
+          earlier in this build: give it real dimensions. */
       }
       <img
         alt={brandName}
-        width={214}
-        height={60}
-        class="h-14 w-auto"
+        width={108}
+        height={180}
+        class="h-[7.5rem] w-auto"
         loading="lazy"
         decoding="async"
         data-theme-logo
-        src={footerLogoLight.src}
-        data-logo-light-src={footerLogoLight.src}
-        data-logo-light-srcset={footerLogoLight.src}
-        data-logo-dark-src={footerLogoDark.src}
-        data-logo-dark-srcset={footerLogoDark.src}
+        src={footerLogoLight}
+        data-logo-light-src={footerLogoLight}
+        data-logo-light-srcset={footerLogoLight}
+        data-logo-dark-src={footerLogoDark}
+        data-logo-dark-srcset={footerLogoDark}
       />
     </a>
     {

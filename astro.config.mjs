@@ -165,20 +165,49 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
-    // @sanity/ui ships an ESM build that Vite's dependency pre-bundler
-    // mis-scans on this stack (MISSING_EXPORT errors for styled-components).
-    // Excluding it from pre-bundling matches presacademy's working config; it
-    // is still bundled correctly by `astro build`.
-    //
-    // Deliberately NO custom chunking here. An `advancedChunks` group forcing
-    // styled-components + @sanity/ui into one chunk was tried in presacademy on
-    // 2026-08-26 (chasing a theming crash) and made things worse: merging those
-    // modules changes evaluation order and broke @sanity/ui's theme init,
-    // surfacing as "TypeError: Cannot read properties of undefined (reading
-    // 'v2')" from inside styled-components' generateAndInjectStyles. Leave the
-    // bundler's default chunking alone.
     optimizeDeps: {
-      exclude: ['@sanity/ui', 'styled-components'],
+      // THE `sanity` ENTRY IS WHAT MAKES `npm run dev` START AT ALL.
+      // Astro 7 pre-bundles dependencies with rolldown. `sanity` is
+      // exports-only (no `main` field) and its own modules import the package
+      // by name — `import { FormRow, ... } from 'sanity'` at the top of
+      // node_modules/sanity/lib/presentation.js. Rolldown resolves that
+      // self-reference to the package.json instead of to the "." entry it
+      // points at, and every name comes back MISSING_EXPORT: "Build failed
+      // with 346 errors", process exit 1, nothing ever listening on 4321.
+      // Skipping the pre-bundle skips the whole failure.
+      //
+      // `astro build` does not run the optimizer, which is why this was
+      // invisible in CI and total locally, and why the deployed site was never
+      // affected.
+      //
+      // KNOWN REMAINING GAP: the same bad resolution then happens in the
+      // browser for the EMBEDDED STUDIO, so /studio does not hydrate under
+      // `npm run dev` ("does not provide an export named
+      // 'DEFAULT_STUDIO_CLIENT_OPTIONS'"). The public site is fine. To work on
+      // the Studio locally, build and serve it: `npm run build && npm run
+      // preview`. Tried and rejected: a `resolve.alias` pinning the bare
+      // specifier to lib/index.js (neither the optimizer nor the browser
+      // honours it for these node_modules-internal imports), explicit
+      // `include` of the sanity subpaths (optimizer fails identically), and
+      // dropping `sanity` from `dedupe` below (no effect).
+      //
+      // @sanity/ui and styled-components predate this and are here for the
+      // same class of reason: their ESM builds get mis-scanned by the
+      // pre-bundler and both are bundled correctly by `astro build` anyway.
+      //
+      // Deliberately NO custom chunking here. An `advancedChunks` group forcing
+      // styled-components + @sanity/ui into one chunk was tried in presacademy
+      // on 2026-08-26 (chasing a theming crash) and made things worse: merging
+      // those modules changes evaluation order and broke @sanity/ui's theme
+      // init, surfacing as "TypeError: Cannot read properties of undefined
+      // (reading 'v2')" from inside styled-components' generateAndInjectStyles.
+      // Leave the bundler's default chunking alone.
+      exclude: ['@sanity/ui', 'styled-components', 'sanity'],
+      // The cost of excluding `sanity`: unbundled, its modules import
+      // `react/compiler-runtime`, which is CJS. Served raw it has no named
+      // export `c`. Naming it here pre-bundles that one entry into ESM with
+      // real named exports.
+      include: ['react/compiler-runtime'],
     },
     // -----------------------------------------------------------------------
     // ONE module instance per package

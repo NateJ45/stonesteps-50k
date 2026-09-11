@@ -174,7 +174,7 @@ docs.push({
       _type: 'distanceTicketsSection',
       _key: key(),
       eyebrow: 'Two distances',
-      headline: 'Pick your day',
+      headline: 'Pick your race',
       note: 'Prices step up on February 1 and again on October 1.',
     },
     {

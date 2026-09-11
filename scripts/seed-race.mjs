@@ -154,7 +154,7 @@ docs.push({
   blurb:
     'Same trail, same climbs, four loops instead of seven. The way a lot of Stone Steps ' +
     'finishers start before they come back for the 50K.',
-  includes: ['T-shirt', 'Timing chip', 'Aid station every loop'],
+  includes: ['T-shirt', 'Timing chip', 'Aid station every loop', 'USATF sanctioned'],
   startTime: '8:30 am',
   trekkerNote: 'Trekkers may start at 8:00 am and are ineligible for age group and overall awards.',
   entryCap: 130,

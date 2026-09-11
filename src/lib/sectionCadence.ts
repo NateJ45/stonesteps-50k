@@ -18,6 +18,13 @@
 //   cadence at index 1 (muted) so the first content block contrasts rather
 //   than blending into the hero. An image hero is dark, so the default
 //   starting index 0 (background = light) already contrasts.
+//
+// No automatic dividers:
+//   This classifier used to mark a SectionDivider for insertion wherever two
+//   adjacent content blocks changed surface. The surface change IS the
+//   division, and the ornament landed in the seam between two nearly identical
+//   warm greys, where it read as a stray mark rather than as a rule. The
+//   spacerSection block still exists for an editor who wants one deliberately.
 
 /** _type strings for blocks that manage their own surface. */
 export const SELF_CONTAINED_TYPES = new Set([
@@ -90,8 +97,6 @@ export interface ClassifiedRow<T extends SectionBlock = SectionBlock> {
   block: T;
   /** Assigned surface for content blocks; null for self-contained blocks. */
   surface: 'background' | 'muted' | null;
-  /** Whether a SectionDivider should be inserted BEFORE this row. */
-  insertDividerBefore: boolean;
   /** Generated heading id for accessible aria-labelledby. */
   headingId: string;
 }
@@ -123,7 +128,6 @@ export function classifySections<T extends { _type: string }>(
     first?._type === 'heroSection' && !(first as Record<string, unknown>)?.backgroundImage;
 
   let contentIdx = opensWithTextHero ? 1 : 0;
-  let prevContentSurface: 'background' | 'muted' | null = null;
 
   return list.map((block, i): ClassifiedRow<T & SectionBlock> => {
     let surface: 'background' | 'muted' | null = null;
@@ -133,22 +137,9 @@ export function classifySections<T extends { _type: string }>(
       contentIdx += 1;
     }
 
-    // Insert a divider before this row when:
-    //   - Both this and the previous content block are content blocks.
-    //   - Their surfaces differ.
-    // Self-contained blocks neither trigger nor suppress dividers between
-    // adjacent content blocks.
-    const insertDividerBefore =
-      surface !== null && prevContentSurface !== null && surface !== prevContentSurface;
-
-    if (surface !== null) {
-      prevContentSurface = surface;
-    }
-
     return {
       block,
       surface,
-      insertDividerBefore,
       headingId: `${idPrefix}-${i}`,
     };
   });

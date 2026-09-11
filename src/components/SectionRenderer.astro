@@ -85,10 +85,8 @@ const wrapAttrs = (key: string | undefined) =>
 ---
 
 {
-  rows.map(({ block: s, surface, insertDividerBefore, headingId }) => (
+  rows.map(({ block: s, surface, headingId }) => (
     <>
-      {insertDividerBefore && <SectionDivider />}
-
       <Wrap {...wrapAttrs((s as { _key?: string })._key)}>
         {s._type === 'heroSection' ? (
           <Hero

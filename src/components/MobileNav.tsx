@@ -242,9 +242,9 @@ export default function MobileNav({
               <img
                 src={logoLightUrl}
                 alt="Studio Starter"
-                width={280}
-                height={60}
-                className="block h-10 w-auto dark:hidden"
+                width={108}
+                height={180}
+                className="block h-16 w-auto dark:hidden"
                 loading="lazy"
                 decoding="async"
               />
@@ -253,9 +253,9 @@ export default function MobileNav({
                   src={logoDarkUrl}
                   alt=""
                   aria-hidden="true"
-                  width={280}
-                  height={60}
-                  className="hidden h-10 w-auto dark:block"
+                  width={108}
+                  height={180}
+                  className="hidden h-16 w-auto dark:block"
                   loading="lazy"
                   decoding="async"
                 />

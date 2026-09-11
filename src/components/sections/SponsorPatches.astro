@@ -50,21 +50,19 @@ const {
           {headline}
         </h2>
 
-        <ul class="mt-8 flex flex-wrap items-stretch gap-6">
+        <ul class="mt-8 flex flex-wrap items-stretch justify-center gap-6">
           {sponsors.map((s) => (
-            <li class="patch min-h-[7.75rem] w-full max-w-[13rem] px-5 py-6">
+            <li class="patch min-h-[9.5rem] w-full max-w-[16rem] px-6 py-7">
               {s.logo?.asset ? (
                 <SanityImage
                   source={s.logo}
-                  width={320}
-                  sizes="208px"
+                  width={512}
+                  sizes="256px"
                   alt={s.logo.alt ?? s.name ?? ''}
-                  class="h-[4.4rem] max-w-full object-contain"
+                  class="h-[6rem] max-w-full object-contain"
                 />
               ) : (
-                <span class="display on-light text-center text-[1.05rem] text-[color:var(--plate-ink)]">
-                  {s.name}
-                </span>
+                <span class="display on-light text-center text-[1.05rem]">{s.name}</span>
               )}
             </li>
           ))}

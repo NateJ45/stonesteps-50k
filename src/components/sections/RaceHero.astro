@@ -149,13 +149,13 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
           )
         }
 
-        <h1 id={headingId} class="display display-echo text-[clamp(3rem,10vw,7rem)]">
+        <h1 id={headingId} class="display display-echo text-[clamp(4.5rem,15vw,10.5rem)]">
           <span class="sr-only">{headline}</span>
           <span class="hand" aria-hidden="true">
             {
               words.map((word, wi) => (
                 <>
-                  <span class="inline-block whitespace-nowrap">
+                  <span class="stamp-word inline-block whitespace-nowrap" style={`--wi:${wi}`}>
                     {word.split('').map((ch, ci) => (
                       <span
                         class={
