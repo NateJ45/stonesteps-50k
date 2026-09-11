@@ -25,6 +25,7 @@ import logoDarkAsset from '@/assets/logo-dark.svg';
 import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { telHref } from '@/lib/phone';
 import { urlFor } from '@/lib/sanity';
+import { getRace } from '@/lib/queries';
 
 // THE IMPORTED ASSET'S OWN URL, NOT getImage(). These used to run through
 // Astro's image pipeline for a cache-busted URL, which they do not need: an
@@ -74,6 +75,13 @@ const availability = siteSettings?.availabilityStatus ?? '';
 // through one shared helper (see src/lib/siteSettings.ts) so the header, the
 // drawer, and the footer can never disagree about what the menu is.
 const chrome = resolveSiteSettings(siteSettings);
+
+// The Facebook group lives on the RACE document (race.facebookUrl), not in
+// Site Settings' social fields, which this dataset leaves empty. It is the one
+// place the race actually talks to its runners, so it earns a spot in the
+// chrome rather than only the footer. Same fetch the footer makes.
+const race = await getRace().catch(() => null);
+const facebookGroupUrl = race?.facebookUrl ?? '';
 const headerCta = chrome.headerCta;
 const logo = chrome.logo;
 // The logo box is 48px tall (h-12), so 280w covers a wide wordmark at 1x and
@@ -373,6 +381,20 @@ function isGroupActive(items: { href: string }[]) {
       </nav>
       {/* The theme toggle moved down here when the tagline strip went. */}
       <ThemeToggle client:idle />
+      {
+        facebookGroupUrl && (
+          <a
+            href={facebookGroupUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Stone Steps Facebook group"
+            title="Facebook group"
+            class="inline-flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition-colors hover:text-primary focus-visible:text-primary"
+          >
+            <IconBrandFacebook size={20} stroke={1.75} aria-hidden="true" />
+          </a>
+        )
+      }
       <span class="h-6 w-px bg-border-soft" aria-hidden="true"></span>
       {
         headerCta.show && (

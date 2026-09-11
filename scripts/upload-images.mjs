@@ -188,33 +188,12 @@ async function main() {
     }
   }
 
-  // THE PHOTOGRAPH BAND. Placed once, on the home page, between the run of
-  // data-heavy bands (tickets, elevation, course, race day) and the storytelling
-  // that follows. That is the point in the page where the eye has been reading
-  // tables for four screens and needs somewhere to rest that is not more paper.
-  //
-  // Inserted rather than seeded, and only when it is absent, so re-running this
-  // script cannot stack up copies and an editor who moves or deletes it keeps
-  // their decision.
-  const homeDoc = await client.fetch('*[_id == "homePage"][0]{ pageBuilder[]{ _key, _type } }');
-  const blocks = homeDoc?.pageBuilder ?? [];
-  if (ids.stepsCrest && !blocks.some((b) => b._type === 'photoBandSection')) {
-    const before = blocks.findIndex((b) => b._type === 'dynastiesSection');
-    const at = before === -1 ? blocks.length : before;
-    await client
-      .patch('homePage')
-      .insert('before', `pageBuilder[${at}]`, [
-        {
-          _key: 'photo-band-1',
-          _type: 'photoBandSection',
-          height: 'standard',
-          image: imageField(ids.stepsCrest, IMAGES.stepsCrest.alt),
-          caption: 'The steps, near the top of the long loop',
-        },
-      ])
-      .commit();
-    console.log('  homePage photograph band');
-  }
+  // NO PHOTOGRAPH BAND ON HOME. One was inserted here until 2026-09-11: a
+  // full-bleed strip of the steps between the data-heavy bands and the
+  // storytelling. Removed because a strip that wide is cropped to a sliver of
+  // whatever is in the middle of the frame on a desktop viewport, which on the
+  // chosen photograph was a runner's torso and a bib rather than the steps.
+  // The photograph still serves the race's atmosphere margins below.
 
   // ATMOSPHERE. Two photographs the bands lay into their outer margins. They
   // are picked by position rather than subject (see GhostPhoto), so what

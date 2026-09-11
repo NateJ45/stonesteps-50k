@@ -1709,7 +1709,8 @@ body::before {
   transition:
     transform 0.16s ease,
     box-shadow 0.16s ease,
-    background 0.16s ease;
+    background 0.16s ease,
+    color 0.16s ease;
 }
 .btn-plate:hover {
   background: var(--primary-accent);
@@ -1730,6 +1731,14 @@ body::before {
 .btn-plate--cream {
   background: #ffebbb;
   color: #1a1712;
+}
+/* On hover the base rule turns the face rust, and dark lettering on rust is the
+   one pairing this palette never uses. The ink flips to the same cream the
+   primary button carries on the same ground, so the two buttons read as one
+   family the moment either is touched. */
+.btn-plate--cream:hover,
+.btn-plate--cream:focus-visible {
+  color: var(--primary-foreground);
 }
 
 /* Reduced motion kills the PRESS TRAVEL, not the lean. The skew is a static
@@ -2343,14 +2352,17 @@ body::before {
   padding: 0.35rem 0.5rem;
   border: 2px solid var(--plate-edge);
   border-radius: 7px;
-  /* THE PAGE'S OWN GROUND, not --plate-face. The plate objects elsewhere invert
-     between themes (a cream ticket on the bark page, a charcoal one on the
-     cream page), and this plate must not: it carries the logo and the wordmark,
-     whose ink follows the THEME. Painted with --plate-face it came out dark
-     charcoal in light mode with dark ink on it. Using the ground means the
-     lockup keeps its normal contrast and the plate is defined by its edge and
-     its shadow, which is what a sign plate is anyway. */
-  background: var(--background);
+  /* DARK STOCK IN BOTH THEMES, as a literal. This plate carried the page's own
+     ground while it held a typeset lockup whose ink followed the theme; that
+     lockup is gone (2026-09-11) and the plate now holds the race's painted mark,
+     which is fixed-colour artwork: yellow lettering with a dark keyline, drawn
+     for a dark sign. On the cream page that came out yellow on cream, all but
+     unreadable. Neither theme token fits: --plate-face is cream on the bark
+     page (the mark would vanish there instead) and --background is what just
+     failed. So the stock is the light theme's charcoal, spelled out, in both
+     themes: the mark reads on it everywhere, and on bark it still separates
+     from the page as a plate should. */
+  background: #3a3128;
   box-shadow: var(--lift-sm);
   rotate: -1.5deg;
   transition:
