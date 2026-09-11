@@ -2674,9 +2674,34 @@ main > .band-torn:first-child::before {
   box-shadow: 8px 12px 0 rgb(0 0 0 / 0.5);
 }
 
-/* The perforation, and the two notches punched through it. The notches are
-   filled with --ground, the page behind the ticket, which is what makes them
-   read as holes rather than as decoration. */
+/* The perforation, and the two notches punched through it.
+
+   PUNCHED, NOT PAINTED. The notches used to be discs filled with --ground, the
+   page's own token, on the theory that a hole shows the page. It does not: the
+   page is that token under the paper grain and the band's mottle, and a flat
+   disc of the bare colour reads as a lighter sticker sitting ON the ticket,
+   which is the opposite of a hole. No fill can match a texture. So the ticket
+   is masked instead: two transparent circles are cut out of its rendering,
+   and whatever is really behind it, grain and all, shows through.
+
+   The cut has to be on the TICKET (the element that owns the face, border and
+   shadow), but the perforation's height depends on how much copy sits above
+   it, which CSS cannot see. A short script in DistanceTickets.astro measures
+   each stub and writes `--perf-y` on its ticket. Until it runs, or if it never
+   does, the variable is unset, the mask declaration is invalid at computed-
+   value time and simply drops, and the painted discs below carry on as the
+   fallback. When it does run, the mask removes the discs along with the face,
+   so the two never fight. */
+.ticket {
+  -webkit-mask-image:
+    radial-gradient(circle at 2px var(--perf-y), transparent 15px, #000 15.5px),
+    radial-gradient(circle at calc(100% - 2px) var(--perf-y), transparent 15px, #000 15.5px);
+  mask-image:
+    radial-gradient(circle at 2px var(--perf-y), transparent 15px, #000 15.5px),
+    radial-gradient(circle at calc(100% - 2px) var(--perf-y), transparent 15px, #000 15.5px);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
 .ticket__stub {
   position: relative;
   border-top: 2px dashed rgb(0 0 0 / 0.4);

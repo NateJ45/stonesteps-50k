@@ -9,9 +9,9 @@
 // from the race's own world, and the mapping carries information the plain
 // version could not: the perforation separates what the entry IS from what you
 // KEEP, so the includes list and the register button sit on the tear-off stub.
-// The notches are filled with the page ground (--ground) rather than a fixed
-// colour, which is what makes them read as holes punched through the card in
-// both themes. See the .ticket rules in globals.css.
+// The notches are real holes: a mask on the ticket, positioned by the script at
+// the bottom of this file, which measures where each perforation falls. See
+// the .ticket rules in globals.css for why a painted disc could never pass.
 //
 // Per-distance register links matter here. Each distance carries its own
 // RunSignUp event id, so the button lands the entrant on the right event
@@ -170,3 +170,26 @@ function registerHref(eventId?: number): string | undefined {
     {note && <p class="mt-3 text-center text-sm text-muted-foreground">{note}</p>}
   </div>
 </section>
+
+<script>
+  // Tell each ticket where its perforation is, so the mask in globals.css can
+  // punch the notches at the right height. The stub's top edge is the
+  // perforation; the discs it replaces were centred 1px above it, and
+  // offsetTop is measured from the padding edge, inside the 2px border, so
+  // both are folded in here. Re-measured on resize, because the copy above the
+  // perforation reflows and moves it.
+  // Observing inside the pass means tickets that arrive with a view
+  // transition get watched too; observe() is idempotent for a known target.
+  const ro = 'ResizeObserver' in window ? new ResizeObserver(() => placePerforations()) : null;
+  function placePerforations() {
+    document.querySelectorAll<HTMLElement>('.ticket').forEach((ticket) => {
+      const stub = ticket.querySelector<HTMLElement>('.ticket__stub');
+      if (!stub) return;
+      ticket.style.setProperty('--perf-y', `${stub.offsetTop + 2 - 1}px`);
+      ro?.observe(stub);
+    });
+  }
+  placePerforations();
+  document.addEventListener('astro:page-load', placePerforations);
+  if (!ro) window.addEventListener('resize', placePerforations);
+</script>
