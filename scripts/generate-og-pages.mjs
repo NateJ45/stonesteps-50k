@@ -12,6 +12,7 @@
 // access at build time. BaseLayout picks the right PNG per pathname; anything
 // without a file gracefully falls back to og-default.png.
 
+import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
@@ -62,50 +63,53 @@ async function render(slug, tagline) {
   console.log(`  ${slug}.png — ${t.slice(0, 60)}${t.length > 60 ? '…' : ''}`);
 }
 
-// ---- Page singletons → /og/<slug>.png -----------------------------------
-// `slug` matches the route (slashes already dash-free here). `defaultTitle` is
-// the fallback when Sanity's seoTitle / heroHeadline are both empty.
-// These are the core routes every starter project ships with. Add rows for any
-// additional page singletons you define in your Sanity schema.
-const SINGLETONS = [
-  { type: 'homePage', slug: 'home', defaultTitle: 'Welcome' },
-  { type: 'aboutPage', slug: 'about', defaultTitle: 'About us' },
-  { type: 'servicesPage', slug: 'services', defaultTitle: 'Services' },
-  { type: 'faqPage', slug: 'faq', defaultTitle: 'Frequently asked questions' },
-  { type: 'contactPage', slug: 'contact', defaultTitle: 'Get in touch' },
-  { type: 'journalPage', slug: 'journal', defaultTitle: 'Journal' },
-  { type: 'privacyPage', slug: 'privacy', defaultTitle: 'Privacy policy' },
-];
+// ---- This site's routes -------------------------------------------------
+// THE STARTER'S LIST IS GONE. It generated about, services, faq, journal,
+// privacy, process, portfolio, shop, quiz, calculator, gift-certificates,
+// press, resources and guides: twenty-three images for a design studio, none
+// of which this race site has a route for. Meanwhile the routes it DOES have
+// (course, records, results, and one per results year) had no image at all, so
+// BaseLayout pointed every share at a file that 404s. Sharing the course page
+// showed a broken preview (2026-09-12).
+//
+// Every entry below is a real route. `runners/<slug>` is deliberately absent:
+// there are more than twelve hundred of them, and a runner's page falls back
+// to og-default.png, which is the right trade.
+const slugs = [];
+const emit = async (slug, tagline) => {
+  await render(slug, tagline);
+  slugs.push(slug);
+};
 
-for (const page of SINGLETONS) {
-  const doc = await client
-    .fetch(`*[_type == $type][0]{ seoTitle, heroHeadline }`, { type: page.type })
-    .catch(() => null);
-  const tagline = doc?.seoTitle || doc?.heroHeadline || page.defaultTitle;
-  await render(page.slug, tagline);
+// The home page, from its own SEO title.
+const home = await client.fetch(`*[_type == "homePage"][0]{ seoTitle }`).catch(() => null);
+await emit('home', home?.seoTitle || "Cincinnati's longest running ultra marathon");
+
+// The custom pages: course, records, contact. Their slug IS their route.
+const pages = await client
+  .fetch(`*[_type == "page" && defined(slug.current)]{ "slug": slug.current, seoTitle, title }`)
+  .catch(() => []);
+for (const p of pages) {
+  await emit(p.slug, p.seoTitle || p.title || p.slug);
 }
 
-// ---- Dynamic collections → /og/<prefix>-<slug>.png ----------------------
-// Mirrors BaseLayout: /journal/my-post → journal-my-post.png, etc.
-// Each module that defines a dynamic collection should add its own entry here.
-// Field names are verified against studio/schemaTypes/<type>.ts before enabling.
-// journalEntry: slug (slug type, value at slug.current), seoTitle and title (both string).
+// The results archive, and one per year that has results.
+const race = await client.fetch(`*[_type == "race"][0]{ name }`).catch(() => null);
+await emit('results', `Every ${race?.name ?? 'Stone Steps'} result on file`);
 
-const COLLECTIONS = [
-  {
-    prefix: 'journal',
-    query: `*[_type=="journalEntry" && defined(slug.current)]{ "slug": slug.current, seoTitle, title }`,
-    pick: (d) => d.seoTitle || d.title,
-  },
-];
-
-for (const col of COLLECTIONS) {
-  const docs = await client.fetch(col.query).catch(() => []);
-  for (const d of docs) {
-    const tagline = col.pick(d);
-    if (!d.slug || !tagline) continue;
-    await render(`${col.prefix}-${d.slug}`, tagline);
-  }
+const years = await client
+  .fetch(`array::unique(*[_type == "raceResult"].year) | order(@ desc)`)
+  .catch(() => []);
+for (const year of years) {
+  if (typeof year !== 'number') continue;
+  await emit(`results-${year}`, `${year} results`);
 }
+
+// ---- The manifest -------------------------------------------------------
+// BaseLayout reads this to decide whether a route HAS an image, instead of
+// assuming one and emitting a URL that 404s. Committed with the PNGs.
+const manifest = resolve(root, 'src/data/ogPages.json');
+writeFileSync(manifest, JSON.stringify([...slugs].sort(), null, 2) + '\n');
+console.log(`\nManifest: ${slugs.length} slugs -> src/data/ogPages.json`);
 
 console.log(`\nDone. ${count} OG images written to ${outDir}`);

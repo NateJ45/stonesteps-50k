@@ -14,6 +14,8 @@ import { ClientRouter } from 'astro:transitions';
 // Preloaded, not merely imported. See the <link rel="preload"> below.
 import staatlichesWoff2 from '@fontsource/staatliches/files/staatliches-latin-400-normal.woff2?url';
 import { site } from '@/data/site';
+// The routes that really have an OG image, written by `npm run og:pages`.
+import OG_PAGES from '@/data/ogPages.json';
 import { urlFor } from '@/lib/sanity';
 import { localBusinessSchema } from '@/lib/schemas';
 import { getActiveAnnouncement } from '@/lib/queries';
@@ -64,12 +66,21 @@ const {
 const canonical = new URL(Astro.url.pathname, site.url).toString();
 
 // Per-page OG image: convention is /og/<route-slug>.png generated at build time.
-// `/` → /og/home.png, `/contact` → /og/contact.png, `/portfolio/foo` → /og/portfolio-foo.png.
-// Falls back to og-default.png if the slug-specific file isn't there.
+// `/` → /og/home.png, `/contact` → /og/contact.png, `/results/2025` → /og/results-2025.png.
+//
+// IT CHECKS THE MANIFEST, and that is the whole point of this comment. The
+// convention used to be assumed: whatever the route, emit the URL and trust a
+// file to be there. Nothing verified it, and the fallback this comment promised
+// did not exist, so /course, /records, /results and every results year shipped
+// an og:image that 404s. A share of the course page showed a broken preview
+// (2026-09-12). src/data/ogPages.json is written by `npm run og:pages` beside
+// the PNGs, so a route without an image now falls back to og-default.png
+// instead of pointing at nothing. The 1,200-odd runner pages rely on that
+// fallback by design.
 function ogPathForRoute(pathname: string): string {
   const trimmed = pathname.replace(/^\/|\/$/g, '');
-  if (!trimmed) return '/og/home.png';
-  return `/og/${trimmed.replace(/\//g, '-')}.png`;
+  const slug = trimmed ? trimmed.replace(/\//g, '-') : 'home';
+  return OG_PAGES.includes(slug) ? `/og/${slug}.png` : site.assets.ogDefault;
 }
 
 // Resolve a raw Sanity image object to a 1200x630 OG URL through the image
