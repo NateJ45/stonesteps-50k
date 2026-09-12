@@ -122,10 +122,12 @@ docs.push({
       ),
       eyebrow: 'Sunday, October 25, 2026',
       headline: 'Stone Steps 50k',
+      // The claim is STAMPED (see `claim` below and .claim-stamp in globals.css),
+      // so the subhead is only the shape of the day.
       subhead:
-        "Cincinnati's longest running ultra marathon, in its 23rd year. Seven single-track " +
-        'loops through Mt. Airy Forest, 10,726 feet of climbing, and an aid station every ' +
-        'time you come back through The Oval.',
+        'Seven single-track loops through Mt. Airy Forest, 10,726 feet of climbing, and an ' +
+        'aid station every time you come back through The Oval.',
+      claim: "Cincinnati's longest running ultra marathon",
       showCountdown: true,
       primaryCta: cta('Register', REGISTER),
       secondaryCta: cta('See the course', '/course'),
@@ -701,9 +703,10 @@ docs.push({
           _key: key(),
           question: 'How much is it, and when do prices go up?',
           answer:
-            'Entry is $35 through January 31, $50 from February 1 through September 30, ' +
-            'and $60 from October 1 to race day, plus a processing fee. The 50K is capped ' +
-            'at 120 entries and the 27K at 130.',
+            'The 50K is $35 through January 31, $50 from February 1 through September 30, ' +
+            'and $60 from October 1 to race day. The 27K is $30, $40 and $45 on the same ' +
+            'dates. Both plus a processing fee. The 50K is capped at 120 entries and the ' +
+            '27K at 130.',
         },
         {
           _type: 'faqCard',
@@ -715,19 +718,11 @@ docs.push({
             'including years this site does not hold, lives on RunSignUp.',
         },
       ],
-      unansweredHeading: 'Still to confirm with the race director',
-      unansweredNote:
-        'The race publishes no answer to these anywhere. They are the highest-value ' +
-        'content to add, and every one of them is a question runners email to ask.',
-      unanswered: [
-        'Packet pickup: when it opens and where',
-        'Pre-race briefing time',
-        'Awards categories and when they are handed out',
-        'Parking and spectator access',
-        'Drop bag, crew and pacer policy',
-        'Whether dogs are allowed on course',
-        'Refund, transfer and deferral policy',
-      ],
+      // The "Still to confirm with the race director" list that used to sit
+      // here (packet pickup, briefing, awards, parking, drop bags, dogs,
+      // refunds) was cut on 2026-09-11: it is the question list for the
+      // director, not content for a runner. It lives in seed-race.mjs's
+      // provenance note and in PENDING.md.
     },
     {
       _type: 'imageTextSection',

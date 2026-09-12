@@ -75,6 +75,15 @@ export const raceHeroSection = defineType({
         },
       },
     }),
+    defineField({
+      name: 'claim',
+      title: 'The claim (stamped mark)',
+      type: 'string',
+      description:
+        'Struck across the hero as a rubber stamp, not set as a sentence. Keep it to the ' +
+        'claim itself: "Cincinnati\'s longest running ultra marathon". The edition number ' +
+        'comes from The Race, so do not retype the year here.',
+    }),
     // THE HERO IS A SLIDESHOW, and the cap is the point of the field rather
     // than a limitation of it. Every photograph here loads on the first paint,
     // because a CSS cross-fade has no way to fetch the next one on demand; four

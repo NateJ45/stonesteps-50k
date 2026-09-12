@@ -121,7 +121,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       image${IMAGE_PROJECTION},
       primaryCta${CTA_PROJECTION},
       secondaryCta${CTA_PROJECTION},
-      "race": *[_type == "race"][0]{ raceDate, registerUrl, resultsUrl, confirmed }
+      "race": *[_type == "race"][0]{ raceDate, editionNumber, registerUrl, resultsUrl, confirmed }
     },
     _type == "distanceTicketsSection" => {
       ...,

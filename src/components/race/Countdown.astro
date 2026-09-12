@@ -47,20 +47,21 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
 {
   valid && (
     <div class={className}>
-      {/* Full-strength ink, not muted. This label is 12px on the busiest band
-      of the site, with mud behind it, and axe measured it at 4.11:1 there
-      against AA's 4.5. Softening a label that sits on texture is the wrong
-      economy: the hierarchy here comes from size and letter-spacing, which it
-      already has. */}
-      <p class="mb-2 font-mono text-[0.75rem] tracking-[0.22em] text-foreground uppercase">
-        {label}
-      </p>
       <div
         class="clock inline-block rounded-[10px] border-2 border-black px-[1.15rem] pt-[0.9rem] pb-3"
         data-target={target}
         role="timer"
         aria-label={srText}
       >
+        {/* THE LABEL LIVES ON THE PLATE, not on the band. It used to sit above
+          the clock on the page ground, 12px over the mud, and axe blends the
+          four mud layers into a veil there: it measured 4.11:1 once, then
+          2.68:1 after the wordmark grew and the label moved a hundred pixels
+          down the band, and reverting either the size or the stamp brought it
+          back over the line. A label whose contrast depends on where the
+          mud happens to fall is not a label with contrast. On the plate's own
+          face it is cream on near-black and the mud cannot reach it. */}
+        <p class="clock__title font-mono text-[0.6875rem] tracking-[0.22em] uppercase">{label}</p>
         <div class="flex items-end gap-2">
           {units.map((u, i) => (
             <>
@@ -128,6 +129,12 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
     text-shadow:
       0 0 6px rgb(255 59 31 / 0.5),
       0 0 18px rgb(255 59 31 / 0.22);
+  }
+  .clock__title {
+    /* Cream at 85% on the plate's #0d0b09: about 15:1, and the mud has no
+       say. Sits flush with the LED row's left edge. */
+    color: rgb(255 235 187 / 0.85);
+    margin-bottom: 0.55rem;
   }
   .clock__lbl {
     grid-area: label;

@@ -449,6 +449,7 @@ export interface ProjectedRaceHeroSection {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  claim?: string;
   images?: ProjectedImage[];
   /** Pre-slideshow documents. Read as a single slide when `images` is empty. */
   image?: ProjectedImage;
@@ -457,6 +458,7 @@ export interface ProjectedRaceHeroSection {
   secondaryCta?: ProjectedCtaBlock;
   race?: {
     raceDate?: string;
+    editionNumber?: number;
     registerUrl?: string;
     resultsUrl?: string;
     confirmed?: boolean;

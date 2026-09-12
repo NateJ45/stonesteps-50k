@@ -191,6 +191,24 @@ box in the Studio each year.
 
 ## Known gaps, deliberately open
 
+### 0b. `npm run dev` logs "Invalid hook call" on every island render
+
+**Blocker: the second React instance is inside the workerd dev runtime, past the config knobs.**
+
+Under the Cloudflare adapter the dev SSR environment is named `astro` and runs through
+workerd's module runner. Diagnosed 2026-09-11: `react-dom/server` and the islands' `react`
+were arriving by different paths (raw `node_modules` vs Vite's transform), so `react` was
+evaluated twice and `ThemeToggle` / `StatsCounter` threw `Cannot read properties of null
+(reading 'useRef')` during SSR; Astro fell back and the page still rendered. Pre-bundling the
+React family for that environment (`vite.environments.astro.optimizeDeps.include` in
+`astro.config.mjs`) fixed the throw: renders now succeed and the SSR HTML is complete. React
+still prints its dev-only "Invalid hook call" warning once per island per render, which means
+it can still see two module instances somewhere in that runtime. Production builds do not run
+the optimizer and are unaffected (CI smoke and Lighthouse render the islands fine). Tried and
+rejected: `optimizeDeps.include: ['react/compiler-runtime']` (made it worse). Next things to
+try: `resolve.noExternal: ['react', 'react-dom']` on the `astro` environment, or a newer
+`@astrojs/cloudflare` that names or handles the environment itself.
+
 ### 0a. Five race dates are unknown, so the weather strip starts in 2006 with gaps
 
 **Blocker: no captured page from those years names the date.**

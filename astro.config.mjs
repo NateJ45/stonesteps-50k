@@ -203,11 +203,35 @@ export default defineConfig({
       // (reading 'v2')" from inside styled-components' generateAndInjectStyles.
       // Leave the bundler's default chunking alone.
       exclude: ['@sanity/ui', 'styled-components', 'sanity'],
-      // The cost of excluding `sanity`: unbundled, its modules import
-      // `react/compiler-runtime`, which is CJS. Served raw it has no named
-      // export `c`. Naming it here pre-bundles that one entry into ESM with
-      // real named exports.
-      include: ['react/compiler-runtime'],
+      // Tried and reverted: `include: ['react/compiler-runtime']`, meant to
+      // give the unbundled Studio an ESM copy of that CJS entry. It did not get
+      // the Studio hydrating (the sanity self-reference fails in the browser
+      // regardless), and a pre-bundled entry inlines its own copy of react, so
+      // the SSR environment ran two React instances and every island render
+      // logged "Invalid hook call" from react-dom/server. Do not add it back.
+    },
+    // THE DEV SSR ENVIRONMENT IS CALLED `astro`, NOT `ssr`, under the
+    // Cloudflare adapter (it runs in workerd through the module runner), and
+    // @astrojs/react only pre-bundles react + react-dom together for
+    // environments named `ssr`. Left alone, react-dom/server loads raw from
+    // node_modules and resolves `react` itself while the islands get `react`
+    // through Vite's transform: two evaluations of the same file, and every
+    // island render logs "Invalid hook call ... reading 'useRef'" from
+    // react-dom-server.edge while still producing correct HTML. Pre-bundling
+    // the family here, in this environment, is the same fix the integration
+    // applies to `ssr`. Dev only; `astro build` does not run the optimizer.
+    environments: {
+      astro: {
+        optimizeDeps: {
+          include: [
+            'react',
+            'react/jsx-runtime',
+            'react/jsx-dev-runtime',
+            'react-dom',
+            'react-dom/server',
+          ],
+        },
+      },
     },
     // -----------------------------------------------------------------------
     // ONE module instance per package

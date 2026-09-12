@@ -80,7 +80,7 @@ const fmtDate = (iso: string) =>
           one absolutely-positioned bar. Heights and offsets are percentages of
           the shared scale, so every bar is comparable by eye and the whole
           thing is plain CSS: nothing to hydrate, nothing to animate. */}
-        <figure class="mt-10">
+        <figure class="mt-10" data-reveal>
           <div class="wx" style={`--wx-cols:${days.length}`}>
             <div class="wx__axis" aria-hidden="true">
               {ticks.map((t) => (
@@ -93,9 +93,10 @@ const fmtDate = (iso: string) =>
               {ticks.map((t) => (
                 <span class="wx__grid" style={`bottom:${pct(t)}%`} />
               ))}
-              {days.map((d) => (
+              {days.map((d, i) => (
                 <div
                   class:list={['wx__col', wasWetUnderfoot(d) && 'is-wet', wasWet(d) && 'is-rain']}
+                  style={`--i:${i}`}
                   title={`${d.year}: ${d.low}° to ${d.high}°F, ${conditionLabel(d.code).toLowerCase()}${wasWet(d) ? `, ${d.rainIn} in of rain` : wasWetUnderfoot(d) ? ', wet from the night before' : ''}`}
                 >
                   <span
@@ -115,12 +116,22 @@ const fmtDate = (iso: string) =>
               ))}
             </div>
           </div>
-          <figcaption class="mt-4 max-w-[62ch] font-mono text-[0.6875rem] leading-relaxed tracking-wide text-muted-foreground uppercase">
-            Each bar runs from the day's low to its high; the notch is the temperature at the 8 am
-            start. A filled foot means rain on the day; an open one, wet ground from the night
-            before. {summary.firstYear} to {summary.lastYear}, the years with a confirmed date.
-            Reanalysis data for Mt. Airy Forest (ERA5 via Open-Meteo): right for the day's
-            temperature and whether it rained, not for a shower that only hit the ridge.
+          {/* A KEY, not a caption. The strip explains itself once the three
+            marks are named; where the numbers came from is in the source of
+            this component and in scripts/build-weather.mjs, not on the page. */}
+          <figcaption class="wx__key mt-8 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[0.6875rem] tracking-wide text-muted-foreground uppercase">
+            <span class="wx__k">
+              <span class="wx__k-bar" aria-hidden="true" /> Low to high
+            </span>
+            <span class="wx__k">
+              <span class="wx__k-notch" aria-hidden="true" /> 8 am start
+            </span>
+            <span class="wx__k">
+              <span class="wx__k-foot is-rain" aria-hidden="true" /> Rain on the day
+            </span>
+            <span class="wx__k">
+              <span class="wx__k-foot is-wet" aria-hidden="true" /> Wet from the night before
+            </span>
           </figcaption>
         </figure>
 

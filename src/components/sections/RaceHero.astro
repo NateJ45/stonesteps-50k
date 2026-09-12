@@ -30,6 +30,7 @@ type Props = {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  claim?: string;
   images?: ProjectedRaceHeroSection['images'];
   image?: ProjectedRaceHeroSection['image'];
   showCountdown?: boolean;
@@ -43,6 +44,7 @@ const {
   eyebrow,
   headline = '',
   subhead,
+  claim,
   images,
   image,
   showCountdown = true,
@@ -68,6 +70,14 @@ const slides = (images?.length ? images : image ? [image] : []).filter((i) => i?
    the timing from the number of pictures. */
 const SLIDE_SECONDS = 7;
 const cycleSeconds = SLIDE_SECONDS * slides.length;
+
+/** 1 -> "1st", 23 -> "23rd". Two rules: the teens are all "th", then the last
+ *  digit decides. */
+const ordinal = (n: number) => {
+  const teen = n % 100 >= 11 && n % 100 <= 13;
+  const last = n % 10;
+  return `${n}${teen ? 'th' : last === 1 ? 'st' : last === 2 ? 'nd' : last === 3 ? 'rd' : 'th'}`;
+};
 
 // Split into words, then characters, so a word never breaks mid-rotation
 // across a line end.
@@ -140,7 +150,7 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
 
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
     <div class="lg:max-w-[52%]">
-      <div>
+      <div class="relative">
         {
           eyebrow && (
             <p class="blaze blaze--plain text-heading-accent mb-5 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
@@ -174,6 +184,33 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
             }
           </span>
         </h1>
+
+        {
+          /* THE CLAIM IS A MARK, NOT A SENTENCE. It used to open the subhead,
+            where the one genuinely boastable fact about this race ("Cincinnati's
+            longest running ultra marathon") was the first half of a paragraph
+            nobody reads twice. Struck over the hero as a rubber stamp it is
+            read in the same glance as the wordmark, which is what a claim is
+            for. The edition line under it reads off The Race's own
+            editionNumber, so the year can never disagree with the rest of the
+            site.
+
+            Real text, not an image: it is a claim a search engine and a screen
+            reader should both get, and at this size type is sharper than any
+            raster would be.
+
+            In flow on a phone (under the wordmark, still rotated), absolutely
+            placed at the top right of the copy column from lg, where the
+            second line of the wordmark leaves the corner empty. */
+          claim && (
+            <p class="claim-stamp">
+              <span class="claim-stamp__line">{claim}</span>
+              {typeof race?.editionNumber === 'number' && (
+                <span class="claim-stamp__edition">{ordinal(race.editionNumber)} year</span>
+              )}
+            </p>
+          )
+        }
 
         {
           /* FULL-STRENGTH INK, not muted. This is the one paragraph on the site

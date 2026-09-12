@@ -1721,7 +1721,12 @@ body::before {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
-  padding: 0.9rem 1.7rem;
+  /* Half again the size it shipped at (0.9rem 1.7rem, inherited type). A
+     plate button is the one thing on a poster you are meant to reach for,
+     and at the old size it read as a tag rather than a handle. The header's
+     --sm variant keeps its own dimensions below. */
+  font-size: 1.25rem;
+  padding: 1.15rem 2.4rem;
   border: 2px solid var(--plate-edge);
   border-radius: var(--plate-radius);
   background: var(--primary);
@@ -2116,6 +2121,99 @@ body::before {
   }
   50% {
     text-shadow: 0.072em 0.066em 0 var(--display-echo);
+  }
+}
+
+/* ---------- The claim, struck as a rubber stamp -------------------------- */
+/* A postmark, not a badge: double rule, rotated off square, ink in the band's
+   own accent so it belongs to the poster rather than sitting on it.
+
+   THE INK IS --heading-accent, which is the one rust-family token that FLIPS
+   with the theme (#8f3323 on the cream page, #fed89b on bark). Brand rust
+   itself measures 2.84:1 on the dark hero, and this is a claim a visitor is
+   meant to read, not a texture. The eyebrow on this same band already proves
+   this token against axe in both themes.
+
+   The double rule is a border plus an inset ::before rather than two elements,
+   so the mark is one box to position and one thing to rotate. */
+.claim-stamp {
+  --claim-rotate: -6deg;
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 17rem;
+  margin-top: 1.75rem;
+  padding: 0.85rem 1.1rem;
+  border: 2px solid var(--heading-accent);
+  border-radius: 4px;
+  color: var(--heading-accent);
+  text-transform: uppercase;
+  rotate: var(--claim-rotate);
+  /* The ink sits a hair off full strength, the way a stamp pad leaves it.
+     Not low enough to cost the contrast the token was chosen for. */
+  opacity: 0.94;
+}
+.claim-stamp::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid currentcolor;
+  border-radius: 2px;
+  pointer-events: none;
+}
+.claim-stamp__line {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+}
+.claim-stamp__edition {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.24em;
+  /* A rule above it, so the edition reads as the stamp's second impression
+     rather than as a third line of the claim. */
+  border-top: 1px solid currentcolor;
+  padding-top: 0.35rem;
+}
+@media (min-width: 64rem) {
+  .claim-stamp {
+    --claim-rotate: -7deg;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 0;
+    max-width: 15rem;
+  }
+}
+
+/* It lands like the words do: dropped in oversized and out of square, then
+   struck. Delayed past the last word of the wordmark (three words at 170ms
+   apart, 620ms each), so the claim is the last thing to hit the page. */
+@media (prefers-reduced-motion: no-preference) {
+  .claim-stamp {
+    animation: claim-strike 520ms cubic-bezier(0.5, 0, 0.4, 1) 900ms both;
+  }
+}
+@keyframes claim-strike {
+  0% {
+    opacity: 0;
+    scale: 1.8;
+    rotate: calc(var(--claim-rotate) - 14deg);
+    filter: blur(3px);
+  }
+  60% {
+    opacity: 0.94;
+    scale: 0.96;
+    rotate: calc(var(--claim-rotate) + 1.5deg);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0.94;
+    scale: 1;
+    rotate: var(--claim-rotate);
+    filter: blur(0);
   }
 }
 
@@ -3279,6 +3377,83 @@ main > .band-torn:first-child::before {
   font-size: 0.6875rem;
   color: var(--muted-foreground);
 }
+/* THE STRIP ARRIVES. The figure rides the page's own reveal observer (the
+   `data-reveal` / `.is-visible` pair from BaseLayout), and once it is visible
+   each bar grows up from its low in year order, the notch and the foot
+   arriving a beat after the bar they belong to. Transforms and opacity only,
+   so it is compositor work; before the reveal the bars sit collapsed at their
+   low, which is a true state (a day with no range yet) rather than a blank.
+   Off under reduced motion: the bars are simply there. */
+.wx__bar {
+  transform-origin: bottom center;
+}
+[data-reveal] .wx__bar {
+  transform: scaleY(0);
+  transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 55ms);
+}
+[data-reveal] .wx__start,
+[data-reveal] .wx__foot,
+[data-reveal] .wx__year {
+  opacity: 0;
+  transition: opacity 400ms ease calc(var(--i, 0) * 55ms + 450ms);
+}
+[data-reveal].is-visible .wx__bar {
+  transform: scaleY(1);
+}
+[data-reveal].is-visible .wx__start,
+[data-reveal].is-visible .wx__foot,
+[data-reveal].is-visible .wx__year {
+  opacity: 1;
+}
+/* A column you point at comes forward; the others step back a touch, so one
+   year can be read against the row. */
+.wx__track:hover .wx__col:not(:hover) .wx__bar {
+  opacity: 0.55;
+}
+.wx__bar {
+  transition-property: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] .wx__bar {
+    transform: none;
+    transition: none;
+  }
+  [data-reveal] .wx__start,
+  [data-reveal] .wx__foot,
+  [data-reveal] .wx__year {
+    opacity: 1;
+    transition: none;
+  }
+}
+
+/* The key's three marks, drawn the same way the strip draws them. */
+.wx__k {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.wx__k-bar {
+  width: 0.55rem;
+  height: 1rem;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+.wx__k-notch {
+  width: 0.9rem;
+  height: 2px;
+  background: var(--background);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+.wx__k-foot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--primary);
+}
+.wx__k-foot.is-rain {
+  background: var(--primary);
+}
+
 /* Two dozen labels do not fit a phone; every other year is enough to read the
    row, and the table underneath has all of them. */
 @media (max-width: 40rem) {
