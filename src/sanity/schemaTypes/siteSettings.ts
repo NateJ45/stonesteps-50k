@@ -4,6 +4,24 @@
 import { defineType, defineField, defineArrayMember } from 'sanity';
 import { LinkIcon, ChevronDownIcon, ListIcon } from '@sanity/icons';
 
+// WHAT AN EDITOR SHOULD SEE HERE.
+//
+// This schema arrived from the starter, which is a design-studio template, and
+// it carried that studio's whole identity: a newsletter, Google reviews, a
+// business category offering "Legal Service" and "Real Estate Agent", and ten
+// toggles for a portfolio, a shop, an e-design service, gift certificates, a
+// style quiz and a budget calculator. None of it has a route, a document or a
+// line of rendering on this site. It was pages of settings for a trail race
+// that needs about two screens (2026-09-12).
+//
+// Everything irrelevant is `hidden: true` rather than deleted. Hiding costs
+// nothing, keeps whatever an old document holds, and leaves the GROQ projection
+// in src/lib/queries.ts working untouched; deleting a field is the one action
+// in Sanity with no undo. The audit (`npm run audit:studio`) fails if a hidden
+// field is also required, which is the trap that pairing creates.
+//
+// If you ADD a field here, ask first whether the race director will ever type
+// into it.
 export const siteSettings = defineType({
   name: 'siteSettings',
   title: 'Site Settings',
@@ -13,10 +31,7 @@ export const siteSettings = defineType({
   groups: [
     { name: 'identity', title: 'Identity & contact' },
     { name: 'navigation', title: 'Navigation (menus)' },
-    { name: 'visibility', title: 'Section visibility' },
     { name: 'social', title: 'Social & footer' },
-    { name: 'newsletter', title: 'Newsletter' },
-    { name: 'reviews', title: 'Reviews' },
   ],
   fields: [
     defineField({
@@ -451,6 +466,9 @@ export const siteSettings = defineType({
     }),
     defineField({
       name: 'businessType',
+      // NOT A STONE STEPS FIELD. Feeds a LocalBusiness listing this site no longer emits.
+      // Hidden, not deleted: see the note at the top of this file.
+      hidden: true,
       title: 'Business type',
       type: 'string',
       description:
@@ -500,6 +518,9 @@ export const siteSettings = defineType({
     // ── Newsletter ──────────────────────────────────────────────────────────
     defineField({
       name: 'newsletter',
+      // NOT A STONE STEPS FIELD. There is no newsletter, and the footer only renders one when this is enabled.
+      // Hidden, not deleted: see the note at the top of this file.
+      hidden: true,
       title: 'Newsletter signup',
       type: 'object',
       description:
@@ -574,6 +595,9 @@ export const siteSettings = defineType({
     // ── Reviews ──────────────────────────────────────────────────────────────
     defineField({
       name: 'googleBusinessUrl',
+      // NOT A STONE STEPS FIELD. Nothing on the site reads it.
+      // Hidden, not deleted: see the note at the top of this file.
+      hidden: true,
       title: 'Google Business Profile URL',
       type: 'url',
       description:
@@ -581,6 +605,9 @@ export const siteSettings = defineType({
     }),
     defineField({
       name: 'reviewsNote',
+      // NOT A STONE STEPS FIELD. Nothing on the site reads it.
+      // Hidden, not deleted: see the note at the top of this file.
+      hidden: true,
       title: 'Reviews note',
       type: 'string',
       description:
@@ -594,6 +621,9 @@ export const siteSettings = defineType({
     // completely unaffected until an editor intentionally turns something off.
     defineField({
       name: 'sectionVisibility',
+      // NOT A STONE STEPS FIELD. Toggles for a portfolio, shop, e-design, gift certificates, a style quiz and a budget calculator. None of them exist here, and the footer links they gate are replaced by this race's own footer columns.
+      // Hidden, not deleted: see the note at the top of this file.
+      hidden: true,
       title: 'Section visibility',
       type: 'object',
       group: 'visibility',
@@ -685,6 +715,9 @@ export const siteSettings = defineType({
     // ── Satisfaction guarantee ────────────────────────────────────────────────
     defineField({
       name: 'satisfactionGuarantee',
+      // NOT A STONE STEPS FIELD. Feeds a guarantee band that is not among the sections this site offers.
+      // Hidden, not deleted: see the note at the top of this file.
+      hidden: true,
       title: 'Satisfaction guarantee line',
       type: 'text',
       rows: 2,

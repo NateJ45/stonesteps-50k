@@ -54,19 +54,34 @@ interface Breadcrumb {
   url: string;
 }
 
-// ---------- LocalBusiness (site-wide, BaseLayout injects on every page) ----
+// ---------- The organisation (site-wide, BaseLayout injects on every page) ----
+//
+// A TRAIL RACE IS NOT A LOCAL BUSINESS. This emitted `LocalBusiness` with a
+// `priceRange` of "$$" on every page, from a Sanity dropdown whose choices ran
+// to "Legal Service" and "Real Estate Agent". Google reads that as a business
+// listing, which is wrong about what this is, and it sat beside the
+// SportsEvent on the home page contradicting it (2026-09-12).
+//
+// `SportsOrganization` is the honest type: the body that puts the race on. It
+// keeps the name, url, logo and social links, which are the parts Google
+// actually uses, and drops the price range and the opening hours a race does
+// not have. The event itself is described by raceEventSchema on the home page.
+//
+// The function name is unchanged so the one caller in BaseLayout still reads
+// plainly; only what it emits has moved.
 
 export function localBusinessSchema(settings: SiteSettings | null | undefined): string {
   const s = settings ?? {};
   const schema: Record<string, any> = {
     '@context': 'https://schema.org',
-    '@type': s.businessType ?? 'LocalBusiness',
-    '@id': `${site.url}/#business`,
+    '@type': 'SportsOrganization',
+    '@id': `${site.url}/#organization`,
     name: s.title ?? site.name,
     url: site.url,
+    logo: `${site.url}${site.assets.ogDefault}`,
     image: `${site.url}${site.assets.ogDefault}`,
+    sport: 'Trail running',
     email: s.email ?? undefined,
-    priceRange: '$$',
     // Merge legacy fields + socialLinks urls, deduplicating by url string.
     sameAs: Array.from(
       new Set(
