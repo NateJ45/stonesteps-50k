@@ -39,7 +39,7 @@ const hasImage = Boolean(image?.asset);
 ---
 
 <section
-  class="relative overflow-hidden border-b border-border bg-background py-section-lg"
+  class="relative overflow-hidden border-b border-border bg-background pt-8 pb-section-lg lg:pt-section-lg"
   aria-labelledby={headingId}
 >
   {
@@ -63,7 +63,7 @@ const hasImage = Boolean(image?.asset);
   }
   <MudField field="walk" class="header-walk mud-edge-fade" />
 
-  <div class="relative z-10 mx-auto w-full max-w-content px-6">
+  <div class="mob-center relative z-10 mx-auto w-full max-w-content px-6">
     <div class={hasImage ? 'grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center' : ''}>
       <div>
         {
@@ -96,7 +96,11 @@ const hasImage = Boolean(image?.asset);
             )
           }
         </h1>
-        {lede && <p class="mt-6 max-w-[46ch] text-lg text-muted-foreground">{lede}</p>}
+        {
+          lede && (
+            <p class="mx-auto mt-6 max-w-[46ch] text-lg text-muted-foreground lg:mx-0">{lede}</p>
+          )
+        }
       </div>
 
       {

@@ -212,7 +212,7 @@ const latestProjects = allProjects.slice(0, 3);
   {
     raceDateLabel && raceIsUpcoming && (
       <div class="border-b border-border">
-        <div class="mx-auto flex max-w-content flex-col gap-m px-m py-l md:flex-row md:items-end md:justify-between">
+        <div class="mob-center mx-auto flex max-w-content flex-col items-center gap-m px-6 py-l md:flex-row md:items-end md:justify-between">
           <div>
             <p class="blaze text-heading-accent mb-2 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
               Next running
@@ -224,7 +224,7 @@ const latestProjects = allProjects.slice(0, 3);
           </div>
           {race?.registerUrl && (
             <a
-              class="btn-plate btn-plate--cream self-start md:self-auto"
+              class="btn-plate btn-plate--cream self-center md:self-auto"
               href={race.registerUrl}
               {...externalLinkAttrs(race.registerUrl)}
             >
@@ -247,7 +247,7 @@ const latestProjects = allProjects.slice(0, 3);
   }
   {
     siteSettings?.newsletter?.enabled && (
-      <div class="mx-auto max-w-content px-m pt-l">
+      <div class="mx-auto max-w-content px-6 pt-l">
         <div class="mx-auto max-w-md">
           <NewsletterSignup client:visible newsletter={siteSettings.newsletter} source="footer" />
         </div>
@@ -263,7 +263,7 @@ const latestProjects = allProjects.slice(0, 3);
        Projects column and Get in touch column always render. */
   }
   <div
-    class="mx-auto grid max-w-content grid-cols-1 gap-l px-m pt-l pb-m text-center sm:grid-cols-2 md:grid-cols-3 md:text-left lg:grid-cols-5"
+    class="mx-auto grid max-w-content grid-cols-1 gap-l px-6 pt-l pb-m text-center sm:grid-cols-2 md:grid-cols-3 md:text-left lg:grid-cols-5"
   >
     {/* --- Editor-managed columns (from Sanity siteSettings.footerColumns) --- */}
     {
@@ -543,7 +543,7 @@ const latestProjects = allProjects.slice(0, 3);
   </div>
 
   {/* Logo + tagline — sits below the nav grid as a centered brand signature. */}
-  <div class="mx-auto flex max-w-content flex-col items-center gap-s px-m pb-l text-center">
+  <div class="mx-auto flex max-w-content flex-col items-center gap-s px-6 pb-l text-center">
     <a
       href="/"
       aria-label={`${brandName} home`}
@@ -584,7 +584,7 @@ const latestProjects = allProjects.slice(0, 3);
   }
   <div class="border-t border-border">
     <div
-      class="mx-auto flex max-w-content flex-col items-center justify-center gap-xs px-m py-m text-center text-xs text-foreground/80 sm:flex-row sm:justify-between"
+      class="mx-auto flex max-w-content flex-col items-center justify-center gap-xs px-6 py-m text-center text-xs text-foreground/80 sm:flex-row sm:justify-between"
     >
       <p>© {currentYear} {brandName}</p>
       <div class="flex items-center gap-m">

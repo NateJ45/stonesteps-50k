@@ -113,12 +113,12 @@ export default function StatsCounter({ stats }: Props) {
        four on a desktop, and each number owns the line above it. */
     <div
       ref={ref}
-      className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-4 md:gap-x-12"
+      className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-4 md:gap-x-12"
       aria-label="Race statistics"
     >
       {stats.map((stat) => (
         <React.Fragment key={stat.label}>
-          <div className="border-t-2 border-[color:var(--plate-edge)] pt-4 text-left">
+          <div className="border-t-2 border-[color:var(--plate-edge)] pt-4 text-center md:text-left">
             {/* text-[color:var(--primary)], NOT text-primary. The Tailwind utility
                 maps to the @theme brand token, which is one constant for both
                 themes; the shadcn --primary is the theme-aware one. These
@@ -133,7 +133,7 @@ export default function StatsCounter({ stats }: Props) {
                 run={visible}
               />
             </span>
-            <span className="mt-3 block max-w-[22ch] text-[0.6875rem] leading-snug tracking-eyebrow text-muted-foreground uppercase">
+            <span className="mx-auto mt-3 block max-w-[22ch] text-[0.6875rem] leading-snug tracking-eyebrow text-muted-foreground uppercase md:mx-0">
               {stat.label}
             </span>
           </div>

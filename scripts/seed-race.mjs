@@ -335,7 +335,7 @@ const sponsors = [
   {
     id: 'cincinnati-parks',
     name: 'Cincinnati Parks',
-    url: 'https://www.cincinnatiparks.com',
+    url: 'https://www.cincinnati-oh.gov/cincyparks/',
     logo: 'image-5106de23eac526b4d09fc8b10b92f9514685e036-828x1556-png',
   },
   {

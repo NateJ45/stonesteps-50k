@@ -64,11 +64,17 @@ const measured =
       }[])
     : null;
 
-const W = 1400;
-const H = 320;
-const BASE = H - 42;
-const PEAK = 46;
-
+/**
+ * THE CHART IS DRAWN TWICE, ON TWO CANVASES, and that is a phone fix. The
+ * profile is a 1400 x 320 drawing, a 4.4:1 strip that reads as a ridge line on
+ * a desktop column. Scaled to a 327px phone column that same strip is 75px
+ * tall, the fourteen aid verticals are 23px apart and the whole thing is a
+ * smear under the caption. Stretching it with preserveAspectRatio="none" would
+ * have squashed every label and turned the aid dots into slivers. So the same
+ * loops are laid out again on a 720 x 400 canvas, whose teeth are about twice
+ * as steep, and each canvas is shown at its own breakpoint. The geometry is
+ * one function of (W, H) so the two can never disagree about the course.
+ */
 type Loop = { kind: 'long' | 'short'; miles: number };
 
 const loops: Loop[] = [
@@ -88,65 +94,91 @@ function jitter(i: number, n: number) {
   return Math.sin(i * 12.9898 + n * 78.233) * 0.5;
 }
 
-let x = 0;
-let cumulative = 0;
-const points: [number, number][] = [[0, BASE]];
-const markers: { x: number; label: string; kind: Loop['kind']; mile: number }[] = [];
+function build(W: number, H: number) {
+  const BASE = H - 42;
+  const PEAK = 46;
 
-loops.forEach((loop, li) => {
-  const w = (loop.miles / totalMiles) * W;
-  // Long loops get more internal climbs than short ones.
-  const teeth = loop.kind === 'long' ? 4 : 3;
-  const height = loop.kind === 'long' ? 1 : 0.72;
+  let x = 0;
+  let cumulative = 0;
+  const points: [number, number][] = [[0, BASE]];
+  const markers: { x: number; label: string; kind: Loop['kind']; mile: number }[] = [];
 
-  for (let t = 0; t < teeth; t++) {
-    const seg = w / teeth;
-    const up = x + seg * 0.45;
-    const down = x + seg;
-    const wob = jitter(li, t) * 26;
-    const crest = BASE - (BASE - PEAK) * height * (0.62 + 0.38 * Math.abs(jitter(li, t + 3))) + wob;
-    points.push([up, Math.max(PEAK, Math.min(BASE - 20, crest))]);
-    points.push([down, BASE - (t === teeth - 1 ? 0 : 34)]);
-    x = down;
+  loops.forEach((loop, li) => {
+    const w = (loop.miles / totalMiles) * W;
+    // Long loops get more internal climbs than short ones.
+    const teeth = loop.kind === 'long' ? 4 : 3;
+    const height = loop.kind === 'long' ? 1 : 0.72;
+
+    for (let t = 0; t < teeth; t++) {
+      const seg = w / teeth;
+      const up = x + seg * 0.45;
+      const down = x + seg;
+      const wob = jitter(li, t) * 26;
+      const crest =
+        BASE - (BASE - PEAK) * height * (0.62 + 0.38 * Math.abs(jitter(li, t + 3))) + wob;
+      points.push([up, Math.max(PEAK, Math.min(BASE - 20, crest))]);
+      points.push([down, BASE - (t === teeth - 1 ? 0 : 34)]);
+      x = down;
+    }
+
+    cumulative += loop.miles;
+    markers.push({
+      x,
+      label: `Loop ${li + 1}`,
+      kind: loop.kind,
+      mile: cumulative,
+    });
+  });
+
+  /** Smooth the saw teeth just enough to feel like terrain. */
+  const line = points
+    .map(([px, py], i) => {
+      if (i === 0) return `M ${px.toFixed(1)} ${py.toFixed(1)}`;
+      const [qx, qy] = points[i - 1];
+      const cx = (qx + px) / 2;
+      return `C ${cx.toFixed(1)} ${qy.toFixed(1)} ${cx.toFixed(1)} ${py.toFixed(1)} ${px.toFixed(1)} ${py.toFixed(1)}`;
+    })
+    .join(' ');
+
+  const area = `${line} L ${W} ${BASE} L 0 ${BASE} Z`;
+
+  // A measured profile replaces both paths and the aid markers. Scaled to the
+  // same viewBox so every style rule below keeps applying unchanged.
+  let mLine = '';
+  let mArea = '';
+  if (measured) {
+    const maxMile = Math.max(...measured.map((p) => p.mile)) || 1;
+    const lo = Math.min(...measured.map((p) => p.ft));
+    const hi = Math.max(...measured.map((p) => p.ft));
+    const span = Math.max(1, hi - lo);
+    const sx = (m: number) => (m / maxMile) * W;
+    const sy = (ft: number) => BASE - ((ft - lo) / span) * (BASE - PEAK);
+    mLine = measured
+      .map((p, i) => `${i === 0 ? 'M' : 'L'} ${sx(p.mile).toFixed(1)} ${sy(p.ft).toFixed(1)}`)
+      .join(' ');
+    mArea = `${mLine} L ${W} ${BASE} L 0 ${BASE} Z`;
   }
 
-  cumulative += loop.miles;
-  markers.push({
-    x,
-    label: `Loop ${li + 1}`,
-    kind: loop.kind,
-    mile: cumulative,
-  });
-});
-
-/** Smooth the saw teeth just enough to feel like terrain. */
-const line = points
-  .map(([px, py], i) => {
-    if (i === 0) return `M ${px.toFixed(1)} ${py.toFixed(1)}`;
-    const [qx, qy] = points[i - 1];
-    const cx = (qx + px) / 2;
-    return `C ${cx.toFixed(1)} ${qy.toFixed(1)} ${cx.toFixed(1)} ${py.toFixed(1)} ${px.toFixed(1)} ${py.toFixed(1)}`;
-  })
-  .join(' ');
-
-const area = `${line} L ${W} ${BASE} L 0 ${BASE} Z`;
-
-// A measured profile replaces both paths and the aid markers. Scaled to the
-// same viewBox so every style rule below keeps applying unchanged.
-let mLine = '';
-let mArea = '';
-if (measured) {
-  const maxMile = Math.max(...measured.map((p) => p.mile)) || 1;
-  const lo = Math.min(...measured.map((p) => p.ft));
-  const hi = Math.max(...measured.map((p) => p.ft));
-  const span = Math.max(1, hi - lo);
-  const sx = (m: number) => (m / maxMile) * W;
-  const sy = (ft: number) => BASE - ((ft - lo) / span) * (BASE - PEAK);
-  mLine = measured
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${sx(p.mile).toFixed(1)} ${sy(p.ft).toFixed(1)}`)
-    .join(' ');
-  mArea = `${mLine} L ${W} ${BASE} L 0 ${BASE} Z`;
+  return {
+    W,
+    H,
+    BASE,
+    PEAK,
+    markers,
+    line: measured ? mLine : line,
+    area: measured ? mArea : area,
+  };
 }
+
+const wide = build(1400, 320);
+const tall = build(720, 400);
+// Two canvases, one for each breakpoint. The phone's carries a bigger label
+// size because its viewBox is half the width and would otherwise render the
+// loop numbers at 7px.
+const canvases = [
+  { ...wide, cls: 'elev__svg elev__svg--wide', lbl: 15 },
+  { ...tall, cls: 'elev__svg elev__svg--tall', lbl: 26 },
+];
 ---
 
 {
@@ -164,55 +196,73 @@ if (measured) {
   variant === 'watermark' ? (
     <svg
       class="elev-mark"
-      viewBox={`0 0 ${Math.round(W * 0.34)} ${H}`}
+      viewBox={`0 0 ${Math.round(wide.W * 0.34)} ${wide.H}`}
       preserveAspectRatio="none"
       aria-hidden="true"
       focusable="false"
     >
-      <path d={measured ? mArea : area} class="elev-mark__area" />
-      <path d={measured ? mLine : line} class="elev-mark__line" />
+      <path d={wide.area} class="elev-mark__area" />
+      <path d={wide.line} class="elev-mark__line" />
     </svg>
   ) : (
     <figure class="elev" data-reveal>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="elev-title elev-desc">
-        <title id="elev-title">Stone Steps 50K elevation profile</title>
-        <desc id="elev-desc">
-          Seven loops from The Oval: four long loops alternating with three short loops of just over
-          three miles, totalling 10,726 feet of elevation change across 31 miles.
-        </desc>
+      {/* The chart's ONE accessible name lives on the first canvas; the phone
+          canvas is a second drawing of the same figure and is hidden from the
+          tree, or a screen reader would hear the course described twice. The
+          gradient ids are suffixed per canvas because two <linearGradient
+          id="elevFill"> in one document resolve to the first one only. */}
+      {canvases.map((c, ci) => (
+        <svg
+          class={c.cls}
+          viewBox={`0 0 ${c.W} ${c.H}`}
+          role={ci === 0 ? 'img' : undefined}
+          aria-labelledby={ci === 0 ? 'elev-title elev-desc' : undefined}
+          aria-hidden={ci === 0 ? undefined : 'true'}
+        >
+          {ci === 0 && (
+            <>
+              <title id="elev-title">Stone Steps 50K elevation profile</title>
+              <desc id="elev-desc">
+                Seven loops from The Oval: four long loops alternating with three short loops of
+                just over three miles, totalling 10,726 feet of elevation change across 31 miles.
+              </desc>
+            </>
+          )}
 
-        <defs>
-          <linearGradient id="elevFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" class="elev__stop-top" />
-            <stop offset="100%" class="elev__stop-bottom" />
-          </linearGradient>
-        </defs>
+          <defs>
+            <linearGradient id={`elevFill-${ci}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" class="elev__stop-top" />
+              <stop offset="100%" class="elev__stop-bottom" />
+            </linearGradient>
+          </defs>
 
-        {/* Aid-station verticals: you pass through The Oval at the end of every loop. */}
-        {!measured &&
-          markers.map((m) => (
-            <g class="elev__aid" style={`--t:${(m.x / W).toFixed(3)}`}>
-              <line x1={m.x} y1={PEAK - 20} x2={m.x} y2={BASE} />
-              <circle cx={m.x} cy={BASE} r="4" />
-            </g>
-          ))}
+          {/* Aid-station verticals: you pass through The Oval at the end of every loop. */}
+          {!measured &&
+            c.markers.map((m) => (
+              <g class="elev__aid" style={`--t:${(m.x / c.W).toFixed(3)}`}>
+                <line x1={m.x} y1={c.PEAK - 20} x2={m.x} y2={c.BASE} />
+                <circle cx={m.x} cy={c.BASE} r={ci === 0 ? 4 : 6} />
+              </g>
+            ))}
 
-        <path d={measured ? mArea : area} class="elev__area" fill="url(#elevFill)" />
-        <path d={measured ? mLine : line} class="elev__line" pathLength="1" />
-        <line x1="0" y1={BASE} x2={W} y2={BASE} class="elev__base" />
+          <path d={c.area} class="elev__area" fill={`url(#elevFill-${ci})`} />
+          <path d={c.line} class="elev__line" pathLength="1" />
+          <line x1="0" y1={c.BASE} x2={c.W} y2={c.BASE} class="elev__base" />
 
-        {!measured &&
-          markers.map((m, i) => (
-            <text
-              x={m.x}
-              y={BASE + 26}
-              class={`elev__lbl ${m.kind === 'long' ? 'is-long' : ''}`}
-              text-anchor="middle"
-            >
-              {i + 1}
-            </text>
-          ))}
-      </svg>
+          {!measured &&
+            c.markers.map((m, i) => (
+              <text
+                x={m.x}
+                y={c.BASE + (ci === 0 ? 26 : 34)}
+                class={`elev__lbl ${m.kind === 'long' ? 'is-long' : ''}`}
+                style={`font-size:${c.lbl}px`}
+                text-anchor="middle"
+              >
+                {i + 1}
+              </text>
+            ))}
+        </svg>
+      ))}
 
       <figcaption class="elev__cap">
         <span class="mono">
@@ -265,12 +315,39 @@ if (measured) {
     /* The stretch would otherwise thin the line wherever the profile is steep. */
     vector-effect: non-scaling-stroke;
   }
+  /* ON A PHONE THE WATERMARK STEPS BACK. At 78% of the band it was three
+     times the height of the chart it sits behind, and a background that
+     outweighs its subject reads as the subject. A third of the band, and
+     fainter, keeps it a watermark. */
+  @media (width < 48rem) {
+    .elev-mark {
+      height: 34%;
+    }
+    .elev-mark__area {
+      fill: color-mix(in srgb, var(--heading-accent) 4%, transparent);
+    }
+    .elev-mark__line {
+      stroke: color-mix(in srgb, var(--heading-accent) 11%, transparent);
+    }
+  }
 
   .elev svg {
     width: 100%;
     height: auto;
     display: block;
     overflow: visible;
+  }
+  /* One canvas at a time. See the note on `build()` above. */
+  .elev__svg--tall {
+    display: none;
+  }
+  @media (width < 48rem) {
+    .elev__svg--wide {
+      display: none;
+    }
+    .elev__svg--tall {
+      display: block;
+    }
   }
 
   /* stop-color must be set as a CSS PROPERTY, not a presentation attribute.
@@ -365,7 +442,7 @@ if (measured) {
 
   .elev__lbl {
     font-family: var(--font-mono);
-    font-size: 15px;
+    /* Size is set inline per canvas: 15px on the wide one, 26px on the tall. */
     fill: var(--muted-foreground);
   }
 

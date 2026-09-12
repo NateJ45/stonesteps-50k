@@ -2355,6 +2355,14 @@ body::before {
       fade-in, where nobody can see it move. Without that return leg the stack
       would either snap or need a second animation to reset it.
 
+      AND THE DRIFT IS ALREADY UNDER WAY WHEN THE SLIDE FADES IN. It used to
+      fade in at scale(1) and only start growing once fully opaque, so for the
+      length of every cross-fade the incoming picture was the one still thing
+      on the screen while the outgoing one kept moving: a stutter, once every
+      slide. The push now starts at the fade-in keyframe and runs in one
+      straight line to the fade-out, so the 0% keyframe is a fraction past
+      scale(1) (the fade-in's share of the visible span) rather than at it.
+
    3. THE TIMING IS SHARED, NOT REPEATED. The cycle length is written once by
       the component as --slide-cycle and the nth slide simply starts a negative
       fraction of it into an animation that never restarts, so all of them stay
@@ -2402,7 +2410,7 @@ body::before {
 @keyframes hero-slide-2 {
   0% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1.0096) translateY(-0.13%);
   }
   44.0% {
     opacity: 1;
@@ -2417,14 +2425,14 @@ body::before {
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1.0096) translateY(-0.13%);
   }
 }
 
 @keyframes hero-slide-3 {
   0% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1.0137) translateY(-0.18%);
   }
   27.33% {
     opacity: 1;
@@ -2439,14 +2447,14 @@ body::before {
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1.0137) translateY(-0.18%);
   }
 }
 
 @keyframes hero-slide-4 {
   0% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1.0174) translateY(-0.23%);
   }
   19.0% {
     opacity: 1;
@@ -2461,7 +2469,7 @@ body::before {
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1.0174) translateY(-0.23%);
   }
 }
 
@@ -3492,4 +3500,382 @@ main > .band-torn:first-child::before {
 }
 .wx + figcaption {
   margin-top: 3rem;
+}
+
+/* ======================================================================== */
+/* ---------- The phone pass (2026-09-12) --------------------------------- */
+/* Everything below is the phone's layout of things the desktop already had.
+   Read the note on each block; the desktop rules above are untouched. */
+
+/* ---------- Centred on a phone ------------------------------------------ */
+/* A phone column is a single 327px stack, and a left-anchored eyebrow with a
+   rule running off to the right, above a heading that fills the width anyway,
+   reads as a desktop layout squeezed rather than a phone layout. Below lg a
+   band that wears this class centres its heading block: the blaze loses its
+   rule (a rule has nowhere to run from the middle) and keeps its mark. Long
+   copy, tables and cards inside the band opt back out with `.mob-left`,
+   because a paragraph is read from a left edge whatever the screen. */
+@media (width < 64rem) {
+  .mob-center,
+  .mob-center > .text-left {
+    text-align: center;
+  }
+  .mob-center .blaze {
+    justify-content: center;
+  }
+  .mob-center .blaze::after {
+    display: none;
+  }
+  /* SectionHeading's hairline under a small eyebrow. */
+  .mob-center > .text-left > .w-12 {
+    margin-inline: auto;
+  }
+  .mob-center .mob-left {
+    text-align: left;
+  }
+}
+
+/* ---------- The hero on a phone ----------------------------------------- */
+/* Three things the screenshots showed. A hand's width of nothing between the
+   header and the date line; the slideshow a full screen down, after the clock;
+   and a wordmark that filled two thirds of the column. So: the band starts
+   just under the header, the wordmark is set by viewport width (see the
+   clamp in RaceHero.astro), and the photograph moves up to sit between the
+   poster (wrapper A) and the day (wrapper B), with the claim struck across
+   its top edge. The picture is in the first screen now. */
+@media (width < 64rem) {
+  .hero-band {
+    padding-top: calc(var(--header-h) + 0.5rem);
+  }
+  .hero-copy {
+    text-align: center;
+  }
+  .hero-copy--a .blaze--plain {
+    justify-content: center;
+  }
+  .hero-copy--a {
+    order: 0;
+  }
+  .hero-photo {
+    order: 1;
+    margin-top: 0;
+    height: min(50vh, 24rem);
+  }
+  .hero-copy--b {
+    order: 2;
+    margin-top: -0.5rem;
+  }
+  /* Over the photograph's faded top edge. The stamp carries its own ground
+     (see .claim-stamp), so nothing about its contrast depends on the picture
+     under it. */
+  .hero-copy--a .claim-stamp {
+    position: relative;
+    z-index: 2;
+    margin-top: 1.25rem;
+    margin-bottom: -2.9rem;
+  }
+}
+
+/* ---------- The contours run behind the header too ---------------------- */
+/* The mud escapes upward over the transparent header by exactly the header's
+   height (see .hero-mud). The contour lines did not, and on a phone the
+   difference showed: prints crossing the nav, lines stopping dead at its
+   bottom edge. Same fix, same token. */
+.hero-topo {
+  top: calc(-1 * var(--header-h));
+}
+
+/* ---------- The menu trigger -------------------------------------------- */
+/* A small cream plate with three hand-cut bars and the word, rather than a
+   bare icon: the header is a sign board, and things mounted on it are plates. */
+.menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.7rem 0.5rem 0.6rem;
+  border: 2px solid var(--plate-edge);
+  border-radius: 6px;
+  background: #ffebbb;
+  color: #1a1712;
+  box-shadow: var(--lift-sm);
+  rotate: 1.5deg;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition:
+    rotate 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.menu-trigger:hover,
+.menu-trigger:focus-visible {
+  rotate: 0deg;
+  box-shadow: var(--lift);
+}
+.menu-trigger__bars {
+  display: grid;
+  gap: 3px;
+  width: 18px;
+}
+.menu-trigger__bars i {
+  display: block;
+  height: 2.5px;
+  border-radius: 1px;
+  background: currentcolor;
+}
+/* Hand-cut: each bar a hair off square, like the blaze. */
+.menu-trigger__bars i:nth-child(1) {
+  rotate: -3deg;
+  width: 100%;
+}
+.menu-trigger__bars i:nth-child(2) {
+  rotate: 2deg;
+  width: 78%;
+}
+.menu-trigger__bars i:nth-child(3) {
+  rotate: -2deg;
+  width: 92%;
+}
+
+/* ---------- The menu board ---------------------------------------------- */
+/* ALWAYS BARK. The board pins the dark theme's own values, because it is an
+   object (like the race clock, like the header's plate) and objects do not
+   change colour with the page. Every token the shared components read
+   (.btn-plate, .claim-stamp, .display, the theme toggle) is set here, so in
+   light mode they draw as they do on the bark page rather than as rust on
+   bark or bark on bark. */
+.menu-sheet {
+  --background: #1a1712;
+  --color-background: #1a1712;
+  --foreground: #ffebbb;
+  --color-foreground: #ffebbb;
+  --muted-foreground: #c9b98f;
+  --color-muted-foreground: #c9b98f;
+  --heading-accent: #fed89b;
+  --color-heading-accent: #fed89b;
+  --primary: #b8462f;
+  --primary-accent: #c9553a;
+  --primary-foreground: #ffebbb;
+  --plate-edge: #000;
+  --display-shadow: var(--lift-sm);
+  --display-echo: #a83c26;
+  --accent: #241f17;
+  --color-accent: #241f17;
+  background: #1a1712;
+  color: #ffebbb;
+  isolation: isolate;
+}
+.menu-topo {
+  position: absolute;
+  inset: -2% 0;
+  width: 100%;
+  height: 104%;
+  pointer-events: none;
+  z-index: 0;
+}
+.menu-topo path {
+  fill: none;
+  stroke: rgb(255 235 187 / 0.11);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.menu-topo path:nth-child(3n) {
+  stroke: rgb(254 216 155 / 0.22);
+}
+/* The route of prints, worn as a mask painted in cream. Same file the page
+   headers wear, so the phone's walk and the menu's are the same walk. */
+.menu-mud {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: rgb(255 235 187 / 0.13);
+  -webkit-mask-image: url('/mud/walk-phone.png');
+  mask-image: url('/mud/walk-phone.png');
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.menu-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 1.1rem 1.5rem 1.5rem;
+}
+.menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* The same height as the header's row, so the close plate lands exactly
+     where the trigger was and the board reads as the header opened up. */
+  min-height: calc(var(--header-h) - 2.2rem);
+}
+.menu-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #fed89b;
+}
+.menu-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 2px solid #000;
+  border-radius: 6px;
+  background: #ffebbb;
+  color: #1a1712;
+  box-shadow: var(--lift-sm);
+  rotate: 1.5deg;
+}
+.menu-close:hover,
+.menu-close:focus-visible {
+  rotate: 0deg;
+}
+
+.menu-nav {
+  margin-top: 0.5rem;
+}
+.menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.menu-item {
+  border-bottom: 2px dashed rgb(255 235 187 / 0.18);
+}
+.menu-item:last-child {
+  border-bottom: 0;
+}
+/* Slower stagger than the wordmark's: five rows, not three words, and the
+   board has just dropped in. Reduced motion switches the press off through
+   the shared rule. */
+.menu-item.stamp-word,
+.menu-group.stamp-word {
+  animation-delay: calc(var(--wi, 0) * 80ms + 140ms);
+}
+.menu-group {
+  padding: 1rem 0 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #c9b98f;
+}
+.menu-link {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  padding: 0.7rem 0.15rem;
+  color: #ffebbb;
+  text-decoration: none;
+}
+.menu-link__idx {
+  flex: none;
+  width: 1.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #fed89b;
+}
+.menu-link__label {
+  font-size: clamp(2.5rem, 11.5vw, 3.6rem);
+  line-height: 0.9;
+  letter-spacing: 0.005em;
+  transition: translate 0.16s ease;
+}
+.menu-link:hover .menu-link__label,
+.menu-link:focus-visible .menu-link__label {
+  translate: 6px 0;
+}
+/* Where you are: the row is struck in the second ink, the way the wordmark
+   carries its red echo. */
+.menu-link[aria-current='page'] .menu-link__label {
+  color: #fed89b;
+  text-shadow: 0.055em 0.055em 0 #a83c26;
+}
+.menu-link[aria-current='page'] .menu-link__idx {
+  color: #ffebbb;
+}
+
+.menu-foot {
+  margin-top: auto;
+  padding-top: 1.75rem;
+  display: grid;
+  gap: 1.25rem;
+}
+.menu-cta {
+  justify-content: center;
+  width: calc(100% - 0.75rem);
+  margin-inline: auto;
+}
+.menu-util {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.menu-util__row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: none;
+}
+.menu-util__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 6px;
+  color: #ffebbb;
+}
+.menu-util__btn:hover,
+.menu-util__btn:focus-visible {
+  background: #241f17;
+}
+/* The claim, smaller than the hero's and held to the bottom-left. Its
+   `claim-strike` press is delayed past the last row. */
+.menu-stamp {
+  --claim-rotate: -4deg;
+  max-width: 13rem;
+  /* Rotated, its bottom-left corner swings past the board's edge; the
+     margin is what the rotation costs. */
+  margin: 0 0 0 0.6rem;
+  padding: 0.6rem 0.8rem;
+  gap: 0;
+  animation-delay: 700ms;
+}
+.menu-stamp .claim-stamp__line {
+  font-size: 0.95rem;
+}
+.menu-logo {
+  height: 3.5rem;
+  width: auto;
+  justify-self: end;
+  margin-top: -0.5rem;
+  opacity: 0.9;
+}
+/* Short phones (an iPhone SE at 667px): the rows tighten before anything
+   scrolls. */
+@media (height < 700px) {
+  .menu-link {
+    padding-block: 0.45rem;
+  }
+  .menu-link__label {
+    font-size: clamp(2.1rem, 9.5vw, 3rem);
+  }
+  .menu-logo {
+    display: none;
+  }
 }

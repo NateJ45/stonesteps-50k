@@ -65,16 +65,20 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
 {
   holders.length > 0 && (
     <section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
-      <div class="mx-auto w-full max-w-content px-6">
+      <div class="mob-center mx-auto w-full max-w-content px-6">
         <SectionHeading {eyebrow} {headline} {headingId} labelDisplay />
 
-        <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {/* TWO ACROSS FROM THE NARROWEST PHONE. Stacked, four callouts of
+            three short lines each ran the height of a screen and a half for
+            four numbers; a time is seven monospace characters and fits a
+            half-column with room to spare. */}
+        <ul class="mob-left mt-10 grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-6 lg:grid-cols-4">
           {holders.map((h) => (
-            <li class="border-l-[3px] border-[color:var(--heading-accent)] pl-5">
+            <li class="border-l-[3px] border-[color:var(--heading-accent)] pl-4 sm:pl-5">
               <p class="font-mono text-[0.6875rem] tracking-[0.2em] text-muted-foreground uppercase">
                 {h.gender} <span class="lc">{h.distance}</span>
               </p>
-              <p class="tabular text-heading-accent mt-2 text-2xl font-bold">
+              <p class="tabular text-heading-accent mt-2 text-[1.35rem] font-bold sm:text-2xl">
                 {formatRaceTime(h.timeSeconds)}
               </p>
               <p class="display mt-1 text-h5">{h.athlete}</p>

@@ -99,9 +99,11 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
 <section class="hero-band relative py-section-lg" aria-labelledby={headingId}>
   {
     /* The topo still needs clipping to the band; the mud deliberately does not,
-    so the clip lives on this wrapper rather than on the <section>. */
+    so the clip lives on this wrapper rather than on the <section>. The wrapper
+    starts at the top of the PAGE, not the band (`.hero-topo`), so the lines
+    run up behind the transparent header the way the mud does. */
   }
-  <div class="pointer-events-none absolute inset-0 overflow-hidden">
+  <div class="hero-topo pointer-events-none absolute inset-0 overflow-hidden">
     <Topo seed={11} lines={16} opacity={0.42} />
   </div>
 
@@ -160,7 +162,18 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
     )
   }
 
-  <div class="relative z-10 mx-auto w-full max-w-content px-6">
+  {
+    /* THE COPY IS TWO WRAPPERS, NOT ONE, and the reason is the phone. The
+      photograph is a flex sibling of these (see `.hero-photo`, which uses
+      `order` to place itself), so on a phone it can only land BETWEEN two
+      wrappers, never in the middle of one. Wrapper A is the poster: eyebrow,
+      wordmark, the struck claim. Wrapper B is the day: subhead, the two
+      buttons, the clock. On a phone the picture runs between them, inside the
+      first screen, with the claim stamped over its top edge. From lg the
+      photo leaves the flow and the two wrappers simply stack, which is the
+      layout that shipped. */
+  }
+  <div class="hero-copy hero-copy--a z-10 mx-auto w-full max-w-content px-6">
     <div class="lg:max-w-[52%]">
       <div class="relative">
         {
@@ -171,7 +184,10 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
           )
         }
 
-        <h1 id={headingId} class="display display-echo text-[clamp(6rem,15vw,10.5rem)]">
+        <h1
+          id={headingId}
+          class="display display-echo text-[clamp(6rem,31vw,8.25rem)] lg:text-[clamp(6rem,15vw,10.5rem)]"
+        >
           <span class="sr-only">{headline}</span>
           <span class="hand" aria-hidden="true">
             {
@@ -223,17 +239,25 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
             </p>
           )
         }
+      </div>
+    </div>
+  </div>
 
+  <div class="hero-copy hero-copy--b z-10 mx-auto w-full max-w-content px-6">
+    <div class="lg:max-w-[52%]">
+      <div>
         {
           /* FULL-STRENGTH INK, not muted. This is the one paragraph on the site
             that sits on the mud, and axe measured it at 4.11:1 against AA's 4.5
             once the field ran the width of the band. It is also the line that
             tells a visitor what the race IS, so softening it was the wrong
             economy twice over. Same call as the countdown's label. */
-          subhead && <p class="mt-6 max-w-[46ch] text-lg text-foreground">{subhead}</p>
+          subhead && (
+            <p class="mx-auto mt-6 max-w-[46ch] text-lg text-foreground lg:mx-0">{subhead}</p>
+          )
         }
 
-        <div class="mt-8 flex flex-wrap items-center gap-4">
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
           {primaryCta && <CtaLink cta={primaryCta} class="btn-plate" />}
           {secondaryCta && <CtaLink cta={secondaryCta} class="btn-plate btn-plate--cream" />}
         </div>
@@ -245,7 +269,7 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
           anyway: date, then the two things you can do about it, then how long
           you have. */
         showCountdown && race?.raceDate && (
-          <div class="border-heading-accent mt-10 max-w-[30rem] border-t-2 pt-5">
+          <div class="border-heading-accent mx-auto mt-10 max-w-[30rem] border-t-2 pt-5 lg:mx-0">
             <Countdown target={race.raceDate} />
           </div>
         )

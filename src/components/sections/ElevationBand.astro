@@ -58,9 +58,9 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
       profile={race?.elevationProfile}
     />
   </div>
-  <div class="relative z-10 mx-auto w-full max-w-content px-6">
+  <div class="mob-center relative z-10 mx-auto w-full max-w-content px-6">
     <SectionHeading {eyebrow} {headline} {headingId} labelDisplay />
-    {intro && <p class="mt-4 max-w-[52ch] text-muted-foreground">{intro}</p>}
+    {intro && <p class="mx-auto mt-4 max-w-[52ch] text-muted-foreground lg:mx-0">{intro}</p>}
     <div class="mt-10">
       <ElevationProfile
         totalGain={totalGain}

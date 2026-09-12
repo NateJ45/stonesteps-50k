@@ -54,3 +54,4 @@ test-results/
 
 # Local scratch space for one-off calculations.
 .scratch/
+.tmp-shots/

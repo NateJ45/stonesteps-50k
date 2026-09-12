@@ -324,8 +324,11 @@ docs.push({
     {
       _type: 'loopCardSection',
       _key: key(),
-      eyebrow: 'The course',
-      headline: 'Seven loops out of The Oval',
+      // Not "Seven loops out of The Oval" again: the page header directly
+      // above already says it, and the same words twice in one screen is a
+      // stutter. This band is about the ORDER.
+      eyebrow: 'Loop order',
+      headline: 'Long, short, all the way to seven',
       legend: 'The 27K punches the first four and finishes. The 50K punches all seven.',
       aside: [
         {

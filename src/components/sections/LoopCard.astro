@@ -62,7 +62,7 @@ const {
       <div class="pointer-events-none absolute inset-0 overflow-hidden">
         <DataMark text={loops.length} align="right" position="inset" />
       </div>
-      <div class="mx-auto w-full max-w-content px-6">
+      <div class="mob-center mx-auto w-full max-w-content px-6">
         {eyebrow && (
           <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
             {eyebrow}
@@ -73,18 +73,23 @@ const {
         </h2>
 
         <div class="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-start">
-          <div class="punch w-full max-w-[38rem] p-6 sm:p-8" data-reveal>
+          <div class="punch mob-left mx-auto w-full max-w-[38rem] p-5 sm:p-8 lg:mx-0" data-reveal>
             <div
               class="punch__rows"
               role="table"
               aria-label="Loop order for the 50K, and which loops the 27K covers"
             >
               <div
-                class="grid grid-cols-[22px_3rem_1fr_4.5rem] items-center gap-4 border-b-2 border-dashed border-black/35 pb-2"
+                class="grid grid-cols-[22px_2.5rem_1fr_auto] items-center gap-3 border-b-2 border-dashed border-black/35 pb-2"
                 role="row"
               >
-                <span class="sr-only" role="columnheader">
-                  Included in the 27K
+                {/* The visually hidden header is WRAPPED so the wrapper still
+                    takes its grid cell: `sr-only` is position:absolute, and an
+                    absolute child leaves the grid, which shoved every header
+                    one column left ("LOOP" over the holes, "TYPE" over the
+                    numbers). */}
+                <span role="columnheader">
+                  <span class="sr-only">Included in the 27K</span>
                 </span>
                 <span
                   class="font-mono text-[0.6875rem] tracking-[0.18em] text-[color:var(--plate-ink-soft)] uppercase"
@@ -109,7 +114,7 @@ const {
 
               {loops.map((loop, i) => (
                 <div
-                  class="grid grid-cols-[22px_3rem_1fr_4.5rem] items-center gap-4 border-b border-black/10 py-2.5 last:border-b-0"
+                  class="grid grid-cols-[22px_2.5rem_1fr_auto] items-center gap-3 border-b border-black/10 py-2.5 last:border-b-0"
                   role="row"
                 >
                   <span
@@ -136,7 +141,7 @@ const {
                         day: it answers "how far in am I" at the only point on
                         the course where they can be told. */}
                     {loop.throughMiles && (
-                      <span class="tabular block text-[0.75rem] text-[color:var(--plate-ink-soft)]">
+                      <span class="tabular block text-[0.75rem] whitespace-nowrap text-[color:var(--plate-ink-soft)]">
                         {/* "8.5 mi so far", spelled out. It shipped as "8.5 in"
                             for "8.5 miles in", and beside a bare "5.3" that
                             read as inches. The final loop carries the race's
@@ -170,7 +175,7 @@ const {
           </div>
 
           {aside.length > 0 && (
-            <aside class="grid gap-6">
+            <aside class="mob-left grid gap-6">
               {aside.map((note) => (
                 <div class="border-t border-border pt-5 first:border-t-0 first:pt-0">
                   <h3 class="display text-h4">{note.title}</h3>
