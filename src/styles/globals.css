@@ -1507,53 +1507,15 @@ body::before {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------- The records tabs, pinned ------------------------------------ */
-/* THIS ONE IS USABILITY, NOT DECORATION. The 50K and 27K boards run to about
-   1400px, so by the time you are reading the fastest-ten table the chip that
-   says which distance you are looking at has been off screen for two screens.
-   Pinning it means the answer to "which board is this" is always on the page.
-
-   `top` clears the site header, which is itself sticky, so the two never
-   overlap: the numbers here are the header's measured heights, the same pair
-   `.hero-band` pads by.
-
-   The background is not optional. A sticky element with a transparent
-   background lets the table scroll through it, which is worse than not pinning
-   it at all. It takes the band's own colour, so it works on either surface the
-   cadence hands this section, and a soft fade underneath stops it cutting a
-   hard line across the table. */
+/* ---------- The records tabs ---------------------------------------------- */
+/* NOT PINNED. They were sticky from 2026-09-06 on the argument that the boards
+   run to 1400px and the chip saying which distance you are reading scrolls off.
+   In practice the chip floating over the age-bracket table read as a stray
+   control that had drifted into the data (2026-09-12), and every table on the
+   page already names its distance in its own heading ("Men 50K", "Women 27K"),
+   so the answer was never off screen. Plain flow. */
 .records-tabs {
-  position: sticky;
-  top: calc(var(--header-h) + 0.5rem);
-  z-index: 5;
   padding-block: 0.75rem;
-  background: linear-gradient(
-    to bottom,
-    var(--band-bg, transparent) 0%,
-    var(--band-bg, transparent) 72%,
-    transparent 100%
-  );
-}
-
-@media (min-width: 64rem) {
-  .records-tabs {
-    top: calc(var(--header-h) + 0.5rem);
-  }
-}
-
-/* The band tells the tabs what colour it is. Without this the gradient above
-   has nothing to paint and the rule degrades to transparent, which is exactly
-   the failure it exists to prevent, so both surfaces set it. */
-.band-torn.bg-background {
-  --band-bg: var(--background);
-}
-.band-torn.bg-muted {
-  --band-bg: var(--muted);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* Nothing to disable: sticky is not motion. Kept as a note so nobody adds a
-     scroll listener here later and then has to remember why. */
 }
 
 /* ---------- The section label, at display scale ------------------------- */

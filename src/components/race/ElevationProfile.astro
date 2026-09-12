@@ -337,15 +337,18 @@ const canvases = [
     display: block;
     overflow: visible;
   }
-  /* One canvas at a time. See the note on `build()` above. */
-  .elev__svg--tall {
+  /* One canvas at a time. See the note on `build()` above. Written as
+     `.elev .elev__svg--*` because the `.elev svg` rule above is (0,1,1) and a
+     bare class is (0,1,0): the first cut of this lost to it and both charts
+     rendered, one under the other, on every width. */
+  .elev .elev__svg--tall {
     display: none;
   }
   @media (width < 48rem) {
-    .elev__svg--wide {
+    .elev .elev__svg--wide {
       display: none;
     }
-    .elev__svg--tall {
+    .elev .elev__svg--tall {
       display: block;
     }
   }
