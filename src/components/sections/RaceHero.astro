@@ -128,7 +128,14 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
       6.6s, 6.9s and 7.4s and held up the first paint behind them. The rest are
       lazy now. They are in the viewport, so they still start immediately after
       load, and the cross-fade does not reach the second slide for seven
-      seconds. */
+      seconds.
+
+      QUALITY 62, against the component's default of 75. This photograph sits
+      behind a gradient scrim and the page's paper grain, which is exactly the
+      case where the last fifth of JPEG quality is invisible and expensive: it
+      is the LCP element and it was 218kB. (The note lives up here because a
+      C-style comment inside an element's attribute list is not a comment in
+      Astro's template syntax at all: every word of it is parsed as a prop.) */
     slides.length > 0 && (
       <figure
         class:list={[
@@ -143,10 +150,6 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
             source={img}
             width={1400}
             sizes="(min-width: 1024px) 48vw, 100vw"
-            /* 62, against the component's default of 75. This photograph sits
-               behind a gradient scrim and the page's grain, which is exactly
-               the case where the last fifth of JPEG quality is invisible and
-               expensive: it is the LCP element and it was 218kB. */
             quality={62}
             alt={i === 0 ? (img.alt ?? '') : ''}
             loading={i === 0 ? 'eager' : 'lazy'}
