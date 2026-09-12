@@ -26,6 +26,7 @@ import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings'
 import { telHref } from '@/lib/phone';
 import { urlFor } from '@/lib/sanity';
 import { getRace } from '@/lib/queries';
+import { externalLinkAttrs } from '@/lib/links';
 
 // THE IMPORTED ASSET'S OWN URL, NOT getImage(). These used to run through
 // Astro's image pipeline for a cache-busted URL, which they do not need: an
@@ -400,6 +401,7 @@ function isGroupActive(items: { href: string }[]) {
         headerCta.show && (
           <a
             href={headerCta.href}
+            {...externalLinkAttrs(headerCta.href)}
             class:list={[
               'btn-plate btn-plate--sm',
               isActive(headerCta.href) && 'btn-plate--is-current',

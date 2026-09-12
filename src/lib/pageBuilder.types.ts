@@ -408,6 +408,7 @@ export interface ProjectedRaceDistance {
   runSignUpEventId?: number;
   featured?: boolean;
   confirmed?: boolean;
+  feeTiers?: { label?: string; amount?: number; endsOn?: string }[];
 }
 
 export interface ProjectedFeeTier {
@@ -514,6 +515,7 @@ export interface ProjectedCourseFeaturesSection {
   headline?: string;
   cta?: ProjectedCtaBlock;
   image?: ProjectedImage;
+  caption?: string;
   features?: { _id: string; title?: string; body?: string; confirmed?: boolean }[];
 }
 
@@ -608,6 +610,14 @@ export interface ProjectedTickerSection {
   items?: string[];
 }
 
+export interface ProjectedRaceWeatherSection {
+  _type: 'raceWeatherSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+}
+
 export interface ProjectedParksSection {
   _type: 'parksSection';
   _key: string;
@@ -683,5 +693,6 @@ export type PageBuilderBlock =
   | ProjectedFaqKioskSection
   | ProjectedTickerSection
   | ProjectedParksSection
+  | ProjectedRaceWeatherSection
   | ProjectedDynastiesSection
   | ProjectedGearSection;

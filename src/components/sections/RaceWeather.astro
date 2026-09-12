@@ -1,0 +1,167 @@
+---
+// Foundation, edit with care
+//
+// Race-day weather since the first year we have a date for.
+//
+// CONTENT block: receives a surface from the cadence in sectionCadence.ts.
+//
+// WHY A STRIP AND NOT A "HOW OFTEN" CHART. With two dozen race days, weather
+// TYPES collapse to three or four bars that mostly say "autumn in Ohio" and
+// hide the two things a runner packs for: how cold the start is and whether
+// the trail is wet. So: one bar per year from that day's low to its high, the
+// start temperature marked on it, and a filled foot when it rained on the day
+// or the night before. The row's shape IS the usual conditions, and the
+// spread it shows is the honest answer for a race that has had both 37°F and
+// 77°F on the same Sunday in different years.
+//
+// The sentence above it is computed from the same data (src/lib/raceWeather.ts),
+// never typed. The data is a committed file built by scripts/build-weather.mjs
+// from ERA5 reanalysis; the caption says what that is good for.
+
+import SectionHeading from '@/components/SectionHeading.astro';
+import Topo from '@/components/race/Topo.astro';
+import raw from '@/data/raceDayWeather.json';
+import {
+  conditionLabel,
+  summarise,
+  summarySentence,
+  tempScale,
+  wasWet,
+  wasWetUnderfoot,
+  type RaceDay,
+} from '@/lib/raceWeather';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+  surface?: 'background' | 'muted';
+  headingId: string;
+};
+
+const {
+  eyebrow,
+  headline = 'What the weather has done',
+  intro,
+  surface = 'background',
+  headingId,
+} = Astro.props as Props;
+
+const days = (raw as RaceDay[]).slice().sort((a, b) => a.year - b.year);
+const summary = summarise(days);
+const scale = days.length ? tempScale(days) : { min: 30, max: 80 };
+const span = scale.max - scale.min || 1;
+const pct = (t: number) => ((t - scale.min) / span) * 100;
+
+// Gridlines every 10°F across the strip, labelled at the left.
+const ticks: number[] = [];
+for (let t = scale.min; t <= scale.max; t += 10) ticks.push(t);
+
+const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
+const fmtDate = (iso: string) =>
+  new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+---
+
+{
+  summary && (
+    <section class={`relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+      <div class="pointer-events-none absolute inset-0 overflow-hidden">
+        <Topo seed={41} lines={9} opacity={0.3} />
+      </div>
+      <div class="relative z-10 mx-auto w-full max-w-content px-6">
+        <SectionHeading {eyebrow} {headline} {headingId} labelDisplay />
+        <p class="mt-4 max-w-[60ch] text-lg text-foreground">{intro || summarySentence(summary)}</p>
+
+        {/* THE STRIP. A track with 10° gridlines; each year is a column holding
+          one absolutely-positioned bar. Heights and offsets are percentages of
+          the shared scale, so every bar is comparable by eye and the whole
+          thing is plain CSS: nothing to hydrate, nothing to animate. */}
+        <figure class="mt-10">
+          <div class="wx" style={`--wx-cols:${days.length}`}>
+            <div class="wx__axis" aria-hidden="true">
+              {ticks.map((t) => (
+                <span class="wx__tick" style={`bottom:${pct(t)}%`}>
+                  {t}°
+                </span>
+              ))}
+            </div>
+            <div class="wx__track" aria-hidden="true">
+              {ticks.map((t) => (
+                <span class="wx__grid" style={`bottom:${pct(t)}%`} />
+              ))}
+              {days.map((d) => (
+                <div
+                  class:list={['wx__col', wasWetUnderfoot(d) && 'is-wet', wasWet(d) && 'is-rain']}
+                  title={`${d.year}: ${d.low}° to ${d.high}°F, ${conditionLabel(d.code).toLowerCase()}${wasWet(d) ? `, ${d.rainIn} in of rain` : wasWetUnderfoot(d) ? ', wet from the night before' : ''}`}
+                >
+                  <span
+                    class="wx__bar"
+                    style={`bottom:${pct(d.low)}%;height:${pct(d.high) - pct(d.low)}%`}
+                  >
+                    {d.startTemp != null && (
+                      <span
+                        class="wx__start"
+                        style={`bottom:${((d.startTemp - d.low) / Math.max(d.high - d.low, 1)) * 100}%`}
+                      />
+                    )}
+                  </span>
+                  <span class="wx__foot" />
+                  <span class="wx__year">{String(d.year).slice(2)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <figcaption class="mt-4 max-w-[62ch] font-mono text-[0.6875rem] leading-relaxed tracking-wide text-muted-foreground uppercase">
+            Each bar runs from the day's low to its high; the notch is the temperature at the 8 am
+            start. A filled foot means rain on the day; an open one, wet ground from the night
+            before. {summary.firstYear} to {summary.lastYear}, the years with a confirmed date.
+            Reanalysis data for Mt. Airy Forest (ERA5 via Open-Meteo): right for the day's
+            temperature and whether it rained, not for a shower that only hit the ridge.
+          </figcaption>
+        </figure>
+
+        {/* The same record as a table, for a screen reader or anyone who wants
+          the numbers. Visually hidden, not display:none, so it is read. The
+          sr-only class goes on a wrapping div, not the table: on a
+          display:table element its width:1px is only a minimum, the table
+          grows to its content, and a hidden 10px of it hung past the phone's
+          viewport as a horizontal scroll. */}
+        <div class="sr-only">
+          <table>
+            <caption>Race-day weather by year</caption>
+            <thead>
+              <tr>
+                <th scope="col">Year</th>
+                <th scope="col">Date</th>
+                <th scope="col">Start</th>
+                <th scope="col">Low</th>
+                <th scope="col">High</th>
+                <th scope="col">Rain</th>
+                <th scope="col">Conditions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {days.map((d) => (
+                <tr>
+                  <th scope="row">{d.year}</th>
+                  <td>{fmtDate(d.date)}</td>
+                  <td>{d.startTemp != null ? `${d.startTemp}°F` : ''}</td>
+                  <td>{d.low}°F</td>
+                  <td>{d.high}°F</td>
+                  <td>
+                    {wasWet(d) ? `${d.rainIn} in` : wasWetUnderfoot(d) ? 'night before' : 'dry'}
+                  </td>
+                  <td>{conditionLabel(d.code)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  )
+}

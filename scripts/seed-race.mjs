@@ -132,7 +132,35 @@ docs.push({
     'The original. Seven single-track loops through Mt. Airy Forest, each one returning ' +
     'you through the aid station at The Oval before sending you back out. Roots, rocks, ' +
     'ridge traverses and the occasional blow down.',
-  includes: ['Tech t-shirt', 'Timing chip', 'Aid station every loop', 'USATF sanctioned'],
+  includes: ['T-shirt', 'Timing chip', 'Aid station every loop', 'USATF sanctioned'],
+  // Per-distance ladder, VERIFIED against RunSignUp's registration periods for
+  // the 2026 events on 2026-09-11. The two races are priced apart at every
+  // stage, and the early price is the 2008 fee. The old site's own price list
+  // still said $45 / $55 for this distance; RunSignUp, where people actually
+  // pay, says $50 / $60.
+  feeTiers: [
+    {
+      _type: 'distanceFeeTier',
+      _key: 'early',
+      label: 'Through January 31',
+      amount: 35,
+      endsOn: '2026-01-31',
+    },
+    {
+      _type: 'distanceFeeTier',
+      _key: 'mid',
+      label: 'February 1 to September 30',
+      amount: 50,
+      endsOn: '2026-09-30',
+    },
+    {
+      _type: 'distanceFeeTier',
+      _key: 'late',
+      label: 'October 1 to race day',
+      amount: 60,
+      endsOn: '2026-10-25',
+    },
+  ],
   startTime: '8:00 am', // RunSignUp event details
   trekkerNote: 'Trekkers may start at 7:00 am.', // RunSignUp event details
   entryCap: 120, // RunSignUp participant_cap
@@ -155,6 +183,29 @@ docs.push({
     'Same trail, same climbs, four loops instead of seven. The way a lot of Stone Steps ' +
     'finishers start before they come back for the 50K.',
   includes: ['T-shirt', 'Timing chip', 'Aid station every loop', 'USATF sanctioned'],
+  feeTiers: [
+    {
+      _type: 'distanceFeeTier',
+      _key: 'early',
+      label: 'Through January 31',
+      amount: 30,
+      endsOn: '2026-01-31',
+    },
+    {
+      _type: 'distanceFeeTier',
+      _key: 'mid',
+      label: 'February 1 to September 30',
+      amount: 40,
+      endsOn: '2026-09-30',
+    },
+    {
+      _type: 'distanceFeeTier',
+      _key: 'late',
+      label: 'October 1 to race day',
+      amount: 45,
+      endsOn: '2026-10-25',
+    },
+  ],
   startTime: '8:30 am',
   trekkerNote: 'Trekkers may start at 8:00 am and are ineligible for age group and overall awards.',
   entryCap: 130,
@@ -272,21 +323,25 @@ const sponsors = [
   {
     id: 'fleet-feet',
     name: 'Fleet Feet',
+    url: 'https://www.fleetfeet.com',
     logo: 'image-92185fc8e2adcd29b8b8708f38a86fbeb0d45533-1000x204-png',
   },
   {
     id: 'cincinnati-parks',
     name: 'Cincinnati Parks',
+    url: 'https://www.cincinnatiparks.com',
     logo: 'image-5106de23eac526b4d09fc8b10b92f9514685e036-828x1556-png',
   },
   {
     id: 'altra',
     name: 'Altra Running',
+    url: 'https://www.altrarunning.com',
     logo: 'image-89340d4d65c1633a3a471727210dd35e2f4c6c4b-1594x434-png',
   },
   {
     id: 'usatf',
     name: 'USATF Sanctioned Event',
+    url: 'https://www.usatf.org',
     logo: 'image-07e53d1bbdb1dd6f7e2e3b54d82b487c36764b53-1168x1168-png',
   },
 ];
@@ -295,6 +350,8 @@ sponsors.forEach((s, i) => {
     _id: `sponsor-${s.id}`,
     _type: 'sponsor',
     name: s.name,
+    // Each patch links out to the organisation's own home page, in a new tab.
+    ...(s.url ? { url: s.url } : {}),
     ...(s.logo
       ? {
           logo: {

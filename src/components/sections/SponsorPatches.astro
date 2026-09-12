@@ -20,6 +20,7 @@
 // their actual mark rather than a washed-out one.
 
 import SanityImage from '@/components/SanityImage.astro';
+import { externalLinkAttrs } from '@/lib/links';
 import type { ProjectedSponsorPatchesSection } from '@/lib/pageBuilder.types';
 
 type Props = {
@@ -53,7 +54,29 @@ const {
         <ul class="mt-8 flex flex-wrap items-stretch justify-center gap-6">
           {sponsors.map((s) => (
             <li class="patch min-h-[9.5rem] w-full max-w-[16rem] px-6 py-7">
-              {s.logo?.asset ? (
+              {/* A patch with a url is a link to the sponsor's own site, in a
+                new tab; without one it is just a patch. The anchor fills the
+                patch so the whole object is the target, not only the mark. */}
+              {s.url ? (
+                <a
+                  href={s.url}
+                  class="patch__link"
+                  aria-label={`${s.name ?? 'Sponsor'} website`}
+                  {...externalLinkAttrs(s.url)}
+                >
+                  {s.logo?.asset ? (
+                    <SanityImage
+                      source={s.logo}
+                      width={512}
+                      sizes="256px"
+                      alt={s.logo.alt ?? s.name ?? ''}
+                      class="h-[6rem] max-w-full object-contain"
+                    />
+                  ) : (
+                    <span class="display on-light text-center text-[1.05rem]">{s.name}</span>
+                  )}
+                </a>
+              ) : s.logo?.asset ? (
                 <SanityImage
                   source={s.logo}
                   width={512}

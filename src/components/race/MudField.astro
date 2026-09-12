@@ -187,6 +187,89 @@ const { field = 'hero', class: className = '' } = Astro.props as Props;
     .mud__l--solo {
       animation: mud-land 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
     }
+
+    /* ---- The idle, hero only ------------------------------------------
+       Once the field has landed it used to hold perfectly still, and a hero
+       that moves once and then freezes reads as a page that has finished
+       loading rather than a place with weather in it. So each throw drifts:
+       a few pixels, on its own period, none of them sharing a divisor, so the
+       layers slide against each other and the ground never repeats.
+
+       Composed INTO the arrival declarations, because `animation` is a
+       shorthand and a second rule would replace the landing rather than add
+       to it. The drift animates `translate`; the landing animates `scale` and
+       `opacity` and the walk animates `clip-path`, so the two never contend
+       for a property. Hero only: the walk and the director's ground are
+       still fields under still things. */
+    .mud--hero .mud__l--1 {
+      animation:
+        mud-land 900ms cubic-bezier(0.16, 1, 0.3, 1) both,
+        mud-drift-a 23s ease-in-out infinite;
+    }
+    .mud--hero .mud__l--2 {
+      animation:
+        mud-land 900ms cubic-bezier(0.16, 1, 0.3, 1) 260ms both,
+        mud-drift-b 31s ease-in-out infinite;
+    }
+    .mud--hero .mud__l--3 {
+      animation:
+        mud-land 1000ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both,
+        mud-drift-c 37s ease-in-out infinite;
+    }
+    .mud--hero .mud__l--trail {
+      animation:
+        mud-walk 1600ms cubic-bezier(0.4, 0, 0.3, 1) 700ms both,
+        mud-drift-b 41s ease-in-out infinite reverse;
+    }
+    /* The phone's single combined layer drifts too, or the phone hero would
+       be the one still thing on the site. */
+    .mud--hero .mud__l--solo {
+      animation:
+        mud-land 1100ms cubic-bezier(0.16, 1, 0.3, 1) both,
+        mud-drift-a 29s ease-in-out infinite;
+    }
+    /* Oversized by the drift's reach, so a layer sliding a few pixels never
+       drags an uncovered strip in from its own edge. */
+    .mud--hero .mud__l {
+      inset: -14px;
+    }
+  }
+
+  /* Three drift shapes, all under 10px, all returning where they started.
+     The eye must not be able to follow any of them; this is the ground
+     shifting under the page, not something moving on it. */
+  @keyframes mud-drift-a {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    33% {
+      translate: 7px -4px;
+    }
+    66% {
+      translate: -5px 3px;
+    }
+  }
+  @keyframes mud-drift-b {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: -8px 5px;
+    }
+  }
+  @keyframes mud-drift-c {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    40% {
+      translate: 4px 6px;
+    }
+    75% {
+      translate: -6px -3px;
+    }
   }
 
   @keyframes mud-land {

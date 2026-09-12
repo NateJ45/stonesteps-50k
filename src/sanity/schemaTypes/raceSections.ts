@@ -34,6 +34,7 @@ import {
   ClockIcon,
   ComponentIcon,
   HeartIcon,
+  SunIcon,
   ImageIcon,
   PinIcon,
   StarFilledIcon,
@@ -239,6 +240,12 @@ export const courseFeaturesSection = defineType({
           title: 'Alt text',
           type: 'string',
           validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: 'caption',
+          title: 'Photo caption (optional)',
+          type: 'string',
+          description: 'One line under the photograph: what the trail is like, who is pictured.',
         }),
       ],
     }),
@@ -687,6 +694,38 @@ export const parksSection = defineType({
   },
 });
 
+/* ---------- Race-day weather ---------------------------------------------- */
+
+export const raceWeatherSection = defineType({
+  name: 'raceWeatherSection',
+  title: 'Race-day weather since 2003',
+  type: 'object',
+  icon: SunIcon,
+  description:
+    'The weather on every race day we have a date for: a temperature strip, one bar per ' +
+    'year, and a sentence computed from it. The data is a committed file ' +
+    '(src/data/raceDayWeather.json, built by scripts/build-weather.mjs), not a field here.',
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline', type: 'string' }),
+    defineField({
+      name: 'intro',
+      title: 'Intro (optional)',
+      type: 'text',
+      rows: 3,
+      description: 'Leave empty to use the sentence computed from the data.',
+    }),
+  ],
+  preview: {
+    select: { title: 'headline' },
+    prepare: ({ title }) => ({
+      title: title || 'Race-day weather',
+      subtitle: 'Data from src/data/raceDayWeather.json',
+      media: SunIcon,
+    }),
+  },
+});
+
 /* ---------- The names on the board ---------------------------------------- */
 
 export const dynastiesSection = defineType({
@@ -849,6 +888,7 @@ export const raceSectionSchemas = [
   sponsorPatchesSection,
   tickerSection,
   parksSection,
+  raceWeatherSection,
   dynastiesSection,
   gearSection,
   photoBandSection,

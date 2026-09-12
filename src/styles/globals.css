@@ -2074,6 +2074,51 @@ body::before {
   }
 }
 
+/* ---------- The hero at idle -------------------------------------------- */
+/* The stamp and the mud's landing settle inside three seconds, after which the
+   hero used to be as still as a screenshot. Two more slow motions keep it a
+   place rather than a picture, both far below the speed at which the eye
+   tracks anything, both off under reduced motion (the mud's drift lives in
+   MudField.astro under the same query).
+
+   The contours creep: the whole topo slides a few pixels on a long loop,
+   against the direction the nearest mud layer drifts, so the ground has two
+   currents in it. It is scaled up a hair so the slide never pulls a bare edge
+   in from the band's side.
+
+   The echo breathes: the second plate behind the wordmark eases a fraction of
+   an em in and out of register, like a press that has not quite settled. The
+   outlined k keeps its own `text-shadow: none`; an animation on the heading
+   changes the heading's value, and a rule on the span still beats inheritance,
+   so the counter stays open throughout. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-band .topo {
+    scale: 1.03;
+    animation: topo-creep 47s ease-in-out infinite;
+  }
+  .hero-band .display-echo {
+    animation: echo-breathe 7s ease-in-out infinite;
+  }
+}
+@keyframes topo-creep {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: -9px 6px;
+  }
+}
+@keyframes echo-breathe {
+  0%,
+  100% {
+    text-shadow: 0.055em 0.055em 0 var(--display-echo);
+  }
+  50% {
+    text-shadow: 0.072em 0.066em 0 var(--display-echo);
+  }
+}
+
 /* ---------- The hero photograph, bled off the right edge ---------------- */
 /* The live WordPress site opens on full-bleed photography of the race, and that
    is the one thing it does better than a framed thumbnail in a side column: a
@@ -2969,7 +3014,17 @@ main > .band-torn:first-child::before {
 .patch:nth-child(4n) {
   transform: rotate(2.2deg);
 }
-.patch:hover {
+/* The link fills the patch, so the click target is the whole object. */
+.patch__link {
+  display: grid;
+  place-items: center;
+  inset: 0;
+  position: absolute;
+  padding: inherit;
+  border-radius: inherit;
+}
+.patch:hover,
+.patch:focus-within {
   transform: rotate(0) translateY(-4px);
   box-shadow: 6px 9px 0 rgb(0 0 0 / 0.5);
 }
@@ -3130,4 +3185,107 @@ main > .band-torn:first-child::before {
   .qa__i::after {
     transition: none;
   }
+}
+
+/* ---------- Race-day weather strip ------------------------------------- */
+/* One column per year, one bar per column from the low to the high, a notch
+   at the start temperature, a foot that fills when it rained. All percentages
+   of a shared scale, computed in RaceWeather.astro; this file only draws. The
+   bar takes the foreground at reduced strength so it sits INTO the band rather
+   than on it; rain takes the primary, because it is the one fact a runner
+   reacts to. */
+.wx {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  gap: 0.5rem;
+  height: 12rem;
+}
+.wx__axis {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+}
+.wx__tick {
+  position: absolute;
+  right: 0;
+  transform: translateY(50%);
+  line-height: 1;
+}
+.wx__track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--wx-cols, 12), minmax(0, 1fr));
+  gap: clamp(2px, 0.6vw, 8px);
+  border-left: 1px solid color-mix(in srgb, var(--foreground) 30%, transparent);
+}
+.wx__grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+.wx__col {
+  position: relative;
+  min-width: 0;
+}
+.wx__bar {
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--foreground) 62%, transparent);
+  min-height: 3px;
+}
+.wx__col.is-rain .wx__bar {
+  background: var(--primary);
+}
+.wx__start {
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  height: 2px;
+  background: var(--background);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+.wx__col.is-rain .wx__start {
+  box-shadow: 0 0 0 1px var(--primary);
+}
+/* The foot sits just under the axis line and says wet or dry. */
+.wx__foot {
+  position: absolute;
+  left: 50%;
+  bottom: -0.55rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  translate: -50% 0;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--foreground) 45%, transparent);
+  background: transparent;
+}
+.wx__col.is-wet .wx__foot {
+  border-color: var(--primary);
+}
+.wx__col.is-rain .wx__foot {
+  background: var(--primary);
+}
+.wx__year {
+  position: absolute;
+  left: 50%;
+  bottom: -1.9rem;
+  translate: -50% 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+}
+/* Two dozen labels do not fit a phone; every other year is enough to read the
+   row, and the table underneath has all of them. */
+@media (max-width: 40rem) {
+  .wx__col:nth-child(even of .wx__col) .wx__year {
+    display: none;
+  }
+}
+.wx + figcaption {
+  margin-top: 3rem;
 }

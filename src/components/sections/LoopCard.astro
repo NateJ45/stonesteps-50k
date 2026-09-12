@@ -23,8 +23,10 @@
 // short one. Four independent years agreeing is what makes this a measurement
 // rather than a guess, and the 27K falls exactly on the fourth mark.
 //
-// Precision the reader cannot trace is worse than vagueness, so the card
-// carries a sourceNote saying where the numbers came from. Do not drop it.
+// The provenance (the split columns on the race's own 2006 to 2009 timing
+// sheets) is recorded beside the numbers in scripts/seed-pages.mjs. The card
+// can still show it through the optional sourceNote field, but the page no
+// longer does: it was cut on 2026-09-11 as more than a visitor needs.
 
 import Provisional from '@/components/race/Provisional.astro';
 import DataMark from '@/components/race/DataMark.astro';
@@ -135,11 +137,13 @@ const {
                         the course where they can be told. */}
                     {loop.throughMiles && (
                       <span class="tabular block text-[0.75rem] text-[color:var(--plate-ink-soft)]">
-                        {/* "8.5 in" reads as distance covered. The final loop
-                            carries the race's own label for that column, "50K",
-                            which is not a mileage and must not take the suffix. */}
+                        {/* "8.5 mi so far", spelled out. It shipped as "8.5 in"
+                            for "8.5 miles in", and beside a bare "5.3" that
+                            read as inches. The final loop carries the race's
+                            own label for that column, "50K", which is not a
+                            mileage and takes no suffix. */}
                         {/^[\d.]+$/.test(loop.throughMiles)
-                          ? `${loop.throughMiles} in`
+                          ? `${loop.throughMiles} mi so far`
                           : loop.throughMiles}
                       </span>
                     )}

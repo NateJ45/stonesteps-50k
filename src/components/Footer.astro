@@ -39,6 +39,7 @@ import {
 import { Mail, Phone } from 'lucide-react';
 import CopyEmailButton from '@/components/CopyEmailButton';
 import NewsletterSignup from '@/components/NewsletterSignup';
+import { externalLinkAttrs } from '@/lib/links';
 import { getAllProjects, getRace, type CoreProjectCard } from '@/lib/queries';
 // THE SVG, NOT THE PNG. The .png files in src/assets were the REID DESIGN
 // wordmark, inherited from the repo this project was forked from, and this
@@ -222,7 +223,11 @@ const latestProjects = allProjects.slice(0, 3);
             </p>
           </div>
           {race?.registerUrl && (
-            <a class="btn-plate btn-plate--cream self-start md:self-auto" href={race.registerUrl}>
+            <a
+              class="btn-plate btn-plate--cream self-start md:self-auto"
+              href={race.registerUrl}
+              {...externalLinkAttrs(race.registerUrl)}
+            >
               Register
               <span class="btn-plate__arrow" aria-hidden="true">
                 &rarr;
@@ -274,7 +279,11 @@ const latestProjects = allProjects.slice(0, 3);
             <ul class="list-none space-y-2 p-0 text-sm">
               {col.links.map((link) => (
                 <li>
-                  <a href={link.href} class="text-foreground/85 transition-colors hover:text-link">
+                  <a
+                    href={link.href}
+                    class="text-foreground/85 transition-colors hover:text-link"
+                    {...externalLinkAttrs(link.href)}
+                  >
                     {link.label}
                   </a>
                 </li>
@@ -585,6 +594,7 @@ const latestProjects = allProjects.slice(0, 3);
                 <a
                   href={l.href}
                   class="underline underline-offset-2 transition-colors hover:text-link"
+                  {...externalLinkAttrs(l.href)}
                 >
                   {l.label}
                 </a>
@@ -598,19 +608,23 @@ const latestProjects = allProjects.slice(0, 3);
               null
         }
         {
-          siteCredit &&
-            (siteCreditUrl ? (
-              <a
-                href={siteCreditUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="underline underline-offset-2 transition-colors hover:text-link"
-              >
-                {siteCredit}
-              </a>
-            ) : (
-              <span>{siteCredit}</span>
-            ))
+          siteCredit && (
+            <span>
+              Designed by{' '}
+              {siteCreditUrl ? (
+                <a
+                  href={siteCreditUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="underline underline-offset-2 transition-colors hover:text-link"
+                >
+                  {siteCredit}
+                </a>
+              ) : (
+                siteCredit
+              )}
+            </span>
+          )
         }
       </div>
     </div>

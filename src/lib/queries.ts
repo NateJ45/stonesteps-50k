@@ -128,7 +128,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       "distances": *[_type == "distance"] | order(orderRank asc){
         _id, name, "slug": slug.current, kicker, loopStructure, totalMiles, loopCount,
         blurb, includes, startTime, trekkerNote, entryCap, runSignUpEventId, featured,
-        confirmed
+        confirmed, feeTiers[]{ label, amount, endsOn }
       },
       "race": *[_type == "race"][0]{ registerUrl, feeTiers }
     },

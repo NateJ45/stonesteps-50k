@@ -24,6 +24,7 @@ type Props = {
   headline?: string;
   cta?: ProjectedCourseFeaturesSection['cta'];
   image?: ProjectedCourseFeaturesSection['image'];
+  caption?: string;
   features?: ProjectedCourseFeaturesSection['features'];
   surface?: string;
   headingId?: string;
@@ -34,6 +35,7 @@ const {
   headline = 'The course',
   cta,
   image,
+  caption,
   features = [],
   surface = 'background',
   headingId = 'course-features-heading',
@@ -65,6 +67,11 @@ const hasImage = Boolean(image?.asset);
                   class="course-photo w-full"
                 />
               </div>
+              {caption && (
+                <figcaption class="mt-3 max-w-[48ch] text-sm leading-relaxed text-muted-foreground">
+                  {caption}
+                </figcaption>
+              )}
             </figure>
           )}
 

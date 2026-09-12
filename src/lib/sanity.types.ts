@@ -93,6 +93,9 @@ export type SectionPreset = {
       } & ParksSection)
     | ({
         _key: string;
+      } & RaceWeatherSection)
+    | ({
+        _key: string;
       } & DynastiesSection)
     | ({
         _key: string;
@@ -461,6 +464,13 @@ export type Distance = {
   entryCap?: number;
   runSignUpEventId?: number;
   featured?: boolean;
+  feeTiers?: Array<{
+    label?: string;
+    amount?: number;
+    endsOn?: string;
+    _type: 'distanceFeeTier';
+    _key: string;
+  }>;
   confirmed?: boolean;
   orderRank?: string;
 };
@@ -1283,6 +1293,13 @@ export type DynastiesSection = {
   cta?: CtaBlock;
 };
 
+export type RaceWeatherSection = {
+  _type: 'raceWeatherSection';
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+};
+
 export type ParksSection = {
   _type: 'parksSection';
   eyebrow?: string;
@@ -1353,6 +1370,7 @@ export type CourseFeaturesSection = {
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
     alt?: string;
+    caption?: string;
     _type: 'image';
   };
 };
@@ -1577,6 +1595,9 @@ export type Page = {
     | ({
         _key: string;
       } & ParksSection)
+    | ({
+        _key: string;
+      } & RaceWeatherSection)
     | ({
         _key: string;
       } & DynastiesSection)
@@ -2021,6 +2042,9 @@ export type ProcessPage = {
       } & ParksSection)
     | ({
         _key: string;
+      } & RaceWeatherSection)
+    | ({
+        _key: string;
       } & DynastiesSection)
     | ({
         _key: string;
@@ -2126,6 +2150,9 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & ParksSection)
+    | ({
+        _key: string;
+      } & RaceWeatherSection)
     | ({
         _key: string;
       } & DynastiesSection)
@@ -2273,6 +2300,9 @@ export type AboutPage = {
     | ({
         _key: string;
       } & ParksSection)
+    | ({
+        _key: string;
+      } & RaceWeatherSection)
     | ({
         _key: string;
       } & DynastiesSection)
@@ -2479,6 +2509,9 @@ export type HomePage = {
     | ({
         _key: string;
       } & ParksSection)
+    | ({
+        _key: string;
+      } & RaceWeatherSection)
     | ({
         _key: string;
       } & DynastiesSection)
@@ -2836,6 +2869,7 @@ export type AllSanitySchemaTypes =
   | PhotoBandSection
   | GearSection
   | DynastiesSection
+  | RaceWeatherSection
   | ParksSection
   | TickerSection
   | SponsorPatchesSection

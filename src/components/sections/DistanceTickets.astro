@@ -18,6 +18,7 @@
 // instead of the generic race page.
 
 import Provisional from '@/components/race/Provisional.astro';
+import { externalLinkAttrs } from '@/lib/links';
 import type { ProjectedDistanceTicketsSection } from '@/lib/pageBuilder.types';
 
 type Props = {
@@ -113,6 +114,23 @@ function registerHref(eventId?: number): string | undefined {
                   )}
                 </dl>
                 {d.trekkerNote && <p class="ticket-soft mt-3 text-xs">{d.trekkerNote}</p>}
+
+                {/* THE PRICE LADDER, PER DISTANCE. The two races are priced apart at
+                  every stage, so a single race-level strip under the board (which
+                  is where this used to be) could only ever be right for one of
+                  them. Each ticket carries its own. */}
+                {Array.isArray(d.feeTiers) && d.feeTiers.length > 0 && (
+                  <dl class="mt-5 grid gap-1 border-t border-dashed border-current/30 pt-4 text-sm">
+                    {d.feeTiers.map((t) => (
+                      <div class="flex items-baseline justify-between gap-4">
+                        <dt class="ticket-soft font-mono text-[0.6875rem] tracking-[0.14em] uppercase">
+                          {t.label}
+                        </dt>
+                        <dd class="tabular font-bold">${t.amount}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
               </div>
 
               {/* Everything below the perforation is the part you would keep.
@@ -135,6 +153,7 @@ function registerHref(eventId?: number): string | undefined {
                   <a
                     class="btn-plate mt-6 w-full justify-center md:mt-auto md:pt-6"
                     href={registerHref(d.runSignUpEventId)}
+                    {...externalLinkAttrs(registerHref(d.runSignUpEventId))}
                     rel="noopener"
                   >
                     Register for the <span class="lc">{d.name}</span>
@@ -157,17 +176,11 @@ function registerHref(eventId?: number): string | undefined {
     </div>
 
     {
-      Array.isArray(race?.feeTiers) && race.feeTiers.length > 0 && (
-        <ul class="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-2 font-mono text-xs tracking-wide text-muted-foreground">
-          {race.feeTiers.map((t) => (
-            <li>
-              <span class="tabular font-bold text-foreground">${t.amount}</span> {t.label}
-            </li>
-          ))}
-        </ul>
-      )
+      /* The ladders moved onto the tickets (see above); the race-level tiers now
+      only feed the JSON-LD offers. The note stays: it is where the director
+      says what the early price is. */
     }
-    {note && <p class="mt-3 text-center text-sm text-muted-foreground">{note}</p>}
+    {note && <p class="mt-8 text-center text-sm text-muted-foreground">{note}</p>}
   </div>
 </section>
 

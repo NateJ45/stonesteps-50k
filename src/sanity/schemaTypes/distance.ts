@@ -6,7 +6,7 @@
 //
 // Registered in index.ts, drag-orderable under "The Race" in structure.ts.
 
-import { defineType, defineField } from 'sanity';
+import { defineType, defineArrayMember, defineField } from 'sanity';
 import { orderRankField } from '@sanity/orderable-document-list';
 import { confirmedField } from './_confirmedField';
 
@@ -121,6 +121,33 @@ export const distance = defineType({
       initialValue: false,
       description: 'The featured distance gets the corner flag on its ticket.',
       options: { canvasApp: { exclude: true } },
+    }),
+    defineField({
+      name: 'feeTiers',
+      title: 'Entry fee tiers',
+      type: 'array',
+      description:
+        'In date order, for THIS distance. The two distances are priced differently at every ' +
+        'stage, which is why the ladder lives here and not on The Race. The race-level tiers ' +
+        'still exist for the JSON-LD offers and the Studio checkup.',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'distanceFeeTier',
+          fields: [
+            defineField({ name: 'label', title: 'Label', type: 'string' }),
+            defineField({ name: 'amount', title: 'Amount (USD)', type: 'number' }),
+            defineField({ name: 'endsOn', title: 'Available until', type: 'date' }),
+          ],
+          preview: {
+            select: { label: 'label', amount: 'amount' },
+            prepare: ({ label, amount }) => ({
+              title: amount != null ? `$${amount}` : '(no amount)',
+              subtitle: label,
+            }),
+          },
+        }),
+      ],
     }),
     confirmedField("Tick once this distance's times and cap are confirmed for this edition."),
     orderRankField({ type: 'distance' }),

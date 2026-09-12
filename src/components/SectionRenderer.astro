@@ -47,6 +47,7 @@ import ContactBand from '@/components/sections/ContactBand.astro';
 import FaqKiosk from '@/components/sections/FaqKiosk.astro';
 import Ticker from '@/components/sections/Ticker.astro';
 import ParksBand from '@/components/sections/ParksBand.astro';
+import RaceWeather from '@/components/sections/RaceWeather.astro';
 import Dynasties from '@/components/sections/Dynasties.astro';
 import GearBand from '@/components/sections/GearBand.astro';
 import { classifySections } from '@/lib/sectionCadence';
@@ -358,6 +359,7 @@ const wrapAttrs = (key: string | undefined) =>
             headline={s.headline}
             cta={s.cta}
             image={s.image}
+            caption={s.caption}
             features={s.features ?? []}
             surface={surface ?? 'background'}
             headingId={headingId}
@@ -420,6 +422,14 @@ const wrapAttrs = (key: string | undefined) =>
           />
         ) : s._type === 'tickerSection' ? (
           <Ticker items={s.items ?? []} />
+        ) : s._type === 'raceWeatherSection' ? (
+          <RaceWeather
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            intro={s.intro}
+            surface={surface ?? 'background'}
+            headingId={headingId}
+          />
         ) : s._type === 'parksSection' ? (
           <ParksBand
             eyebrow={s.eyebrow}

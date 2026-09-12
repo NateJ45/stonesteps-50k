@@ -74,6 +74,8 @@ const cta = (label, href) => {
 const REGISTER = 'https://runsignup.com/Race/OH/Cincinnati/StoneSteps50KTrailRun';
 // A Google Maps SEARCH for the start area, not a pin: a search URL cannot go
 // stale the way hand-typed coordinates can, and the park is well indexed.
+const HOTELS_URL =
+  'https://www.google.com/maps/search/hotel/@39.1371651,-84.622812,77994m/data=!3m1!1e3';
 const MAPS_URL =
   'https://www.google.com/maps/search/?api=1&query=Mt.+Airy+Forest+Area+13+The+Oval+Cincinnati+OH';
 
@@ -179,7 +181,8 @@ docs.push({
       _key: key(),
       eyebrow: 'Two distances',
       headline: 'Pick your race',
-      note: 'Prices step up on February 1 and again on October 1.',
+      // The director's own line from the old site.
+      note: 'Earlybird pricing (2008 registration fees!) runs through January 31. Prices go up after January 31 and again after September 30.',
     },
     {
       _type: 'elevationSection',
@@ -200,6 +203,9 @@ docs.push({
       ),
       eyebrow: 'What to expect',
       headline: 'Roots, rocks, and one very good park',
+      caption:
+        'Hilly trails with roots and rocks and occasional tree blow downs. Pictured are Jon ' +
+        'Hastings, one of two sub-4 hour finishers, and Backyard champion Harvey Lewis.',
       cta: cta('The full course', '/course'),
     },
     {
@@ -259,7 +265,8 @@ docs.push({
                 'David Corfman has directed this race for over twenty years, which is most ' +
                 'of the time it has existed. He is also the 34th runner in history to finish ' +
                 'a hundred hundred-mile races, so the person setting the cutoffs has stood ' +
-                'where you will be standing at four in the afternoon.',
+                'where you will be standing at four in the afternoon. He now wears a Coros ' +
+                'watch!',
             },
           ],
         },
@@ -275,8 +282,7 @@ docs.push({
               marks: [],
               text:
                 'Everything the site cannot answer yet, he can. Parking, packet pickup, ' +
-                'the briefing, whether you can bring a dog: ask, and the answer goes on ' +
-                'this site.',
+                'the briefing: ask, and the answer goes on this site.',
             },
           ],
         },
@@ -350,12 +356,10 @@ docs.push({
         },
       ],
       // The loop distances are the race's own, recovered from the split
-      // columns on its 2006 to 2009 timing spreadsheets. All four years carry
-      // the same marks. See the sourceNote below, which ships on the page.
-      sourceNote:
-        'Loop distances come from the split columns on the timing sheets the race kept for ' +
-        '2006 through 2009, which all read 5.3M, 8.5M, 13.8M, 17M, 22.3M and 25.5M. Its ' +
-        'current copy rounds these to "5+" and "3+".',
+      // columns on its 2006 to 2009 timing spreadsheets (5.3M, 8.5M, 13.8M,
+      // 17M, 22.3M, 25.5M; all four years agree). That provenance used to ship
+      // on the page as a sourceNote; it was cut on 2026-09-11 as more than a
+      // visitor needs, and lives here instead.
       loops: [
         {
           _type: 'loop',
@@ -424,6 +428,13 @@ docs.push({
         'Each loop returns you through the aid station at The Oval before sending you back ' +
         'out, so drop bags stay in one place all day.',
       totalGain: '10,726 ft',
+    },
+    {
+      _type: 'raceWeatherSection',
+      _key: key(),
+      eyebrow: 'Race day, historically',
+      headline: 'What the weather has done',
+      // intro left empty on purpose: the sentence is computed from the data.
     },
     {
       _type: 'courseFeaturesSection',
@@ -655,8 +666,8 @@ docs.push({
           _key: key(),
           question: 'What does my entry include?',
           answer:
-            'A race t-shirt and a timing chip, plus aid at the end of every loop. The 50K ' +
-            'shirt is a tech tee. Entries also fund the annual donation to Cincinnati Parks.',
+            'A race t-shirt and a timing chip, plus aid at the end of every loop. Entries ' +
+            'also fund the annual donation to Cincinnati Parks.',
         },
         {
           _type: 'faqCard',
@@ -726,6 +737,9 @@ docs.push({
       // `heading`, not `headline`. ImageText.astro reads `heading`, so the
       // wrong key rendered this block with no title at all.
       heading: 'Stay downtown or near CVG',
+      // The old site sent people to a Google Maps hotel search centred on the
+      // park. Same search, minus the date the old link had baked into it.
+      cta: { ...cta('Find a hotel on Google Maps', HOTELS_URL), openInNewTab: true },
       body: [
         {
           _type: 'block',

@@ -55,16 +55,30 @@ const {
 
         {items.length > 0 && (
           <div class="kiosk mt-10 rounded-2xl border-2 border-black p-5 sm:p-8">
-            <div class="grid gap-4 md:grid-cols-2">
-              {items.map((item) => (
-                <details class="qa">
-                  <summary class="flex items-start gap-3">
-                    <span class="qa__pin" aria-hidden="true" />
-                    <span class="display on-light flex-1 text-[1.05rem]">{item.question}</span>
-                    <span class="qa__i" aria-hidden="true" />
-                  </summary>
-                  <p class="qa__a">{item.answer}</p>
-                </details>
+            {/* TWO INDEPENDENT COLUMNS, not one grid. A grid aligns its rows, so
+              opening a card stretched its row-mate to the same height: a plate
+              with a question on top and nothing under it. Each column is its own
+              stack, so an open card only pushes down the cards beneath it. The
+              cards alternate left/right so the columns stay balanced; on a phone
+              the two stacks simply follow each other. */}
+            <div class="grid gap-4 md:grid-cols-2 md:items-start">
+              {[0, 1].map((col) => (
+                <div class="grid gap-4">
+                  {items
+                    .filter((_, i) => i % 2 === col)
+                    .map((item) => (
+                      <details class="qa">
+                        <summary class="flex items-start gap-3">
+                          <span class="qa__pin" aria-hidden="true" />
+                          <span class="display on-light flex-1 text-[1.05rem]">
+                            {item.question}
+                          </span>
+                          <span class="qa__i" aria-hidden="true" />
+                        </summary>
+                        <p class="qa__a">{item.answer}</p>
+                      </details>
+                    ))}
+                </div>
               ))}
             </div>
           </div>

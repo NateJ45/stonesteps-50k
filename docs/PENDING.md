@@ -191,6 +191,26 @@ box in the Studio each year.
 
 ## Known gaps, deliberately open
 
+### 0a. Five race dates are unknown, so the weather strip starts in 2006 with gaps
+
+**Blocker: no captured page from those years names the date.**
+
+The course page's race-day weather strip (`raceWeatherSection`, added 2026-09-11) reads
+`scripts/data/race-days.json`, one `{ year, date }` per edition, and `scripts/build-weather.mjs`
+turns that into `src/data/raceDayWeather.json` from Open-Meteo's ERA5 archive. A year with
+no confirmed date is simply absent from the strip; nothing is guessed.
+
+Confirmed: 2006 (Oct 22), 2007 (Oct 21), 2008 (Oct 19), 2009 (Oct 25), 2010 (Oct 24),
+2013 (Oct 27) and 2014 (Oct 26, from a single capture) from Wayback captures of the old
+site, and 2015 through 2026 from RunSignUp's past events.
+**Unknown: 2003, 2004, 2005, 2011, 2012.** The archived results pages carry no dates, the
+race did not run on a fixed Sunday (2017 was the fifth Sunday of October, 2024 the third),
+and two Wayback sweeps (strict and relaxed date patterns, up to 16 pages per year) found
+nothing for those five; 2003 and 2004 have no autumn captures at all. Likely sources still untried: the race director's own records,
+the 2009 and 2010 entry-form PDFs (Wayback has them; text extraction was not attempted), and
+Ultrarunning Magazine's results archive. Add a date to `race-days.json` with its source,
+re-run `node scripts/build-weather.mjs`, commit the JSON.
+
 ### 0. Two archive years are still lost, and the results pages now say so
 
 /results renders every edition from 2003 to 2025, including 2020 as a row that

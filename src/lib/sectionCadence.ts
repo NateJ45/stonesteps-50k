@@ -83,6 +83,7 @@ export const CONTENT_TYPES = new Set([
   'recordsBoardSection',
   'courseFeaturesSection',
   'elevationSection',
+  'raceWeatherSection',
   'contactSection',
   'dynastiesSection',
   'gearSection',

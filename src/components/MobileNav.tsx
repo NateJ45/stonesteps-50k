@@ -25,6 +25,7 @@ import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import ThemeToggle from './ThemeToggle';
 import { telHref } from '@/lib/phone';
+import { externalLinkAttrs } from '@/lib/links';
 
 // ---- Types ------------------------------------------------------------------
 
@@ -120,6 +121,7 @@ export default function MobileNav({
               <a
                 href={cta.href}
                 onClick={close}
+                {...externalLinkAttrs(cta.href)}
                 className="block w-full rounded-md bg-primary-dark px-m py-m text-center text-xs font-semibold tracking-eyebrow text-white uppercase transition-colors hover:bg-accent-dark"
               >
                 {cta.label}
@@ -141,6 +143,7 @@ export default function MobileNav({
                     key={item.href}
                     href={item.href}
                     onClick={close}
+                    {...externalLinkAttrs(item.href)}
                     className="flex items-center px-l py-s font-display text-lg text-foreground transition-colors hover:bg-muted hover:text-link"
                   >
                     {item.label}
@@ -162,6 +165,7 @@ export default function MobileNav({
                       key={sub.href}
                       href={sub.href}
                       onClick={close}
+                      {...externalLinkAttrs(sub.href)}
                       className="flex items-center gap-xs py-xs pr-l pl-[calc(theme(spacing.l)+0.5rem)] font-body text-base text-foreground transition-colors hover:bg-muted hover:text-link"
                     >
                       <ChevronRight

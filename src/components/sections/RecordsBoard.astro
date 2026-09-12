@@ -28,6 +28,7 @@ import GhostPhoto from '@/components/race/GhostPhoto.astro';
 import { bracketRecords, courseRecord, type RecordRow } from '@/lib/age-brackets';
 import { formatRaceTime } from '@/lib/race-time';
 import type { ProjectedRecordsBoardSection } from '@/lib/pageBuilder.types';
+import { externalLinkAttrs } from '@/lib/links';
 
 type Props = {
   eyebrow?: string;
@@ -320,7 +321,11 @@ const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
         has to be told is where the rest of the results are. */
       race?.resultsUrl && (
         <p class="mt-10 max-w-[62ch] text-sm text-muted-foreground">
-          <a class="text-link underline" href={race.resultsUrl} rel="noopener">
+          <a
+            class="text-link underline"
+            href={race.resultsUrl}
+            {...externalLinkAttrs(race.resultsUrl)}
+          >
             The complete results archive lives on RunSignUp.
           </a>
         </p>

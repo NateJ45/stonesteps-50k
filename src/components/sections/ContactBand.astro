@@ -11,6 +11,7 @@
 
 import RaceContactForm from '@/components/RaceContactForm';
 import type { ProjectedContactSection } from '@/lib/pageBuilder.types';
+import { externalLinkAttrs } from '@/lib/links';
 
 type Props = {
   eyebrow?: string;
@@ -86,7 +87,7 @@ const dateLabel =
               <a
                 class="btn-plate btn-plate--cream mt-4 text-sm"
                 href={race.facebookUrl}
-                rel="noopener"
+                {...externalLinkAttrs(race.facebookUrl)}
               >
                 Join the group
                 <span aria-hidden="true">&rarr;</span>

@@ -1,4 +1,5 @@
 ---
+import { externalLinkAttrs } from '@/lib/links';
 // Foundation, edit with care
 /**
  * Elevation profile for the 50K, drawn from the loop structure: four 5.3 mile
@@ -229,7 +230,7 @@ if (measured) {
           </span>
         )}
         {gpxUrl && (
-          <a class="elev__note" href={gpxUrl} rel="noopener">
+          <a class="elev__note" href={gpxUrl} {...externalLinkAttrs(gpxUrl)}>
             Download the course GPX
           </a>
         )}

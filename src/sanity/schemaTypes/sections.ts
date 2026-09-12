@@ -622,6 +622,7 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
         'courseFeaturesSection',
         'loopCardSection',
         'elevationSection',
+        'raceWeatherSection',
         'sponsorPatchesSection',
         'tickerSection',
         'parksSection',
