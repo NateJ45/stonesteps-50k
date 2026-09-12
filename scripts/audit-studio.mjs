@@ -4,21 +4,25 @@
 //
 // WHY THIS EXISTS. The race director edits this site about twice a year, which
 // is long enough that anything wrong in the Studio is discovered by him, alone,
-// under time pressure, rather than by us. The three faults below are all ones
-// that shipped and none of them show up in a build, a type check or a test:
+// under time pressure, rather than by us. The faults below are all ones that
+// shipped and none of them show up in a build, a type check or a test:
 //
 //   1. A field that is `hidden: true` AND `Rule.required()`. Sanity validates
 //      the document, not the form, so the document is permanently invalid and
 //      the error names a field that is nowhere on screen. Four of these were
 //      live on 2026-09-12, on Home and on Site Settings.
 //
-//   2. A stored key the schema does not declare. The Studio renders it as
+//   2. A preview title selected from a number. Sanity lowercases the title to
+//      index it, so the whole array field renders as a red Unhandled Runtime
+//      Error. The home page's Numbers Row did this.
+//
+//   3. A stored key the schema does not declare. The Studio renders it as
 //      "Unknown field found" with a REMOVE FIELD button beside it, and that
 //      button deletes the value from every document of the type with no undo.
 //      A stray key is not cosmetic; it is a loaded gun in an editor's form.
 //      Two seeded buttons carried a `href` that ctaBlock has never had.
 //
-//   3. A required field that is blank in the live document. Some of those are
+//   4. A required field that is blank in the live document. Some of those are
 //      real jobs for the editor and some mean the requirement is wrong, but
 //      either way nobody can publish until it is settled.
 //
@@ -125,6 +129,71 @@ function readSchema() {
   return types;
 }
 
+/**
+ * Preview titles taken straight from a non-string field.
+ *
+ * Sanity lowercases a preview title when it indexes the item for search, so a
+ * title selected from a `number` throws "toLowerCase is not a function" and the
+ * whole array field renders as a red Unhandled Runtime Error. The Numbers Row
+ * on the home page did exactly that until 2026-09-12. A `prepare` that returns
+ * a string is the fix, so a select with one beside it is fine.
+ */
+/** The source of the `{...}` object starting at `open`, brace-balanced. */
+function objectAt(src, open) {
+  let depth = 0;
+  for (let i = open; i < src.length; i++) {
+    if (src[i] === '{') depth++;
+    else if (src[i] === '}') {
+      depth--;
+      if (depth === 0) return src.slice(open, i + 1);
+    }
+  }
+  return src.slice(open);
+}
+
+function numericPreviewTitles() {
+  const out = [];
+  const BAD = new Set(['number', 'boolean', 'date', 'datetime', 'array', 'reference', 'image']);
+  for (const file of readdirSync(SCHEMA_DIR).filter((f) => f.endsWith('.ts'))) {
+    const src = readFileSync(resolve(SCHEMA_DIR, file), 'utf8');
+
+    // Every field name declared in this file, with its type. A name is reused
+    // across objects rarely enough, and a field called `number` that is a
+    // number somewhere in the file is worth flagging wherever it titles a
+    // preview.
+    const fieldTypes = new Map();
+    for (const f of src.matchAll(
+      // TEMPERED: the gap must not contain another `name:`. A plain
+      // [\s\S]{0,240} scans left to right and swallows the next field, so
+      // `name: 'statItem'` paired itself with the `type: 'number'` belonging to
+      // the field INSIDE it and the real `number` field was never seen. That is
+      // why two earlier versions of this check reported nothing on a file that
+      // was crashing the Studio.
+      /name:\s*'([A-Za-z0-9_]+)',(?:(?!name:)[\s\S]){0,240}?type:\s*'([a-zA-Z]+)'/g,
+    )) {
+      if (BAD.has(f[2])) fieldTypes.set(f[1], f[2]);
+    }
+
+    // BRACE-BALANCED, NOT A PROXIMITY GUESS. The first cut looked for the word
+    // "prepare" within 600 characters of the select and found the PARENT
+    // object's prepare, so it cleared the very bug it was written for. Reading
+    // the preview object itself is the only way to know whether this preview
+    // has one.
+    for (const p of src.matchAll(/preview:\s*\{/g)) {
+      const open = p.index + p[0].length - 1;
+      const block = objectAt(src, open);
+      if (/\bprepare\b/.test(block)) continue;
+      const title = block.match(/title:\s*'([A-Za-z0-9_]+)'/);
+      if (!title) continue;
+      const declared = fieldTypes.get(title[1]);
+      if (!declared) continue;
+      const line = src.slice(0, p.index).split('\n').length;
+      out.push(`${file}:${line}  preview title '${title[1]}' is a ${declared}, with no prepare()`);
+    }
+  }
+  return out;
+}
+
 /** Fields that are hidden and required at once. */
 function hiddenRequired() {
   const out = [];
@@ -218,7 +287,16 @@ if (hr.length) {
   console.log('  none');
 }
 
-section('2. Stored keys the schema does not declare ("Remove field" bait)');
+section('2. Preview titles that are not strings (crashes the field)');
+const npt = numericPreviewTitles();
+if (npt.length) {
+  problems += npt.length;
+  npt.forEach((l) => console.log(`  ${l}`));
+} else {
+  console.log('  none');
+}
+
+section('3. Stored keys the schema does not declare ("Remove field" bait)');
 const docTypes = await client.fetch(
   `array::unique(*[!(_type match "sanity.*") && !(_type match "system.*")]._type)`,
 );
@@ -255,7 +333,7 @@ if (hits.length) {
   console.log('  none');
 }
 
-section('3. Required fields left blank in the live data');
+section('4. Required fields left blank in the live data');
 let blanks = 0;
 for (const [type, fields] of requiredFields()) {
   if (!docTypes.includes(type)) continue;

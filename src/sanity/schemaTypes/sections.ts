@@ -340,7 +340,24 @@ export const statSection = defineType({
               validation: (R) => R.required(),
             }),
           ],
-          preview: { select: { title: 'number', subtitle: 'label' } },
+          // A PREVIEW TITLE MUST BE A STRING. Selected straight from `number`
+          // this handed Sanity a real number, and Sanity lowercases the title
+          // when it indexes an item for search, so opening Numbers Row threw
+          // "TypeError: toLowerCase is not a function" and the whole field
+          // rendered as a red Unhandled Runtime Error instead of a list
+          // (2026-09-12). `prepare` is what makes the value a string, and it
+          // can show the suffix too, so the row reads "10,726 ft" rather than
+          // "10726".
+          preview: {
+            select: { number: 'number', suffix: 'suffix', label: 'label' },
+            prepare: ({ number, suffix, label }) => ({
+              title:
+                typeof number === 'number'
+                  ? `${number.toLocaleString('en-US')}${suffix ?? ''}`
+                  : 'No number yet',
+              subtitle: label,
+            }),
+          },
         }),
       ],
     }),
