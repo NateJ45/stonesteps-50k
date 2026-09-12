@@ -170,7 +170,14 @@ function isGroupActive(items: { href: string }[]) {
 }
 ---
 
-<header class="site-header sign-board bg-background" data-overlay={overlay ? '' : undefined}>
+{
+  /* NO `bg-background` UTILITY HERE. The board paints its own stock in
+    globals.css (`--board-stock`, shared with the footer), and a utility class
+    on the element would be a second answer to the same question whose winner
+    depends on where Tailwind injects its layer. Overlay mode still wins over
+    both: that rule is an attribute selector. */
+}
+<header class="site-header sign-board" data-overlay={overlay ? '' : undefined}>
   {
     /* Eyebrow strip (desktop only). Carries the locked positioning line and
       utility controls (email + social icons + theme toggle). Mobile gets

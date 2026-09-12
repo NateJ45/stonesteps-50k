@@ -285,6 +285,15 @@
   --muted: #f4ebd6;
   --muted-foreground: #5c513b; /* ~5.6:1 on #FBFBFA — passes AA */
 
+  /* BOARD STOCK: the ground the two signs are cut from, the header at the top
+     of the page and the footer at the bottom. Deliberately NOT --muted, which
+     is seven units off the body and left both boards' torn edges tearing a
+     colour over itself. One token because if the two ends of the page ever
+     stop matching it should be an edit someone made, not a drift nobody
+     noticed. Page ink measures 13.9:1 on it, the muted ink 6.1, the link and
+     the heading accent 5.2 and 6.1. */
+  --board-stock: #efe2c6;
+
   /* Accent */
   --accent: #f0e6ce;
   --accent-foreground: #1a1712;
@@ -365,6 +374,10 @@
 
   --muted: #241f17;
   --muted-foreground: #c9b98f;
+
+  /* See the light note. 15.9:1 for the page ink, 9.6 for the muted, 13.8 for
+     the accent. */
+  --board-stock: #15120c;
 
   --accent: #2f281d;
   --accent-foreground: #fed89b;
@@ -1105,6 +1118,9 @@ body::before {
     --background: white;
     --foreground: black;
     --muted: white;
+    /* The two boards flatten with everything else; a literal ground would be
+       the one thing on the page that ignored this block. */
+    --board-stock: white;
     --border: #d4d4d4;
   }
   html,
@@ -2021,6 +2037,22 @@ body::before {
   background: transparent;
 }
 .site-header {
+  /* THE TWO BOARDS ARE CUT FROM THE SAME STOCK (2026-09-12). The header has had
+     a torn bottom edge since it became a sign, and on most of the site that
+     edge was invisible: the board was `bg-background` over a page painted
+     `--background`, so it was tearing its own colour over itself. It only ever
+     showed on the home page, after a scroll, against the hero.
+
+     It takes the footer's ground now, the same literal on each theme, so the
+     chrome reads as one sign cut in two and nailed at either end of the page,
+     and the torn edge has something to cut. Contrast is comfortable on both:
+     the page ink 13.9:1 light and 15.9:1 dark, the nav's active red 5.2:1, the
+     muted ink 6.1 and 9.6.
+
+     `--board-stock` rather than a second token, because if these two ever stop
+     matching it should be a deliberate edit in one place, not a drift nobody
+     notices between the top of the page and the bottom. */
+  background: var(--board-stock);
   transition:
     transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
     background-color 220ms ease;
@@ -2583,6 +2615,37 @@ a:focus-visible > .sign-badge {
    It grows from the centre on hover and sits full width on the current page,
    so the motion says "this one" rather than merely decorating. The mark is
    decorative; `aria-current="page"` is what announces the page. */
+/* ---------- The nav, in the sign's own face ------------------------------ */
+/* THE LAST TYPE ON THE SITE STILL SET IN A WEB FACE (2026-09-12). The header
+   had already become a board: painted face, torn bottom edge, the mark nailed
+   to it, a hand-drawn blaze under the page you are on. The links on it were
+   14px Inter with a little tracking, which is the one thing in the chrome that
+   could have come off any site. The mobile menu sets its rows in the display
+   face, and so does the footer, so the desktop nav was the odd one out in its
+   own system.
+
+   IT IS ALSO NARROWER. Staatliches is condensed, so five labels take about a
+   fifth less room than they did, which is width handed back to the row at the
+   1024px breakpoint where the desktop layout has always been tightest.
+
+   The face is caps-only, so there is no `text-transform` here: asking for
+   uppercase would do nothing but make the rule look like it had an opinion.
+   Tracking is positive but small; the face is tight by design and the labels
+   are short.
+
+   Specificity: `.site-nav > a` is 0,1,1 and beats the `text-sm` utility on the
+   element itself (0,1,0), which is why the size can be set here rather than by
+   editing five class lists in Header.astro. */
+.site-nav > a,
+.site-nav summary {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.035em;
+  /* The display face sits high in its box next to the body-face CTA beside it.
+     A hair of line-height keeps the row's baselines in agreement. */
+  line-height: 1.1;
+}
+
 .nav-stroke {
   position: relative;
 }
@@ -3906,8 +3969,7 @@ main > .band-torn:first-child::before {
      on each theme is enough for the ridge to cut a visible line, and it costs
      nothing in contrast: the page ink measures 13.9:1 on the light ground and
      15.9:1 on the dark, the muted ink 6.1 and 9.6, the accent 6.1 and 13.8. */
-  --foot-ground: #efe2c6;
-  background: var(--foot-ground);
+  background: var(--board-stock);
   position: relative;
   isolation: isolate;
   /* The register plate rotates and the stamp lands past its resting size, so
@@ -3917,15 +3979,9 @@ main > .band-torn:first-child::before {
      scroll container. */
   overflow-x: clip;
 }
-.dark .site-foot {
-  --foot-ground: #15120c;
-}
 /* Printing flattens every surface to white (see the print block above), and a
    literal ground would be the one band that ignored that. */
 @media print {
-  .site-foot {
-    --foot-ground: white;
-  }
   .foot-topo,
   .foot-mud {
     display: none;
