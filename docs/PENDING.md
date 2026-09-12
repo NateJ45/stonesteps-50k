@@ -378,3 +378,44 @@ Nathan should make rather than an optimisation:
   is a design call.
 
 The CI gate asserts performance at 0.85 as a warning and passes.
+
+### 11. The modern trail map: what is possible, and the one input missing
+
+2026-09-12. Nathan asked whether the Stone Steps course could be printed onto
+Cincinnati Parks' current trail map instead of the 1998 scan the course page
+carries today. Investigated properly; the answer is yes, but not from the two
+maps alone.
+
+WHAT IS ESTABLISHED, so nobody re-derives it:
+
+- Parks publishes two PDFs. The "printable trail map" is a raster-heavy poster
+  (7.2MB, 67 embedded images). The "East Section" map is CLEAN VECTOR: 1,992
+  paths, and every named trail is separable by stroke colour and dash pattern
+  (Colerain dark green 2pt [2 2], Ponderosa brown 1.5pt [2 2], Beechwood yellow
+  2pt [1 2], Furnas light green 1.5pt [3 4], Arboretum orange 1.5pt [3 4], and
+  so on). A route drawn from those paths would be real geometry, not a tracing.
+- The race's own 1998 map extracts cleanly too: thresholding its red and blue
+  gives two continuous, unbroken loop polylines plus the direction arrows.
+- The site knows the loops are 5.3 and 3.2 miles out of The Oval. It does NOT
+  record which trails they use, and no named trail is either length, so each
+  loop is several trails plus connectors.
+- The two maps are in DIFFERENT ORIENTATIONS. An affine fitted to three
+  landmarks (Arboretum Center, Oak Ridge Lodge, the disc golf course) comes out
+  at roughly 55 degrees of rotation and 0.91 scale, and lands the Stone Steps
+  about 90 map-points from where the 2017 map labels them. On a map where
+  neighbouring trails are 30 to 60 points apart, that is not close enough to
+  say which trail a line is on.
+- Neither RunSignUp nor the current WordPress site holds a GPX, a KML or any
+  course file. RunSignUp's race page links only to Google and Apple directions.
+
+WHAT WOULD CLOSE IT: a GPX from any recent running, Dave's watch or any
+finisher's. With real coordinates the route goes onto the modern base directly,
+no tracing and no georeferencing, and the result is accurate rather than
+transcribed. That is a short job once the file exists. Failing that, Dave
+marking up a printout of the East Section map would do: the alignment only has
+to be good enough to name the trails, and he knows them.
+
+ONE THING TO SETTLE BEFORE PUBLISHING EITHER WAY: the base map is Cincinnati
+Parks' copyrighted artwork. Ask them before republishing a modified version.
+The race already partners with them and gives them $2,000 a year, so this is a
+conversation rather than an obstacle, but it should happen first.
