@@ -36,6 +36,26 @@
 // page, so the transcript keeps X (meaning "this source is not trustworthy
 // here") and resolveUnknownGenders settles it from his other years.
 //
+// RE-VERIFIED AGAINST THE SOURCES, EVERY YEAR, 2026-09-12. After the W bug
+// above was found in 2004, all fourteen years were fetched again from their
+// archived pages and compared row by row on name and gender. Every year
+// matches its page exactly:
+//
+//   2003 23   2004 19   2005 22   2006 48   2007 51   2008 57   2009 60
+//   2010 68   2011 68   2012 73   2013 83   2014 94   2015 128  2016 135
+//
+// Two traps in that comparison, in case anyone repeats it. The 2007 to 2009
+// pages list DNF and DNS rows alongside finishers, so a raw row count says a
+// year is short when it is not: 2007's own prose reads "65 runners registered,
+// 63 starters, and 51 finishers", and 51 is what we hold. And those same pages
+// split the runner's name across two columns, so matching on the column headed
+// "Name" compares first names to full names.
+//
+// The comparison found exactly one further error, now fixed: 2006's Mary
+// Wienholtz was transcribed "Mary Weinholts". The page spells it Wienholtz
+// twice, in her results row and in the door-prize list under it. She ran only
+// that year, so there was no second source to catch it.
+//
 // SOURCES, which differ by year:
 //   2003-2005  HTML tables on the archived pages
 //   2006-2009  the race's own .xls timing spreadsheets. The archived pages for
