@@ -3676,6 +3676,21 @@ main > .band-torn:first-child::before {
   width: 92%;
 }
 
+/* THE STRUCK ROW'S SHADOW, PER THEME (2026-09-12). The row for the page you
+   are on is set in the accent with the wordmark's echo behind it. On bark that
+   is gold over rust and reads as a press. On the cream page the accent IS rust
+   (#8f3323) and the echo is rust (#a83c26), so the current row came out as
+   rust on rust: a smear rather than a shadow, which is what Nathan saw in the
+   light-mode menu. The shadow is the page ink there instead, near black, and
+   stays the rust echo on bark. Both the menu board and the footer's rows read
+   this one token, so they cannot disagree. */
+:root {
+  --struck-echo: var(--foreground);
+}
+.dark {
+  --struck-echo: var(--display-echo);
+}
+
 /* ---------- The menu board ---------------------------------------------- */
 /* IT FOLLOWS THE THEME. The first cut pinned the board to bark in both modes,
    on the argument that a sign is an object and objects do not change colour
@@ -3835,7 +3850,7 @@ main > .band-torn:first-child::before {
    carries its red echo. */
 .menu-link[aria-current='page'] .menu-link__label {
   color: var(--heading-accent);
-  text-shadow: 0.055em 0.055em 0 var(--display-echo);
+  text-shadow: 0.055em 0.055em 0 var(--struck-echo);
 }
 .menu-link[aria-current='page'] .menu-link__idx {
   color: var(--foreground);
@@ -4153,7 +4168,7 @@ main > .band-torn:first-child::before {
 /* Where you are, struck the way the menu strikes it. */
 .foot-link[aria-current='page'] .foot-link__label {
   color: var(--heading-accent);
-  text-shadow: 0.05em 0.05em 0 var(--display-echo);
+  text-shadow: 0.05em 0.05em 0 var(--struck-echo);
 }
 .foot-link[aria-current='page'] .foot-link__idx {
   color: var(--foreground);
