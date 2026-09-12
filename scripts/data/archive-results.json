@@ -2953,7 +2953,8 @@
     "age": 29,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 1
   },
   {
     "year": 2010,
@@ -2964,7 +2965,8 @@
     "age": 34,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 2
   },
   {
     "year": 2010,
@@ -2975,7 +2977,8 @@
     "age": 44,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 3
   },
   {
     "year": 2010,
@@ -2986,7 +2989,8 @@
     "age": 38,
     "gender": "M",
     "city": "DECATUR",
-    "region": "AL"
+    "region": "AL",
+    "place": 4
   },
   {
     "year": 2010,
@@ -2997,7 +3001,8 @@
     "age": 33,
     "gender": "F",
     "city": "BLUFFTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 5
   },
   {
     "year": 2010,
@@ -3008,7 +3013,8 @@
     "age": 53,
     "gender": "M",
     "city": "AUSTIN",
-    "region": "TX"
+    "region": "TX",
+    "place": 6
   },
   {
     "year": 2010,
@@ -3019,7 +3025,8 @@
     "age": 26,
     "gender": "F",
     "city": "HERNDON",
-    "region": "VA"
+    "region": "VA",
+    "place": 7
   },
   {
     "year": 2010,
@@ -3030,7 +3037,8 @@
     "age": 43,
     "gender": "M",
     "city": "CROSS LANES",
-    "region": "WV"
+    "region": "WV",
+    "place": 8
   },
   {
     "year": 2010,
@@ -3041,7 +3049,8 @@
     "age": 35,
     "gender": "M",
     "city": "BLUFFTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 9
   },
   {
     "year": 2010,
@@ -3052,7 +3061,8 @@
     "age": 48,
     "gender": "M",
     "city": "HUBERTUS",
-    "region": "WI"
+    "region": "WI",
+    "place": 10
   },
   {
     "year": 2010,
@@ -3063,7 +3073,8 @@
     "age": 45,
     "gender": "M",
     "city": "IONIA",
-    "region": "MI"
+    "region": "MI",
+    "place": 11
   },
   {
     "year": 2010,
@@ -3073,7 +3084,8 @@
     "timeSeconds": 19866,
     "age": 34,
     "gender": "M",
-    "city": "HAMILTON"
+    "city": "HAMILTON",
+    "place": 12
   },
   {
     "year": 2010,
@@ -3084,7 +3096,8 @@
     "age": 51,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 13
   },
   {
     "year": 2010,
@@ -3095,7 +3108,8 @@
     "age": 36,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 14
   },
   {
     "year": 2010,
@@ -3106,7 +3120,8 @@
     "age": 37,
     "gender": "M",
     "city": "NEWPORT",
-    "region": "KY"
+    "region": "KY",
+    "place": 15
   },
   {
     "year": 2010,
@@ -3117,7 +3132,8 @@
     "age": 25,
     "gender": "F",
     "city": "NEWPORT",
-    "region": "KY"
+    "region": "KY",
+    "place": 16
   },
   {
     "year": 2010,
@@ -3128,7 +3144,8 @@
     "age": 28,
     "gender": "M",
     "city": "STERLING",
-    "region": "VA"
+    "region": "VA",
+    "place": 17
   },
   {
     "year": 2010,
@@ -3139,7 +3156,8 @@
     "age": 51,
     "gender": "M",
     "city": "SPRINGFIELD",
-    "region": "OH"
+    "region": "OH",
+    "place": 18
   },
   {
     "year": 2010,
@@ -3150,7 +3168,8 @@
     "age": 38,
     "gender": "M",
     "city": "DEARBORN HEIGHTS",
-    "region": "MI"
+    "region": "MI",
+    "place": 19
   },
   {
     "year": 2010,
@@ -3161,7 +3180,8 @@
     "age": 47,
     "gender": "M",
     "city": "REYNOLDSBURG",
-    "region": "OH"
+    "region": "OH",
+    "place": 20
   },
   {
     "year": 2010,
@@ -3172,7 +3192,8 @@
     "age": 48,
     "gender": "F",
     "city": "FT. LORAMIE",
-    "region": "OH"
+    "region": "OH",
+    "place": 21
   },
   {
     "year": 2010,
@@ -3183,7 +3204,8 @@
     "age": 23,
     "gender": "M",
     "city": "COLUMBUS",
-    "region": "OH"
+    "region": "OH",
+    "place": 22
   },
   {
     "year": 2010,
@@ -3194,7 +3216,8 @@
     "age": 56,
     "gender": "F",
     "city": "DAYTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 23
   },
   {
     "year": 2010,
@@ -3205,7 +3228,8 @@
     "age": 46,
     "gender": "M",
     "city": "LATONIA",
-    "region": "KY"
+    "region": "KY",
+    "place": 24
   },
   {
     "year": 2010,
@@ -3216,7 +3240,8 @@
     "age": 36,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 25
   },
   {
     "year": 2010,
@@ -3227,7 +3252,8 @@
     "age": 34,
     "gender": "F",
     "city": "KETTERING",
-    "region": "OH"
+    "region": "OH",
+    "place": 26
   },
   {
     "year": 2010,
@@ -3238,7 +3264,8 @@
     "age": 45,
     "gender": "M",
     "city": "KINGS MILLS",
-    "region": "OH"
+    "region": "OH",
+    "place": 27
   },
   {
     "year": 2010,
@@ -3249,7 +3276,8 @@
     "age": 48,
     "gender": "M",
     "city": "SHEPHERDSVILLE",
-    "region": "KY"
+    "region": "KY",
+    "place": 28
   },
   {
     "year": 2010,
@@ -3260,7 +3288,8 @@
     "age": 43,
     "gender": "M",
     "city": "DAYTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 29
   },
   {
     "year": 2010,
@@ -3271,7 +3300,8 @@
     "age": 36,
     "gender": "M",
     "city": "DAYTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 30
   },
   {
     "year": 2010,
@@ -3282,7 +3312,8 @@
     "age": 33,
     "gender": "M",
     "city": "CHILLICOTHE",
-    "region": "OH"
+    "region": "OH",
+    "place": 31
   },
   {
     "year": 2010,
@@ -3293,7 +3324,8 @@
     "age": 38,
     "gender": "M",
     "city": "PLYMOUTH",
-    "region": "MI"
+    "region": "MI",
+    "place": 32
   },
   {
     "year": 2010,
@@ -3304,7 +3336,8 @@
     "age": 51,
     "gender": "M",
     "city": "MILFORD",
-    "region": "OH"
+    "region": "OH",
+    "place": 33
   },
   {
     "year": 2010,
@@ -3315,7 +3348,8 @@
     "age": 42,
     "gender": "M",
     "city": "WEST CHESTER",
-    "region": "OH"
+    "region": "OH",
+    "place": 34
   },
   {
     "year": 2010,
@@ -3326,7 +3360,8 @@
     "age": 37,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 35
   },
   {
     "year": 2010,
@@ -3337,7 +3372,8 @@
     "age": 29,
     "gender": "M",
     "city": "OXFORD",
-    "region": "OH"
+    "region": "OH",
+    "place": 36
   },
   {
     "year": 2010,
@@ -3348,7 +3384,8 @@
     "age": 45,
     "gender": "F",
     "city": "FAIRBORN",
-    "region": "OH"
+    "region": "OH",
+    "place": 37
   },
   {
     "year": 2010,
@@ -3359,7 +3396,8 @@
     "age": 27,
     "gender": "M",
     "city": "KILLBUCK",
-    "region": "OH"
+    "region": "OH",
+    "place": 38
   },
   {
     "year": 2010,
@@ -3370,7 +3408,8 @@
     "age": 47,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 39
   },
   {
     "year": 2010,
@@ -3381,7 +3420,8 @@
     "age": 30,
     "gender": "M",
     "city": "REYNOLDSBURG",
-    "region": "OH"
+    "region": "OH",
+    "place": 40
   },
   {
     "year": 2010,
@@ -3392,7 +3432,8 @@
     "age": 29,
     "gender": "M",
     "city": "PICKERINGTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 41
   },
   {
     "year": 2010,
@@ -3403,7 +3444,8 @@
     "age": 43,
     "gender": "M",
     "city": "LEBANON",
-    "region": "OH"
+    "region": "OH",
+    "place": 42
   },
   {
     "year": 2010,
@@ -3414,7 +3456,8 @@
     "age": 51,
     "gender": "F",
     "city": "DAYTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 43
   },
   {
     "year": 2010,
@@ -3425,7 +3468,8 @@
     "age": 38,
     "gender": "M",
     "city": "CINCY",
-    "region": "OH"
+    "region": "OH",
+    "place": 44
   },
   {
     "year": 2010,
@@ -3436,7 +3480,8 @@
     "age": 41,
     "gender": "F",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 45
   },
   {
     "year": 2010,
@@ -3447,7 +3492,8 @@
     "age": 49,
     "gender": "M",
     "city": "BELLBROOK",
-    "region": "OH"
+    "region": "OH",
+    "place": 46
   },
   {
     "year": 2010,
@@ -3457,7 +3503,8 @@
     "timeSeconds": 24648,
     "age": 67,
     "gender": "M",
-    "city": "UNK"
+    "city": "UNK",
+    "place": 47
   },
   {
     "year": 2010,
@@ -3468,7 +3515,8 @@
     "age": 53,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 48
   },
   {
     "year": 2010,
@@ -3479,7 +3527,8 @@
     "age": 54,
     "gender": "M",
     "city": "FREELAND",
-    "region": "MI"
+    "region": "MI",
+    "place": 49
   },
   {
     "year": 2010,
@@ -3490,7 +3539,8 @@
     "age": 58,
     "gender": "M",
     "city": "DAYTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 50
   },
   {
     "year": 2010,
@@ -3501,7 +3551,8 @@
     "age": 30,
     "gender": "M",
     "city": "FORT KNOX",
-    "region": "KY"
+    "region": "KY",
+    "place": 51
   },
   {
     "year": 2010,
@@ -3512,7 +3563,8 @@
     "age": 58,
     "gender": "M",
     "city": "VANDALIA",
-    "region": "OH"
+    "region": "OH",
+    "place": 52
   },
   {
     "year": 2010,
@@ -3523,7 +3575,8 @@
     "age": 45,
     "gender": "F",
     "city": "MIAMISBURG",
-    "region": "OH"
+    "region": "OH",
+    "place": 53
   },
   {
     "year": 2010,
@@ -3534,7 +3587,8 @@
     "age": 31,
     "gender": "F",
     "city": "DAYTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 54
   },
   {
     "year": 2010,
@@ -3545,7 +3599,8 @@
     "age": 63,
     "gender": "M",
     "city": "FRANKLIN",
-    "region": "TN"
+    "region": "TN",
+    "place": 55
   },
   {
     "year": 2010,
@@ -3556,7 +3611,8 @@
     "age": 52,
     "gender": "M",
     "city": "POWELL",
-    "region": "OH"
+    "region": "OH",
+    "place": 56
   },
   {
     "year": 2010,
@@ -3567,7 +3623,8 @@
     "age": 44,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 57
   },
   {
     "year": 2010,
@@ -3578,7 +3635,8 @@
     "age": 54,
     "gender": "F",
     "city": "DAYTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 58
   },
   {
     "year": 2010,
@@ -3589,7 +3647,8 @@
     "age": 63,
     "gender": "M",
     "city": "HUBER HEIGHTS",
-    "region": "OH"
+    "region": "OH",
+    "place": 59
   },
   {
     "year": 2010,
@@ -3600,7 +3659,8 @@
     "age": 55,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 60
   },
   {
     "year": 2010,
@@ -3611,7 +3671,8 @@
     "age": 55,
     "gender": "M",
     "city": "BROOKS",
-    "region": "KY"
+    "region": "KY",
+    "place": 61
   },
   {
     "year": 2010,
@@ -3622,7 +3683,8 @@
     "age": 39,
     "gender": "M",
     "city": "MILFORD",
-    "region": "OH"
+    "region": "OH",
+    "place": 62
   },
   {
     "year": 2010,
@@ -3633,7 +3695,8 @@
     "age": 52,
     "gender": "M",
     "city": "CARBONDALE",
-    "region": "IL"
+    "region": "IL",
+    "place": 63
   },
   {
     "year": 2010,
@@ -3644,7 +3707,8 @@
     "age": 41,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 64
   },
   {
     "year": 2010,
@@ -3655,7 +3719,8 @@
     "age": 35,
     "gender": "M",
     "city": "DAYTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 65
   },
   {
     "year": 2010,
@@ -3666,7 +3731,8 @@
     "age": 25,
     "gender": "F",
     "city": "LYNDHURST",
-    "region": "OH"
+    "region": "OH",
+    "place": 66
   },
   {
     "year": 2010,
@@ -3677,7 +3743,8 @@
     "age": 26,
     "gender": "F",
     "city": "MOUNT VERNON",
-    "region": "OH"
+    "region": "OH",
+    "place": 67
   },
   {
     "year": 2010,
@@ -3688,7 +3755,8 @@
     "age": 67,
     "gender": "F",
     "city": "NEWBERRY",
-    "region": "SC"
+    "region": "SC",
+    "place": 68
   },
   {
     "year": 2011,
@@ -3699,7 +3767,8 @@
     "age": 30,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 1
   },
   {
     "year": 2011,
@@ -3710,7 +3779,8 @@
     "age": 29,
     "gender": "M",
     "city": "LIVONIA",
-    "region": "MI"
+    "region": "MI",
+    "place": 2
   },
   {
     "year": 2011,
@@ -3721,7 +3791,8 @@
     "age": 35,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 3
   },
   {
     "year": 2011,
@@ -3732,7 +3803,8 @@
     "age": 35,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 4
   },
   {
     "year": 2011,
@@ -3743,7 +3815,8 @@
     "age": 50,
     "gender": "M",
     "city": "BURLINGTON",
-    "region": "KY"
+    "region": "KY",
+    "place": 5
   },
   {
     "year": 2011,
@@ -3754,7 +3827,8 @@
     "age": 40,
     "gender": "M",
     "city": "WEST JEFFERSON",
-    "region": "OH"
+    "region": "OH",
+    "place": 6
   },
   {
     "year": 2011,
@@ -3765,7 +3839,8 @@
     "age": 45,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 7
   },
   {
     "year": 2011,
@@ -3776,7 +3851,8 @@
     "age": 53,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 8
   },
   {
     "year": 2011,
@@ -3787,7 +3863,8 @@
     "age": 36,
     "gender": "M",
     "city": "BLUFFTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 9
   },
   {
     "year": 2011,
@@ -3798,7 +3875,8 @@
     "age": 43,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 10
   },
   {
     "year": 2011,
@@ -3809,7 +3887,8 @@
     "age": 52,
     "gender": "M",
     "city": "SPRINGFIELD",
-    "region": "OH"
+    "region": "OH",
+    "place": 11
   },
   {
     "year": 2011,
@@ -3820,7 +3899,8 @@
     "age": 30,
     "gender": "M",
     "city": "HUNTERTOWN",
-    "region": "IN"
+    "region": "IN",
+    "place": 12
   },
   {
     "year": 2011,
@@ -3831,7 +3911,8 @@
     "age": 33,
     "gender": "M",
     "city": "WEST CHESTER",
-    "region": "OH"
+    "region": "OH",
+    "place": 13
   },
   {
     "year": 2011,
@@ -3842,7 +3923,8 @@
     "age": 52,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 14
   },
   {
     "year": 2011,
@@ -3853,7 +3935,8 @@
     "age": 34,
     "gender": "F",
     "city": "BLUFFTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 15
   },
   {
     "year": 2011,
@@ -3864,7 +3947,8 @@
     "age": 28,
     "gender": "M",
     "city": "KETTERING",
-    "region": "OH"
+    "region": "OH",
+    "place": 16
   },
   {
     "year": 2011,
@@ -3875,7 +3959,8 @@
     "age": 38,
     "gender": "M",
     "city": "NEWPORT",
-    "region": "KY"
+    "region": "KY",
+    "place": 17
   },
   {
     "year": 2011,
@@ -3886,7 +3971,8 @@
     "age": 26,
     "gender": "F",
     "city": "NEWPORT",
-    "region": "KY"
+    "region": "KY",
+    "place": 18
   },
   {
     "year": 2011,
@@ -3897,7 +3983,8 @@
     "age": 35,
     "gender": "M",
     "city": "HAMILTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 19
   },
   {
     "year": 2011,
@@ -3908,7 +3995,8 @@
     "age": 48,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 20
   },
   {
     "year": 2011,
@@ -3919,7 +4007,8 @@
     "age": 38,
     "gender": "F",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 21
   },
   {
     "year": 2011,
@@ -3930,7 +4019,8 @@
     "age": 57,
     "gender": "M",
     "city": "TAMPA",
-    "region": "FL"
+    "region": "FL",
+    "place": 22
   },
   {
     "year": 2011,
@@ -3941,7 +4031,8 @@
     "age": 43,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 23
   },
   {
     "year": 2011,
@@ -3952,7 +4043,8 @@
     "age": 52,
     "gender": "M",
     "city": "HIGHLAND HEIGHTS",
-    "region": "KY"
+    "region": "KY",
+    "place": 24
   },
   {
     "year": 2011,
@@ -3963,7 +4055,8 @@
     "age": 48,
     "gender": "M",
     "city": "REYNOLDSBURG",
-    "region": "OH"
+    "region": "OH",
+    "place": 25
   },
   {
     "year": 2011,
@@ -3974,7 +4067,8 @@
     "age": 33,
     "gender": "F",
     "city": "NILES",
-    "region": "OH"
+    "region": "OH",
+    "place": 26
   },
   {
     "year": 2011,
@@ -3985,7 +4079,8 @@
     "age": 50,
     "gender": "M",
     "city": "BELLBROOK",
-    "region": "OH"
+    "region": "OH",
+    "place": 27
   },
   {
     "year": 2011,
@@ -3996,7 +4091,8 @@
     "age": 39,
     "gender": "M",
     "city": "EVERGREEN",
-    "region": "CO"
+    "region": "CO",
+    "place": 28
   },
   {
     "year": 2011,
@@ -4007,7 +4103,8 @@
     "age": 26,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 29
   },
   {
     "year": 2011,
@@ -4018,7 +4115,8 @@
     "age": 27,
     "gender": "M",
     "city": "GLOUSTER",
-    "region": "OH"
+    "region": "OH",
+    "place": 30
   },
   {
     "year": 2011,
@@ -4029,7 +4127,8 @@
     "age": 46,
     "gender": "M",
     "city": "KINGS MILLS",
-    "region": "OH"
+    "region": "OH",
+    "place": 31
   },
   {
     "year": 2011,
@@ -4040,7 +4139,8 @@
     "age": 26,
     "gender": "M",
     "city": "MORROW",
-    "region": "OH"
+    "region": "OH",
+    "place": 32
   },
   {
     "year": 2011,
@@ -4051,7 +4151,8 @@
     "age": 42,
     "gender": "M",
     "city": "UNION",
-    "region": "KY"
+    "region": "KY",
+    "place": 33
   },
   {
     "year": 2011,
@@ -4062,7 +4163,8 @@
     "age": 54,
     "gender": "M",
     "city": "MILTON",
-    "region": "GA"
+    "region": "GA",
+    "place": 34
   },
   {
     "year": 2011,
@@ -4073,7 +4175,8 @@
     "age": 43,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 35
   },
   {
     "year": 2011,
@@ -4084,7 +4187,8 @@
     "age": 38,
     "gender": "M",
     "city": "HIGHLANDS RANCH",
-    "region": "CO"
+    "region": "CO",
+    "place": 36
   },
   {
     "year": 2011,
@@ -4095,7 +4199,8 @@
     "age": 46,
     "gender": "F",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 37
   },
   {
     "year": 2011,
@@ -4106,7 +4211,8 @@
     "age": 37,
     "gender": "F",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 38
   },
   {
     "year": 2011,
@@ -4117,7 +4223,8 @@
     "age": 62,
     "gender": "M",
     "city": "DAYTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 39
   },
   {
     "year": 2011,
@@ -4128,7 +4235,8 @@
     "age": 40,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 40
   },
   {
     "year": 2011,
@@ -4139,7 +4247,8 @@
     "age": 46,
     "gender": "F",
     "city": "BEAVERCREEK",
-    "region": "OH"
+    "region": "OH",
+    "place": 41
   },
   {
     "year": 2011,
@@ -4150,7 +4259,8 @@
     "age": 64,
     "gender": "M",
     "city": "FRANKLIN",
-    "region": "TN"
+    "region": "TN",
+    "place": 42
   },
   {
     "year": 2011,
@@ -4161,7 +4271,8 @@
     "age": 44,
     "gender": "M",
     "city": "LEBANON",
-    "region": "OH"
+    "region": "OH",
+    "place": 43
   },
   {
     "year": 2011,
@@ -4172,7 +4283,8 @@
     "age": 59,
     "gender": "M",
     "city": "DAYTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 44
   },
   {
     "year": 2011,
@@ -4183,7 +4295,8 @@
     "age": 59,
     "gender": "M",
     "city": "VANDALIA",
-    "region": "OH"
+    "region": "OH",
+    "place": 45
   },
   {
     "year": 2011,
@@ -4194,7 +4307,8 @@
     "age": 44,
     "gender": "M",
     "city": "LIBERTY TWP",
-    "region": "OH"
+    "region": "OH",
+    "place": 46
   },
   {
     "year": 2011,
@@ -4205,7 +4319,8 @@
     "age": 64,
     "gender": "M",
     "city": "HUBER HEIGHTS",
-    "region": "OH"
+    "region": "OH",
+    "place": 47
   },
   {
     "year": 2011,
@@ -4216,7 +4331,8 @@
     "age": 28,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 48
   },
   {
     "year": 2011,
@@ -4227,7 +4343,8 @@
     "age": 50,
     "gender": "M",
     "city": "OKEMOS",
-    "region": "MI"
+    "region": "MI",
+    "place": 49
   },
   {
     "year": 2011,
@@ -4238,7 +4355,8 @@
     "age": 33,
     "gender": "M",
     "city": "LEXINGTON",
-    "region": "KY"
+    "region": "KY",
+    "place": 50
   },
   {
     "year": 2011,
@@ -4249,7 +4367,8 @@
     "age": 24,
     "gender": "M",
     "city": "MARION",
-    "region": "OH"
+    "region": "OH",
+    "place": 51
   },
   {
     "year": 2011,
@@ -4260,7 +4379,8 @@
     "age": 35,
     "gender": "M",
     "city": "INDIANAPOLIS",
-    "region": "IN"
+    "region": "IN",
+    "place": 52
   },
   {
     "year": 2011,
@@ -4271,7 +4391,8 @@
     "age": 32,
     "gender": "F",
     "city": "HUBER HEIGHTS",
-    "region": "OH"
+    "region": "OH",
+    "place": 53
   },
   {
     "year": 2011,
@@ -4282,7 +4403,8 @@
     "age": 38,
     "gender": "F",
     "city": "COLUMBUS",
-    "region": "OH"
+    "region": "OH",
+    "place": 54
   },
   {
     "year": 2011,
@@ -4293,7 +4415,8 @@
     "age": 47,
     "gender": "M",
     "city": "UNIONVILLE CENTER",
-    "region": "OH"
+    "region": "OH",
+    "place": 55
   },
   {
     "year": 2011,
@@ -4304,7 +4427,8 @@
     "age": 35,
     "gender": "F",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 56
   },
   {
     "year": 2011,
@@ -4315,7 +4439,8 @@
     "age": 42,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 57
   },
   {
     "year": 2011,
@@ -4326,7 +4451,8 @@
     "age": 45,
     "gender": "M",
     "city": "CHICAGO",
-    "region": "IL"
+    "region": "IL",
+    "place": 58
   },
   {
     "year": 2011,
@@ -4337,7 +4463,8 @@
     "age": 33,
     "gender": "F",
     "city": "ROAMING SHORES",
-    "region": "OH"
+    "region": "OH",
+    "place": 59
   },
   {
     "year": 2011,
@@ -4348,7 +4475,8 @@
     "age": 49,
     "gender": "M",
     "city": "FLORENCE",
-    "region": "KY"
+    "region": "KY",
+    "place": 60
   },
   {
     "year": 2011,
@@ -4359,7 +4487,8 @@
     "age": 52,
     "gender": "M",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 61
   },
   {
     "year": 2011,
@@ -4370,7 +4499,8 @@
     "age": 35,
     "gender": "M",
     "city": "WEST CHESTER",
-    "region": "OH"
+    "region": "OH",
+    "place": 62
   },
   {
     "year": 2011,
@@ -4381,7 +4511,8 @@
     "age": 41,
     "gender": "M",
     "city": "LATONIA",
-    "region": "KY"
+    "region": "KY",
+    "place": 63
   },
   {
     "year": 2011,
@@ -4392,7 +4523,8 @@
     "age": 43,
     "gender": "F",
     "city": "BLACKLICK",
-    "region": "OH"
+    "region": "OH",
+    "place": 64
   },
   {
     "year": 2011,
@@ -4403,7 +4535,8 @@
     "age": 29,
     "gender": "M",
     "city": "LATONIA",
-    "region": "KY"
+    "region": "KY",
+    "place": 65
   },
   {
     "year": 2011,
@@ -4414,7 +4547,8 @@
     "age": 55,
     "gender": "F",
     "city": "DAYTON",
-    "region": "OH"
+    "region": "OH",
+    "place": 66
   },
   {
     "year": 2011,
@@ -4425,7 +4559,8 @@
     "age": 44,
     "gender": "F",
     "city": "MCARTHUR",
-    "region": "OH"
+    "region": "OH",
+    "place": 67
   },
   {
     "year": 2011,
@@ -4436,7 +4571,8 @@
     "age": 55,
     "gender": "F",
     "city": "CINCINNATI",
-    "region": "OH"
+    "region": "OH",
+    "place": 68
   },
   {
     "year": 2012,

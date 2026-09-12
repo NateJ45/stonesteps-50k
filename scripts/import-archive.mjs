@@ -51,6 +51,23 @@
 // split the runner's name across two columns, so matching on the column headed
 // "Name" compares first names to full names.
 //
+// A SECOND RECOVERY CAME OUT OF THAT PASS (2026-09-12). 2010 and 2011 had no
+// finishing place on any of their 136 rows, which showed up as a blank Place
+// on a runner's own page. Both pages do publish one; it was lost because the
+// header cell carrying the label is merged with the page's prose blob ("2010
+// Race Results ..."), so a header-driven parser sees no column called Place and
+// the first data cell looks unlabelled. It is the place. Recovered by position:
+// 2010 reads [place, name, age, sex, city, state, div, time] and 2011 inserts a
+// bib after it. All 136 matched by name with no duplicate place in either year.
+//
+// STILL NO PLACE, CORRECTLY: 2003, 2004 and 2014. Their pages do not publish
+// one. 2003 and 2004 lead with "Race Number", which is a bib and not a
+// placing, and 2014 starts straight at Name. The rows are in finishing order,
+// so the year table numbers them by position, but a runner's own page leaves
+// the column blank rather than presenting a row index as a result. Deriving it
+// would also be wrong in the years with trekkers, who start an hour early and
+// whose finish order is not their placing.
+//
 // The comparison found exactly one further error, now fixed: 2006's Mary
 // Wienholtz was transcribed "Mary Weinholts". The page spells it Wienholtz
 // twice, in her results row and in the door-prize list under it. She ran only
@@ -97,6 +114,7 @@ import { createClient } from '@sanity/client';
 import { loadEnv } from './lib/loadEnv.mjs';
 import { canonicalSlug, canonicalName } from '../src/lib/athlete-aliases.ts';
 import { resolveUnknownGenders, resolvedGenderReport } from '../src/lib/resolve-gender.ts';
+import { derivePlaces, derivedPlaceReport } from '../src/lib/derive-place.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -128,8 +146,17 @@ const recovered = JSON.parse(
 // recorded one, and leaves alone anybody there is no evidence for. The rule and
 // the reason it refuses to guess from a name are in src/lib/resolve-gender.ts;
 // it is tested, so the archive can be re-imported without the fix eroding.
-const rows = resolveUnknownGenders(recovered);
-const genderFixes = resolvedGenderReport(recovered, rows);
+const withGender = resolveUnknownGenders(recovered);
+const genderFixes = resolvedGenderReport(recovered, withGender);
+
+// 2003, 2004 and 2014 publish no finishing place, so the place is ranked from
+// the times here. Doing it at import rather than at render is what stops the
+// year page and a runner's own page giving two answers about the same row: the
+// year table used to fall back to the row index and show Marc Teismann 3rd in
+// 2014 while his runner page showed nothing. The rule, including how it treats
+// ties and trekkers, is in src/lib/derive-place.ts and is tested.
+const rows = derivePlaces(withGender);
+const placeFixes = derivedPlaceReport(withGender, rows);
 
 const athletes = new Map();
 const results = [];
@@ -181,6 +208,14 @@ async function main() {
     console.log(
       `  gender filled from the same runner's other years: ` +
         genderFixes.map((f) => `${f.slug}=${f.gender}`).join(', '),
+    );
+  }
+  if (Object.keys(placeFixes).length > 0) {
+    console.log(
+      `  place ranked from the times where the race published none: ` +
+        Object.entries(placeFixes)
+          .map(([y, n]) => `${y}=${n}`)
+          .join(', '),
     );
   }
   const stillUnknown = rows.filter((r) => r.gender !== 'M' && r.gender !== 'F');

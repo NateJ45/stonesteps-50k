@@ -177,9 +177,20 @@ const description = `Every finisher of the ${edition.year} Stone Steps 50K and 2
                   </tr>
                 </thead>
                 <tbody>
-                  {d.rows.map((row, i) => (
+                  {d.rows.map((row) => (
                     <tr>
-                      <td class="f-place">{row.place ?? i + 1}</td>
+                      {/* THE ROW INDEX IS NOT A PLACE. This used to read
+                        `row.place ?? i + 1`, so a row the race never placed
+                        still showed a number, and Marc Teismann was 3rd here in
+                        2014 and blank on his own page. Every placeable row now
+                        carries a real place (ranked from the times at import
+                        where the race published none, see src/lib/
+                        derive-place.ts), so the only rows left without one are
+                        the trekkers, who are ineligible by the race's own rule
+                        and get the same dash their runner page gives them. */}
+                      <td class="f-place">
+                        {row.place ?? <span aria-hidden="true">&mdash;</span>}
+                      </td>
                       <th scope="row" class="f-name">
                         {row.slug ? (
                           <a

@@ -190,7 +190,18 @@ const description = `Every Stone Steps 50K and 27K finish on file for ${runner.n
                     <td class="py-2">
                       <span class="lc">{r.distance}</span>
                     </td>
-                    <td class="tabular py-2 text-right">{r.place ?? ''}</td>
+                    {/* A DASH, NOT A BLANK. Three years publish no finishing
+                      place at all: 2003 and 2004 lead their table with a bib
+                      rather than a placing, and 2014 starts at the name. An
+                      empty cell reads as a rendering fault on a row that
+                      otherwise has a year, a distance and a time; a dash reads
+                      as "the race did not publish one", which is the truth.
+                      The value is never derived from finishing order, because
+                      trekkers start an hour early and their order is not their
+                      placing. */}
+                    <td class="tabular py-2 text-right">
+                      {r.place ?? <span class="text-muted-foreground">&mdash;</span>}
+                    </td>
                     <td class="tabular py-2 text-right font-bold whitespace-nowrap">
                       {formatRaceTime(r.timeSeconds)}
                       {/* Gun time until the race started publishing chip times
