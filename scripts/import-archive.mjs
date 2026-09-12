@@ -23,6 +23,19 @@
 // described below rather than shipped, because it needed a spreadsheet parser
 // this project should not carry forever.
 //
+// A TRANSCRIPTION BUG WORTH KNOWING ABOUT (found 2026-09-12). The archived
+// pages carry a "Sex" column, and THEY DO NOT ALL SPELL IT THE SAME WAY: 2003
+// uses M and F, 2004 uses M and W, and 2005 uses M, F and one stray W. The
+// original extraction understood M and F only, so 2004's three women came
+// through as X, unknown, and the site showed the 2004 row with a men's winner
+// and a dash where the women's winner should be. The page itself is explicit:
+// "5 | Linda Barhorst | 42 | W | 6:17:05 | 1st W". Fixed in the data.
+//
+// The one X left is Wesley Fenton in 2005, whom that page marks W while 2003,
+// 2004, 2006, 2007 and 2008 all record him M. That is a typo on the race's own
+// page, so the transcript keeps X (meaning "this source is not trustworthy
+// here") and resolveUnknownGenders settles it from his other years.
+//
 // SOURCES, which differ by year:
 //   2003-2005  HTML tables on the archived pages
 //   2006-2009  the race's own .xls timing spreadsheets. The archived pages for
@@ -44,10 +57,13 @@
 //     check available, and it is why the rest is trusted.
 //
 // WHAT IS STILL MISSING:
-//   - 2020 entirely. The race happened (Katie Ruhlman's 50K course record is
-//     dated 2020) but RunSignUp has no result set and the single Wayback
-//     capture is a page shell with no table. Those results appear to be lost.
 //   - The 27K before 2015, which was timed on runningtime.net.
+//
+// 2020 was listed here as lost until 2026-09-12, on the evidence that RunSignUp
+// had no result set and the one Wayback capture was an empty page shell. Both
+// were true and the conclusion was wrong: the race published that year through
+// RunSignUp's CUSTOM results pages, which the REST API cannot see at all.
+// scripts/import-results-html.mjs reads them, and the 2021 27K with them.
 //
 // This file stops at 2016 on purpose. The API import owns 2017 onward, the two
 // agree exactly where they overlap, and keeping them disjoint means neither can
@@ -60,6 +76,7 @@ import { readFileSync } from 'node:fs';
 import { createClient } from '@sanity/client';
 import { loadEnv } from './lib/loadEnv.mjs';
 import { canonicalSlug, canonicalName } from '../src/lib/athlete-aliases.ts';
+import { resolveUnknownGenders, resolvedGenderReport } from '../src/lib/resolve-gender.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -81,7 +98,18 @@ if (!token && !DRY_RUN) {
 
 const client = createClient({ projectId, dataset, token, apiVersion: '2026-05-01', useCdn: false });
 
-const rows = JSON.parse(readFileSync(resolve(root, 'scripts/data/archive-results.json'), 'utf8'));
+const recovered = JSON.parse(
+  readFileSync(resolve(root, 'scripts/data/archive-results.json'), 'utf8'),
+);
+
+// THE JSON STAYS A FAITHFUL TRANSCRIPT of what came back off the Wayback
+// captures, including the four rows that came through with no gender. This
+// fills those in from the SAME RUNNER'S other years, where the race itself
+// recorded one, and leaves alone anybody there is no evidence for. The rule and
+// the reason it refuses to guess from a name are in src/lib/resolve-gender.ts;
+// it is tested, so the archive can be re-imported without the fix eroding.
+const rows = resolveUnknownGenders(recovered);
+const genderFixes = resolvedGenderReport(recovered, rows);
 
 const athletes = new Map();
 const results = [];
@@ -129,6 +157,19 @@ async function main() {
   console.log(
     `Archive: ${results.length} results, ${athletes.size} athletes, ${years[0]} to ${years.at(-1)}`,
   );
+  if (genderFixes.length > 0) {
+    console.log(
+      `  gender filled from the same runner's other years: ` +
+        genderFixes.map((f) => `${f.slug}=${f.gender}`).join(', '),
+    );
+  }
+  const stillUnknown = rows.filter((r) => r.gender !== 'M' && r.gender !== 'F');
+  if (stillUnknown.length > 0) {
+    console.log(
+      `  still unknown (no other running on file, and a name is not evidence): ` +
+        stillUnknown.map((r) => `${r.year} ${r.slug}`).join(', '),
+    );
+  }
 
   if (DRY_RUN) {
     const byYear = {};
@@ -165,7 +206,7 @@ async function main() {
     process.stdout.write(`\r  results ${done}/${results.length}`);
   }
   process.stdout.write('\nDone.\n');
-  console.log('Still missing: 2020 entirely, and the 27K before 2015. See this file’s header.');
+  console.log('Still missing: the 27K before 2015. See this file’s header.');
 }
 
 main().catch((err) => {

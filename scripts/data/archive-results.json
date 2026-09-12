@@ -249,7 +249,7 @@
     "slug": "linda-barhorst",
     "timeSeconds": 22625,
     "age": 42,
-    "gender": "X"
+    "gender": "F"
   },
   {
     "year": 2004,
@@ -303,7 +303,7 @@
     "slug": "molly-moilanen",
     "timeSeconds": 25014,
     "age": 29,
-    "gender": "X"
+    "gender": "F"
   },
   {
     "year": 2004,
@@ -359,7 +359,7 @@
     "slug": "rosemary-evans",
     "timeSeconds": 29235,
     "age": 51,
-    "gender": "X",
+    "gender": "F",
     "trekker": true
   },
   {
