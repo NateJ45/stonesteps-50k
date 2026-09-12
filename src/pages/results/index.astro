@@ -15,9 +15,10 @@
 // the holes in it are all computed, so no one can type a number here that
 // disagrees with the rows it counts.
 //
-// THE GAPS ARE RENDERED, NOT SKIPPED. 2020 was run and its results are lost.
-// Dropping the year would say the race did not happen that autumn, which is a
-// worse error than an empty row.
+// THE GAPS ARE RENDERED, NOT SKIPPED. A year inside the span with no results on
+// file is drawn as a row that says so. Dropping it would say the race did not
+// happen that autumn, which is a worse error than an empty row. (2020 was that
+// row until its results were found; the rule stays for whatever is next.)
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getAllResults, getDistanceRefs, getSiteSettings } from '@/lib/queries';

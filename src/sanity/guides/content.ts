@@ -634,8 +634,8 @@ export const guides: Guide[] = [
       {
         kind: 'callout',
         tone: 'primary',
-        title: 'Two things are still missing from the archive.',
-        text: 'The 2020 results are lost, and so is the 27K before 2015. If a copy ever turns up, on a hard drive or in an old email, it can go straight in. The website says so on the results page rather than pretending those years did not happen.',
+        title: 'One thing is still missing from the archive.',
+        text: 'The 27K before 2015 was timed by a company that no longer exists, and no copy has turned up. If one ever does, on a hard drive or in an old email, it can go straight in. (2020 and the 2021 27K were found on RunSignUp in September 2026, in a corner its data feed does not reach, and are in.) The website says what is missing on the results page rather than pretending those years did not happen.',
       },
     ],
   },

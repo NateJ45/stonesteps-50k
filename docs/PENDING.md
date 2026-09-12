@@ -244,18 +244,18 @@ the 2009 and 2010 entry-form PDFs (Wayback has them; text extraction was not att
 Ultrarunning Magazine's results archive. Add a date to `race-days.json` with its source,
 re-run `node scripts/build-weather.mjs`, commit the JSON.
 
-### 0. Two archive years are still lost, and the results pages now say so
+### 0. One archive gap is left, and the results pages say so
 
-/results renders every edition from 2003 to 2025, including 2020 as a row that
-says the race was run and the results are gone. The 27K before 2015 is missing
-for a different reason: it was timed on runningtime.net, which no longer exists.
-Both gaps are stated on the page rather than hidden by skipping the year.
+/results renders every edition from 2003 to 2025. Two of the gaps this entry
+used to list are closed (2026-09-12): 2020, both distances, and the 2021 27K
+were on RunSignUp all along, published through custom results pages that the
+REST API cannot reach, and `scripts/import-results-html.mjs` reads them from
+the HTML. The 27K before 2015 is missing for a different reason: it was timed
+on runningtime.net, which no longer exists. That gap is stated on the page
+rather than hidden by skipping the year.
 
-Two things would close them, and neither is code:
-
-- 2020: ask David Corfman whether a copy survives anywhere. RunSignUp holds no
-  result set and the single Wayback capture is an empty page shell.
-- the pre-2015 27K: same question, same person.
+One thing would close it, and it is not code: ask David Corfman whether a copy
+of the pre-2015 27K survives anywhere.
 
 ### 0a. Two near-duplicate athletes were examined and NOT merged
 
