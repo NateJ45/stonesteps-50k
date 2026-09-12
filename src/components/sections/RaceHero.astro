@@ -25,6 +25,7 @@ import CtaLink from '@/components/CtaLink.astro';
 import Topo from '@/components/race/Topo.astro';
 import Countdown from '@/components/race/Countdown.astro';
 import type { ProjectedRaceHeroSection } from '@/lib/pageBuilder.types';
+import { displayWords } from '@/lib/display-words';
 
 type Props = {
   eyebrow?: string;
@@ -80,8 +81,13 @@ const ordinal = (n: number) => {
 };
 
 // Split into words, then characters, so a word never breaks mid-rotation
-// across a line end.
-const words = headline.split(/\s+/).filter(Boolean);
+// across a line end. `displayWords` removes the preview's invisible stega run
+// FIRST, because that run contains U+FEFF and U+FEFF is whitespace to a regex:
+// splitting the raw string returned 157 "words" and grew the hero band from
+// 1032px to 1879px, in the preview only. The full note is in src/lib/
+// display-words.ts; the sr-only copy below still renders the raw headline, so
+// the payload survives intact in one text node.
+const words = displayWords(headline);
 
 /** True for a final token like "50k" or "27k", whose k gets outlined. */
 const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d+k$/i.test(w);
