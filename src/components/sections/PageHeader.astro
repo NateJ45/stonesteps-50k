@@ -116,7 +116,7 @@ const hasImage = Boolean(image?.asset);
           `.subject-stage` and `.photo-cutout` rules, so the two appearances
           cannot drift apart. */
         hasImage && cutout ? (
-          <div class="subject-stage">
+          <div class="subject-stage subject-stage--soft">
             <span class="subject-stage__pool" aria-hidden="true">
               <Topo seed={5} lines={9} />
             </span>
@@ -127,7 +127,7 @@ const hasImage = Boolean(image?.asset);
               quality={80}
               alt={image?.alt ?? ''}
               loading="eager"
-              class="photo-cutout h-auto w-full max-w-[30rem]"
+              class="photo-cutout photo-cutout--soft h-auto w-full max-w-[30rem]"
             />
             <MudField field="director-fore" class="subject-stage__mud" />
           </div>

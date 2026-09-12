@@ -3845,3 +3845,38 @@ main > .band-torn:first-child::before {
     height: 3.25rem;
   }
 }
+
+/* ---------- A cut-out on a page header ---------------------------------- */
+/* The home page's director is 19rem wide and stands on a full-band mud field,
+   so wherever his photograph's frame crops him (the left elbow, the bottom of
+   the file) the ground is busy enough to carry it. On the contact header he is
+   30rem, on a quieter band, and both crops showed: a straight edge through the
+   arm, and the foreground prints stopping dead at the bottom of the stage.
+   Two extra fades, on the header only, so the home page's tuning is untouched.
+
+   The image gets a third mask: a horizontal ramp, intersected with the two it
+   already wears, so the sides dissolve the way the foot does. The foreground
+   mud gets a fade on every edge, because the stage it is clipped to is exactly
+   the picture's box and nothing outside it can hide a straight line. */
+.photo-cutout--soft {
+  -webkit-mask-image:
+    radial-gradient(125% 96% at 60% 26%, #000 52%, rgba(0, 0, 0, 0.4) 84%, transparent 100%),
+    linear-gradient(to bottom, #000 58%, transparent 99%),
+    linear-gradient(to right, transparent 0%, #000 16%, #000 86%, transparent 100%);
+  mask-image:
+    radial-gradient(125% 96% at 60% 26%, #000 52%, rgba(0, 0, 0, 0.4) 84%, transparent 100%),
+    linear-gradient(to bottom, #000 58%, transparent 99%),
+    linear-gradient(to right, transparent 0%, #000 16%, #000 86%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+.subject-stage--soft .subject-stage__mud {
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 46%, #000 74%, #000 88%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  mask-image:
+    linear-gradient(to bottom, transparent 46%, #000 74%, #000 88%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
