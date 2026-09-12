@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { useClient } from 'sanity';
 import { Badge, Box, Button, Card, Flex, Spinner, Stack, Text } from '@sanity/ui';
 import { ToolHeading } from './ToolHeading';
-import { useStudioLink, type StudioTarget } from './studioLink';
+import { useStudioLink } from './studioLink';
+// The rules themselves are pure and live in src/lib, where the unit tests can
+// reach them. See the header of that file.
+import { STEPS, type Snapshot, type State, type Step } from '@/lib/raceYearSteps';
 
 // =============================================================================
 // RaceYearTool — "Start a new race year", the rollover checklist
@@ -17,137 +20,6 @@ import { useStudioLink, type StudioTarget } from './studioLink';
 // forget where you got to. A list that already knows the date is updated and
 // the prices are not is worth more than a list that asks you to remember.
 // =============================================================================
-
-type State = 'done' | 'todo' | 'check';
-
-interface Step {
-  id: string;
-  title: string;
-  blurb: string;
-  target: StudioTarget;
-  /** Given a snapshot of the dataset, is this step done? */
-  state: (s: Snapshot) => State;
-  /** Extra line shown under the blurb, when there is something to say. */
-  note?: (s: Snapshot) => string | null;
-}
-
-interface Snapshot {
-  raceDate: string | null;
-  editionNumber: number | null;
-  feeTiers: { label?: string; endsOn?: string }[];
-  unconfirmed: number;
-  sponsors: number;
-  latestResultYear: number | null;
-  now: number;
-}
-
-const DAY = 1000 * 60 * 60 * 24;
-
-/** The race year the site is currently advertising, or null. */
-function advertisedYear(s: Snapshot): number | null {
-  if (!s.raceDate) return null;
-  const t = new Date(s.raceDate);
-  return Number.isNaN(t.getTime()) ? null : t.getUTCFullYear();
-}
-
-const STEPS: Step[] = [
-  {
-    id: 'date',
-    title: 'Put in next year’s date',
-    blurb:
-      'One field. It moves the countdown, the "Next running" band in the footer, and the date Google shows.',
-    target: { doc: 'race' },
-    state: (s) => {
-      if (!s.raceDate) return 'todo';
-      return new Date(s.raceDate).getTime() > s.now ? 'done' : 'todo';
-    },
-    note: (s) => {
-      if (!s.raceDate) return 'No date set.';
-      const t = new Date(s.raceDate).getTime();
-      if (t > s.now) {
-        return `Currently ${new Date(s.raceDate).toLocaleDateString('en-US', { dateStyle: 'long', timeZone: 'UTC' })}.`;
-      }
-      return `The date on the site is ${Math.floor((s.now - t) / DAY)} days ago.`;
-    },
-  },
-  {
-    id: 'edition',
-    title: 'Move the edition number up by one',
-    blurb: 'The "23rd edition" figure on the home page and in the footer.',
-    target: { doc: 'race' },
-    // Cannot be derived, only prompted: the number is right or wrong only in
-    // relation to a date a human just set.
-    state: () => 'check',
-    note: (s) =>
-      s.editionNumber
-        ? `Currently the ${s.editionNumber}th running as far as the site knows.`
-        : null,
-  },
-  {
-    id: 'fees',
-    title: 'Check the entry fees',
-    blurb:
-      'The prices printed under the two tickets. They should match what RunSignUp is actually charging.',
-    target: { doc: 'race' },
-    state: (s) => {
-      if (!s.feeTiers.length) return 'todo';
-      const allPast = s.feeTiers.every((t) => t.endsOn && new Date(t.endsOn).getTime() < s.now);
-      return allPast ? 'todo' : 'check';
-    },
-    note: (s) =>
-      s.feeTiers.length ? `${s.feeTiers.length} price tiers on file.` : 'No prices on file.',
-  },
-  {
-    id: 'schedule',
-    title: 'Check the race-day schedule',
-    blurb: 'Start times, trekker starts, and when the course closes.',
-    target: { pane: 'scheduleItem' },
-    state: () => 'check',
-  },
-  {
-    id: 'unconfirmed',
-    title: 'Clear the "Not confirmed" markers',
-    blurb:
-      'Anything the race has never published carries a small marker on the site. Confirm it or correct it.',
-    target: { pane: 'checkup' },
-    state: (s) => (s.unconfirmed === 0 ? 'done' : 'todo'),
-    note: (s) =>
-      s.unconfirmed === 0
-        ? 'Nothing is unconfirmed.'
-        : `${s.unconfirmed} item${s.unconfirmed === 1 ? '' : 's'} still marked not confirmed.`,
-  },
-  {
-    id: 'sponsors',
-    title: 'Update this year’s sponsors',
-    blurb: 'Add whoever is in, remove whoever is out, and drag them into the order you want.',
-    target: { pane: 'sponsor' },
-    state: () => 'check',
-    note: (s) => `${s.sponsors} sponsor${s.sponsors === 1 ? '' : 's'} on the site.`,
-  },
-  {
-    id: 'results',
-    title: 'After the race: check the results landed',
-    blurb:
-      'They import themselves within a day of your timer posting them. This is only a check, not a job.',
-    target: { pane: 'theRace;results' },
-    state: (s) => {
-      const year = advertisedYear(s);
-      if (!year || !s.raceDate) return 'check';
-      if (new Date(s.raceDate).getTime() > s.now) return 'check'; // race not run yet
-      return s.latestResultYear !== null && s.latestResultYear >= year ? 'done' : 'todo';
-    },
-    note: (s) =>
-      s.latestResultYear ? `Latest results on file: ${s.latestResultYear}.` : 'No results on file.',
-  },
-  {
-    id: 'trekkers',
-    title: 'After the race: mark any trekkers',
-    blurb:
-      'Early starters cannot win an award. The importer cannot tell who they were, so they need ticking by hand.',
-    target: { pane: 'theRace;results' },
-    state: () => 'check',
-  },
-];
 
 const BADGE: Record<State, { tone: 'positive' | 'caution' | 'primary'; text: string }> = {
   done: { tone: 'positive', text: 'Done' },
@@ -205,12 +77,15 @@ export function RaceYearTool() {
       const data = await client.fetch<Omit<Snapshot, 'now'>>(`{
         "raceDate": *[_type == "race"][0].raceDate,
         "editionNumber": *[_type == "race"][0].editionNumber,
-        "feeTiers": *[_type == "race"][0].feeTiers[]{ label, endsOn },
-        "unconfirmed": count(*[_type in ["scheduleItem", "courseFeature", "distance"] && confirmed != true && !(_id in path("drafts.**"))]),
+        "raceConfirmed": *[_type == "race"][0].confirmed,
+        "distances": *[_type == "distance" && !(_id in path("drafts.**"))]{
+          name, entryCap, runSignUpEventId, feeTiers[]{ label, endsOn, price }
+        },
+        "unconfirmed": count(*[_type in ["race", "scheduleItem", "courseFeature", "distance"] && confirmed != true && !(_id in path("drafts.**"))]),
         "sponsors": count(*[_type == "sponsor" && !(_id in path("drafts.**"))]),
         "latestResultYear": math::max(*[_type == "raceResult"].year)
       }`);
-      setSnap({ ...data, feeTiers: data.feeTiers ?? [], now: Date.now() });
+      setSnap({ ...data, distances: data.distances ?? [], now: Date.now() });
     } finally {
       setBusy(false);
     }

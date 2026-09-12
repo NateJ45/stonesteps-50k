@@ -75,18 +75,30 @@ const CHECKS: Check[] = [
     // Prices are the thing a runner is most likely to act on, so a stale tier
     // is worse than a stale sentence.
     id: 'fees-expired',
+    // THE PRICES LIVE ON EACH DISTANCE, not on the race document. The 50K and
+    // the 27K charge different money, so the ladder printed on a ticket is that
+    // distance's own. This read `race.feeTiers`, which no ticket has used since
+    // the ladders were added, so it was silent on prices that were genuinely
+    // out of date and pointed at the wrong page when it did speak (2026-09-12).
+    //
+    // ONE stale tier is worth saying, not only all of them: a ladder whose
+    // first step ended last January is already printing a price nobody can buy.
     run: async (c) => {
-      const tiers = await c.fetch<{ label?: string; endsOn?: string }[]>(
-        '*[_type == "race"][0].feeTiers[]{ label, endsOn }',
+      const rows = await c.fetch<{ name?: string; feeTiers?: { endsOn?: string }[] }[]>(
+        '*[_type == "distance" && !(_id in path("drafts.**"))]{ name, feeTiers[]{ endsOn } }',
       );
-      if (!tiers?.length) return null;
+      const tiers = (rows ?? []).flatMap((r) => r.feeTiers ?? []);
+      if (!tiers.length) return null;
       const past = tiers.filter((t) => t.endsOn && new Date(t.endsOn).getTime() < Date.now());
-      if (past.length < tiers.length) return null;
+      if (!past.length) return null;
+      const allPast = past.length === tiers.length;
       return {
         severity: 'warn',
-        label: 'Every entry-fee tier has an end date in the past',
+        label: allPast
+          ? 'Every entry-fee tier has an end date in the past'
+          : `${plural(past.length, 'entry-fee tier')} ended in the past`,
         detail:
-          'The prices printed under the two tickets are last year’s. Update them in "This year’s race" → "Race day", and check they match what RunSignUp is actually charging.',
+          'The price ladder printed on a ticket comes from that distance. Open "This year’s race" → "Distances", check the 50K and the 27K, and make the dates and prices match what RunSignUp is charging.',
       };
     },
   },
@@ -96,7 +108,7 @@ const CHECKS: Check[] = [
     id: 'unconfirmed',
     run: async (c) => {
       const n = await c.fetch<number>(
-        'count(*[_type in ["scheduleItem", "courseFeature", "distance"] && confirmed != true && !(_id in path("drafts.**"))])',
+        'count(*[_type in ["race", "scheduleItem", "courseFeature", "distance"] && confirmed != true && !(_id in path("drafts.**"))])',
       );
       if (!n) return null;
       return {

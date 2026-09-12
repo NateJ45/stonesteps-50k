@@ -792,6 +792,12 @@ docs.push({
 docs.push({
   _id: 'siteSettings',
   _type: 'siteSettings',
+  // THE RACE NAME LIVES HERE, not only in src/data/site.ts. The header and the
+  // footer read this field and fall back to the constant, so with the field
+  // blank the site looked right while Site Settings carried a permanent
+  // "Site title is required" error (2026-09-12). The name belongs to the
+  // editor, so it is seeded rather than left to the fallback.
+  title: 'Stone Steps 50K',
   navItems: [
     { _type: 'navLink', _key: key(), label: 'The Race', linkType: 'internal', href: '/' },
     { _type: 'navLink', _key: key(), label: 'Course', linkType: 'internal', href: '/course' },

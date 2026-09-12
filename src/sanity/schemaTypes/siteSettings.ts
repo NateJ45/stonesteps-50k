@@ -23,8 +23,10 @@ export const siteSettings = defineType({
       name: 'title',
       title: 'Site title',
       type: 'string',
-      description: 'Used in the browser tab and search results.',
-      initialValue: 'Studio Name',
+      description:
+        'The race name. Used in the browser tab, in search results, and as the site name ' +
+        'in the header and footer.',
+      initialValue: 'Stone Steps 50K',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -36,10 +38,17 @@ export const siteSettings = defineType({
     }),
     defineField({
       name: 'email',
-      title: 'Public email',
+      title: 'Public email (optional)',
       type: 'string',
-      description: 'Public email address shown on the Contact page.',
-      validation: (Rule) => Rule.required().regex(/.+@.+\..+/, { name: 'email', invert: false }),
+      description:
+        'Shown in the footer and the phone menu. Leave it blank and neither shows one: ' +
+        "the contact form and the Facebook group are this race's ways in. It was REQUIRED " +
+        'until 2026-09-12, which put a permanent error on this document for an inbox the ' +
+        'race does not publish.',
+      validation: (Rule) =>
+        Rule.regex(/.+@.+\..+/, { name: 'email', invert: false }).warning(
+          'That does not look like an email address.',
+        ),
     }),
     defineField({
       name: 'phone',
@@ -308,7 +317,11 @@ export const siteSettings = defineType({
       type: 'string',
       description:
         'Short status next to the green dot on the Contact page. Examples: "Accepting new clients" / "Booking for Fall 2026" / "Currently booked, accepting waitlist".',
-      validation: (Rule) => Rule.required().max(80),
+      // HIDDEN AND REQUIRED IS A BLOCKER NOBODY CAN CLEAR. Sanity validates the
+      // document rather than the form, so each of the starter's hidden identity
+      // fields was failing validation invisibly (2026-09-12). The rule goes; the
+      // field stays hidden and read-only so nothing it holds is lost.
+      validation: (Rule) => Rule.max(80),
       hidden: true,
       readOnly: true,
     }),
@@ -319,7 +332,7 @@ export const siteSettings = defineType({
       description:
         'Cities and neighborhoods you serve, in display order. Put your primary market first.',
       of: [defineArrayMember({ type: 'string' })],
-      validation: (Rule) => Rule.required().min(1),
+      // Hidden and required is an error nobody can clear: see the note above.
       hidden: true,
       readOnly: true,
     }),
@@ -353,7 +366,7 @@ export const siteSettings = defineType({
           },
         }),
       ],
-      validation: (Rule) => Rule.required().min(1),
+      // Hidden and required is an error nobody can clear: see the note above.
       hidden: true,
       readOnly: true,
     }),

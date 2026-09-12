@@ -226,7 +226,7 @@ export const guides: Guide[] = [
       {
         kind: 'path',
         items: ['This year’s race', 'Race-day schedule'],
-        link: { pane: 'scheduleItem' },
+        link: { pane: 'this-years-race;orderable-scheduleItem' },
       },
       { kind: 'h', text: 'Editing a row' },
       {
@@ -296,7 +296,7 @@ export const guides: Guide[] = [
       {
         kind: 'path',
         items: ['This year’s race', 'Sponsors'],
-        link: { pane: 'sponsor' },
+        link: { pane: 'this-years-race;orderable-sponsor' },
       },
       {
         kind: 'steps',
@@ -367,7 +367,7 @@ export const guides: Guide[] = [
       {
         kind: 'path',
         items: ['Results and runners', 'Runners'],
-        link: { pane: 'athlete' },
+        link: { pane: 'this-years-race;athlete' },
       },
       { kind: 'h', text: 'Why there is only one place to fix' },
       {

@@ -232,6 +232,12 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
       // They are here so a name can be corrected at its single source, which is
       // the whole reason results reference an athlete rather than repeating one.
       S.listItem()
+        // EVERY PANE A TOOL LINKS TO NEEDS AN EXPLICIT ID. A list item with no
+        // `.id()` gets a generated one, so `/structure/this-years-race` matched
+        // nothing and the "Start a new race year" cards that pointed here were
+        // dead links (2026-09-12). Change an id here and the targets in
+        // RaceYearTool.tsx and guides/content.ts have to move with it.
+        .id('this-years-race')
         .title("This year's race")
         .icon(ActivityIcon)
         .child(
@@ -293,6 +299,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               // only that one. The query is inside the child callback, so it
               // runs when an editor opens Results rather than on every boot.
               S.listItem()
+                .id('results')
                 .title('Results')
                 .icon(ThListIcon)
                 .child(() =>
@@ -380,6 +387,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
 
       // Pages — every page singleton lives here.
       S.listItem()
+        .id('pages')
         .title('Pages')
         .icon(DocumentTextIcon)
         .child(

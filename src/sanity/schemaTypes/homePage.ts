@@ -94,9 +94,13 @@ export const homePage = defineType({
       title: 'Hero headline',
       type: 'string',
       group: 'hero',
+      // HIDDEN AND REQUIRED IS A BLOCKER NOBODY CAN CLEAR. Sanity validates the
+      // document, not the form, so this field put a permanent error on the home
+      // page for a value the editor could neither see nor type (2026-09-12). The
+      // page is built from its section list and nothing reads this any more; the
+      // field stays hidden and read-only so its old value is never lost.
       hidden: true,
       readOnly: true,
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'heroSubhead',
