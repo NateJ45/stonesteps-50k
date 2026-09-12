@@ -26,7 +26,11 @@
 //      fails validation with "already used by a built-in page" and cannot be
 //      published. The Contact page did, for a list copied from the starter.
 //
-//   5. A required field that is blank in the live document. Some of those are
+//   5. A collection type whose "Used on N pages" panel disagrees with the
+//      pages that really render it. The 50K said "Used on one page" while its
+//      ticket was on two.
+//
+//   6. A required field that is blank in the live document. Some of those are
 //      real jobs for the editor and some mean the requirement is wrong, but
 //      either way nobody can publish until it is settled.
 //
@@ -356,7 +360,60 @@ section('4. Page addresses that collide with a reserved route');
   problems += hits;
 }
 
-section('5. Required fields left blank in the live data');
+section('5. "Used on N pages" against what the pages really contain');
+{
+  // Which section type renders which collection. The left side is the document
+  // type whose panel we are checking; the right is the section that reads it.
+  const RENDERED_BY = {
+    distance: ['distanceTicketsSection'],
+    courseFeature: ['courseFeaturesSection'],
+    recordEntry: ['recordsBoardSection', 'dynastiesSection'],
+    scheduleItem: ['raceScheduleSection'],
+    sponsor: ['sponsorPatchesSection'],
+  };
+  const src = readFileSync(resolve(root, 'src/sanity/resolve.ts'), 'utf8');
+  // Split the exported map on its top-level entries. `\n};` would be a literal
+  // newline if this were built by string interpolation, which is how the two
+  // previous attempts shipped a broken regex.
+  const block = src.match(/COLLECTION_LOCATIONS[^=]*=\s*\{([\s\S]*?)\};/)?.[1] ?? '';
+  const declared = {};
+  for (const m of block.matchAll(/^\s*(\w+):\s*\[([^\]]*)\]/gm)) {
+    declared[m[1]] = m[2]
+      .split(',')
+      .map((x) => x.trim())
+      .filter(Boolean);
+  }
+  const pages = await client.fetch(
+    `*[_type in ["homePage", "page"] && !(_id in path("drafts.**"))]{_id, "slug": slug.current, "types": pageBuilder[]._type}`,
+  );
+  const nameFor = (p) =>
+    p._id === 'homePage'
+      ? 'HOME'
+      : { course: 'COURSE', records: 'RECORDS', contact: 'CONTACT' }[p.slug];
+  let hits = 0;
+  for (const [type, sections] of Object.entries(RENDERED_BY)) {
+    const real = new Set();
+    for (const pg of pages) {
+      if ((pg.types ?? []).some((t) => sections.includes(t))) {
+        const n = nameFor(pg);
+        if (n) real.add(n);
+      }
+    }
+    const said = new Set(declared[type] ?? []);
+    const missing = [...real].filter((x) => !said.has(x));
+    const extra = [...said].filter((x) => !real.has(x));
+    if (missing.length || extra.length) {
+      hits++;
+      console.log(
+        `  ${type}: resolve.ts says [${[...said].join(', ') || 'nothing'}], the pages say [${[...real].join(', ') || 'nothing'}]`,
+      );
+    }
+  }
+  if (!hits) console.log('  none');
+  problems += hits;
+}
+
+section('6. Required fields left blank in the live data');
 let blanks = 0;
 for (const [type, fields] of requiredFields()) {
   if (!docTypes.includes(type)) continue;

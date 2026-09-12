@@ -56,6 +56,36 @@ export const SINGLETON_PREVIEW_PATHS: Record<string, string> = {
 
 const previewHref = (slug?: string) => (slug === 'home' ? '/preview' : `/preview/${slug}`);
 
+const HOME = { title: 'Home', href: '/preview' };
+const COURSE = { title: 'The course', href: '/preview/course' };
+const RECORDS = { title: 'Records', href: '/preview/records' };
+const CONTACT = { title: 'Contact', href: '/preview/contact' };
+
+/**
+ * Which preview pages each collection type appears on.
+ *
+ * Read as: a `distance` document is rendered by `distanceTicketsSection`, and
+ * that section sits on both the home page and the course page, so editing the
+ * 50K changes both. `race` and `siteSettings` feed the chrome (the footer's
+ * next-running band, the header) on every page, so they list all four.
+ *
+ * Exported for scripts/audit-studio.mjs, which is what keeps it honest.
+ */
+export const COLLECTION_LOCATIONS: Record<string, { title: string; href: string }[]> = {
+  race: [HOME, COURSE, RECORDS, CONTACT],
+  siteSettings: [HOME, COURSE, RECORDS, CONTACT],
+  announcement: [HOME, COURSE, RECORDS, CONTACT],
+  distance: [HOME, COURSE],
+  courseFeature: [HOME, COURSE],
+  recordEntry: [HOME, RECORDS],
+  scheduleItem: [HOME],
+  sponsor: [HOME],
+};
+
+const collectionLocations = Object.fromEntries(
+  Object.entries(COLLECTION_LOCATIONS).map(([type, locations]) => [type, { locations }]),
+);
+
 // One static location entry per singleton.
 const singletonLocations = Object.fromEntries(
   Object.entries(SINGLETON_PREVIEW_PATHS).map(([type, href]) => [
@@ -86,15 +116,16 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     // Collection docs have no draft-preview route of their own, so each is sent
     // to the page it renders on. The starter's entries (journalEntry, service,
     // processStep, faqItem and the rest) are gone with the pages they pointed
-    // at: see the note on SINGLETON_PREVIEW_PATHS. Every type below holds real
-    // documents on this site.
-    announcement: { locations: [{ title: 'Home', href: '/preview' }] },
-    siteSettings: { locations: [{ title: 'Home', href: '/preview' }] },
-    race: { locations: [{ title: 'Home', href: '/preview' }] },
-    distance: { locations: [{ title: 'Home', href: '/preview' }] },
-    scheduleItem: { locations: [{ title: 'Home', href: '/preview' }] },
-    sponsor: { locations: [{ title: 'Home', href: '/preview' }] },
-    courseFeature: { locations: [{ title: 'The course', href: '/preview/course' }] },
-    recordEntry: { locations: [{ title: 'Records', href: '/preview/records' }] },
+    // at: see the note on SINGLETON_PREVIEW_PATHS.
+    //
+    // EVERY PAGE, NOT THE FIRST ONE. This is what fills Sanity's own "Used on N
+    // pages" panel at the top of a document, so a short list is not a tidier
+    // list, it is a false statement: the 50K said "Used on one page" while its
+    // ticket was on the home page AND the course page (2026-09-12). The lists
+    // below are hand-written because Presentation resolves locations from
+    // selected fields and cannot run a query, so `npm run audit:studio` checks
+    // them against what the page builders really contain and fails when an
+    // editor moves a section.
+    ...collectionLocations,
   },
 };
