@@ -339,3 +339,42 @@ porting, only saying: **clean a display string before any `split`, `length`, `sl
 truncation or word count.** To close: add it to the starter's preview section in
 CLAUDE.md next to the existing "never compare a stega-encoded string" rule, and note it
 on the preview PORTS card. Vault note: `_vault/gotchas/stega-run-contains-whitespace.md`.
+
+### 10. Lighthouse performance sits at 88, and the last lever is the stylesheet
+
+2026-09-12. Nathan asked for performance over 90. It was a median of 80 across
+five runs of the deployed home page; the cause was real and is fixed (the
+wordmark's stamp keyframe started at `opacity: 0`, so the largest element on
+the page did not count as painted until its press had landed, and Lighthouse
+put LCP at 4.7s). Median is 88 now, runs ranging 80 to 89 on identical code.
+
+WHAT IS LEFT IS THE MODEL, NOT THE SITE. Measured on a real throttled mobile
+profile (4x CPU, 1.6Mbps, 150ms RTT, five loads, PerformanceObserver rather
+than Lighthouse's simulation) the home page paints at **FCP 0.93s and LCP
+1.06s**. Lighthouse's Lantern engine reports 2.1s and 3.6s for the same page
+because it charges the two render-blocking stylesheets 763ms and 463ms.
+
+Things that were measured and are NOT the problem, so nobody repeats them:
+
+- The mud masks, the paper grain and the topo SVG each cost nothing measurable
+  at first paint. An early A/B seemed to show the mud costing ~1s; that was an
+  artefact of the test server not gzipping, which made the 236KB raw stylesheet
+  the gate in every variant. Always compress in a local perf harness.
+- `content-visibility: auto` on off-screen sections: no measurable change.
+- Dead hand-written CSS: only 19 of 117 class selectors in globals.css appear
+  nowhere in the built output, and several of those are used by the SSR-only
+  preview routes, which are not in `dist/client`. There is no bulk win here.
+- Tailwind is tree-shaking correctly: no staged-module utilities reach the
+  bundle.
+
+To actually close it, one of these, and the first is a design trade Dave and
+Nathan should make rather than an optimisation:
+
+- Cut the stylesheet. 43KB gzipped is the site's own design language, not
+  waste, so this means dropping features.
+- Art-direct the hero photograph for phones. It is a 1081x2048 portrait shown
+  as a ~384px band, so Lighthouse reports ~96KB wasted. A phone crop would help
+  the model and real users both, but which part of the runner survives the crop
+  is a design call.
+
+The CI gate asserts performance at 0.85 as a warning and passes.
