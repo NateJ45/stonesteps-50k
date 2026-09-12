@@ -179,7 +179,7 @@ export const guides: Guide[] = [
       {
         kind: 'path',
         items: ['This year’s race', 'Race day'],
-        link: { doc: 'race' },
+        link: { doc: 'race', field: 'raceDate' },
       },
       { kind: 'h', text: 'What to change' },
       {
@@ -263,18 +263,23 @@ export const guides: Guide[] = [
     body: [
       {
         kind: 'path',
-        items: ['This year’s race', 'Race day', 'Entry fees'],
-        link: { doc: 'race' },
+        // THE PRICES ARE ON EACH DISTANCE. This guide sent the reader to the
+        // race document, where there is a fee list nothing on the site reads
+        // any more: the ladder printed on a ticket is that distance's own.
+        // Same error the Checkup and the rollover checklist carried
+        // (2026-09-12).
+        items: ['This year’s race', 'Distances'],
+        link: { pane: 'this-years-race;orderable-distance' },
       },
       { kind: 'h', text: 'The prices' },
       {
         kind: 'p',
-        text: 'The fee tiers are a list. Each row has a label, an amount, the processing fee and the date it ends. They print in a line under the two distance tickets on the home page, and they are also what Google reads when it shows the race as an event.',
+        text: 'The 50K and the 27K each carry their own price ladder, so both need changing. Open **This year’s race**, then **Distances**, then the 50K or the 27K, and edit `Entry fee tiers`. Each row has a label, an amount and the date it stops applying, and the rows print as the ladder on that distance’s ticket.',
       },
       { kind: 'h', text: 'The entry caps' },
       {
         kind: 'p',
-        text: 'The cap is on the distance, not the race. Go to **This year’s race**, then **Distances**, open the 50K or the 27K, and change `Entry cap`. It prints on the ticket.',
+        text: 'The cap is on the same screen. Open the distance and change `Entry cap`. It prints on the ticket beside the start time.',
       },
       {
         kind: 'callout',

@@ -187,7 +187,8 @@ test('step ids are unique', () => {
 // This re-derives them from the structure file, so renaming a pane there
 // fails here instead of quietly breaking every card that points at it.
 
-test('the pane ids the steps use are still declared in structure.ts', async () => {
+/** Every pane id the structure declares, however it declares it. */
+async function declaredPanes() {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync('src/sanity/structure.ts', 'utf8');
   const declared = new Set([...src.matchAll(/\.id\('([^']+)'\)/g)].map((m) => m[1]));
@@ -195,6 +196,15 @@ test('the pane ids the steps use are still declared in structure.ts', async () =
   for (const m of src.matchAll(/orderableDocumentListDeskItem\(\{\s*type:\s*'([^']+)'/g)) {
     declared.add(`orderable-${m[1]}`);
   }
+  // A plain document-type list takes the type as its id.
+  for (const m of src.matchAll(/documentTypeListItem\('([^']+)'\)/g)) declared.add(m[1]);
+  // Singletons are named after their document: see singletonWithPreview.
+  for (const m of src.matchAll(/singletonWithPreview\(S, '([^']+)'/g)) declared.add(m[1]);
+  return declared;
+}
+
+test('the pane ids the steps use are still declared in structure.ts', async () => {
+  const declared = await declaredPanes();
   for (const s of STEPS) {
     if (!('pane' in s.target)) continue;
     for (const segment of s.target.pane.split(';')) {
@@ -204,4 +214,37 @@ test('the pane ids the steps use are still declared in structure.ts', async () =
       );
     }
   }
+});
+
+// ── Every other door in the Studio ───────────────────────────────────────
+// The rollover checklist is not the only thing with links: the Welcome pane
+// has seven cards and the Help guides have a "Take me there" on each. Two of
+// those were dead for the same reason the checklist's were, and nothing would
+// have caught it, because a dead pane link opens an empty column rather than
+// an error. Both files are read as text, so a target added in either is
+// covered the day it is written.
+
+test('every Welcome card and guide link points somewhere that exists', async () => {
+  const { readFileSync } = await import('node:fs');
+  const declared = await declaredPanes();
+  const files = ['src/sanity/components/WelcomePane.tsx', 'src/sanity/guides/content.ts'];
+  let checked = 0;
+  for (const file of files) {
+    const src = readFileSync(file, 'utf8');
+    for (const m of src.matchAll(/(?:target|link):\s*\{\s*pane:\s*'([^']+)'/g)) {
+      checked++;
+      for (const segment of m[1].split(';')) {
+        assert.ok(declared.has(segment), `${file}: pane segment "${segment}" is not declared`);
+      }
+    }
+    for (const m of src.matchAll(/(?:target|link):\s*\{\s*doc:\s*'([^']+)'/g)) {
+      checked++;
+      assert.ok(
+        declared.has(m[1]),
+        `${file}: doc "${m[1]}" has no singleton pane of that id, so the intent ` +
+          `resolves only as far as the parent list`,
+      );
+    }
+  }
+  assert.ok(checked >= 12, `expected to check a dozen or more links, saw ${checked}`);
 });

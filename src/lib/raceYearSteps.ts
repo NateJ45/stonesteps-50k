@@ -73,7 +73,7 @@ export const STEPS: Step[] = [
     title: 'Put in next year’s date',
     blurb:
       'One field. It moves the countdown, the "Next running" band in the footer, and the date Google shows.',
-    target: { doc: 'race' },
+    target: { doc: 'race', field: 'raceDate' },
     state: (s) => {
       if (!s.raceDate) return 'todo';
       return new Date(s.raceDate).getTime() > s.now ? 'done' : 'todo';
@@ -94,7 +94,7 @@ export const STEPS: Step[] = [
     id: 'edition',
     title: 'Move the edition number up by one',
     blurb: 'The "23rd edition" figure on the home page and in the footer.',
-    target: { doc: 'race' },
+    target: { doc: 'race', field: 'editionNumber' },
     // Cannot be derived, only prompted: the number is right or wrong only in
     // relation to a date a human just set.
     state: () => 'check',

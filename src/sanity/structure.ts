@@ -108,10 +108,21 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
  * and that is where the per-type extra tabs are added.
  */
 function singletonWithPreview(S: StructureBuilder, schemaType: string, title: string, icon: any) {
-  return S.listItem()
-    .title(title)
-    .icon(icon)
-    .child(S.document().schemaType(schemaType).documentId(schemaType).views([S.view.form()]));
+  return (
+    S.listItem()
+      // THE ID IS THE DOCUMENT'S, NOT THE TITLE'S, and that is what makes every
+      // "Take me there" button land on the form. With no explicit id Sanity
+      // derives one from the title, so "Race day (date, times, fees)" became the
+      // pane `raceDayDateTimesFees`, while an edit intent for the race document
+      // looks for a pane called `race`. It found the parent list and stopped
+      // there, which is why the guides opened the category rather than the
+      // document (2026-09-12). Naming the pane after the document also means a
+      // reworded title can no longer break a link.
+      .id(schemaType)
+      .title(title)
+      .icon(icon)
+      .child(S.document().schemaType(schemaType).documentId(schemaType).views([S.view.form()]))
+  );
 }
 
 export const deskStructure = (S: StructureBuilder, context: StructureResolverContext) =>

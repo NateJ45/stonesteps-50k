@@ -289,7 +289,13 @@ docs.push({
           ],
         },
       ],
-      cta: { _type: 'ctaBlock', label: 'Ask David a question', href: '/contact' },
+      // THROUGH THE HELPER, like every other button. Written by hand this was
+      // `{ label, href }`, and `href` is not a field ctaBlock has: the Studio
+      // showed "Unknown field found" with a Remove field button beside it, and
+      // a required Link type nobody had set. It still worked on the page only
+      // because CtaLink falls back to /contact when it cannot resolve a link,
+      // which is the same address this one wanted (2026-09-12).
+      cta: cta('Ask David a question', '/contact'),
     },
     {
       _type: 'sponsorPatchesSection',
@@ -581,7 +587,8 @@ docs.push({
           ],
         },
       ],
-      cta: { _type: 'ctaBlock', label: 'Ask a question', href: '/contact' },
+      // See the note on the home page's version of this button.
+      cta: cta('Ask a question', '/contact'),
     },
     {
       _type: 'distanceTicketsSection',

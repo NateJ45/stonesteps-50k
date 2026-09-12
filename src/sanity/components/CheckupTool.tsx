@@ -197,8 +197,17 @@ const CHECKS: Check[] = [
   },
   {
     id: 'unpublished-drafts',
+    // SYSTEM DRAFTS ARE NOT EDITS. The Presentation tool keeps its preview-URL
+    // secret as a draft document (sanity.previewUrlSecret), and Sanity writes a
+    // few other internal types the same way. Counting them reported "1
+    // unpublished change" on a dataset where nobody had touched anything, and
+    // sent the race director looking for a document he cannot open, let alone
+    // publish (2026-09-12). Only real content counts.
     run: async (c) => {
-      const n = await c.fetch<number>('count(*[_id in path("drafts.**")])');
+      const ids = await c.fetch<string[]>(
+        '*[_id in path("drafts.**") && !(_type match "sanity.*") && !(_type match "system.*")]._id',
+      );
+      const n = ids?.length ?? 0;
       if (!n) return null;
       return {
         severity: 'info',

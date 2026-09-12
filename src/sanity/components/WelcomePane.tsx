@@ -27,19 +27,22 @@ const TASKS: Task[] = [
     emoji: '📅',
     title: 'Change the race date',
     blurb: 'Next year’s date and edition number. Moves the countdown, the footer and Google.',
-    target: { doc: 'race' },
+    target: { doc: 'race', field: 'raceDate' },
   },
   {
     emoji: '⏱️',
     title: 'Race-day schedule',
     blurb: 'The start times and the course close, as printed on the home page.',
-    target: { pane: 'scheduleItem' },
+    target: { pane: 'this-years-race;orderable-scheduleItem' },
   },
   {
     emoji: '💵',
     title: 'Entry fees and caps',
-    blurb: 'The prices under the two tickets, and how many entries each distance takes.',
-    target: { doc: 'race' },
+    // The prices live on each distance, not on the race document: see the note
+    // in src/lib/raceYearSteps.ts. This card opened a screen with nothing on it
+    // to change.
+    blurb: 'The prices on the two tickets, and how many entries each distance takes.',
+    target: { pane: 'this-years-race;orderable-distance' },
   },
   {
     emoji: '🩺',
@@ -57,7 +60,7 @@ const TASKS: Task[] = [
     emoji: '🏁',
     title: 'This year’s results',
     blurb: 'Every finisher, by year. They import themselves; this is where to look.',
-    target: { pane: 'theRace;results' },
+    target: { pane: 'this-years-race;results' },
   },
   {
     emoji: '❔',

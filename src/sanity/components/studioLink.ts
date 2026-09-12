@@ -14,8 +14,14 @@ import { useRouter } from 'sanity/router';
 // =============================================================================
 
 export type StudioTarget =
-  /** A document's editor, by id. `type` defaults to the id (the singleton convention). */
-  | { doc: string; type?: string }
+  /**
+   * A document's editor, by id. `type` defaults to the id (the singleton
+   * convention). `field` scrolls to and focuses one field once it opens, which
+   * is the difference between "here is the race document" and "here is the
+   * date": a guide that says "set Race date" should not then ask the reader to
+   * find it. Use the field's schema name, dotted for something nested.
+   */
+  | { doc: string; type?: string; field?: string }
   /** A structure pane by its id path, ';'-separated for nesting. */
   | { pane: string };
 
@@ -26,7 +32,9 @@ export function useStudioLink() {
   return function linkTo(target: StudioTarget) {
     const path =
       'doc' in target
-        ? `${basePath}/intent/edit/id=${target.doc};type=${target.type ?? target.doc}`
+        ? `${basePath}/intent/edit/id=${target.doc};type=${target.type ?? target.doc}` +
+          // Sanity's own parameter for "open on this field".
+          (target.field ? `;path=${encodeURIComponent(target.field)}` : '')
         : `${basePath}/structure/${target.pane}`;
     const isHashRouted = typeof window !== 'undefined' && window.location.hash.startsWith('#/');
     const href = isHashRouted ? `${window.location.pathname}#${path}` : path;

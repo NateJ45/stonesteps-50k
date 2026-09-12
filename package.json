@@ -35,6 +35,7 @@
     "format:check": "prettier --check .",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
+    "audit:studio": "node scripts/audit-studio.mjs",
     "test:unit": "node --experimental-strip-types --test src/lib/*.test.ts",
     "serve:dist": "http-server dist/client -p 4321 -s -c-1 --silent",
     "check:links": "linkinator ./dist/client --recurse --skip \"^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])\" --skip \"/studio\" --skip \"/preview\" --skip \"/runners\" --skip \"/api/\"",
