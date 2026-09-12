@@ -574,6 +574,7 @@ export interface ProjectedPageHeaderSection {
   headlineSecondLine?: string;
   lede?: string;
   image?: ProjectedImage;
+  cutout?: boolean;
 }
 
 export interface ProjectedContactSection {

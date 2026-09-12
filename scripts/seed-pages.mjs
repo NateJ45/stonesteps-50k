@@ -655,6 +655,13 @@ docs.push({
       lede:
         'Whatever you need answered, you get an answer. Course questions, entry transfers, ' +
         'volunteering, or whether your shoes are aggressive enough.',
+      // The man himself, cut out and stood on the band, rather than a framed
+      // photograph of runners: the page is about writing to him.
+      image: img(
+        PHOTO.raceDirector,
+        'David Corfman, the race director, grinning with one arm raised to show his watch.',
+      ),
+      cutout: true,
     },
     {
       _type: 'contactSection',

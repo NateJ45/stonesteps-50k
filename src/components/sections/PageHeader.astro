@@ -13,6 +13,7 @@
 
 import SanityImage from '@/components/SanityImage.astro';
 import MudField from '@/components/race/MudField.astro';
+import Topo from '@/components/race/Topo.astro';
 import type { ProjectedPageHeaderSection } from '@/lib/pageBuilder.types';
 
 type Props = {
@@ -21,6 +22,8 @@ type Props = {
   headlineSecondLine?: string;
   lede?: string;
   image?: ProjectedPageHeaderSection['image'];
+  /** Stand the photograph as a cut-out on a pool of ground. See ImageText. */
+  cutout?: boolean;
   seed?: number;
   headingId?: string;
 };
@@ -31,6 +34,7 @@ const {
   headlineSecondLine,
   lede,
   image,
+  cutout = false,
   seed = 17,
   headingId = 'page-header-heading',
 } = Astro.props as Props;
@@ -104,7 +108,30 @@ const hasImage = Boolean(image?.asset);
       </div>
 
       {
-        hasImage && (
+        /* THE CUT-OUT IS THE SAME STAGE THE HOME PAGE GIVES THE DIRECTOR
+          (ImageText.astro, `cutout`), one size up: the header column is wider
+          than the home band's half, and the source file is 541px across, so
+          30rem is as large as he goes before the print softens. The pool,
+          the echo plate and the mud at his feet all come from the shared
+          `.subject-stage` and `.photo-cutout` rules, so the two appearances
+          cannot drift apart. */
+        hasImage && cutout ? (
+          <div class="subject-stage">
+            <span class="subject-stage__pool" aria-hidden="true">
+              <Topo seed={5} lines={9} />
+            </span>
+            <SanityImage
+              source={image}
+              width={1000}
+              sizes="(min-width: 1024px) 42vw, 100vw"
+              quality={80}
+              alt={image?.alt ?? ''}
+              loading="eager"
+              class="photo-cutout h-auto w-full max-w-[30rem]"
+            />
+            <MudField field="director-fore" class="subject-stage__mud" />
+          </div>
+        ) : hasImage ? (
           <figure class="overflow-hidden rounded-xl border-2 border-black shadow-[var(--lift-lg)]">
             <SanityImage
               source={image}
@@ -115,7 +142,7 @@ const hasImage = Boolean(image?.asset);
               class="w-full"
             />
           </figure>
-        )
+        ) : null
       }
     </div>
   </div>

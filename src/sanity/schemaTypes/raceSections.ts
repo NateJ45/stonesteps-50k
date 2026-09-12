@@ -498,6 +498,16 @@ export const pageHeaderSection = defineType({
         }),
       ],
     }),
+    defineField({
+      name: 'cutout',
+      title: 'Show the photograph as a cut-out',
+      type: 'boolean',
+      description:
+        'For a picture with a transparent background (a person cut out of their photo). ' +
+        'Drops the frame and stands them on a pool of contour lines and mud, the way the ' +
+        'race director appears on the home page. Leave off for an ordinary photograph.',
+      initialValue: false,
+    }),
   ],
   preview: {
     select: { title: 'headline', subtitle: 'eyebrow', media: 'image' },

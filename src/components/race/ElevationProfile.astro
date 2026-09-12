@@ -304,6 +304,20 @@ const canvases = [
     height: 78%;
     width: 100%;
     pointer-events: none;
+    /* FADED AT THE FOOT. The drawing's baseline sits 42 units up from the
+       bottom of its own viewBox (the room the chart keeps for its loop
+       numbers), so stretched across the band it ended in a flat filled strip
+       with a clean horizontal edge above the bare band below: a gap nobody
+       drew. The mask dissolves the bottom fifth, and the top too, so the
+       ridge fades into the band on both sides rather than stopping. */
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      #000 22%,
+      #000 66%,
+      transparent 96%
+    );
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 66%, transparent 96%);
   }
   .elev-mark__area {
     fill: color-mix(in srgb, var(--heading-accent) 6%, transparent);

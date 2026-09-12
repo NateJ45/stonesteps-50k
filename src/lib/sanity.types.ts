@@ -1432,6 +1432,7 @@ export type PageHeaderSection = {
     alt?: string;
     _type: 'image';
   };
+  cutout?: boolean;
 };
 
 export type RaceHeroSection = {

@@ -213,6 +213,20 @@ export default function MobileNav({
           <div className="menu-inner">
             <div className="menu-head">
               <SheetTitle className="menu-eyebrow">Menu</SheetTitle>
+              {/* The mark, top centre, where the header carries it: the board
+                  reads as the header opened up. One file serves both themes
+                  because the board is always bark. */}
+              {logoLightUrl && (
+                <img
+                  src={logoLightUrl}
+                  alt=""
+                  aria-hidden="true"
+                  width={108}
+                  height={180}
+                  className="menu-logo"
+                  decoding="async"
+                />
+              )}
               <SheetClose asChild>
                 <button type="button" aria-label="Close menu" className="menu-close">
                   <X size={20} strokeWidth={2.5} aria-hidden="true" />
@@ -259,6 +273,13 @@ export default function MobileNav({
             </nav>
 
             <div className="menu-foot">
+              {/* The claim, struck full width across the foot of the board,
+                  directly above the one thing to do about it. */}
+              {tagline && (
+                <p className="claim-stamp menu-stamp">
+                  <span className="claim-stamp__line">{tagline}</span>
+                </p>
+              )}
               {cta.show && (
                 <a
                   href={cta.href}
@@ -274,12 +295,6 @@ export default function MobileNav({
               )}
 
               <div className="menu-util">
-                {/* The claim, stamped where a sign carries its maker's mark. */}
-                {tagline && (
-                  <p className="claim-stamp menu-stamp">
-                    <span className="claim-stamp__line">{tagline}</span>
-                  </p>
-                )}
                 <div className="menu-util__row">
                   {fb && (
                     <a
@@ -295,21 +310,6 @@ export default function MobileNav({
                   <ThemeToggle />
                 </div>
               </div>
-
-              {/* The mark, small, where a sign is signed. One file serves both
-                  themes because the board is always bark. */}
-              {logoLightUrl && (
-                <img
-                  src={logoLightUrl}
-                  alt=""
-                  aria-hidden="true"
-                  width={108}
-                  height={180}
-                  className="menu-logo"
-                  loading="lazy"
-                  decoding="async"
-                />
-              )}
             </div>
           </div>
         </SheetContent>

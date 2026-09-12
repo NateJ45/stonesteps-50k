@@ -77,8 +77,14 @@ const value = text == null ? '' : String(text).trim();
     color: color-mix(in srgb, var(--foreground) 6.5%, transparent);
   }
 
+  /* INSIDE THE BAND, NOT HANGING OFF IT. `bleed` used to sit at -0.18em
+     with its outer edge at -0.06em, so the first digit and the descender line
+     were cropped by the viewport, on purpose. Seen on the records page it did
+     not read as a watermark running off the paper; it read as a picture that
+     had been cut off (2026-09-12). The name stays because callers use it; the
+     mark now sits just clear of both edges and keeps its low anchor. */
   .data-mark--bleed {
-    bottom: -0.18em;
+    bottom: 0.1em;
   }
   .data-mark--inset {
     bottom: 1rem;
@@ -90,10 +96,10 @@ const value = text == null ? '' : String(text).trim();
   }
 
   .data-mark--right {
-    right: -0.06em;
+    right: 0.08em;
   }
   .data-mark--left {
-    left: -0.06em;
+    left: 0.08em;
   }
   .data-mark--inset.data-mark--right {
     right: 2rem;
