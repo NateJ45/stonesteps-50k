@@ -156,6 +156,19 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
       href={staatlichesWoff2}
       crossorigin="anonymous"
     />
+    {/* EVERY PHOTOGRAPH ON THIS SITE COMES FROM cdn.sanity.io, including the
+        hero, which is the LCP element on the home page. Without this the
+        browser cannot even start that request until it has done DNS, TCP and
+        TLS to a third-party origin it has never seen: three round trips, which
+        on Lighthouse's throttled profile (150ms latency) is most of half a
+        second spent before the first byte.
+
+        NO crossorigin ATTRIBUTE, deliberately. These are plain <img> tags with
+        no crossorigin of their own, so they use a non-CORS connection; a
+        preconnect marked crossorigin opens an anonymous one that those
+        requests cannot reuse, and the handshake is paid twice instead of
+        never. */}
+    <link rel="preconnect" href="https://cdn.sanity.io" />
     {/* No RSS alternate: the journal and its feed were removed with the
         other starter pages this race does not have. A <link rel="alternate">
         pointing at a 404 is an invitation for a reader to fail. */}

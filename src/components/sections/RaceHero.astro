@@ -143,6 +143,11 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
             source={img}
             width={1400}
             sizes="(min-width: 1024px) 48vw, 100vw"
+            /* 62, against the component's default of 75. This photograph sits
+               behind a gradient scrim and the page's grain, which is exactly
+               the case where the last fifth of JPEG quality is invisible and
+               expensive: it is the LCP element and it was 218kB. */
+            quality={62}
             alt={i === 0 ? (img.alt ?? '') : ''}
             loading={i === 0 ? 'eager' : 'lazy'}
             fetchpriority={i === 0 ? 'high' : 'low'}
