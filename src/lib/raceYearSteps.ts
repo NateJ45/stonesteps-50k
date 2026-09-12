@@ -93,7 +93,11 @@ export const STEPS: Step[] = [
   {
     id: 'edition',
     title: 'Move the edition number up by one',
-    blurb: 'The "23rd edition" figure on the home page and in the footer.',
+    // NO FIXED NUMBER IN THE BLURB. It said 'The "23rd edition" figure', which
+    // is wrong the moment the job is done: rehearsing 2027 the card explained
+    // the 24th running by naming the 23rd (2026-09-12). The note underneath
+    // already prints the live figure.
+    blurb: 'The "nth edition" figure in the row of numbers on the home page, and in the footer.',
     target: { doc: 'race', field: 'editionNumber' },
     // Cannot be derived, only prompted: the number is right or wrong only in
     // relation to a date a human just set.

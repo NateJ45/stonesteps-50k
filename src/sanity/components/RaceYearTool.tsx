@@ -138,13 +138,18 @@ export function RaceYearTool() {
 
         <Card padding={4} radius={3} tone="caution" border>
           <Stack space={2}>
+            {/* NO COUNT IN THIS SENTENCE. It read "Two things are marked
+                'Worth checking'" and there are six: it was written when there
+                were two and went stale the day a card was added, which is a bad
+                look on the one panel whose job is to be trusted (2026-09-12). */}
             <Text size={1} weight="semibold">
-              Two things are marked "Worth checking" on purpose.
+              Why some of these say "Worth checking" rather than "To do".
             </Text>
             <Text size={1} style={{ lineHeight: 1.5 }}>
-              The edition number and the prices cannot be worked out from the data: only you know
-              whether the number matches the new date, and only RunSignUp knows what a runner is
-              actually charged. The site will not guess at either.
+              Those are the ones the site cannot decide for you. Only you know whether the edition
+              number matches the new date, only RunSignUp knows what a runner is actually charged
+              and which event id is this year's, and only the race knows its own start times. The
+              site will not guess at any of them, so it asks.
             </Text>
           </Stack>
         </Card>

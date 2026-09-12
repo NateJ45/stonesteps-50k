@@ -177,10 +177,23 @@ Neither mode builds. The caller builds; the script reads existing output. That k
 fast to re-run, keeps build noise out of the diff, and lets capture and compare be
 pointed at the same artifacts while debugging the normalizer itself.
 
-The normalizer strips exactly four classes of build-varying value and leaves everything
+The normalizer strips exactly five classes of build-varying value and leaves everything
 else byte-faithful: `/_astro/` content hashes, Astro's generated `data-astro-cid-*` and
-transition-scope hashes, the `<astro-island>` render-order `prefix`, and whitespace
-between tags. Text, classes, ids, aria, inline styles and JSON-LD are all compared.
+transition-scope hashes, the `<astro-island>` render-order `prefix`, the contents and
+accessible name of an element with `role="timer"`, and whitespace between tags. Text,
+classes, ids, aria, inline styles and JSON-LD are otherwise all compared.
+
+**Rule 5 added 2026-09-12 (stonesteps-50k).** An element with `role="timer"` is by
+definition a value that counts, and a countdown server-rendered so the block never
+appears empty is computed from the clock AT BUILD TIME. Two identical rebuilds minutes
+apart therefore differ, and the home page failed parity on every single build, which is
+how a gate teaches everyone to ignore it. Both the digits and the element's own
+`aria-label` (which reads "3711193 seconds remaining") are normalised to `TIMER`; the
+element, its other attributes and its structure are still compared, so markup drift
+inside a timer still shows up. Nothing site-specific: `role="timer"` is the standard
+ARIA role for exactly this case. Note for anyone porting it: the scan is brace-balanced
+rather than a regex, because a timer's markup nests and a non-greedy `[\s\S]*?</div>`
+stops at the first inner close.
 
 **Parameterization done on the port:** the built-HTML root is auto-detected
 (`dist/client` when it holds an index.html, which is the adapter 14 shape, else `dist`,

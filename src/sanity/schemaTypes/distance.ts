@@ -104,17 +104,27 @@ export const distance = defineType({
       name: 'entryCap',
       title: 'Entry cap',
       type: 'number',
+      // NO YEAR'S NUMBERS IN THE DESCRIPTION. It used to read "120 for the
+      // 50K, 130 for the 27K (re-checked 2026-09-11)", which is a fact about
+      // 2026 sitting in the permanent help text for a field that changes every
+      // year. Rehearsing 2027 in the Studio, it read as instruction rather than
+      // history (2026-09-12). It says where to LOOK instead, which stays true.
       description:
-        "Verified from RunSignUp's participant_cap on the current events: 120 for the 50K, " +
-        '130 for the 27K (re-checked 2026-09-11). Leave empty rather than guessing.',
+        'How many places this distance takes. It is RunSignUp that enforces it, so copy ' +
+        "the number from that event's participant cap rather than setting one here. " +
+        'Leave it empty rather than guessing: the ticket simply omits the line.',
     }),
     defineField({
       name: 'runSignUpEventId',
       title: 'RunSignUp event id (current year)',
       type: 'number',
+      // Also no year's numbers: see the note on Entry cap. This one matters
+      // more, because a stale id sends a runner to a closed event and the
+      // description used to name the ids for one particular year.
       description:
-        'Makes the Register button link straight to this distance. 2026: 1104726 is the ' +
-        '50K, 1104727 the 27K.',
+        'Sends the Register button straight to this distance instead of the race page. ' +
+        "It is a NEW number every year: open this year's event on RunSignUp and take the " +
+        "eventId from the address bar. Wrong, and entrants land on last year's closed event.",
     }),
     defineField({
       name: 'featured',
@@ -141,11 +151,19 @@ export const distance = defineType({
             defineField({ name: 'amount', title: 'Amount (USD)', type: 'number' }),
             defineField({ name: 'endsOn', title: 'Available until', type: 'date' }),
           ],
+          // THE ROW SHOWS ITS END DATE. Rehearsing the 2027 rollover in the
+          // Studio (2026-09-12), the checklist said "1 of 6 price tiers ended
+          // in the past" and the list above showed "$35 / Through January 31"
+          // with no year anywhere: the only way to find the stale one was to
+          // open all six. The date is the whole reason a tier expires, so it
+          // belongs on the row.
           preview: {
-            select: { label: 'label', amount: 'amount' },
-            prepare: ({ label, amount }) => ({
+            select: { label: 'label', amount: 'amount', endsOn: 'endsOn' },
+            prepare: ({ label, amount, endsOn }) => ({
               title: amount != null ? `$${amount}` : '(no amount)',
-              subtitle: label,
+              subtitle: [label, endsOn ? `ends ${endsOn}` : 'no end date']
+                .filter(Boolean)
+                .join('  ·  '),
             }),
           },
         }),
