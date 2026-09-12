@@ -130,7 +130,7 @@ interface PreviewDoc {
 
 const singletonType = SINGLETON_BY_PATH[slug];
 
-const doc = await previewFetch<PreviewDoc | null>(
+const fetched = await previewFetch<PreviewDoc | null>(
   draftMode,
   singletonType
     ? `*[_type == $type][0]${PREVIEW_FIELDS}`
@@ -138,12 +138,36 @@ const doc = await previewFetch<PreviewDoc | null>(
   singletonType ? { type: singletonType } : { slug },
 );
 
-if (!doc) {
-  return new Response(
-    `No document found for "${slug || 'home'}". Create it in the Studio, then reopen the preview.`,
-    { status: 404 },
-  );
-}
+// A MISSING DOCUMENT STILL RENDERS THE PREVIEW SHELL. This used to answer a bare
+// 404 text response, and that broke the Studio in a way a refresh was the only
+// way out of (2026-09-12): the text page carries no PreviewLayout, so no
+// overlay, so the comlink channel to the Studio never connects for that frame.
+// Presentation then DROPS every navigation asked for while the channel is not
+// connected (see src/lib/preview-navigation.ts), and a frame with no overlay
+// never reports a location either, so the bounce that would have re-issued the
+// click never comes. Pick "404 page" (a document this dataset has not created)
+// and every page after it read "could not connect". The shell always renders
+// now; what is missing is said inside it, where the overlay is alive.
+//
+// The 404 gets its live defaults rather than a notice, because that is what the
+// public /404 renders without a document: the words in src/pages/404.astro.
+const missing = !fetched;
+const doc: PreviewDoc =
+  fetched ??
+  (singletonType === 'notFoundPage'
+    ? {
+        _id: 'notFoundPage',
+        _type: 'notFoundPage',
+        notFoundEyebrow: 'Error 404',
+        notFoundHeadline: 'You took a wrong turn.',
+        heroSubhead:
+          'That page is not on the course. It happens. Follow the blazes back and pick up the loop where you left it.',
+      }
+    : {
+        _id: singletonType ?? `page-${slug}`,
+        _type: singletonType ?? 'page',
+        title: slug || 'Home',
+      });
 
 // The doc id the overlay and /preview/live listen on, read from the QUERY (a
 // Studio-created page has a random id). The draft perspective can return the
@@ -181,6 +205,17 @@ const title = `${label} - Preview`;
 ---
 
 <PreviewLayout {title} {draftMode} {pageId}>
+  {
+    missing && (
+      <div class="mx-auto max-w-3xl px-4 py-6">
+        <p class="rounded-md border border-border-soft bg-bg-soft px-4 py-3 text-sm text-foreground/80">
+          {singletonType === 'notFoundPage'
+            ? 'This page has not been created in the Studio yet, so these are the built-in words the live site uses. Fill in the form on the right and publish to change them.'
+            : `No document found for "${slug || 'home'}" yet. Create it in the Studio and it will appear here.`}
+        </p>
+      </div>
+    )
+  }
   {
     showHero && (
       <Hero
