@@ -626,7 +626,11 @@ export const siteSettings = defineType({
       hidden: true,
       title: 'Section visibility',
       type: 'object',
-      group: 'visibility',
+      // No `group` any more: the Section visibility tab went with the toggles
+      // it held, and a field naming a group the schema does not declare fails
+      // `sanity schema extract`, which is what typegen runs. Local `astro check`
+      // and `astro build` never call it, so CI caught this and nothing here did
+      // (2026-09-12).
       description: 'Turn optional sections on or off. An unset toggle counts as ON.',
       fields: [
         defineField({
