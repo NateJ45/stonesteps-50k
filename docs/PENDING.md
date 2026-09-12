@@ -324,3 +324,18 @@ Flagged in CLAUDE.md's topic index since the fork. The 2026-08-28 pass corrected
 stale `studio/` path and every `studio:deploy` instruction in the live docs, but the
 examples inside them were not retoned. Trust the patterns; fix nouns when you touch a
 file.
+
+### 9. The `\s` stega lesson is not in the starter or the sibling repos
+
+2026-09-12. A stega payload is written in U+200B, U+200C, U+200D and U+FEFF, and U+FEFF
+matches `\s`, so splitting a preview display string on whitespace shatters the payload
+into fake words. Here it turned the home hero's three-word wordmark into 157 words and
+grew the hero band from 1032px to 1879px, in the preview only. Fixed here by
+`src/lib/display-words.ts` (+ test), which is site-specific: the wordmark is this site's.
+
+The LESSON is family-wide and is not written down anywhere the other repos will see it.
+`splitStega` already lives in the PORTABLE `src/lib/preview-stega.ts`, so nothing needs
+porting, only saying: **clean a display string before any `split`, `length`, `slice`,
+truncation or word count.** To close: add it to the starter's preview section in
+CLAUDE.md next to the existing "never compare a stega-encoded string" rule, and note it
+on the preview PORTS card. Vault note: `_vault/gotchas/stega-run-contains-whitespace.md`.
