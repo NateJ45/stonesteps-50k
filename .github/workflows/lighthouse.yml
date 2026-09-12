@@ -6,11 +6,18 @@
 name: Lighthouse
 
 on:
-  push:
-    branches: [main, staging]
+  # NOT ON PUSH, since 2026-09-12. This audit runs six URLs three times each,
+  # which made it the most expensive workflow in the repo by a distance: 507 of
+  # roughly 1,360 Actions minutes over the first five days of September, on a
+  # private repo with a 2,000 minute monthly allowance. The signal is worth
+  # having and almost never worth having per commit, so it runs weekly against
+  # main, on any pull request, and on demand.
+  #
+  # Dispatchable so a staging tip can be re-audited without pushing an empty
+  # commit, which is also now the way to audit a specific main commit.
+  schedule:
+    - cron: '30 8 * * 1' # Mondays 08:30 UTC
   pull_request:
-  # Dispatchable so a staging tip can be re-audited on demand, without pushing
-  # an empty commit.
   workflow_dispatch:
 
 # A newer push to the same branch obsoletes the in-flight run; cancel it
