@@ -1470,8 +1470,14 @@ body::before {
   /* linear here because the shape of each segment is set inside the keyframes
      above: one easing across the whole thing would soften the landing, which is
      the only frame that matters. */
-  animation: word-stamp 620ms linear both;
-  animation-delay: calc(var(--wi, 0) * 170ms);
+  animation: word-stamp 420ms linear both;
+  /* 100ms, not 170. THE STAMP DECIDES THE LCP: each word starts at opacity 0,
+     so the wordmark is not painted until its own delay has elapsed, and the
+     wordmark is the largest element on the page. At 170ms apart over 620ms the
+     last word landed 960ms after first render and Lighthouse measured LCP at
+     4572ms against a 4500 budget. 100ms over 420ms lands it in 620ms and keeps
+     the strike reading as three separate impacts. */
+  animation-delay: calc(var(--wi, 0) * 100ms);
 }
 
 /* A press with no press. The words are simply there, at full size, in their
@@ -2212,11 +2218,11 @@ body::before {
 }
 
 /* It lands like the words do: dropped in oversized and out of square, then
-   struck. Delayed past the last word of the wordmark (three words at 170ms
-   apart, 620ms each), so the claim is the last thing to hit the page. */
+   struck. Delayed past the last word of the wordmark (three words at 100ms
+   apart, 420ms each), so the claim is the last thing to hit the page. */
 @media (prefers-reduced-motion: no-preference) {
   .claim-stamp {
-    animation: claim-strike 520ms cubic-bezier(0.5, 0, 0.4, 1) 900ms both;
+    animation: claim-strike 520ms cubic-bezier(0.5, 0, 0.4, 1) 640ms both;
   }
 }
 @keyframes claim-strike {

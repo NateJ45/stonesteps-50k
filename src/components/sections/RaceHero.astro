@@ -122,9 +122,13 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
       which is the correct markup for an image that adds nothing a caption has
       not already said.
 
-      Priority is explicit for the same reason. The first photograph is a real
-      LCP candidate and asks for the bandwidth; the others are behind it in the
-      same paint and would otherwise compete with it for the connection. */
+      Priority is explicit for the same reason, and ONLY THE FIRST SLIDE IS
+      EAGER. All of them used to be, which put three full-size photographs on
+      the wire at once: measured under Lighthouse's throttling they finished at
+      6.6s, 6.9s and 7.4s and held up the first paint behind them. The rest are
+      lazy now. They are in the viewport, so they still start immediately after
+      load, and the cross-fade does not reach the second slide for seven
+      seconds. */
     slides.length > 0 && (
       <figure
         class:list={[
@@ -140,7 +144,7 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
             width={1400}
             sizes="(min-width: 1024px) 48vw, 100vw"
             alt={i === 0 ? (img.alt ?? '') : ''}
-            loading="eager"
+            loading={i === 0 ? 'eager' : 'lazy'}
             fetchpriority={i === 0 ? 'high' : 'low'}
           />
         ))}
