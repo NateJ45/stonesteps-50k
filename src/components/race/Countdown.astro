@@ -30,6 +30,43 @@ const targetDate = target ? new Date(target) : null;
 const valid = targetDate && !Number.isNaN(targetDate.getTime());
 const ms = valid ? Math.max(0, targetDate.getTime() - Date.now()) : 0;
 
+/**
+ * THREE STATES, NOT ONE. Counting down is the clock's job until the gun; then
+ * it has two more things to say. From the gun until the end of race day it
+ * reads RACE TIME!, because a clock showing 00:00:00:00 all afternoon says the
+ * site has stopped. From the next morning it reads TBC, because the only true
+ * thing about the next running is that it has not been announced, and this is
+ * the line nobody would remember to take down.
+ *
+ * "End of race day" is midnight in Cincinnati, worked out from the gun's own
+ * wall-clock hour, so an 8:00 start turns over sixteen hours later whatever
+ * timezone the visitor or the build machine is in. The client script below
+ * makes the same call every second, so a page built the week before still
+ * turns over on the day.
+ */
+const RACE_TZ = 'America/New_York';
+function dayEndOf(t: Date): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: RACE_TZ,
+    hour: 'numeric',
+    minute: 'numeric',
+    hourCycle: 'h23',
+  }).formatToParts(t);
+  const h = Number(parts.find((p) => p.type === 'hour')?.value ?? 0);
+  const m = Number(parts.find((p) => p.type === 'minute')?.value ?? 0);
+  return t.getTime() + (24 * 60 - (h * 60 + m)) * 60 * 1000;
+}
+type Phase = 'count' | 'race' | 'done';
+const phase: Phase = !valid
+  ? 'count'
+  : Date.now() < targetDate.getTime()
+    ? 'count'
+    : Date.now() < dayEndOf(targetDate)
+      ? 'race'
+      : 'done';
+const TITLES: Record<Phase, string> = { count: label, race: 'Today', done: 'Next running' };
+const MESSAGES: Record<Phase, string> = { count: '', race: 'Race time!', done: 'TBC' };
+
 const totalSeconds = Math.floor(ms / 1000);
 const units = [
   { key: 'days', value: Math.floor(totalSeconds / 86400), lbl: 'days' },
@@ -41,7 +78,13 @@ const units = [
   return { ...u, text, ghost: '8'.repeat(text.length) };
 });
 
-const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set';
+const srText = !valid
+  ? 'Race date not set'
+  : phase === 'count'
+    ? `${totalSeconds} seconds remaining`
+    : phase === 'race'
+      ? 'Race day. The race is under way.'
+      : 'Next running to be confirmed.';
 ---
 
 {
@@ -50,6 +93,12 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
       <div
         class="clock inline-block rounded-[10px] border-2 border-black px-[1.15rem] pt-[0.9rem] pb-3"
         data-target={target}
+        data-phase={phase}
+        data-title-count={label}
+        data-title-race={TITLES.race}
+        data-title-done={TITLES.done}
+        data-msg-race={MESSAGES.race}
+        data-msg-done={MESSAGES.done}
         role="timer"
         aria-label={srText}
       >
@@ -61,8 +110,15 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
           back over the line. A label whose contrast depends on where the
           mud happens to fall is not a label with contrast. On the plate's own
           face it is cream on near-black and the mud cannot reach it. */}
-        <p class="clock__title font-mono text-[0.6875rem] tracking-[0.22em] uppercase">{label}</p>
-        <div class="flex items-end gap-2">
+        <p class="clock__title font-mono text-[0.6875rem] tracking-[0.22em] uppercase">
+          {TITLES[phase]}
+        </p>
+        {/* The two messages, lit in the same LED as the digits. Hidden while
+            counting; the digits row is hidden while one of these shows. */}
+        <p class="clock__msg tabular" data-msg hidden={phase === 'count'}>
+          {MESSAGES[phase]}
+        </p>
+        <div class="flex items-end gap-2" data-digits hidden={phase !== 'count'}>
           {units.map((u, i) => (
             <>
               {i > 0 && (
@@ -129,6 +185,23 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
     text-shadow:
       0 0 6px rgb(255 59 31 / 0.5),
       0 0 18px rgb(255 59 31 / 0.22);
+  }
+  /* RACE TIME! and TBC, in the digits' own light. Slightly smaller than the
+     digits so a nine-character message sits inside the same housing. */
+  .clock__msg {
+    font-weight: 700;
+    font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--led);
+    text-shadow:
+      0 0 6px rgb(255 59 31 / 0.5),
+      0 0 18px rgb(255 59 31 / 0.22);
+    padding: 0.35rem 0 0.55rem;
+  }
+  .clock__msg[hidden] {
+    display: none;
   }
   .clock__title {
     /* Cream at 85% on the plate's #0d0b09: about 15:1, and the mud has no
@@ -222,7 +295,53 @@ const srText = valid ? `${totalSeconds} seconds remaining` : 'Race date not set'
       seconds: clock.querySelector('[data-unit="seconds"]'),
     };
 
+    // See the note on the three states in the frontmatter. Same arithmetic,
+    // run on every tick, so the turnover happens on a page that has been
+    // open since the night before.
+    const dayEnd = (() => {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York',
+        hour: 'numeric',
+        minute: 'numeric',
+        hourCycle: 'h23',
+      }).formatToParts(target);
+      const h = Number(parts.find((p) => p.type === 'hour')?.value ?? 0);
+      const m = Number(parts.find((p) => p.type === 'minute')?.value ?? 0);
+      return target.getTime() + (24 * 60 - (h * 60 + m)) * 60 * 1000;
+    })();
+    const title = clock.querySelector<HTMLElement>('.clock__title');
+    const msg = clock.querySelector<HTMLElement>('[data-msg]');
+    const digits = clock.querySelector<HTMLElement>('[data-digits]');
+    const setPhase = (phase: 'count' | 'race' | 'done') => {
+      if (clock.dataset.phase === phase) return;
+      clock.dataset.phase = phase;
+      if (title)
+        title.textContent = clock.dataset[`title${phase[0].toUpperCase()}${phase.slice(1)}`] ?? '';
+      if (msg) {
+        msg.textContent =
+          phase === 'count'
+            ? ''
+            : (clock.dataset[`msg${phase[0].toUpperCase()}${phase.slice(1)}`] ?? '');
+        msg.hidden = phase === 'count';
+      }
+      if (digits) digits.hidden = phase !== 'count';
+      clock.setAttribute(
+        'aria-label',
+        phase === 'race'
+          ? 'Race day. The race is under way.'
+          : phase === 'done'
+            ? 'Next running to be confirmed.'
+            : '',
+      );
+    };
+
     const tick = () => {
+      const now = Date.now();
+      if (now >= target.getTime()) {
+        setPhase(now < dayEnd ? 'race' : 'done');
+        return;
+      }
+      setPhase('count');
       const total = Math.max(0, Math.floor((target.getTime() - Date.now()) / 1000));
       const parts = {
         days: Math.floor(total / 86400),
