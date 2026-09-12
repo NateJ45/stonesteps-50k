@@ -18,6 +18,11 @@ export const RESERVED_SLUGS = new Set([
   'runners',
   // The fixed-data wall the visual-regression suite shoots.
   'styleguide',
+  // Mounted routes rather than pages, but a custom page at any of these would
+  // still shadow one or be shadowed by it.
+  'studio',
+  'preview',
+  'api',
 ]);
 
 /** Returns true when a slug collides with a built-in route. */

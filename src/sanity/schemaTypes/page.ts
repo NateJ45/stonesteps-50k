@@ -7,40 +7,26 @@
 // (editors make as many as they like), so it is deliberately kept out of the
 // SINGLETON_TYPES sets in sanity.config.ts and structure.ts.
 //
-// Keep RESERVED_SLUGS in sync with src/lib/reservedSlugs.ts (both lists guard
-// the same invariant; the Studio list shows a validation error, the Astro list
-// filters getStaticPaths).
+// RESERVED_SLUGS comes from src/lib/reservedSlugs.ts, the same list that
+// filters getStaticPaths in [slug].astro; the Studio shows it as a validation
+// error and the site never builds a colliding page.
 
 import { defineType, defineField } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons';
 import { SECTION_TYPES, sectionArrayOptions } from './sections';
+import { RESERVED_SLUGS } from '../../lib/reservedSlugs';
 import { PUBLISH_AT_GROUP, publishAtField } from './_publishAt';
 import { seoFields } from './_seoFields';
 
-// Every built-in route segment. A custom page slug may not match any of these.
-// Keep in sync with src/lib/reservedSlugs.ts.
-const RESERVED_SLUGS = new Set([
-  'about',
-  'services',
-  'process',
-  'portfolio',
-  'faq',
-  'contact',
-  'journal',
-  'e-design',
-  'shop',
-  'gift-certificates',
-  'quiz',
-  'calculator',
-  'resources',
-  'guides',
-  'press',
-  'privacy',
-  '404',
-  'sitemap-index.xml',
-  'og',
-  '_astro',
-]);
+// ONE LIST, IMPORTED. This file used to carry its own copy of the reserved
+// routes with a comment asking that the two be kept in sync, and they were not:
+// src/lib/reservedSlugs.ts was trimmed to this site's real routes while this
+// copy still held the starter's (about, services, faq, contact, journal...).
+// The Contact page is a `page` document here, so its own address failed
+// validation with "already used by a built-in page" and it could not be
+// published (2026-09-12). A list that has to be kept in sync by hand is two
+// lists; there is one now, and src/lib/reservedSlugs.test.ts fails if this
+// file ever grows a second.
 
 export const page = defineType({
   name: 'page',

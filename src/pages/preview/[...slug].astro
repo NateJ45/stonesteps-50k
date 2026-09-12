@@ -204,7 +204,13 @@ const label = doc.title || doc.seoTitle || heroHeadline || slug || 'Home';
 const title = `${label} - Preview`;
 ---
 
-<PreviewLayout {title} {draftMode} {pageId}>
+{
+  /* THE SAME CALL index.astro MAKES. Only the home page runs its content up
+    behind a transparent header; every other route uses the solid one. Keyed off
+    the document type rather than the slug so a renamed address cannot silently
+    change how the preview is framed. */
+}
+<PreviewLayout {title} {draftMode} {pageId} headerOverlay={doc._type === 'homePage'}>
   {
     missing && (
       <div class="mx-auto max-w-3xl px-4 py-6">

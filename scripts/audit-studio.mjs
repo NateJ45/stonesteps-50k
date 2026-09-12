@@ -22,7 +22,11 @@
 //      A stray key is not cosmetic; it is a loaded gun in an editor's form.
 //      Two seeded buttons carried a `href` that ctaBlock has never had.
 //
-//   4. A required field that is blank in the live document. Some of those are
+//   4. A page document whose address is on the reserved-route list, so it
+//      fails validation with "already used by a built-in page" and cannot be
+//      published. The Contact page did, for a list copied from the starter.
+//
+//   5. A required field that is blank in the live document. Some of those are
 //      real jobs for the editor and some mean the requirement is wrong, but
 //      either way nobody can publish until it is settled.
 //
@@ -333,7 +337,26 @@ if (hits.length) {
   console.log('  none');
 }
 
-section('4. Required fields left blank in the live data');
+section('4. Page addresses that collide with a reserved route');
+{
+  const src = readFileSync(resolve(root, 'src/lib/reservedSlugs.ts'), 'utf8');
+  const literal = src.match(/new Set\(\[([\s\S]*?)\]\)/)?.[1] ?? '';
+  const reserved = new Set([...literal.matchAll(/'([^']+)'/g)].map((m) => m[1]));
+  const pages = await client.fetch(`*[_type == "page"]{_id, "slug": slug.current}`);
+  let hits = 0;
+  for (const pg of pages) {
+    if (pg.slug && reserved.has(pg.slug)) {
+      hits++;
+      console.log(
+        `  ${pg._id} uses "${pg.slug}", which reservedSlugs.ts reserves: it cannot be published`,
+      );
+    }
+  }
+  if (!hits) console.log('  none');
+  problems += hits;
+}
+
+section('5. Required fields left blank in the live data');
 let blanks = 0;
 for (const [type, fields] of requiredFields()) {
   if (!docTypes.includes(type)) continue;
