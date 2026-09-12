@@ -72,6 +72,10 @@ const cta = (label, href) => {
   };
 };
 const REGISTER = 'https://runsignup.com/Race/OH/Cincinnati/StoneSteps50KTrailRun';
+// A Google Maps SEARCH for the start area, not a pin: a search URL cannot go
+// stale the way hand-typed coordinates can, and the park is well indexed.
+const MAPS_URL =
+  'https://www.google.com/maps/search/?api=1&query=Mt.+Airy+Forest+Area+13+The+Oval+Cincinnati+OH';
 
 // ── Photographs ───────────────────────────────────────────────────────────
 // Uploaded by scripts/upload-images.mjs and referenced by asset id, so a
@@ -343,15 +347,6 @@ docs.push({
             'The Oval, Area 13, inside Mt. Airy Forest. Both distances start and finish in ' +
             'the same place. The 50K goes at 8:00 am, the 27K at 8:30.',
           confirmed: true,
-        },
-        {
-          _type: 'loopNote',
-          _key: key(),
-          title: 'Cutoff',
-          body:
-            'The course closes at about 4:30 pm. How that is enforced loop by loop is not ' +
-            'published anywhere.',
-          confirmed: false,
         },
       ],
       // The loop distances are the race's own, recovered from the split
@@ -768,6 +763,7 @@ docs.push({
     { _type: 'navLink', _key: key(), label: 'Course', linkType: 'internal', href: '/course' },
     { _type: 'navLink', _key: key(), label: 'Records', linkType: 'internal', href: '/records' },
     { _type: 'navLink', _key: key(), label: 'Results', linkType: 'internal', href: '/results' },
+    { _type: 'navLink', _key: key(), label: 'Contact', linkType: 'internal', href: '/contact' },
     // The RunSignUp link used to sit here too, also labelled "Results", which
     // put the word in the header twice, side by side. The archive at /results is
     // the better destination and RunSignUp is still one click away in the
@@ -816,10 +812,15 @@ docs.push({
       _type: 'footerColumn',
       _key: key(),
       title: 'Where',
+      // ONE link, out to the map. Three lines each pointing at /course read as
+      // three separate destinations for one place.
       links: [
-        { _type: 'footerLink', _key: key(), label: 'Mt. Airy Forest', href: '/course' },
-        { _type: 'footerLink', _key: key(), label: 'The Oval, Area 13', href: '/course' },
-        { _type: 'footerLink', _key: key(), label: 'Cincinnati, Ohio', href: '/course' },
+        {
+          _type: 'footerLink',
+          _key: key(),
+          label: 'Mt. Airy Forest, The Oval (Area 13), Cincinnati, Ohio',
+          href: MAPS_URL,
+        },
       ],
     },
   ],

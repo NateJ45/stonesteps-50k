@@ -1242,14 +1242,18 @@ body::before {
      TOKENS are fine and the dilution happens in a utility class. Only the axe
      sweep caught it. This value is bark at 70%, resolved to a literal, which
      measures 6.08:1 on the plate.
-     Light theme: cream softened toward the charcoal stock, 6.36:1, the same
-     footing the dark theme's 6.08:1 gives on cream. */
-  --plate-ink-soft: #c4b698;
+     Light theme: cream softened toward the charcoal stock. Was 6.36:1, the
+     same footing the dark theme's 6.08:1 gives on cream; lifted to 7.53:1 on
+     2026-09-11 alongside --plate-accent, because the punch card's soft rows
+     read as faded rather than secondary on the charcoal plate. */
+  --plate-ink-soft: #d3c6aa;
   /* The ACCENT on a plate: the rust family, but a plate-stock-aware member of
      it. Brand rust #a83c26 measures 5.35:1 on the cream stock and 2.02:1 on the
      charcoal one, so there is no single value that serves both and it has to be
-     a token. Light theme, on charcoal: a warm clay at 4.86:1. */
-  --plate-accent: #e08a6b;
+     a token. Light theme, on charcoal: a warm clay. It sat at #e08a6b (4.86:1)
+     until 2026-09-11, when the "Long" labels on the punch card were called
+     hard to read; lifted to 6.75:1 and still clay, not gold. */
+  --plate-accent: #f2ad8c;
   /* The mud thrown behind the home headline. Bark on the cream page, at an
      opacity low enough that it reads as a stain in the paper rather than as a
      graphic sitting on top of it. */
@@ -1355,6 +1359,23 @@ body::before {
    carry no shadow at all: there was nowhere for that treatment to go. */
 :root {
   --display-echo: #a83c26;
+}
+
+/* THE HEADER'S MEASURED HEIGHT, in one place. Three things have to agree with
+   it: the hero band pads past it, the hero's mud escapes upward over it by
+   exactly it, and the records page's sticky distance chip pins beneath it.
+   They used to carry the numbers by hand, and the day the logo grew (2026-09-11)
+   all three went stale at once: the mud stopped short of the top of the window
+   and showed a hard edge across the header. Measure the header, write it here,
+   nowhere else. The pair is the header's actual rendered height with the
+   sign plate at h-[4.5rem] on phones and h-24 from lg. */
+:root {
+  --header-h: 119px;
+}
+@media (min-width: 64rem) {
+  :root {
+    --header-h: 166px;
+  }
 }
 
 .display-echo {
@@ -1497,7 +1518,7 @@ body::before {
    hard line across the table. */
 .records-tabs {
   position: sticky;
-  top: calc(92px + 0.5rem);
+  top: calc(var(--header-h) + 0.5rem);
   z-index: 5;
   padding-block: 0.75rem;
   background: linear-gradient(
@@ -1510,7 +1531,7 @@ body::before {
 
 @media (min-width: 64rem) {
   .records-tabs {
-    top: calc(135px + 0.5rem);
+    top: calc(var(--header-h) + 0.5rem);
   }
 }
 
@@ -1629,8 +1650,8 @@ body::before {
   transform: translateX(4px) skewX(calc(-1 * var(--plate-skew)));
 }
 
-/* The footnote marker on a record the published source reports two ways. A
-   circled question mark reads as a footnote; a bare ? reads as a typo. */
+/* The footnote marker on a results row: a circled letter reads as a footnote
+   where a bare one reads as a typo. Used by the trekker T on the year pages. */
 .source-flag {
   display: inline-grid;
   place-items: center;
@@ -2028,7 +2049,7 @@ body::before {
 /* The band the header sits over has to make room for it, or the hero copy
    starts underneath the nav. These heights are the header's, measured. */
 .hero-band {
-  padding-top: calc(92px + 2rem);
+  padding-top: calc(var(--header-h) + 2rem);
   /* CLIP, NOT HIDDEN, AND ONLY ON ONE AXIS. The mud's arrival scales each throw
      slightly past its resting size, which puts the layer ~50px past the
      viewport for the length of the animation and widens the document. The
@@ -2049,7 +2070,7 @@ body::before {
 
 @media (min-width: 64rem) {
   .hero-band {
-    padding-top: calc(135px + 2.5rem);
+    padding-top: calc(var(--header-h) + 2.5rem);
   }
 }
 
@@ -2293,7 +2314,7 @@ body::before {
    the header in paint order, and that is fine precisely because the header has
    no background to hide it. */
 .hero-mud {
-  --mud-top: -92px;
+  --mud-top: calc(-1 * var(--header-h));
   /* ABOVE the photograph (z-index 0), below the copy (z-index 10). The whole
      reason the photo is not a scrimmed background is so the spatter can run
      across the join between picture and page. */
@@ -2302,7 +2323,7 @@ body::before {
 
 @media (min-width: 64rem) {
   .hero-mud {
-    --mud-top: -135px;
+    --mud-top: calc(-1 * var(--header-h));
   }
 }
 

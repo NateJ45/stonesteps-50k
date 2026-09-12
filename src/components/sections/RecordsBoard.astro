@@ -83,19 +83,6 @@ function boardFor(slug: string) {
   });
 }
 
-// COVERAGE, COMPUTED. This used to be a sentence claiming the archive started
-// in 2017, which stopped being true the moment the recovered years landed. Any
-// statement about what the data contains should be read OFF the data.
-const allYears = results.map((r) => r.year).filter(Boolean) as number[];
-const firstYear = allYears.length ? Math.min(...allYears) : null;
-const lastYear = allYears.length ? Math.max(...allYears) : null;
-const missingYears =
-  firstYear && lastYear
-    ? Array.from({ length: lastYear - firstYear + 1 }, (_, i) => firstYear + i).filter(
-        (y) => !allYears.includes(y),
-      )
-    : [];
-
 const boards = distances
   .filter((d) => d.slug)
   .map((d) => ({ ...d, slug: d.slug as string, genders: boardFor(d.slug as string) }));
@@ -238,14 +225,6 @@ const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
                                 ) : (
                                   <span class="text-muted-foreground">Unclaimed</span>
                                 )}
-                                {row.sourceNote && (
-                                  <abbr
-                                    class="source-flag text-muted-foreground"
-                                    title={row.sourceNote}
-                                  >
-                                    ?
-                                  </abbr>
-                                )}
                               </td>
                               <td class="py-2 text-right whitespace-nowrap">{row.year ?? ''}</td>
                               <td class="rec-time tabular py-2 text-right font-bold whitespace-nowrap">
@@ -334,37 +313,19 @@ const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
     }
 
     {
-      /* Saying what the archive does NOT contain matters more than saying what it
-        does. The results here start in 2017 and skip three years; the records
-        above them reach back to 2007 from the race's own published tables. A
-        visitor looking for 2013 needs to know where it actually is. */
+      /* Only the pointer survives. The paragraph that used to sit here described
+        the archive's coverage and gaps and explained the ? marker on records
+        the race's own tables report two ways; both were cut on 2026-09-11 as
+        more caveat than a records board needs. The one thing a visitor still
+        has to be told is where the rest of the results are. */
+      race?.resultsUrl && (
+        <p class="mt-10 max-w-[62ch] text-sm text-muted-foreground">
+          <a class="text-link underline" href={race.resultsUrl} rel="noopener">
+            The complete results archive lives on RunSignUp.
+          </a>
+        </p>
+      )
     }
-    <p class="mt-10 max-w-[62ch] text-sm text-muted-foreground">
-      Every name links to that runner's full history here. Finishing times on file cover{' '}
-      {firstYear} to {lastYear}{
-        missingYears.length > 0 && <>, with no surviving results for {missingYears.join(', ')}</>
-      }. The 27K is only on file from 2015: earlier years were timed elsewhere and those results are
-      lost. A few records are carried from the race's own published tables, where the finishing
-      times behind them did not survive.
-      {
-        race?.resultsUrl && (
-          <>
-            {' '}
-            <a class="text-link underline" href={race.resultsUrl} rel="noopener">
-              The complete results archive lives on RunSignUp.
-            </a>
-          </>
-        )
-      }
-      <br />
-      <span class="text-xs">
-        A <abbr
-          class="text-primary"
-          title="Marks a value the published source records inconsistently">?</abbr
-        >
-        marks a record the race's own tables report two different ways.
-      </span>
-    </p>
   </div>
 </section>
 

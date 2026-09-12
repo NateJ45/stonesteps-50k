@@ -51,8 +51,6 @@ export async function getStaticPaths() {
 const { edition, newer, older } = Astro.props;
 const siteSettings = await getSiteSettings().catch(() => null);
 
-/** Gun time until the race started publishing chip times in 2024. */
-const anyGun = edition.distances.some((d) => d.rows.some((r) => r.timeSource === 'gun'));
 const anyTrekker = edition.distances.some((d) => d.rows.some((r) => r.trekker));
 
 const title = `${edition.year} results | Stone Steps 50K`;
@@ -172,14 +170,6 @@ const description = `Every finisher of the ${edition.year} Stone Steps 50K and 2
                       <td class="tabular py-2 text-right text-muted-foreground">{row.age ?? ''}</td>
                       <td class="tabular py-2 text-right font-bold whitespace-nowrap">
                         {formatRaceTime(row.timeSeconds)}
-                        {row.timeSource === 'gun' && (
-                          <abbr
-                            class="source-flag text-muted-foreground"
-                            title="Gun time, not chip time"
-                          >
-                            g
-                          </abbr>
-                        )}
                       </td>
                     </tr>
                   ))}
@@ -191,26 +181,15 @@ const description = `Every finisher of the ${edition.year} Stone Steps 50K and 2
       }
 
       {
-        (anyGun || anyTrekker) && (
+        anyTrekker && (
           <ul class="mt-10 grid max-w-[62ch] gap-2 border-t border-border pt-6 text-sm text-muted-foreground">
-            {anyGun && (
-              <li>
-                <span class="source-flag" aria-hidden="true">
-                  g
-                </span>{' '}
-                Gun time. The race did not publish chip times until 2024, so these are the clock
-                from the start, not from crossing the mat.
-              </li>
-            )}
-            {anyTrekker && (
-              <li>
-                <span class="source-flag" aria-hidden="true">
-                  T
-                </span>{' '}
-                Trekker. Took the optional early start, which the race makes ineligible for age
-                group and overall awards. The time is real and counts nowhere in the records.
-              </li>
-            )}
+            <li>
+              <span class="source-flag" aria-hidden="true">
+                T
+              </span>{' '}
+              Trekker. Took the optional early start, which the race makes ineligible for age group
+              and overall awards. The time is real and counts nowhere in the records.
+            </li>
           </ul>
         )
       }
