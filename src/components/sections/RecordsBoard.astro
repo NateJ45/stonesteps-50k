@@ -223,6 +223,12 @@ const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
                                   ) : (
                                     row.athlete
                                   )
+                                ) : row.timeSeconds ? (
+                                  /* A time with no name is a record whose holder is
+                                    not on file, which is a different thing from a
+                                    bracket nobody has run. It used to say
+                                    "Unclaimed" next to a year and a time. */
+                                  <span class="text-muted-foreground">Name not on file</span>
                                 ) : (
                                   <span class="text-muted-foreground">Unclaimed</span>
                                 )}

@@ -1442,7 +1442,20 @@ body::before {
    single light rebound after it. */
 @keyframes word-stamp {
   0% {
-    opacity: 0;
+    /* NOT ZERO, AND THAT IS THE LCP (2026-09-12). Lighthouse measured the home
+       page's largest paint at 4.7s on every run, and the element was always
+       the third word of this wordmark. Fonts were in by 340ms and nothing else
+       was loading: the delay was this keyframe. A word at opacity 0 is not a
+       paint, so the largest element on the page did not exist until its own
+       press had landed, and under the throttled profile that gap grew to
+       three seconds after first paint.
+
+       The press is now visible from its first frame: the word is already on
+       the page, huge, soft, and a third of the way to ink, and comes down into
+       focus. Which is what a press looks like anyway; the ghost of the type
+       above the paper was always part of the picture. The words paint at first
+       paint, so the LCP is the FCP. */
+    opacity: 0.3;
     scale: 2.4;
     translate: 0 -0.1em;
     filter: blur(6px);

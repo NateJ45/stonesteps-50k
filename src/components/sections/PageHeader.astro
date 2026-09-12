@@ -120,6 +120,11 @@ const hasImage = Boolean(image?.asset);
             <span class="subject-stage__pool" aria-hidden="true">
               <Topo seed={5} lines={9} />
             </span>
+            {/* THIS IS THE LCP ELEMENT on every page with a header photograph,
+              and eager alone is not enough: Lighthouse measured 1.2s of "load
+              delay" on the course page, the gap between the HTML arriving and
+              the browser deciding to fetch this image at all. `fetchpriority`
+              puts it in the first request wave. On both variants below. */}
             <SanityImage
               source={image}
               width={1000}
@@ -127,6 +132,7 @@ const hasImage = Boolean(image?.asset);
               quality={80}
               alt={image?.alt ?? ''}
               loading="eager"
+              fetchpriority="high"
               class="photo-cutout photo-cutout--soft h-auto w-full max-w-[30rem]"
             />
             <MudField field="director-fore" class="subject-stage__mud" />
@@ -139,6 +145,7 @@ const hasImage = Boolean(image?.asset);
               sizes="(min-width: 1024px) 42vw, 100vw"
               alt={image?.alt ?? ''}
               loading="eager"
+              fetchpriority="high"
               class="w-full"
             />
           </figure>
