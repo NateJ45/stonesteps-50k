@@ -168,3 +168,60 @@ export function courseRecord(rows: RecordRow[]): RecordRow | null {
   if (held.length === 0) return null;
   return held.reduce((a, b) => ((b.timeSeconds as number) < (a.timeSeconds as number) ? b : a));
 }
+
+/** A row of the fastest-on-file list: a result, or a transcribed record. */
+export type FastestRow = {
+  athlete?: { name?: string | null; slug?: string | null } | null;
+  year?: number | null;
+  timeSeconds?: number | null;
+  /** True when the row came from the transcribed tables, not the archive. */
+  historical?: boolean;
+};
+
+/**
+ * The fastest N performances on file for one distance and gender.
+ *
+ * WHY THE TRANSCRIBED RECORDS ARE IN HERE (2026-09-12). They were not, on the
+ * argument that a transcribed record is a single best mark rather than a ranked
+ * field, so ranking them implies an ordering the historical rows cannot
+ * support. That argument is tidy and the page it produced was wrong: the 27K
+ * board named a course record of 1:58:36 by Brian List in 2010 and then listed
+ * the fastest ten starting at 1:59:32 with Brian List nowhere on it. Nathan
+ * read that as an error, which is the only sensible way to read it.
+ *
+ * The cause is the archive's remaining gap: the 27K only has results from 2015,
+ * and five of its bracket records predate that, so those five runners have a
+ * record and no finish on file. The 50K has a result behind every one of its
+ * records, which is why this never showed there.
+ *
+ * DEDUPED BY TIME, not by name or year, and the reason is in the source notes
+ * on the record documents: where a record and its result both exist they
+ * routinely DISAGREE about the year, because the race's own two published
+ * tables disagreed. Katie Ruhlman's 2:28:40 is filed as 2010 on one and 2021 on
+ * the other. The time is the performance and is the only field both agree on.
+ * A result wins the tie, because it carries the runner's slug and links to
+ * their page.
+ *
+ * The cost of matching on time is that two different runners with the identical
+ * time in one distance and gender would collapse to one row. That is rare, and
+ * losing a duplicate line is a smaller error than printing a record holder who
+ * is missing from the list of the fastest.
+ */
+export function fastestOnFile(
+  results: ResultLike[],
+  historical: HistoricalLike[] = [],
+  limit = 10,
+): FastestRow[] {
+  const timed = <T extends { timeSeconds?: number | null }>(rows: T[]) =>
+    rows.filter((r) => typeof r.timeSeconds === 'number' && r.timeSeconds > 0);
+
+  const fromResults = timed(results);
+  const onFile = new Set(fromResults.map((r) => r.timeSeconds as number));
+  const fromHistorical = timed(historical)
+    .filter((h) => !onFile.has(h.timeSeconds as number))
+    .map((h) => ({ ...h, historical: true as const }));
+
+  return [...fromResults, ...fromHistorical]
+    .sort((a, b) => (a.timeSeconds as number) - (b.timeSeconds as number))
+    .slice(0, limit);
+}

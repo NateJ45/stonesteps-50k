@@ -14,6 +14,7 @@ import {
   courseRecord,
   type ResultLike,
   type HistoricalLike,
+  fastestOnFile,
 } from './age-brackets.ts';
 
 const r = (name: string, age: number, timeSeconds: number, year: number): ResultLike => ({
@@ -167,5 +168,59 @@ describe('courseRecord', () => {
 
   it('is null when nobody holds anything', () => {
     assert.equal(courseRecord(bracketRecords([])), null);
+  });
+});
+
+// ── fastestOnFile ────────────────────────────────────────────────────────
+// The gate on the contradiction Nathan found: a course record whose holder was
+// missing from the list of the fastest, because the list read results only and
+// that record predates the archive.
+describe('fastestOnFile', () => {
+  const res = (name: string, year: number, timeSeconds: number) => ({
+    athlete: { name, slug: name.toLowerCase().replace(/\s+/g, '-') },
+    year,
+    timeSeconds,
+  });
+
+  it('ranks results by time', () => {
+    const out = fastestOnFile([res('B', 2020, 200), res('A', 2019, 100)]);
+    assert.deepEqual(
+      out.map((r) => r.athlete?.name),
+      ['A', 'B'],
+    );
+  });
+
+  it('includes a transcribed record that has no result behind it', () => {
+    // Brian List's 1:58:36, in a 27K archive that starts after his year.
+    const out = fastestOnFile([res('Riddle', 2017, 7172)], [res('List', 2010, 7116)]);
+    assert.deepEqual(
+      out.map((r) => r.athlete?.name),
+      ['List', 'Riddle'],
+    );
+    assert.equal(out[0].historical, true);
+  });
+
+  it('drops a transcribed record when a result already carries that time', () => {
+    // Even when the two disagree about the YEAR, which the race's own tables do.
+    const out = fastestOnFile([res('Ruhlman', 2021, 8920)], [res('Ruhlman', 2010, 8920)]);
+    assert.equal(out.length, 1);
+    assert.equal(out[0].year, 2021);
+    assert.equal(out[0].historical, undefined);
+  });
+
+  it('ignores rows with no usable time', () => {
+    const out = fastestOnFile(
+      [res('A', 2019, 100), { athlete: { name: 'X' }, year: 2019, timeSeconds: null }],
+      [{ athlete: { name: 'Y' }, year: 2009, timeSeconds: 0 }],
+    );
+    assert.deepEqual(
+      out.map((r) => r.athlete?.name),
+      ['A'],
+    );
+  });
+
+  it('honours the limit', () => {
+    const many = Array.from({ length: 20 }, (_, i) => res(`R${i}`, 2020, 100 + i));
+    assert.equal(fastestOnFile(many, [], 10).length, 10);
   });
 });

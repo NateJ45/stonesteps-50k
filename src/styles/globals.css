@@ -2213,7 +2213,38 @@ body::before {
   border-top: 1px solid currentcolor;
   padding-top: 0.4rem;
 }
-@media (min-width: 64rem) {
+/* THE STAMP STAYS OUT OF THE FLOW AT EVERY DESKTOP WIDTH, AND MOVES INSTEAD.
+   It goes absolute at 64rem, and from there to about 1300px it used to land on
+   top of the wordmark: the copy column is 52% of the content width while the
+   wordmark is still growing on `15vw`, so "STONE" ran under the mark. Worst at
+   1040px, where it sat squarely over the E.
+
+   THE FIRST FIX WAS TO PUT IT BACK IN THE FLOW under the wordmark until 82rem,
+   and it looked right and broke something else. Everything below it moved down
+   by 134px, which carried the subhead into a part of the band where axe models
+   the hero's four stacked mud layers as a 70% veil and measured the paragraph
+   at 2.59:1. That paragraph is already the tightest on the site (the note on it
+   in RaceHero records 4.11:1 before it was set in full-strength ink), so the
+   hero's copy cannot be moved down without paying for it. Hence: same flow,
+   same height, the stamp just steps outward over the photograph's soft edge,
+   which is where it already sits at full width.
+
+   The offsets are measured, not guessed: at 64rem the wordmark needs the whole
+   column, so the stamp clears it entirely; by 82rem it is back in its designed
+   corner. */
+@media (min-width: 64rem) and (max-width: 81.999rem) {
+  .claim-stamp {
+    --claim-rotate: -5deg;
+    position: absolute;
+    top: 0.25rem;
+    /* Negative, so the mark overhangs the copy column and lands on the
+       photograph's faded left edge rather than on the type. */
+    right: -26%;
+    margin-top: 0;
+    max-width: 15.5rem;
+  }
+}
+@media (min-width: 82rem) {
   .claim-stamp {
     --claim-rotate: -7deg;
     position: absolute;

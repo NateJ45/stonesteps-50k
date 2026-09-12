@@ -35,8 +35,6 @@ const {
 // Atmosphere sits in the LEFT margin here and in the right margin on the
 // records board, so two bands on one page never mirror each other.
 const ghost = race?.atmosphere?.[0];
-
-const anyUnconfirmed = items.some((i) => i.confirmed !== true);
 ---
 
 {
@@ -60,18 +58,6 @@ const anyUnconfirmed = items.some((i) => i.confirmed !== true);
         <div class="clip mx-auto mt-14 max-w-[46rem] px-[1.1rem] pt-6 pb-[1.1rem]">
           <div class="clip__clamp" aria-hidden="true" />
           <div class="clip__sheet p-6 sm:p-8">
-            {anyUnconfirmed && (
-              <p class="provisional mb-5 rounded-md px-3 py-2 text-sm">
-                <span class="rounded-sm bg-primary px-2 py-0.5 font-mono text-[0.6875rem] tracking-[0.2em] text-primary-foreground uppercase">
-                  Not confirmed
-                </span>{' '}
-                <span class="opacity-75">
-                  The race publishes start times and the course close. The rest is still to come
-                  from the race director.
-                </span>
-              </p>
-            )}
-
             <ol class="grid gap-1">
               {items.map((item) => (
                 <li class="grid grid-cols-[6.5rem_1fr] items-baseline gap-x-4 gap-y-0.5 border-b border-black/10 py-2.5 last:border-b-0 sm:grid-cols-[6.5rem_minmax(0,1fr)_auto]">

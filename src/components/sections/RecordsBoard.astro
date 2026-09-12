@@ -25,7 +25,7 @@
 import SectionHeading from '@/components/SectionHeading.astro';
 import DataMark from '@/components/race/DataMark.astro';
 import GhostPhoto from '@/components/race/GhostPhoto.astro';
-import { bracketRecords, courseRecord, type RecordRow } from '@/lib/age-brackets';
+import { bracketRecords, courseRecord, fastestOnFile, type RecordRow } from '@/lib/age-brackets';
 import { formatRaceTime } from '@/lib/race-time';
 import type { ProjectedRecordsBoardSection } from '@/lib/pageBuilder.types';
 import { externalLinkAttrs } from '@/lib/links';
@@ -68,13 +68,13 @@ function boardFor(slug: string) {
     const brackets = bracketRecords(set, hist);
     const course = courseRecord(brackets);
 
-    // The top ten is the results archive only. A transcribed record is a single
-    // best mark, not a ranked field, so mixing them would imply an ordering the
-    // historical rows cannot support.
-    const topTen = [...set]
-      .filter((r) => typeof r.timeSeconds === 'number' && r.timeSeconds > 0)
-      .sort((a, b) => (a.timeSeconds as number) - (b.timeSeconds as number))
-      .slice(0, 10);
+    // THE TOP TEN INCLUDES THE TRANSCRIBED RECORDS. It used to be the results
+    // archive alone, on the argument that a transcribed record is one best mark
+    // rather than a ranked field. The page that produced was wrong: the 27K
+    // board named a course record of 1:58:36 by Brian List in 2010 and then
+    // listed the fastest ten starting at 1:59:32 with him nowhere on it,
+    // because the 27K archive only reaches back to 2015. See fastestOnFile.
+    const topTen = fastestOnFile(set, hist, 10);
 
     // Which bracket row holds the outright record. The mockup highlighted a
     // stored "Course" row; we derive that record, so the highlight follows it.
