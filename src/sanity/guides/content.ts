@@ -112,6 +112,11 @@ export const guides: Guide[] = [
           SITE.contactName +
           '.',
       },
+      { kind: 'h', text: 'There are two ways in, and they are the same content' },
+      {
+        kind: 'p',
+        text: 'Along the very top you will see **Structure** and **Presentation**. Structure is the filing cabinet you are looking at now. Presentation shows you the real website and lets you click the words on it. They edit the same thing, so use whichever suits the job. There is a whole guide on it below if you want the detail.',
+      },
       { kind: 'h', text: 'What is in the left menu' },
       {
         kind: 'bullets',
@@ -131,7 +136,94 @@ export const guides: Guide[] = [
           SITE.contactName +
           '. A question costs nothing; an unpicked change to the wrong thing can take a while to find.',
       },
-      { kind: 'seealso', items: ['Change the race date', 'What happens after race day'] },
+      {
+        kind: 'seealso',
+        items: [
+          'Structure and Presentation: two ways in',
+          'Change the race date',
+          'What happens after race day',
+        ],
+      },
+    ],
+  },
+
+  {
+    slug: 'structure-and-presentation',
+    category: 'Start here',
+    title: 'Structure and Presentation: two ways in',
+    icon: '🧭',
+    lead: 'The tabs along the top are two doors into the same content. Here is which one to use when.',
+    diy: 'self',
+    body: [
+      { kind: 'h', text: 'The tabs along the top' },
+      {
+        kind: 'p',
+        text: 'Across the very top of the Studio there are four words: **Structure**, **Presentation**, **Media** and **Scheduled Drafts**. They are not four sections of the website. They are four ways of looking at the same thing, and you will only ever need the first two.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          '**Structure** is the filing cabinet. Everything the website knows, listed in the menu down the left.',
+          '**Presentation** is the website itself, with the words switched on so you can click them.',
+          '**Media** is every photograph that has ever been uploaded, in one place.',
+          '**Scheduled Drafts** is for publishing something at a set time. You are unlikely to need it.',
+        ],
+      },
+      { kind: 'h', text: 'Structure: when you know what you are looking for' },
+      {
+        kind: 'p',
+        text: 'Structure is the one you land on. The menu on the left is a filing cabinet: `This year’s race`, `Pages`, `Content`, `Site setup`. You open a drawer, you open the thing inside it, you edit the boxes, you publish.',
+      },
+      {
+        kind: 'p',
+        text: 'Use it when you already know the name of the thing you want. The race date, the entry fees, a sponsor, the schedule. It is also the only place some things exist at all, because they are not on any one page: results, runners, records and the site settings all live here and nowhere else.',
+      },
+      { kind: 'h', text: 'Presentation: when you can see the thing you want to change' },
+      {
+        kind: 'p',
+        text: 'Presentation shows you the real website in the middle of the screen, the list of pages down the left, and the boxes for whatever you have selected down the right. It is the one to reach for when you can picture the sentence you want to fix but could not say what it is called.',
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Click `Presentation` at the top.',
+          'Pick a page from the list on the left.',
+          'Make sure the `Edit` switch in the toolbar is on. It is on by default.',
+          'Click the words on the page you want to change. The boxes for them open on the right.',
+          'Type. The page redraws as you go.',
+          'Publish, the same as anywhere else.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'The Edit switch changes what a click does.',
+        text: 'With `Edit` **on**, clicking something on the page selects it so you can edit it. With `Edit` **off**, the page behaves like the real website: links work and you can walk around it. Flick it off when you want to check that a button goes where it should.',
+      },
+      { kind: 'h', text: 'They are the same content' },
+      {
+        kind: 'callout',
+        tone: 'positive',
+        title: 'You cannot get them out of step.',
+        text: 'There is one copy of everything. A change you make in Presentation is already made in Structure, and the other way round. Publish means the same thing in both. Pick whichever one suits the job in front of you and switch between them as often as you like.',
+      },
+      { kind: 'h', text: 'Two things that catch people out' },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'Presentation shows your draft, not the live website.',
+        text: 'The yellow strip at the top of the frame says `Draft preview` for a reason. What you are looking at includes your unpublished changes, so it is what the website WILL look like, not what a runner sees right now. To see the real thing, use the small open-in-a-new-tab button at the right of the toolbar.',
+      },
+      {
+        kind: 'callout',
+        tone: 'default',
+        title: 'The page list only lists pages.',
+        text: 'Results, runners, sponsors, the schedule and the settings are not pages, so they are not in that list. If you cannot find something in Presentation, it is almost certainly in Structure instead.',
+      },
+      {
+        kind: 'seealso',
+        items: ['Start here: how this all works', 'Change the words on a page'],
+      },
     ],
   },
 
