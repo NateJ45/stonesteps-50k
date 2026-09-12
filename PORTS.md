@@ -3053,6 +3053,16 @@ are pure: no DOM, no Sanity client, no repo names. `preview-morph` and
 (`MorphElement`, `TextLike`) precisely so they can be tested under `node:test`,
 which has no DOM. 110 assertions came with them; the suites ported verbatim.
 
+**preview-navigation.ts, 2026-09-12 (stonesteps-50k):** gained `toPreviewPath`. The
+bounce machine compares with strict equality, and on a DEPLOYED Studio
+`params.preview` is the absolute url with `?sanity-preview-perspective=drafts` on the
+end, while every row href is root-relative. So the target was never sighted, the
+bounce was waited out instead of answered, and the two-clicks bug this file exists to
+remove was back, only on deployed Studios. The navigator now runs `params.preview`
+through `toPreviewPath` before anything compares it, and the test file carries the
+absolute-url timeline that would have caught it. Any repo carrying this file should
+take both the helper and the call site (`PreviewNavigator.tsx`, `const current`).
+
 **Left per-repo (adapted, no marker):** `VisualEditingOverlay.tsx` (the scheduler
 loop, the morph and fast-path branch, `noteInstantChange`, the bfcache
 pagehide/pageshow handling), `overlay/useInstantText.ts`, `overlay/timing.ts`,
