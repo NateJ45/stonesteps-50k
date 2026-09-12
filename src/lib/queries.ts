@@ -27,6 +27,43 @@ export const CTA_PROJECTION = `{
 //
 // Parameterized by field name so it serves both `pageBuilder` (custom pages)
 // and `additionalSections` (the flexible append zone on core pages).
+/**
+ * THE RESULTS ARCHIVE, FETCHED ONCE PER PAGE.
+ *
+ * The records board and the dynasties band both need every finish on file, and
+ * both used to carry their own `*[_type == "raceResult"]` inside the
+ * `pageBuilder[]` projection. GROQ evaluates a sub-query inside an array
+ * projection once PER ITEM, so an eleven-section page ran that scan, with its
+ * per-row athlete dereference, eleven times over. Measured on the deployed
+ * worker: the home page's query took 6.8 seconds, of which 6.3 were these two
+ * scans. Hoisted to the document, where they run once, the same query is 0.8
+ * seconds (2026-09-12).
+ *
+ * It is invisible on the live site, which is statically built and pays it once
+ * per deploy. It is very visible in the Studio's Presentation tool, where every
+ * page switch is a fresh render: that is the several-second pause this removes.
+ *
+ * GROQ has no query-level variable and `^` cannot reach a computed sibling
+ * (tested: it returns null), so SectionRenderer merges these into the two
+ * sections that want them.
+ *
+ * AND IT IS SKIPPED ENTIRELY when the page has no section that wants it. Only
+ * the records page and the home page's dynasties band read these; the course
+ * and contact pages were paying half a second for 1,961 rows they throw away.
+ */
+const WANTS_ARCHIVE = `count(pageBuilder[_type in ["recordsBoardSection", "dynastiesSection"]]) > 0`;
+
+export const ARCHIVE_PROJECTION = `
+  "results": select(${WANTS_ARCHIVE} => *[_type == "raceResult"]{
+    year, timeSeconds, gender, age, place, timeSource, trekker,
+    "distance": distance->slug.current,
+    "athlete": { "name": athlete->name, "slug": athlete->slug.current }
+  }, []),
+  "historical": select(${WANTS_ARCHIVE} => *[_type == "recordEntry"]{
+    bracket, gender, year, timeSeconds, sourceNote,
+    "distance": distance->slug.current
+  }, [])`;
+
 export function sectionsProjection(field = 'pageBuilder'): string {
   return `${field}[]{
     ...,
@@ -143,16 +180,6 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       "distances": *[_type == "distance"] | order(orderRank asc){
         _id, name, "slug": slug.current
       },
-      "results": *[_type == "raceResult"]{
-        year, timeSeconds, gender, age, place, timeSource, trekker,
-        "distance": distance->slug.current,
-        "athlete": { "name": athlete->name, "slug": athlete->slug.current }
-      },
-      "historical": *[_type == "recordEntry"]{
-        bracket, gender, year, timeSeconds, sourceNote,
-        "distance": distance->slug.current,
-        "athlete": { "name": athlete->name, "slug": athlete->slug.current }
-      },
       "race": *[_type == "race"][0]{ resultsUrl, atmosphere[]${IMAGE_PROJECTION} }
     },
     _type == "photoBandSection" => {
@@ -194,16 +221,6 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       cta${CTA_PROJECTION},
       "distances": *[_type == "distance"] | order(orderRank asc){
         _id, name, "slug": slug.current
-      },
-      "results": *[_type == "raceResult"]{
-        year, timeSeconds, gender, age, trekker,
-        "distance": distance->slug.current,
-        "athlete": { "name": athlete->name, "slug": athlete->slug.current }
-      },
-      "historical": *[_type == "recordEntry"]{
-        bracket, gender, year, timeSeconds,
-        "distance": distance->slug.current,
-        "athlete": { "name": athlete->name, "slug": athlete->slug.current }
       }
     },
     _type == "pageHeaderSection" => {
@@ -551,7 +568,8 @@ export async function getHomePage() {
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
-    ${sectionsProjection('pageBuilder')}
+    ${sectionsProjection('pageBuilder')},
+    ${ARCHIVE_PROJECTION}
   }`,
     {},
     null,
@@ -566,7 +584,8 @@ export async function getAboutPage() {
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
-    ${sectionsProjection('pageBuilder')}
+    ${sectionsProjection('pageBuilder')},
+    ${ARCHIVE_PROJECTION}
   }`,
     {},
     null,
@@ -581,7 +600,8 @@ export async function getServicesPage() {
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
-    ${sectionsProjection('pageBuilder')}
+    ${sectionsProjection('pageBuilder')},
+    ${ARCHIVE_PROJECTION}
   }`,
     {},
     null,
@@ -607,7 +627,8 @@ export async function getProcessPage() {
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
-    ${sectionsProjection('pageBuilder')}
+    ${sectionsProjection('pageBuilder')},
+    ${ARCHIVE_PROJECTION}
   }`,
     {},
     null,
@@ -884,7 +905,8 @@ export async function getPage(slug: string) {
       "slug": slug.current,
       seoTitle, seoDescription, hideFromSearch,
       seoImage${IMAGE_PROJECTION},
-      ${sectionsProjection('pageBuilder')}
+      ${sectionsProjection('pageBuilder')},
+      ${ARCHIVE_PROJECTION}
     }`,
     { slug },
     null,

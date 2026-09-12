@@ -3612,6 +3612,15 @@ main > .band-torn:first-child::before {
   background: var(--background);
   color: var(--foreground);
   isolation: isolate;
+  /* THE STAMP IS WIDER THAN THE BOARD WHILE IT LANDS. `claim-strike` drops the
+     claim in at scale 1.8, and the claim runs the full width of the foot, so
+     for the length of the animation the sheet's content box is 580px inside a
+     375px screen and the board had a horizontal scrollbar that vanished when
+     the stamp settled (2026-09-12). `clip` rather than `hidden` so the vertical
+     axis stays a real scroll container for short phones, which `hidden` would
+     also allow but `clip` states plainly: nothing here is meant to be scrolled
+     sideways to. */
+  overflow-x: clip;
 }
 .menu-topo {
   position: absolute;

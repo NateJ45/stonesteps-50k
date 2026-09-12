@@ -41,5 +41,10 @@ const schemas = eventSchema ? [JSON.stringify(eventSchema)] : [];
   this, because only the home page opens with a full band the header can sit on. */
 }
 <BaseLayout {title} {description} {siteSettings} seoImage={page?.seoImage} {schemas} headerOverlay>
-  <SectionRenderer {sections} idPrefix="home" />
+  <SectionRenderer
+    {sections}
+    idPrefix="home"
+    results={(page as any)?.results ?? []}
+    historical={(page as any)?.historical ?? []}
+  />
 </BaseLayout>

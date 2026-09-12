@@ -66,5 +66,10 @@ const schemas = [
 ---
 
 <BaseLayout {title} {description} {schemas} {siteSettings} {noindex} seoImage={seoImage}>
-  <SectionRenderer sections={(pageDoc as any).pageBuilder} idPrefix="page" />
+  <SectionRenderer
+    sections={(pageDoc as any).pageBuilder}
+    idPrefix="page"
+    results={(pageDoc as any).results ?? []}
+    historical={(pageDoc as any).historical ?? []}
+  />
 </BaseLayout>

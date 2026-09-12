@@ -51,11 +51,25 @@ import RaceWeather from '@/components/sections/RaceWeather.astro';
 import Dynasties from '@/components/sections/Dynasties.astro';
 import GearBand from '@/components/sections/GearBand.astro';
 import { classifySections } from '@/lib/sectionCadence';
-import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
+import type {
+  PageBuilderBlock,
+  ProjectedRaceResult,
+  ProjectedRecordEntry,
+} from '@/lib/pageBuilder.types';
 import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
 
 interface Props {
   sections?: unknown[];
+  /**
+   * The results archive, fetched ONCE per page rather than once per section.
+   * The records board and the dynasties band both need every finish on file;
+   * projected inside `pageBuilder[]` that scan ran per section and cost six
+   * seconds on the home page. See ARCHIVE_PROJECTION in src/lib/queries.ts.
+   * A section's own value still wins, so nothing that already passes its own
+   * results changes behaviour.
+   */
+  results?: ProjectedRaceResult[];
+  historical?: ProjectedRecordEntry[];
   /** Prefix for generated heading ids, so two renderers on a page do not collide. */
   idPrefix?: string;
   /**
@@ -73,7 +87,13 @@ interface Props {
   editDoc?: EditDoc;
 }
 
-const { sections = [], idPrefix = 'section', editDoc } = Astro.props as Props;
+const {
+  sections = [],
+  idPrefix = 'section',
+  editDoc,
+  results: sharedResults = [],
+  historical: sharedHistorical = [],
+} = Astro.props as Props;
 const rows = classifySections<PageBuilderBlock>(sections as PageBuilderBlock[], idPrefix);
 
 // A real element in preview, nothing at all on the live site. The wrapper must
@@ -338,8 +358,8 @@ const wrapAttrs = (key: string | undefined) =>
             headline={s.headline}
             intro={s.intro}
             distances={s.distances ?? []}
-            results={s.results ?? []}
-            historical={s.historical ?? []}
+            results={s.results ?? sharedResults}
+            historical={s.historical ?? sharedHistorical}
             race={s.race}
             surface={surface ?? 'background'}
             headingId={headingId}
@@ -449,8 +469,8 @@ const wrapAttrs = (key: string | undefined) =>
             headline={s.headline}
             cta={s.cta}
             distances={s.distances ?? []}
-            results={s.results ?? []}
-            historical={s.historical ?? []}
+            results={s.results ?? sharedResults}
+            historical={s.historical ?? sharedHistorical}
             surface={surface ?? 'background'}
             headingId={headingId}
           />
