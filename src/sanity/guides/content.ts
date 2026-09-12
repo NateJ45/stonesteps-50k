@@ -24,7 +24,11 @@
 export type DiyLevel = 'self' | 'ask' | 'mixed';
 
 /** Where a "Where in the Studio" breadcrumb can link to. */
-export type PathLink = { doc: string; type?: string } | { pane: string } | { tool: string };
+// Mirrors StudioTarget in src/sanity/components/studioLink.ts, which is what
+// actually turns one of these into a route. `field` opens the document ON that
+// field; see the note there.
+export type PathLink =
+  { doc: string; type?: string; field?: string } | { pane: string } | { tool: string };
 
 export type GuideBlock =
   | { kind: 'h'; text: string }
