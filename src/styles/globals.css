@@ -3874,3 +3874,262 @@ main > .band-torn:first-child::before {
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 }
+
+/* ---------- The footer, as the trail sign at the finish ------------------ */
+/* WHY THIS EXISTS (2026-09-12). The footer that shipped was the starter's,
+   with race words in it: four ragged columns of body-face links on flat cream,
+   a "Where" column holding one address over a hole, and the mark floating
+   unanchored in the middle. Nothing about it said trail race. The mobile menu
+   had already worked out what this site's navigation looks like when it is
+   allowed to be loud (numbered rows in the display face, contours and a walk
+   of prints behind them, a stamped claim), and the end of a page is the one
+   place on the site where nothing competes for attention. So the footer now
+   wears the same board.
+
+   IT FOLLOWS THE THEME, for the same reason the menu board does: a slab of
+   bark pinned across the bottom of the cream page reads as the dark site's
+   footer dropped on top. The separation comes from the ridge it tears over
+   the page above and from `--muted` being a step off the page's own ground,
+   not from inverting it.
+
+   ONE NEW MOTIF, NONE INVENTED. Every part of this is already somewhere else
+   on the site: the ridge is `--ridge-mask` (the seam between every pair of
+   bands), the contours are the same Topo, the prints are `walk`, the mark sits
+   on the header's own `.sign-badge`, and the numbered rows are the mobile
+   menu's, one size down. */
+.site-foot {
+  /* THE BOARD HAS ITS OWN GROUND, and it is not `--muted`. The first cut used
+     `bg-muted`, which is what the old footer used, and on the cream page that
+     is #f4ebd6 against a #fbf6ea body: a seven-unit step that the torn ridge
+     above it had nothing to draw with. The footer read as more page rather
+     than as an object at the end of it (measured 2026-09-12). One step deeper
+     on each theme is enough for the ridge to cut a visible line, and it costs
+     nothing in contrast: the page ink measures 13.9:1 on the light ground and
+     15.9:1 on the dark, the muted ink 6.1 and 9.6, the accent 6.1 and 13.8. */
+  --foot-ground: #efe2c6;
+  background: var(--foot-ground);
+  position: relative;
+  isolation: isolate;
+  /* The register plate rotates and the stamp lands past its resting size, so
+     for a few frames the content box is wider than the page. `clip` rather
+     than `hidden` for the reason the menu board gives: nothing here is meant
+     to be scrolled sideways to, and `hidden` would make the other axis a
+     scroll container. */
+  overflow-x: clip;
+}
+.dark .site-foot {
+  --foot-ground: #15120c;
+}
+/* Printing flattens every surface to white (see the print block above), and a
+   literal ground would be the one band that ignored that. */
+@media print {
+  .site-foot {
+    --foot-ground: white;
+  }
+  .foot-topo,
+  .foot-mud {
+    display: none;
+  }
+}
+/* The torn top edge. Same path, same `background-color: inherit` trick and the
+   same shallower cut on a phone as `.band-torn`, which this deliberately does
+   not reuse: that class is applied by `surfaceClass()` to page sections, and
+   the footer is not one. */
+.site-foot::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: -34px;
+  height: 35px;
+  background-color: inherit;
+  pointer-events: none;
+  z-index: 1;
+  -webkit-mask-image: var(--ridge-mask);
+  mask-image: var(--ridge-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+@media (width < 48rem) {
+  .site-foot::before {
+    top: -20px;
+    height: 21px;
+  }
+}
+
+/* The two backdrop layers. Both are absolutely positioned and z-index 0; every
+   content row below sets `position: relative; z-index: 1` through `.foot-z`. */
+.foot-topo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.foot-topo path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--foreground) 9%, transparent);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.foot-topo path:nth-child(3n) {
+  stroke: color-mix(in srgb, var(--heading-accent) 22%, transparent);
+}
+/* The same walk of prints the page headers and the menu board wear, so the
+   route that crosses the top of a page also crosses the bottom of it. Lighter
+   here than on the menu: the menu is a takeover with five rows on it, the
+   footer has four columns of small print to stay off. */
+.foot-mud {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--spatter-ink) 9%, transparent);
+  -webkit-mask-image: url('/mud/walk-phone.png');
+  mask-image: url('/mud/walk-phone.png');
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+@media (min-width: 48rem) {
+  .foot-mud {
+    -webkit-mask-image: url('/mud/walk-wide.png');
+    mask-image: url('/mud/walk-wide.png');
+  }
+}
+.foot-z {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- The date plate ---------------------------------------------- */
+/* The most valuable line in the footer, so it is the first thing on the board
+   and it is set at poster size rather than as a heading. */
+.foot-date {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5.2vw, 3.25rem);
+  line-height: 0.95;
+  letter-spacing: 0.005em;
+  /* The wordmark's echo, one third of the offset: enough to say the two are
+     set in the same press, not enough to shout over the hero's. */
+  text-shadow: 0.018em 0.018em 0 var(--display-echo);
+}
+
+/* ---------- The numbered rows ------------------------------------------- */
+/* The mobile menu's rows at footer scale. Left-aligned at every width on
+   purpose: the old footer centred its links on a phone, which turned four
+   short labels into a column of drifting text with no edge to read down. */
+/* The columns fit themselves to the width. See the note in Footer.astro: how
+   many there are is editor data, so a fixed track count is a layout that breaks
+   the first time someone adds one. 11rem is the narrowest a numbered row reads
+   at without the label wrapping under its index. */
+.foot-cols {
+  display: grid;
+  gap: 1.75rem 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  align-content: start;
+}
+.foot-col__title {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin-bottom: 0.35rem;
+}
+.foot-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.foot-item {
+  border-bottom: 2px dashed color-mix(in srgb, var(--foreground) 18%, transparent);
+}
+.foot-item:last-child {
+  border-bottom: 0;
+}
+.foot-link {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.5rem 0.1rem;
+  color: var(--foreground);
+  text-decoration: none;
+}
+.foot-link__idx {
+  flex: none;
+  width: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--heading-accent);
+}
+.foot-link__label {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3.4vw, 1.9rem);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  transition: translate 0.16s ease;
+}
+/* The step down for a long label. Set from Astro, which knows the string's
+   length; CSS cannot ask. */
+.foot-link__label--long {
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  line-height: 1.15;
+  letter-spacing: 0.015em;
+}
+.foot-link:hover .foot-link__label,
+.foot-link:focus-visible .foot-link__label {
+  translate: 5px 0;
+  color: var(--heading-accent);
+}
+/* Where you are, struck the way the menu strikes it. */
+.foot-link[aria-current='page'] .foot-link__label {
+  color: var(--heading-accent);
+  text-shadow: 0.05em 0.05em 0 var(--display-echo);
+}
+.foot-link[aria-current='page'] .foot-link__idx {
+  color: var(--foreground);
+}
+
+/* ---------- The contact rail -------------------------------------------- */
+/* Everything that is reference rather than navigation: where the race is, who
+   to ask, and the social buttons. Small print on purpose, so the rows above
+   stay the loudest thing on the board. */
+.foot-rail dt {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.foot-rail dd {
+  margin: 0.3rem 0 1.15rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.foot-rail dd:last-child {
+  margin-bottom: 0;
+}
+
+/* The mark, mounted rather than floated. `.sign-badge` is the header's plate;
+   this only makes it bigger and takes the header's -1.5deg back off to +2, so
+   the two boards read as the same sign seen at opposite ends of the page
+   rather than as one asset used twice. */
+.foot-badge {
+  rotate: 2deg;
+  padding: 0.6rem 0.85rem;
+}
+
+/* ---------- The base rail ----------------------------------------------- */
+.foot-base {
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+}

@@ -1,29 +1,36 @@
 ---
 // Foundation, edit with care
-// Site footer. Compact layout that reads as a SEPARATE zone from the FinalCta
-// section that sits above it on most pages.
 //
-// Color decoupling: the footer uses bg-muted (Cream in light, dark warm in
-// dark) so it doesn't visually merge with the Charcoal Dark FinalCta. The
-// 4px Warm Bronze accent stripe at the top is the same brand signature
-// used in the header and mobile menu drawer.
+// The footer, as the trail sign at the finish.
 //
-// Structure (top to bottom):
-//   1. Bronze accent stripe
-//   2. Optional newsletter signup (only when siteSettings.newsletter.enabled)
-//   3. Compact brand bar: logo + tagline side by side (one short row, not a
-//      tall stacked block) so the footer stays roughly half its old height.
-//   4. Five-column link grid: Studio / Work / Free tools / Latest projects /
-//      Get in touch (email, phone, location, socials).
-//   5. Thin bottom bar: auto-year copyright, privacy link, optional "Site
-//      by..." credit, all on one line.
+// WHAT CHANGED AND WHY (2026-09-12). This was the starter's generic footer with
+// a race band bolted on the top: five columns of body-face links (Studio, Work,
+// Free tools, Latest projects, Get in touch), an optional newsletter, and the
+// mark floating unanchored in the middle of them. Three of those columns were
+// for a design studio and never rendered here, one ran a portfolio query on
+// every build that could only ever return nothing, and the two that did render
+// came through Sanity and were set in the same 14px as the copyright.
 //
-// Tailwind v4 gotcha: max-w-xs/s/m/l are shadowed by this project's custom
-// --spacing-* tokens (they resolve to a few px, not the container scale). Use
-// max-w-md / max-w-2xl / arbitrary values like max-w-[28rem] for text widths.
+// The mobile menu had already settled what this site's navigation looks like
+// when it is allowed to be loud, and the end of a page is the one place where
+// nothing competes with it. So the footer is now that board: contours and a
+// walk of prints behind it, the race date at poster size, the links as numbered
+// rows in the display face, and the mark on the header's own nailed plate.
+// Everything reference rather than navigation (where the race is, who to ask,
+// the socials) is a small rail beside them. The style lives in globals.css
+// under "The footer, as the trail sign at the finish".
 //
-// Latest projects pull from Sanity. Gracefully degrades to a "see portfolio"
-// message when nothing is published yet.
+// THE STARTER BRANCHES ARE GONE, NOT HIDDEN. Newsletter, latest projects and
+// the three studio columns are deleted outright rather than left behind a flag.
+// They were the reason another client's logo sat at the bottom of every page of
+// this site until 2026-09-09: dead branches nobody reads are where fork
+// artefacts survive. If the race ever wants a newsletter, it is a section in
+// the page builder, not a footer special case.
+//
+// EVERY LINK IS EDITOR-DRIVEN. The columns come from Site settings -> Footer
+// columns. The built-in fallback below is this race's own pages, so a dataset
+// with nothing in that field still gets a usable footer instead of a design
+// studio's sitemap.
 
 import { site } from '@/data/site';
 import {
@@ -36,11 +43,11 @@ import {
   IconBrandX,
   IconLink,
 } from '@tabler/icons-react';
-import { Mail, Phone } from 'lucide-react';
+import { Phone } from 'lucide-react';
 import CopyEmailButton from '@/components/CopyEmailButton';
-import NewsletterSignup from '@/components/NewsletterSignup';
+import Topo from '@/components/race/Topo.astro';
 import { externalLinkAttrs } from '@/lib/links';
-import { getAllProjects, getRace, type CoreProjectCard } from '@/lib/queries';
+import { getRace } from '@/lib/queries';
 // THE SVG, NOT THE PNG. The .png files in src/assets were the REID DESIGN
 // wordmark, inherited from the repo this project was forked from, and this
 // footer was still importing them: another client's logo sat at the bottom of
@@ -50,19 +57,12 @@ import { getAllProjects, getRace, type CoreProjectCard } from '@/lib/queries';
 // them ever reappears, it is a fork artefact, not a design choice.
 import logoLightAsset from '@/assets/logo-light.svg';
 import logoDarkAsset from '@/assets/logo-dark.svg';
-import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { telHref } from '@/lib/phone';
 
-// One themed pair, passed through Astro's pipeline for a cache-busted URL. No
-// width variants and no webp: these are SVGs, so a single file is sharp at
-// every size and asking the optimizer to rasterise them would be a downgrade.
-// The BaseLayout anti-FOUC script swaps src on theme change, same as the header.
-// THE RACE BAND. Site-specific, and deliberately so: this footer is otherwise
-// the family's generic one, but a race footer that does not say when the race
-// is has wasted the most valuable line on the page. Everything here is read
-// from the `race` singleton, so the day it is edited in the Studio the footer
-// follows and nobody has to remember this file exists.
+// THE RACE BAND. Everything here is read from the `race` singleton, so the day
+// it is edited in the Studio the footer follows and nobody has to remember this
+// file exists.
 const race = await getRace().catch(() => null);
 const raceDate = race?.raceDate ? new Date(race.raceDate) : null;
 const raceDateLabel = raceDate
@@ -91,17 +91,6 @@ const wherePlace = [race?.venue, [race?.city, race?.region].filter(Boolean).join
 const footerLogoLight = logoLightAsset.src;
 const footerLogoDark = logoDarkAsset.src;
 
-interface NewsletterConfig {
-  enabled?: boolean;
-  heading?: string;
-  blurb?: string;
-  buttonLabel?: string;
-  successMessage?: string;
-  consentNote?: string;
-  formActionUrl?: string | null;
-  audienceId?: string | null;
-}
-
 interface SocialLink {
   platform?: string;
   url?: string;
@@ -117,11 +106,9 @@ interface Props {
         socialInstagram?: string;
         socialFacebook?: string;
         socialLinks?: SocialLink[] | null;
-        serviceAreas?: string[];
         tagline?: string;
         footerCredit?: string;
         footerCreditUrl?: string;
-        newsletter?: NewsletterConfig | null;
       })
     | null;
 }
@@ -129,13 +116,9 @@ interface Props {
 const { siteSettings } = Astro.props as Props;
 
 // The chrome (footer columns, the small-print row, the social switch) resolves
-// through one shared helper (see src/lib/siteSettings.ts) so the footer can't
-// drift from the header. Both menus come back EMPTY when Sanity is empty, and
-// the built-in markup below renders instead.
+// through one shared helper (see src/lib/siteSettings.ts) so the footer cannot
+// drift from the header.
 const chrome = resolveSiteSettings(siteSettings);
-
-// Normalize section visibility. Unset => visible (safe default for live site).
-const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 
 const brandName = siteSettings?.title ?? site.name;
 const email = siteSettings?.email ?? '';
@@ -143,8 +126,6 @@ const phone = siteSettings?.phone ?? '';
 
 // Social links: prefer the new socialLinks array; fall back to the legacy
 // socialInstagram / socialFacebook fields so existing datasets keep working.
-// The footer's own "show social buttons" switch (Site Settings -> Navigation).
-// Unset means yes, so an untouched site is unchanged.
 const showFooterSocials = chrome.showFooterSocials;
 const rawSocialLinks = showFooterSocials ? (siteSettings?.socialLinks ?? []) : [];
 const ig = showFooterSocials ? (siteSettings?.socialInstagram ?? '') : '';
@@ -157,7 +138,7 @@ const socialLinksToRender: SocialLink[] =
         ...(fb ? [{ platform: 'Facebook', url: fb }] : []),
       ];
 
-// Map platform name to a Tabler icon component.
+/** Map a platform name to a Tabler icon component. */
 function socialIcon(platform: string | undefined) {
   switch (platform) {
     case 'Instagram':
@@ -179,52 +160,82 @@ function socialIcon(platform: string | undefined) {
       return IconLink;
   }
 }
-// Copyright auto-updates every build via new Date(). The "Site by..." line
-// (siteCredit + siteCreditUrl) is a SEPARATE concept that sits next to the
-// auto-year copyright in the thin bottom bar.
+
 const currentYear = new Date().getFullYear();
 const siteCredit = siteSettings?.footerCredit;
 const siteCreditUrl = siteSettings?.footerCreditUrl;
-
-// Optional editor-managed footer columns. When non-empty, these replace the
-// built-in Studio / Work / Free tools columns. "Get in touch" always renders
-// as the last column regardless. Additive: empty = built-in defaults.
-const sanityFooterColumns = chrome.footerColumns;
-const useCustomFooterColumns = sanityFooterColumns.length > 0;
-
-// The small-print row at the very bottom. EMPTY means "keep the built-in
-// privacy link", which is rendered as its own markup below.
 const LEGAL_LINKS = chrome.legalNav;
 
-// Pull the three most recent projects for the Latest Projects column.
-// Falls back to an empty array when Sanity isn't reachable (build won't fail).
-const allProjects: CoreProjectCard[] = (await getAllProjects().catch(() => [])) ?? [];
-const latestProjects = allProjects.slice(0, 3);
+// THIS RACE'S OWN PAGES, as the fallback when Site settings carries no footer
+// columns. The starter's fallback here was Studio / Work / Free tools, which is
+// a design studio's sitemap and would 404 five times over on this site.
+const BUILT_IN_COLUMNS = [
+  {
+    title: 'The race',
+    links: [
+      { label: 'The Race', href: '/' },
+      { label: 'Course', href: '/course' },
+      { label: 'Records', href: '/records' },
+      { label: 'Results', href: '/results' },
+      { label: 'Contact', href: '/contact' },
+    ],
+  },
+];
+const columns = chrome.footerColumns.length > 0 ? chrome.footerColumns : BUILT_IN_COLUMNS;
+
+// WHICH ROW IS STRUCK. The rows carry `aria-current="page"` the way the mobile
+// menu's do, so the footer says where you are instead of listing five places
+// identically. Trailing slash normalised: Astro serves "/course" and "/course/"
+// as the same page and the nav data spells it one way.
+const here = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isHere = (href: string) => (href.replace(/\/+$/, '') || '/') === here;
+
+/** "01", "02"... the index a numbered row wears. */
+const idx = (i: number) => String(i + 1).padStart(2, '0');
+
+// A LONG LABEL GETS A SMALLER ROW. The numbered rows are set in the display
+// face at up to 1.9rem, which suits "Records" and "Facebook group" and does not
+// suit the venue address, which one of the live columns carries as its only
+// entry: at row size it wrapped to three lines and read as a headline nobody
+// wrote. The length is known here at build time, so the step is decided in
+// Astro rather than guessed at in CSS, where there is no way to ask how long a
+// string is.
+const LONG_LABEL = 18;
+const rowClass = (label: string) =>
+  label.length > LONG_LABEL ? 'foot-link__label foot-link__label--long' : 'foot-link__label';
 ---
 
-<footer class="bg-muted text-foreground">
+{
+  /* THE BOARD. Its ground is a literal one step deeper than the page's, set in
+    globals.css rather than with `bg-muted`: muted is seven units off the body
+    on the cream theme, which left the torn top edge with nothing to cut. */
+}
+<footer class="site-foot text-foreground">
+  {/* Backdrop, both layers, both aria-hidden and both out of the flow. */}
+  <Topo seed={31} lines={11} opacity={1} class="foot-topo" />
+  <div class="foot-mud" aria-hidden="true"></div>
+
   {
-    /* Next running, and the one button that matters. Only while the date is
-      still ahead: a footer advertising a race that already happened is worse
-      than one that says nothing, and this is the line nobody would remember to
-      take down. */
+    /* NEXT RUNNING, at poster size. Only while the date is still ahead: a
+      footer advertising a race that already happened is worse than one that
+      says nothing, and this is the line nobody would remember to take down. */
   }
   {
     raceDateLabel && raceIsUpcoming && (
-      <div class="border-b border-border">
-        <div class="mob-center mx-auto flex max-w-content flex-col items-center gap-m px-6 py-l md:flex-row md:items-end md:justify-between">
+      <div class="foot-z border-b border-border/60">
+        <div class="mx-auto flex max-w-content flex-col items-start gap-m px-6 py-l md:flex-row md:items-end md:justify-between">
           <div>
             <p class="blaze text-heading-accent mb-2 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
               Next running
             </p>
-            <p class="display text-[clamp(1.75rem,4vw,2.75rem)]">{raceDateLabel}</p>
-            <p class="mt-2 text-sm text-foreground/80">
+            <p class="foot-date">{raceDateLabel}</p>
+            <p class="mt-3 text-sm text-foreground/80">
               {[editionLabel, wherePlace].filter(Boolean).join(' · ')}
             </p>
           </div>
           {race?.registerUrl && (
             <a
-              class="btn-plate btn-plate--cream self-center md:self-auto"
+              class="btn-plate btn-plate--cream"
               href={race.registerUrl}
               {...externalLinkAttrs(race.registerUrl)}
             >
@@ -238,254 +249,76 @@ const latestProjects = allProjects.slice(0, 3);
       </div>
     )
   }
-  {/* Brand accent stripe — matches header + mobile drawer. */}
-  <div class="h-1 bg-primary" aria-hidden="true"></div>
 
   {
-    /* Newsletter signup — renders only when siteSettings.newsletter.enabled is
-       true. Island hydrates when scrolled into view. */
-  }
-  {
-    siteSettings?.newsletter?.enabled && (
-      <div class="mx-auto max-w-content px-6 pt-l">
-        <div class="mx-auto max-w-md">
-          <NewsletterSignup client:visible newsletter={siteSettings.newsletter} source="footer" />
-        </div>
-      </div>
-    )
-  }
-
-  {
-    /* Five-column link grid. Single centered column on mobile, five columns
-       at md+ (left-aligned). The fifth column carries contact details.
-       When siteSettings.footerColumns is non-empty, the custom Sanity columns
-       replace the built-in Studio / Work / Free tools columns. The Latest
-       Projects column and Get in touch column always render. */
+    /* THE ROWS AND THE RAIL. Three tracks at lg: the numbered columns take a
+      fraction each and the reference rail sits beside them. Below lg they
+      stack, rows first, because navigation is what a visitor came down here
+      for and the address is what they will read once. */
   }
   <div
-    class="mx-auto grid max-w-content grid-cols-1 gap-l px-6 pt-l pb-m text-center sm:grid-cols-2 md:grid-cols-3 md:text-left lg:grid-cols-5"
+    class="foot-z mx-auto grid max-w-content gap-l px-6 pt-l pb-m lg:grid-cols-[1fr_minmax(0,16rem)]"
   >
-    {/* --- Editor-managed columns (from Sanity siteSettings.footerColumns) --- */}
     {
-      useCustomFooterColumns ? (
-        sanityFooterColumns.map((col, colIdx) => (
-          <nav aria-labelledby={`footer-custom-${colIdx}`}>
-            <p
-              id={`footer-custom-${colIdx}`}
-              class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase"
-            >
+      /* AUTO-FIT, NOT A COUNT. The columns come from Site settings and there
+        can be one of them or four, so the track list is computed from the
+        available width rather than written down here. A hardcoded three-track
+        grid put the rail on a fourth track and then wrapped it to its own row
+        the moment a third column was added, which is exactly what the live
+        dataset does. */
+    }
+    <div class="foot-cols">
+      {
+        columns.map((col, colIdx) => (
+          <nav class="foot-col" aria-labelledby={`foot-col-${colIdx}`}>
+            <p id={`foot-col-${colIdx}`} class="foot-col__title">
               {col.title}
             </p>
-            <ul class="list-none space-y-2 p-0 text-sm">
-              {col.links.map((link) => (
-                <li>
+            <ul class="foot-list">
+              {col.links.map((link, i) => (
+                <li class="foot-item">
                   <a
                     href={link.href}
-                    class="text-foreground/85 transition-colors hover:text-link"
+                    class="foot-link"
+                    aria-current={isHere(link.href) ? 'page' : undefined}
                     {...externalLinkAttrs(link.href)}
                   >
-                    {link.label}
+                    {/* A ONE-ROW COLUMN IS NOT A LIST. The numbers exist so four
+                    rows read as a route to follow down; "01" on its own above
+                    nothing is just a decoration that raises a question. The
+                    live "Where" column is exactly this case. */}
+                    {col.links.length > 1 && (
+                      <span class="foot-link__idx" aria-hidden="true">
+                        {idx(i)}
+                      </span>
+                    )}
+                    <span class={rowClass(link.label)}>{link.label}</span>
                   </a>
                 </li>
               ))}
             </ul>
           </nav>
         ))
-      ) : (
-        <>
-          {/* --- Built-in columns (default when footerColumns is empty) --- */}
+      }
+    </div>
 
-          {/* STUDIO */}
-          <nav aria-labelledby="footer-studio">
-            <p
-              id="footer-studio"
-              class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase"
-            >
-              Studio
-            </p>
-            <ul class="list-none space-y-2 p-0 text-sm">
-              <li>
-                <a href="/about" class="text-foreground/85 transition-colors hover:text-link">
-                  About
-                </a>
-              </li>
-              <li>
-                <a href="/process" class="text-foreground/85 transition-colors hover:text-link">
-                  Process
-                </a>
-              </li>
-              <li>
-                <a href="/services" class="text-foreground/85 transition-colors hover:text-link">
-                  Services &amp; Pricing
-                </a>
-              </li>
-              <li>
-                <a href="/faq" class="text-foreground/85 transition-colors hover:text-link">
-                  FAQ
-                </a>
-              </li>
-              {visible.press && (
-                <li>
-                  <a href="/press" class="text-foreground/85 transition-colors hover:text-link">
-                    Press
-                  </a>
-                </li>
-              )}
-            </ul>
-          </nav>
-
-          {/* WORK */}
-          <nav aria-labelledby="footer-work">
-            <p id="footer-work" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
-              Work
-            </p>
-            <ul class="list-none space-y-2 p-0 text-sm">
-              {visible.portfolio && (
-                <li>
-                  <a href="/portfolio" class="text-foreground/85 transition-colors hover:text-link">
-                    Portfolio
-                  </a>
-                </li>
-              )}
-              {visible.portfolio && (
-                <li>
-                  <a
-                    href="/portfolio/before-after"
-                    class="text-foreground/85 transition-colors hover:text-link"
-                  >
-                    Before &amp; After
-                  </a>
-                </li>
-              )}
-              {visible.journal && (
-                <li>
-                  <a href="/journal" class="text-foreground/85 transition-colors hover:text-link">
-                    Journal
-                  </a>
-                </li>
-              )}
-              {visible.shop && (
-                <li>
-                  <a href="/shop" class="text-foreground/85 transition-colors hover:text-link">
-                    Shop
-                  </a>
-                </li>
-              )}
-              {visible.giftCertificates && (
-                <li>
-                  <a
-                    href="/gift-certificates"
-                    class="text-foreground/85 transition-colors hover:text-link"
-                  >
-                    Gift Certificates
-                  </a>
-                </li>
-              )}
-            </ul>
-          </nav>
-
-          {/* FREE TOOLS & GUIDES */}
-          <nav aria-labelledby="footer-tools">
-            <p id="footer-tools" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
-              Free tools &amp; guides
-            </p>
-            <ul class="list-none space-y-2 p-0 text-sm">
-              {visible.styleQuiz && (
-                <li>
-                  <a href="/quiz" class="text-foreground/85 transition-colors hover:text-link">
-                    Style Quiz
-                  </a>
-                </li>
-              )}
-              {visible.budgetCalculator && (
-                <li>
-                  <a
-                    href="/calculator"
-                    class="text-foreground/85 transition-colors hover:text-link"
-                  >
-                    Cost Calculator
-                  </a>
-                </li>
-              )}
-              {visible.guides && (
-                <li>
-                  <a href="/guides" class="text-foreground/85 transition-colors hover:text-link">
-                    Guides
-                  </a>
-                </li>
-              )}
-              {visible.resources && (
-                <li>
-                  <a href="/resources" class="text-foreground/85 transition-colors hover:text-link">
-                    Resources
-                  </a>
-                </li>
-              )}
-            </ul>
-          </nav>
-        </>
-      )
-    }
-
-    {/* LATEST PROJECTS — only when portfolio is visible. */}
     {
-      visible.portfolio ? (
-        <nav aria-labelledby="footer-latest">
-          <p id="footer-latest" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
-            Latest projects
-          </p>
-          {latestProjects.length > 0 ? (
-            <ul class="list-none space-y-2 p-0 text-sm">
-              {latestProjects.map((p) => (
-                <li>
-                  <a
-                    href={`/portfolio/${p.slug?.current ?? ''}`}
-                    class="text-foreground/85 transition-colors hover:text-link"
-                  >
-                    {p.title}
-                  </a>
-                </li>
-              ))}
-              <li class="pt-xs">
-                <a
-                  href="/portfolio"
-                  class="inline-flex items-center gap-xs text-xs font-semibold tracking-eyebrow text-link uppercase transition-colors hover:text-primary-dark"
-                >
-                  View all <span aria-hidden="true">→</span>
-                </a>
-              </li>
-            </ul>
-          ) : (
-            <p class="text-sm text-foreground/85 italic">
-              Case studies are coming soon.{' '}
-              <a
-                href="/portfolio"
-                class="text-link underline underline-offset-2 hover:text-primary-dark"
-              >
-                See the portfolio →
-              </a>
-            </p>
-          )}
-        </nav>
-      ) : (
-        <div aria-hidden="true" />
-      )
-    }
+      /* The reference rail. A description list because that is what it is:
+        labelled facts, not another menu.
 
-    {/* GET IN TOUCH — email, phone, location, socials. */}
-    <div>
-      <p class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">Get in touch</p>
-      <div class="space-y-1 text-sm">
-        {
-          email && (
-            <p>
-              <CopyEmailButton client:visible email={email} variant="link" />
-            </p>
-          )
-        }
-        {
-          phone && (
-            <p>
+        NO "WHERE" ROW HERE. The first cut had one, reading the venue off the
+        race singleton, and on the live dataset the footer then said where the
+        race is three times: in the Next running line directly above, in this
+        rail, and in the editor's own "Where" column beside it. The line above
+        is the one that cannot be switched off, so it wins. */
+    }
+    <div class="foot-rail">
+      <dl class="m-0">
+        <dt>Get in touch</dt>
+        <dd>
+          {email && <CopyEmailButton client:visible email={email} variant="link" />}
+          {
+            phone && (
               <a
                 href={telHref(phone)}
                 class="inline-flex items-center gap-xs text-link transition-colors hover:text-primary-dark"
@@ -493,119 +326,118 @@ const latestProjects = allProjects.slice(0, 3);
                 <Phone size={14} aria-hidden="true" />
                 {phone}
               </a>
-            </p>
+            )
+          }
+          {
+            /* Without an email or phone on file this used to render the brand
+              name and nothing else, which is not a way to get in touch. */
+          }
+          {
+            !email && !phone && (
+              <a class="text-link underline-offset-2 hover:underline" href="/contact">
+                Ask the race director
+              </a>
+            )
+          }
+          {
+            race?.directorName && (
+              <span class="mt-1 block text-foreground/75">{race.directorName}, race director</span>
+            )
+          }
+        </dd>
+        {
+          socialLinksToRender.length > 0 && (
+            <>
+              <dt>Elsewhere</dt>
+              <dd>
+                <ul class="flex list-none gap-s p-0">
+                  {socialLinksToRender.map((link) => {
+                    const Icon = socialIcon(link.platform);
+                    const ariaLabel = link.label ?? link.platform ?? 'Social link';
+                    return (
+                      <li>
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={ariaLabel}
+                          class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-primary-dark hover:bg-primary-dark hover:text-white"
+                        >
+                          <Icon size={20} stroke={1.5} />
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </dd>
+            </>
+          )
+        }
+      </dl>
+
+      {
+        /* THE MARK, MOUNTED. Same nailed plate the header wears, bigger and
+          turned the other way, so the two boards read as the same sign seen at
+          opposite ends of the page. */
+      }
+      <div class="mt-l flex items-center gap-m">
+        <a href="/" aria-label={`${brandName} home`} class="sign-badge foot-badge shrink-0">
+          {
+            /* The mark is the race's own painted trail sign, portrait at
+              108x180, so it is sized by HEIGHT and its width follows. An
+              unloaded lazy image with width:auto shrink-wraps to 0x0, never
+              intersects the viewport and never loads, which is how the sponsor
+              logos vanished earlier in this build: give it real dimensions. */
+          }
+          <img
+            alt={brandName}
+            width={108}
+            height={180}
+            class="h-[5.5rem] w-auto"
+            loading="lazy"
+            decoding="async"
+            data-theme-logo
+            src={footerLogoLight}
+            data-logo-light-src={footerLogoLight}
+            data-logo-light-srcset={footerLogoLight}
+            data-logo-dark-src={footerLogoDark}
+            data-logo-dark-srcset={footerLogoDark}
+          />
+        </a>
+        {
+          siteSettings?.tagline && (
+            <p class="text-sm text-foreground/80 italic">{siteSettings.tagline}</p>
           )
         }
       </div>
-      {
-        /* Without an email or phone on file this column used to render the
-          brand name and nothing else, which is not a way to get in touch. The
-          race takes questions through the contact page, so point at it. */
-      }
-      {
-        !email && !phone && (
-          <p class="text-sm">
-            <a class="text-link underline-offset-2 hover:underline" href="/contact">
-              Ask the race director
-            </a>
-          </p>
-        )
-      }
-      {
-        race?.directorName && (
-          <p class="mt-s text-sm text-foreground/75">{race.directorName}, race director</p>
-        )
-      }
-      {
-        socialLinksToRender.length > 0 && (
-          <ul class="mt-m flex list-none justify-center gap-s p-0 text-sm md:justify-start">
-            {socialLinksToRender.map((link) => {
-              const Icon = socialIcon(link.platform);
-              const ariaLabel = link.label ?? link.platform ?? 'Social link';
-              return (
-                <li>
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={ariaLabel}
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-primary-dark hover:bg-primary-dark hover:text-white"
-                  >
-                    <Icon size={20} stroke={1.5} />
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        )
-      }
     </div>
   </div>
 
-  {/* Logo + tagline — sits below the nav grid as a centered brand signature. */}
-  <div class="mx-auto flex max-w-content flex-col items-center gap-s px-6 pb-l text-center">
-    <a
-      href="/"
-      aria-label={`${brandName} home`}
-      class="inline-block transition-opacity hover:opacity-80"
-    >
-      {
-        /* The mark is the race's own painted trail sign, portrait at 108x180,
-          so it is sized by HEIGHT and its width follows. An unloaded lazy
-          image with width:auto shrink-wraps to 0x0, never intersects the
-          viewport and never loads, which is how the sponsor logos vanished
-          earlier in this build: give it real dimensions. */
-      }
-      <img
-        alt={brandName}
-        width={108}
-        height={180}
-        class="h-[7.5rem] w-auto"
-        loading="lazy"
-        decoding="async"
-        data-theme-logo
-        src={footerLogoLight}
-        data-logo-light-src={footerLogoLight}
-        data-logo-light-srcset={footerLogoLight}
-        data-logo-dark-src={footerLogoDark}
-        data-logo-dark-srcset={footerLogoDark}
-      />
-    </a>
-    {
-      siteSettings?.tagline && (
-        <p class="max-w-[28rem] text-sm text-foreground/80 italic">{siteSettings.tagline}</p>
-      )
-    }
-  </div>
-
   {
-    /* Thin bottom bar — copyright, privacy, optional "Site by..." credit on one
-       line so they don't add a tall block to a footer column. */
+    /* The base rail: copyright, small print and the credit on one line, so they
+      never grow into a column of their own. */
   }
-  <div class="border-t border-border">
+  <div class="foot-base foot-z">
     <div
       class="mx-auto flex max-w-content flex-col items-center justify-center gap-xs px-6 py-m text-center text-xs text-foreground/80 sm:flex-row sm:justify-between"
     >
       <p>© {currentYear} {brandName}</p>
       <div class="flex items-center gap-m">
         {
-          LEGAL_LINKS.length > 0
-            ? LEGAL_LINKS.map((l) => (
-                <a
-                  href={l.href}
-                  class="underline underline-offset-2 transition-colors hover:text-link"
-                  {...externalLinkAttrs(l.href)}
-                >
-                  {l.label}
-                </a>
-              ))
-            : /* The starter's fallback here was a hardcoded "Privacy policy"
-                  link. This site has no privacy route, because the race does
-                  not have that page, and a footer link to a 404 is worse than
-                  no link at all. Editor-supplied small print above still
-                  renders; add a page in the Studio and link it there if one is
-                  ever needed. */
-              null
+          /* The starter's fallback here was a hardcoded "Privacy policy" link.
+            This site has no privacy route, because the race does not have that
+            page, and a footer link to a 404 is worse than no link at all. */
+        }
+        {
+          LEGAL_LINKS.map((l) => (
+            <a
+              href={l.href}
+              class="underline underline-offset-2 transition-colors hover:text-link"
+              {...externalLinkAttrs(l.href)}
+            >
+              {l.label}
+            </a>
+          ))
         }
         {
           siteCredit && (
