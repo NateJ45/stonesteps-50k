@@ -53,7 +53,13 @@ if (!token) {
 const client = createClient({ projectId, dataset, token, apiVersion: '2026-05-01', useCdn: false });
 
 /** Lexical rank for @sanity/orderable-document-list. */
-const rank = (n) => `a${String(n).padStart(4, '0')}`;
+// THE ORDERABLE PLUGIN READS LEXORANK, not any sortable string. A rank is
+// "<bucket>|<6 base-36 characters>:", and the seed used to emit a bare
+// "a0001": no bucket, so @sanity/orderable-document-list logged
+// "Unknown bucket" for every row in the Studio console and could not place a
+// dragged item against the others (2026-09-12). Bucket 0, then the number
+// zero-padded, which sorts as a plain string and stays legible in the data.
+const rank = (n) => `0|a${String(n).padStart(5, '0')}:`;
 
 const docs = [];
 

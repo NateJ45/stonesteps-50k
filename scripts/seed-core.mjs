@@ -681,7 +681,7 @@ docs.push({
     'Share your goals and timeline',
     'We respond personally, no automated sequences',
   ],
-  orderRank: 'a0',
+  orderRank: '0|a00001:',
 });
 
 docs.push({
@@ -697,7 +697,7 @@ docs.push({
     'Determine the right service tier',
     'No pressure, just a conversation',
   ],
-  orderRank: 'a1',
+  orderRank: '0|a00002:',
 });
 
 docs.push({
@@ -714,7 +714,7 @@ docs.push({
     'Full sourcing list with links and pricing',
     'Furniture layout to scale',
   ],
-  orderRank: 'a2',
+  orderRank: '0|a00003:',
 });
 
 docs.push({
@@ -726,7 +726,7 @@ docs.push({
   shortDescription:
     'We coordinate delivery, direct placement, and add the final styling details. You walk in at the end of the day to a finished room.',
   features: ['Delivery and placement coordination', 'Final styling', 'Walkthrough and care notes'],
-  orderRank: 'a3',
+  orderRank: '0|a00004:',
 });
 
 // ── 9. faqPage (singleton) ───────────────────────────────────────────────
