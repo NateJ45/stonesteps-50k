@@ -66,7 +66,11 @@ docs.push({
   name: 'Stone Steps 50K',
   tagline: "Cincinnati's longest running ultra marathon.",
   editionNumber: 23, // RunSignUp race description: "back for its 23rd edition"
-  raceDate: '2026-10-25T08:00:00.000Z', // RunSignUp: 10/25/2026 08:00 local
+  // AN INSTANT, IN UTC. RunSignUp lists the gun at 10/25/2026 08:00 in
+  // America/New_York, which is still on daylight time on race day (UTC-4), so
+  // the instant is 12:00Z. It was seeded as 08:00Z (4 am Eastern) and the
+  // hero's clock ran four hours ahead of RunSignUp's until 2026-09-12.
+  raceDate: '2026-10-25T12:00:00.000Z',
   venue: 'Mt. Airy Forest',
   startArea: 'The Oval, Area 13',
   streetAddress: '5083 Colerain Ave.', // RunSignUp address block
