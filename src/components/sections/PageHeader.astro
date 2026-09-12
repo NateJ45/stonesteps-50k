@@ -53,7 +53,15 @@ const hasImage = Boolean(image?.asset);
     whisper: dense behind the hero, and inside the disc behind the race
     director, where they are enlarged into a map detail. */
   }
-  <MudField field="walk" class="header-walk" />
+  {
+    /* THE FADE IS WHAT STOPS THE PRINTS BEING SLICED. This section clips
+    (overflow-hidden, for the photograph's corner), and the walk fills it edge
+    to edge, so without a mask the prints nearest the top and bottom are cut
+    through the middle and read as a printing fault. Same treatment as the
+    director band and the elevation band: thin the field out before the clip
+    reaches it. */
+  }
+  <MudField field="walk" class="header-walk mud-edge-fade" />
 
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
     <div class={hasImage ? 'grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center' : ''}>

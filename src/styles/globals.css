@@ -1724,9 +1724,16 @@ body::before {
   /* Half again the size it shipped at (0.9rem 1.7rem, inherited type). A
      plate button is the one thing on a poster you are meant to reach for,
      and at the old size it read as a tag rather than a handle. The header's
-     --sm variant keeps its own dimensions below. */
-  font-size: 1.25rem;
-  padding: 1.15rem 2.4rem;
+     --sm variant keeps its own dimensions below.
+
+     FLUID, NOT FIXED, and that is a bug fix rather than a flourish. At a flat
+     1.25rem/2.4rem the longest label on the site ("Register for the 50K") plus
+     its padding is wider than a 320px viewport's content box, and the reflow
+     suite caught the whole page scrolling sideways there. These clamps hold
+     the full size from about 1000px up and give it back on the narrowest
+     phones. */
+  font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
+  padding: clamp(0.85rem, 0.7rem + 0.75vw, 1.15rem) clamp(1.35rem, 0.85rem + 2.5vw, 2.4rem);
   border: 2px solid var(--plate-edge);
   border-radius: var(--plate-radius);
   background: var(--primary);
@@ -2142,11 +2149,21 @@ body::before {
   display: inline-flex;
   flex-direction: column;
   gap: 0.35rem;
-  max-width: 20rem;
-  margin-top: 1.75rem;
+  /* NARROWER THAN THE COLUMN ON A PHONE. At 20rem it ran the full width of
+     the copy and read as a banner across the hero rather than as something
+     stamped on it, and the claim broke across four ragged lines. */
+  max-width: 16rem;
+  margin-top: 1.5rem;
   padding: 0.95rem 1.25rem;
   border: 2px solid var(--heading-accent);
   border-radius: 4px;
+  /* THE STAMP CARRIES ITS OWN GROUND. Transparent, its ink was measured
+     against whatever the mud happened to leave behind it, and CI put the
+     edition line at 3.84:1. The same trap as the countdown label: a mark whose
+     contrast depends on where the spatter falls has no contrast. The band
+     paints nothing (the body's own surface shows through the hero), so the
+     page's ground is an exact match and the stamp reads as paper under ink. */
+  background: var(--background);
   color: var(--heading-accent);
   text-transform: uppercase;
   rotate: var(--claim-rotate);
