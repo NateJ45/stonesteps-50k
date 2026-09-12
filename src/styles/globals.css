@@ -3982,7 +3982,6 @@ main > .band-torn:first-child::before {
 /* Printing flattens every surface to white (see the print block above), and a
    literal ground would be the one band that ignored that. */
 @media print {
-  .foot-topo,
   .foot-mud {
     display: none;
   }
@@ -4014,37 +4013,29 @@ main > .band-torn:first-child::before {
   }
 }
 
-/* The two backdrop layers. Both are absolutely positioned and z-index 0; every
-   content row below sets `position: relative; z-index: 1` through `.foot-z`. */
-.foot-topo {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-}
-.foot-topo path {
-  fill: none;
-  stroke: color-mix(in srgb, var(--foreground) 9%, transparent);
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
-}
-.foot-topo path:nth-child(3n) {
-  stroke: color-mix(in srgb, var(--heading-accent) 22%, transparent);
-}
-/* The same walk of prints the page headers and the menu board wear, so the
-   route that crosses the top of a page also crosses the bottom of it. Lighter
-   here than on the menu: the menu is a takeover with five rows on it, the
-   footer has four columns of small print to stay off. */
+/* THE BACKDROP: PRINTS AND MUD, NO CONTOURS (2026-09-12). The first cut wore
+   the contour lines plus the walk of prints, and the contours were a bit much:
+   a footer is read, not looked at, and a field of hairlines behind small print
+   is noise. It wears the hero's language instead, a throw of mud with a route
+   of prints across it, so the page closes the way it opens. The field is baked
+   at the footer's OWN aspect (scripts/generate-mud.mjs, `foot`): the walk file
+   is 1000x480 and under `cover` on a 3:1 band it lost a third of its route and
+   showed three prints the size of a hand.
+
+   ONE LAYER, ONE ELEMENT, on purpose: axe cannot see a mask, so it reads each
+   layer's background colour and blends them, and two stacked translucent
+   layers model as a veil over every line of small print here. One combined
+   file blends once and models what is really painted. It is marked
+   `data-contrast-media` so the contrast gate measures the type over it from
+   pixels rather than trusting the model. */
 .foot-mud {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: color-mix(in srgb, var(--spatter-ink) 9%, transparent);
-  -webkit-mask-image: url('/mud/walk-phone.png');
-  mask-image: url('/mud/walk-phone.png');
+  background: color-mix(in srgb, var(--spatter-ink) 13%, transparent);
+  -webkit-mask-image: url('/mud/foot-phone.png');
+  mask-image: url('/mud/foot-phone.png');
   -webkit-mask-size: cover;
   mask-size: cover;
   -webkit-mask-position: center;
@@ -4054,8 +4045,8 @@ main > .band-torn:first-child::before {
 }
 @media (min-width: 48rem) {
   .foot-mud {
-    -webkit-mask-image: url('/mud/walk-wide.png');
-    mask-image: url('/mud/walk-wide.png');
+    -webkit-mask-image: url('/mud/foot-wide.png');
+    mask-image: url('/mud/foot-wide.png');
   }
 }
 .foot-z {

@@ -45,7 +45,6 @@ import {
 } from '@tabler/icons-react';
 import { Phone } from 'lucide-react';
 import CopyEmailButton from '@/components/CopyEmailButton';
-import Topo from '@/components/race/Topo.astro';
 import { externalLinkAttrs } from '@/lib/links';
 import { getRace } from '@/lib/queries';
 // THE SVG, NOT THE PNG. The .png files in src/assets were the REID DESIGN
@@ -211,9 +210,12 @@ const rowClass = (label: string) =>
     on the cream theme, which left the torn top edge with nothing to cut. */
 }
 <footer class="site-foot text-foreground">
-  {/* Backdrop, both layers, both aria-hidden and both out of the flow. */}
-  <Topo seed={31} lines={11} opacity={1} class="foot-topo" />
-  <div class="foot-mud" aria-hidden="true"></div>
+  {
+    /* The backdrop: one baked field of mud and prints, out of the flow, and
+      marked as media so the contrast gate samples the pixels under the type.
+      See .foot-mud in globals.css for why it is one layer and not two. */
+  }
+  <div class="foot-mud" aria-hidden="true" data-contrast-media></div>
 
   {
     /* NEXT RUNNING, at poster size. Only while the date is still ahead: a

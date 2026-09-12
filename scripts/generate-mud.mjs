@@ -147,6 +147,32 @@ const FIELDS = [
       { suffix: 'phone', W: 420, H: 760, density: 0.8, big: 0.6, split: false, quiet: [] },
     ],
   },
+  {
+    // THE FOOTER. Its first cut wore the contour lines plus the walk, and the
+    // contours were "a bit much" (Nathan, 2026-09-12): a footer is read, not
+    // looked at, and a hairline field behind small print is noise. Prints and
+    // mud instead, which is what the hero opens the page with, so the page
+    // closes the way it opened.
+    //
+    // ITS OWN SHAPE, NOT THE WALK'S. The walk is 1000x480 and the footer is
+    // about 2.5:1 to 3.4:1 wide on a desktop, so `cover` cropped a third of
+    // the route off the top and bottom and left three prints the size of a
+    // hand. A field baked at the band's own aspect shows everything it holds
+    // at the size it was drawn.
+    //
+    // A THROW AND A WALK, not just a walk: `only: 'all'` gives the footer the
+    // hero's full field (the throw, the splat it leaves, the scatter, and the
+    // route across it), which is the "more mud" half of the request. No quiet
+    // zones: it is worn at an opacity that passes under copy, and the contrast
+    // gate samples the pixels rather than trusting that.
+    name: 'foot',
+    seed: 67,
+    only: 'all',
+    shapes: [
+      { suffix: 'wide', W: 1600, H: 560, density: 0.9, big: 0.7, split: false, quiet: [] },
+      { suffix: 'phone', W: 420, H: 1100, density: 0.55, big: 0.6, split: false, quiet: [] },
+    ],
+  },
 ];
 
 await mkdir(outDir, { recursive: true });
