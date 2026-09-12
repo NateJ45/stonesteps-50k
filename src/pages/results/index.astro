@@ -35,6 +35,16 @@ const ran = editions.filter((e) => !e.missing);
 const totalFinishers = ran.reduce((n, e) => n + e.total, 0);
 const span = editions.length ? `${editions.at(-1)!.year} to ${editions[0].year}` : '';
 
+// THE WINNERS ARE PICKED BY GENDER, NOT BY POSITION. The old markup mapped
+// `d.winners` in whatever order the array happened to hold, which is fine while
+// every year has exactly two and the men's is first, and silently puts a
+// woman's name in the men's column the first time it is not. Now each column
+// asks for the one it wants and renders nothing when that year has none.
+const winnerOf = (d: { winners: { gender: string }[] }, gender: 'M' | 'F') =>
+  (d.winners as { gender: string; row: { name: string; timeSeconds: number } }[]).find(
+    (w) => w.gender === gender,
+  ) ?? null;
+
 const title = 'Results archive | Stone Steps 50K';
 const description = `Every Stone Steps 50K and 27K result on file, ${span}.`;
 ---
@@ -67,10 +77,31 @@ const description = `Every Stone Steps 50K and 27K result on file, ${span}.`;
         )
       }
 
-      <ul class="mt-12 grid gap-px">
+      {
+        /* THE COLUMN HEADS. They exist once, at the top, instead of the words
+          "Men's win" and "Women's win" being repeated forty-six times down the
+          page. aria-hidden because this is a decorative alignment rail, not a
+          table header: every winner cell below carries its own label, visible
+          on a phone and screen-reader-only from 56rem where this rail takes
+          over the explaining. */
+      }
+      <div
+        class="arch-head arch-tracks mt-12 border-b border-border pb-2 font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase"
+        aria-hidden="true"
+      >
+        <span>Year</span>
+        <span>Race</span>
+        <span>Finishers</span>
+        <span>Men's winner</span>
+        <span class="text-right">Time</span>
+        <span>Women's winner</span>
+        <span class="text-right">Time</span>
+      </div>
+
+      <ul class="grid list-none gap-0 p-0">
         {
           editions.map((e) => (
-            <li class="border-t border-border py-6 first:border-t-0 first:pt-0">
+            <li class="border-b border-border py-5">
               {/* The missing-year row carries NO opacity utility.
                   `text-muted-foreground` already sits near the AA floor and
                   diluting it puts the row under, which is how this exact line
@@ -82,32 +113,44 @@ const description = `Every Stone Steps 50K and 27K result on file, ${span}.`;
                   <span class="text-sm text-muted-foreground">Run, but no results on file.</span>
                 </div>
               ) : (
-                <a
-                  class="group grid gap-3 sm:grid-cols-[7rem_1fr] sm:items-baseline"
-                  href={`/results/${e.year}`}
-                >
-                  <span class="display tabular text-heading-accent text-h3 group-hover:underline">
+                <a class="arch-row arch-tracks group" href={`/results/${e.year}`}>
+                  <span class="arch-row__year display tabular text-heading-accent text-h3 group-hover:underline">
                     {e.year}
                   </span>
-                  <span class="grid gap-2">
-                    {e.distances.map((d) => (
-                      <span class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
-                        <span class="lc font-mono text-[0.75rem] tracking-[0.16em] text-muted-foreground uppercase">
-                          {d.name}
-                        </span>
-                        <span class="tabular text-muted-foreground">
-                          {d.finishers} {d.finishers === 1 ? 'finisher' : 'finishers'}
-                        </span>
-                        {d.winners.map((w) => (
-                          <span class="text-muted-foreground">
-                            {w.gender === 'F' ? "Women's" : "Men's"} win{' '}
-                            <span class="text-foreground">{w.row.name}</span>{' '}
-                            <span class="tabular">{formatRaceTime(w.row.timeSeconds)}</span>
-                          </span>
-                        ))}
+
+                  {e.distances.map((d, di) => (
+                    <span class="arch-dist">
+                      {/* The first distance in the Studio's own order is the
+                        headline race and gets the filled chip. See the note on
+                        .dist-chip--lead in globals.css. */}
+                      <span class:list={['dist-chip', di === 0 && 'dist-chip--lead']}>
+                        {d.name}
                       </span>
-                    ))}
-                  </span>
+                      <span class="arch-count tabular text-sm text-muted-foreground">
+                        {d.finishers}{' '}
+                        <span class="arch-count__word">
+                          {d.finishers === 1 ? 'finisher' : 'finishers'}
+                        </span>
+                      </span>
+
+                      {(['M', 'F'] as const).map((g) => {
+                        const w = winnerOf(d, g);
+                        return (
+                          <>
+                            <span class="arch-win text-sm">
+                              <span class="arch-win__label font-mono text-[0.6875rem] tracking-[0.16em] text-muted-foreground uppercase">
+                                {g === 'F' ? 'Women' : 'Men'}
+                              </span>
+                              <span class="text-foreground">{w ? w.row.name : '—'}</span>
+                            </span>
+                            <span class="arch-time tabular text-sm text-muted-foreground">
+                              {w ? formatRaceTime(w.row.timeSeconds) : ''}
+                            </span>
+                          </>
+                        );
+                      })}
+                    </span>
+                  ))}
                 </a>
               )}
             </li>

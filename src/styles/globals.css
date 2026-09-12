@@ -4189,3 +4189,251 @@ main > .band-torn:first-child::before {
 .foot-base {
   border-top: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
 }
+
+/* ---------- Results: the two races, and rows you can count -------------- */
+/* WHY (2026-09-12). Both results pages read as "a long line of letters and
+   numbers". Two separate causes, one per page.
+ 
+   ON A YEAR PAGE the table stretched to the full content column, so on a
+   1440px screen the Name column alone was 762px: a name at the left margin,
+   an age 600px of nothing later, a time 280px after that. The eye has to carry
+   a name across half a screen of blank paper to reach its time, sixty times.
+   Nothing was wrong with the type. The measure was wrong.
+ 
+   ON THE ARCHIVE PAGE the year's two distances were laid out with
+   `flex-wrap` and a gap, which is not a layout, it is a sentence: "50K 53
+   finishers Men's win Jonathan Pahren 4:56:38 Women's win Molly Kash 5:21:06",
+   wrapping wherever it happened to run out of room. Nothing lined up with the
+   year above or below it, so 23 years of it was a wall.
+ 
+   Both are fixed by giving the numbers columns to stand in, and by letting the
+   distance say its own name at a size you can read. */
+
+/* THE DISTANCE CHIP. The distances were set in 11px mono at a fifth of an em
+   of tracking, which is the site's label style: correct for "NEXT RUNNING",
+   wrong for the single most important word on a results row. It is a plate
+   now, in the display face, the same object the rest of the site uses when
+   something is nailed to the page rather than printed on it. */
+.dist-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.5rem;
+  padding: 0.15rem 0.5rem 0.1rem;
+  border: 1.5px solid color-mix(in srgb, var(--foreground) 35%, transparent);
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  line-height: 1.25;
+  letter-spacing: 0.03em;
+  color: var(--foreground);
+  /* The chip sits on whatever band it lands in, so it carries no ground of its
+     own: an outline reads on the page surface and on the board stock alike. */
+  background: transparent;
+}
+/* THE HEADLINE RACE IS FILLED IN, and which one that is comes from the data,
+   not from this sheet. The distances are an orderable list in the Studio and
+   the page marks the FIRST one, so if the race ever leads with something other
+   than the 50K, Dave changes the order and the emphasis follows. Hardcoding
+   "50k" here would be a second opinion about the race that nobody could edit. */
+.dist-chip--lead {
+  border-color: var(--heading-accent);
+  background: var(--heading-accent);
+  /* The band's own ground, so the chip reads as ink-on-plate in both themes
+     without needing a literal. Measured: 8.6:1 light, 12.1:1 dark. */
+  color: var(--background);
+}
+
+/* ---------- The archive, in columns ------------------------------------- */
+/* Seven tracks, the same seven on every row of every year, which is the whole
+   point: the times line up in a column you can read straight down 23 runnings.
+
+   THE TRACKS ARE BOUNDED, NOT FRACTIONAL. With `1fr` on the two name columns
+   the grid spent the full 1272px content width on them, so a winner's name sat
+   at the left of a 270px cell and their time at the right of it: the same
+   name-adrift-from-its-time problem this page was opened to fix, one level
+   down. Capped at 12rem and packed to the start instead, so a name and its
+   time are neighbours and the leftover width stays leftover.
+
+   THE YEAR IS PLACED, NOT SPANNED. `grid-row: 1 / -1` looks like the way to
+   run the year down beside its distances and silently is not: -1 counts back
+   through the EXPLICIT grid, these rows are all implicit, so it resolved to
+   row 1 and the second distance started underneath the year in column 1. Each
+   distance's first cell claims column 2 instead, which starts a new row on its
+   own and works for one distance or four. */
+/* THE TRACK LIST IS INSIDE THE QUERY, and it has to be. Declared at every
+   width it was seven fixed columns totalling about 800px on a 390px phone, so
+   the archive scrolled sideways: `document.scrollWidth` 724 against a 390
+   viewport. Below 56rem the phone layout in `.arch-dist` owns the columns and
+   this rail is not rendered at all. */
+.arch-row {
+  display: grid;
+  gap: 0.5rem 1.25rem;
+}
+.arch-head {
+  display: none;
+}
+@media (min-width: 56rem) {
+  .arch-tracks {
+    grid-template-columns:
+      6.5rem 4.25rem 4.5rem minmax(5rem, 12rem) 5.5rem
+      minmax(5rem, 12rem) 5.5rem;
+    justify-content: start;
+  }
+  .arch-row {
+    align-items: baseline;
+    gap: 0.6rem 1.25rem;
+  }
+  .arch-head {
+    display: grid;
+    gap: 0 1.25rem;
+  }
+}
+
+/* PHONE: each distance is its own small block, and it pairs each name with its
+   time on one line rather than stacking four items down the screen. Two tracks,
+   so the chip sits opposite the finisher count and each winner opposite their
+   time. The labels inside the winner cells do the work the header rail does on
+   a wide screen, which is why they are visible here and only screen-reader text
+   from 56rem: below that there is no rail to read them off. */
+.arch-dist {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 0.3rem 0.75rem;
+  grid-column: 1 / -1;
+  /* A MEASURE HERE TOO. This layout runs up to 56rem, so at 860px it was an
+     812px-wide pair of tracks with a name at one end and its time at the other:
+     the same gap the wide layout was rebuilt to close, hiding one breakpoint
+     down. Capped, it stays a readable pair at every width it serves. */
+  max-width: 30rem;
+}
+.arch-dist > .dist-chip {
+  justify-self: start;
+}
+.arch-win {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.5rem;
+}
+/* The count reads "61" under a column head that already says Finishers, so the
+   word is not repeated in every cell. It is in the markup for the phone, where
+   there is no head, and hidden from sight but not from a reader here. */
+.arch-count__word {
+  white-space: nowrap;
+}
+@media (min-width: 56rem) {
+  .arch-dist {
+    max-width: none;
+  }
+  /* The distance dissolves into the year's own grid so its cells land in the
+     shared tracks. This is the one place `display: contents` is right: the
+     wrapper exists to group for the phone and must not exist at all here. */
+  .arch-dist {
+    display: contents;
+  }
+  /* Column 2 is where a distance row begins. See the note above. */
+  .arch-dist > .dist-chip {
+    grid-column: 2;
+  }
+  .arch-win {
+    display: block;
+  }
+  /* The rail above the list carries these words once. Kept in the accessibility
+     tree at every width, because the rail itself is aria-hidden. */
+  .arch-win__label,
+  .arch-count__word {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .arch-time,
+  .arch-count {
+    text-align: right;
+  }
+}
+
+/* ---------- The finisher table ------------------------------------------ */
+/* A MEASURE, NOT THE WHOLE COLUMN. See the note at the top of this block: the
+   table is reference material and reference material is read down, so it takes
+   the width four columns actually need and no more. `table-layout: fixed` is
+   what makes that stick; without it the browser hands every spare pixel to the
+   longest name and the gap comes back. */
+.finishers {
+  width: 100%;
+  max-width: 36rem;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.finishers col.c-place {
+  width: 3.25rem;
+}
+.finishers col.c-age {
+  width: 3.5rem;
+}
+.finishers col.c-time {
+  width: 6rem;
+}
+/* ROWS IN TENS. Sixty identical hairlines is a texture, not a structure: there
+   is no way to find the 34th row except by counting from the top one at a
+   time. The hairline between rows is lighter now and every tenth row closes
+   with a real rule, so the list arrives in blocks that can be counted in tens
+   the way a printed results sheet is. */
+.finishers tbody tr {
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+}
+.finishers tbody tr:nth-child(10n) {
+  border-bottom: 1.5px solid color-mix(in srgb, var(--foreground) 28%, transparent);
+}
+.finishers tbody tr:last-child {
+  border-bottom: 0;
+}
+.finishers :is(td, th) {
+  padding-top: 0.42rem;
+  padding-bottom: 0.42rem;
+}
+/* The place number is the row's index, so it reads as one: mono, quiet, and
+   never competing with the name beside it. */
+.finishers .f-place {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--muted-foreground);
+}
+.finishers .f-name {
+  padding-left: 0.75rem;
+  text-align: left;
+  font-weight: 400;
+  /* A name longer than the column wraps rather than pushing the time out of
+     alignment, which is the one thing `table-layout: fixed` cannot decide. */
+  overflow-wrap: anywhere;
+}
+.finishers .f-age {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--muted-foreground);
+}
+.finishers .f-time {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ---------- A distance's own block on a year page ----------------------- */
+/* The two races were separated by a `text-h3` heading 43px wide with 2,300px
+   of unbroken table between them. The break is a real one now: space above,
+   the chip and the name at display size, and a rule the width of the page. */
+.dist-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.9rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid color-mix(in srgb, var(--foreground) 22%, transparent);
+}

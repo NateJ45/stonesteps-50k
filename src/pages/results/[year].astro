@@ -77,15 +77,37 @@ const description = `Every finisher of the ${edition.year} Stone Steps 50K and 2
       </p>
 
       {
-        edition.distances.map((d) => (
-          <div class="mt-14">
-            <div class="flex flex-wrap items-baseline gap-x-4">
-              <h2 class="display text-h3">{d.name}</h2>
-              <p class="tabular text-sm text-muted-foreground">{d.finishers} finishers</p>
+        edition.distances.map((d, di) => (
+          <div class="mt-16 first:mt-12">
+            {/* A REAL BREAK BETWEEN THE TWO RACES. This was a `text-h3` heading
+              43px wide with two and a half thousand pixels of unbroken table
+              between it and the next one, so the page read as one endless list
+              that changed race somewhere in the middle without saying so. The
+              distance now arrives as a chip plus its name at display size over
+              a rule the width of the page: the same object the archive page
+              uses, so the two agree about what a race looks like. The first
+              distance in the Studio's own order is the headline one and gets
+              the filled chip. */}
+            <div class="dist-head">
+              {/* NO CHIP HERE, and that is not an oversight. On the archive
+                page a distance is a marker on a dense row, so it is a chip. On
+                this page the distance IS the section, so it is a heading, and a
+                chip beside a heading that says the same word twice is just
+                repetition. The headline race is set in the accent instead, so
+                the two blocks are told apart at a glance from anywhere on the
+                page rather than by reading them. */}
+              <h2 class:list={['display text-h2', di === 0 && 'text-heading-accent']}>{d.name}</h2>
+              <p class="tabular text-sm text-muted-foreground">
+                {d.finishers} {d.finishers === 1 ? 'finisher' : 'finishers'}
+              </p>
             </div>
 
+            {/* The winners sit over the list they came off, so they share its
+              measure rather than running the full content column and leaving
+              the women's card stranded a screen away from the table beneath
+              it. */}
             {d.winners.length > 0 && (
-              <ul class="mt-5 grid gap-4 sm:grid-cols-2">
+              <ul class="mt-5 grid max-w-[46rem] gap-4 sm:grid-cols-2">
                 {d.winners.map((w) => (
                   <li class="border-l-[3px] border-[color:var(--heading-accent)] pl-5">
                     <p class="font-mono text-[0.6875rem] tracking-[0.2em] text-muted-foreground uppercase">
@@ -108,11 +130,24 @@ const description = `Every finisher of the ${edition.year} Stone Steps 50K and 2
               </ul>
             )}
 
-            <div class="mt-8 overflow-x-auto">
-              <table class="w-full border-collapse text-sm">
+            {/* THE TABLE TAKES A MEASURE, NOT THE COLUMN. Full width, the Name
+              cell alone was 762px on a desktop, so a name sat at the left
+              margin and its time 880px away with nothing in between: the eye
+              had to carry one across the other sixty times over. The <colgroup>
+              plus `table-layout: fixed` is what holds it, because without the
+              fixed layout the browser hands every spare pixel back to the
+              longest name and the gap returns. See .finishers in globals.css. */}
+            <div class="mt-7 overflow-x-auto">
+              <table class="finishers text-sm">
                 <caption class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase">
                   {edition.year} {d.name}, every finisher on file
                 </caption>
+                <colgroup>
+                  <col class="c-place" />
+                  <col />
+                  <col class="c-age" />
+                  <col class="c-time" />
+                </colgroup>
                 <thead>
                   <tr class="border-b border-primary/30">
                     <th
@@ -143,11 +178,9 @@ const description = `Every finisher of the ${edition.year} Stone Steps 50K and 2
                 </thead>
                 <tbody>
                   {d.rows.map((row, i) => (
-                    <tr class="border-b border-border/60">
-                      <td class="tabular py-2 text-right text-muted-foreground">
-                        {row.place ?? i + 1}
-                      </td>
-                      <th scope="row" class="py-2 pl-3 text-left font-normal">
+                    <tr>
+                      <td class="f-place">{row.place ?? i + 1}</td>
+                      <th scope="row" class="f-name">
                         {row.slug ? (
                           <a
                             class="underline-offset-2 hover:text-link hover:underline"
@@ -167,10 +200,8 @@ const description = `Every finisher of the ${edition.year} Stone Steps 50K and 2
                           </abbr>
                         )}
                       </th>
-                      <td class="tabular py-2 text-right text-muted-foreground">{row.age ?? ''}</td>
-                      <td class="tabular py-2 text-right font-bold whitespace-nowrap">
-                        {formatRaceTime(row.timeSeconds)}
-                      </td>
+                      <td class="f-age">{row.age ?? ''}</td>
+                      <td class="f-time">{formatRaceTime(row.timeSeconds)}</td>
                     </tr>
                   ))}
                 </tbody>
