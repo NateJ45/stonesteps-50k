@@ -191,6 +191,21 @@ box in the Studio each year.
 
 ## Known gaps, deliberately open
 
+### 0c. A field-level "Take me there" focuses the field but does not scroll to it
+
+**Cosmetic, Sanity's own behaviour, low priority.**
+
+A guide link can name a field (`{ doc: 'race', field: 'raceDate' }` in
+`src/sanity/components/studioLink.ts`), which becomes Sanity's `path=` intent
+parameter. Verified in the deployed Studio on 2026-09-12: it opens the right
+document, selects the right field group tab, and puts the cursor in the field.
+It does NOT scroll the field into view, so on the race document the focused
+Race day input sits below the fold and the reader still has to scroll, just not
+hunt. Sanity's own focus handling owns that scroll; nothing in this repo passes
+it a scroll option. Worth a look if the Studio is upgraded, or if it turns out
+an in-Studio click (rather than a pasted URL, which is how this was tested)
+already scrolls.
+
 ### 0b. `npm run dev` logs "Invalid hook call" on every island render
 
 **Blocker: the second React instance is inside the workerd dev runtime, past the config knobs.**
