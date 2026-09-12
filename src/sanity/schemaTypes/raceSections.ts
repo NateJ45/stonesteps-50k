@@ -679,6 +679,16 @@ export const parksSection = defineType({
         'line around it.',
     }),
     defineField({ name: 'body', title: 'Body', type: 'text', rows: 4 }),
+    // A button under the copy. Added for "Find out more about Mt. Airy"
+    // (2026-09-12), pointing at the park's own page, and a ctaBlock rather than
+    // a bare URL so it can as easily point at a page on this site.
+    defineField({
+      name: 'cta',
+      title: 'Link button (optional)',
+      type: 'ctaBlock',
+      description:
+        'A button under the text. For instance, a link to the park on the Cincinnati Parks site.',
+    }),
     defineField({
       name: 'image',
       title: 'Photograph',

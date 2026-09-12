@@ -23,6 +23,7 @@
 
 import SanityImage from '@/components/SanityImage.astro';
 import MudField from '@/components/race/MudField.astro';
+import CtaLink from '@/components/CtaLink.astro';
 import type { ProjectedParksSection } from '@/lib/pageBuilder.types';
 
 type Props = {
@@ -32,6 +33,7 @@ type Props = {
   image?: ProjectedParksSection['image'];
   caption?: string;
   showDirector?: boolean;
+  cta?: ProjectedParksSection['cta'];
   race?: ProjectedParksSection['race'];
   headingId?: string;
 };
@@ -43,6 +45,7 @@ const {
   image,
   caption,
   showDirector = true,
+  cta,
   race,
   headingId = 'parks-heading',
 } = Astro.props as Props;
@@ -81,6 +84,19 @@ const {
           {headline}
         </h2>
         {body && <p class="mt-5 max-w-[46ch]">{body}</p>}
+
+        {
+          /* The cream plate, as the tickets wear on this same forest ground.
+            CtaLink resolves the link (external, or a page on this site) and
+            the plate class carries the look. */
+        }
+        {
+          cta && (
+            <div class="mt-7">
+              <CtaLink {cta} class="btn-plate btn-plate--cream" />
+            </div>
+          )
+        }
 
         {
           showDirector && race?.directorName && (

@@ -61,7 +61,12 @@ export const ARCHIVE_PROJECTION = `
   }, []),
   "historical": select(${WANTS_ARCHIVE} => *[_type == "recordEntry"]{
     bracket, gender, year, timeSeconds, sourceNote,
-    "distance": distance->slug.current
+    "distance": distance->slug.current,
+    // THE HOLDER. Never projected before (2026-09-12): every transcribed record
+    // reached the board with its year and its time and no name, so the board
+    // printed "Unclaimed" beside a 2010 time, which reads as a contradiction.
+    // The document has always carried the reference; the query never asked.
+    "athlete": { "name": athlete->name, "slug": athlete->slug.current }
   }, [])`;
 
 export function sectionsProjection(field = 'pageBuilder'): string {
@@ -211,6 +216,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
     _type == "parksSection" => {
       ...,
       image${IMAGE_PROJECTION},
+      cta${CTA_PROJECTION},
       "race": *[_type == "race"][0]{ parksDonation, directorName, directorNote }
     },
     // Same shape the records board takes, because it runs the same derivation.

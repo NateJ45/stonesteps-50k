@@ -630,6 +630,7 @@ export interface ProjectedParksSection {
   image?: ProjectedImage;
   caption?: string;
   showDirector?: boolean;
+  cta?: ProjectedCtaBlock | null;
   race?: {
     parksDonation?: string;
     directorName?: string;

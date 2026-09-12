@@ -1305,6 +1305,7 @@ export type ParksSection = {
   eyebrow?: string;
   headline?: string;
   body?: string;
+  cta?: CtaBlock;
   image?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
