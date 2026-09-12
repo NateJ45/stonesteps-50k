@@ -3601,31 +3601,16 @@ main > .band-torn:first-child::before {
 }
 
 /* ---------- The menu board ---------------------------------------------- */
-/* ALWAYS BARK. The board pins the dark theme's own values, because it is an
-   object (like the race clock, like the header's plate) and objects do not
-   change colour with the page. Every token the shared components read
-   (.btn-plate, .claim-stamp, .display, the theme toggle) is set here, so in
-   light mode they draw as they do on the bark page rather than as rust on
-   bark or bark on bark. */
+/* IT FOLLOWS THE THEME. The first cut pinned the board to bark in both modes,
+   on the argument that a sign is an object and objects do not change colour
+   with the page. Seen on the cream site it read as the dark site's menu
+   dropped on top (2026-09-12), so it takes the page's own tokens now: bark
+   with cream type on the dark page, cream stock with bark ink on the light
+   one, the same swap every band on the site makes. The plates on it (close,
+   Register) keep their own stock, as plates do everywhere. */
 .menu-sheet {
-  --background: #1a1712;
-  --color-background: #1a1712;
-  --foreground: #ffebbb;
-  --color-foreground: #ffebbb;
-  --muted-foreground: #c9b98f;
-  --color-muted-foreground: #c9b98f;
-  --heading-accent: #fed89b;
-  --color-heading-accent: #fed89b;
-  --primary: #b8462f;
-  --primary-accent: #c9553a;
-  --primary-foreground: #ffebbb;
-  --plate-edge: #000;
-  --display-shadow: var(--lift-sm);
-  --display-echo: #a83c26;
-  --accent: #241f17;
-  --color-accent: #241f17;
-  background: #1a1712;
-  color: #ffebbb;
+  background: var(--background);
+  color: var(--foreground);
   isolation: isolate;
 }
 .menu-topo {
@@ -3638,12 +3623,12 @@ main > .band-torn:first-child::before {
 }
 .menu-topo path {
   fill: none;
-  stroke: rgb(255 235 187 / 0.11);
+  stroke: color-mix(in srgb, var(--foreground) 11%, transparent);
   stroke-width: 1.2;
   vector-effect: non-scaling-stroke;
 }
 .menu-topo path:nth-child(3n) {
-  stroke: rgb(254 216 155 / 0.22);
+  stroke: color-mix(in srgb, var(--heading-accent) 26%, transparent);
 }
 /* The route of prints, worn as a mask painted in cream. Same file the page
    headers wear, so the phone's walk and the menu's are the same walk. */
@@ -3652,7 +3637,7 @@ main > .band-torn:first-child::before {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: rgb(255 235 187 / 0.13);
+  background: color-mix(in srgb, var(--spatter-ink) 14%, transparent);
   -webkit-mask-image: url('/mud/walk-phone.png');
   mask-image: url('/mud/walk-phone.png');
   -webkit-mask-size: cover;
@@ -3684,7 +3669,7 @@ main > .band-torn:first-child::before {
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #fed89b;
+  color: var(--heading-accent);
 }
 .menu-close {
   justify-self: end;
@@ -3714,7 +3699,7 @@ main > .band-torn:first-child::before {
   padding: 0;
 }
 .menu-item {
-  border-bottom: 2px dashed rgb(255 235 187 / 0.18);
+  border-bottom: 2px dashed color-mix(in srgb, var(--foreground) 22%, transparent);
 }
 .menu-item:last-child {
   border-bottom: 0;
@@ -3732,14 +3717,14 @@ main > .band-torn:first-child::before {
   font-size: 0.6875rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #c9b98f;
+  color: var(--muted-foreground);
 }
 .menu-link {
   display: flex;
   align-items: baseline;
   gap: 0.9rem;
   padding: 0.7rem 0.15rem;
-  color: #ffebbb;
+  color: var(--foreground);
   text-decoration: none;
 }
 .menu-link__idx {
@@ -3749,7 +3734,7 @@ main > .band-torn:first-child::before {
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: #fed89b;
+  color: var(--heading-accent);
 }
 .menu-link__label {
   font-size: clamp(2.5rem, 11.5vw, 3.6rem);
@@ -3764,11 +3749,11 @@ main > .band-torn:first-child::before {
 /* Where you are: the row is struck in the second ink, the way the wordmark
    carries its red echo. */
 .menu-link[aria-current='page'] .menu-link__label {
-  color: #fed89b;
-  text-shadow: 0.055em 0.055em 0 #a83c26;
+  color: var(--heading-accent);
+  text-shadow: 0.055em 0.055em 0 var(--display-echo);
 }
 .menu-link[aria-current='page'] .menu-link__idx {
-  color: #ffebbb;
+  color: var(--foreground);
 }
 
 .menu-foot {
@@ -3801,11 +3786,11 @@ main > .band-torn:first-child::before {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 6px;
-  color: #ffebbb;
+  color: var(--foreground);
 }
 .menu-util__btn:hover,
 .menu-util__btn:focus-visible {
-  background: #241f17;
+  background: var(--accent);
 }
 /* The claim, struck the full width of the board directly above the Register
    plate, so the foot reads as one poster: the boast, then the ask. Barely

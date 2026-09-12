@@ -8,7 +8,7 @@
 // objects from the race's world (the header's sign plate, the cream tickets,
 // the punch card, the rubber-stamped claim, the mud) and the menu was the one
 // piece of chrome that had not been given one. It is now a full-screen board:
-// bark stock in BOTH themes, contour lines and a route of prints behind, the
+// the page's own stock, contour lines and a route of prints behind, the
 // five destinations set in the display face at the size of the wordmark and
 // struck onto the board one at a time with the same stamp the hero uses, the
 // rust Register plate underneath, and the claim stamped in the corner.
@@ -18,11 +18,10 @@
 // must stay client:only="react": Radix's portal hook throws "Invalid hook call"
 // under Astro's SSR.
 //
-// ALWAYS BARK. The board pins its own palette (see `.menu-sheet` in
-// globals.css) rather than reading the theme, because it is a physical object,
-// like the race clock and the header's plate, and a sign does not turn cream
-// when the page does. The values are the dark theme's own, so in dark mode it
-// is simply the page; in light mode it is the sign the header plate promised.
+// IT FOLLOWS THE THEME: bark with cream type on the dark page, cream stock
+// with bark ink on the light one (see `.menu-sheet` in globals.css). It was
+// pinned to bark for a day on the argument that a sign is an object; on the
+// cream site that read as the dark site's menu dropped on top.
 //
 // Data: the menu itself comes from Site Settings through the Header, the
 // Facebook group from the race document, the tagline from Site Settings. All
@@ -135,10 +134,21 @@ export default function MobileNav({
   links,
   siteSettings,
   logoLightUrl,
+  logoDarkUrl,
   cta = DEFAULT_CTA,
   facebookUrl,
 }: Props) {
   const [open, setOpen] = useState(false);
+  // Which logo file: the header keeps `html.dark` current, so it is watched
+  // rather than read once (the toggle at the foot of this board changes it).
+  const [dark, setDark] = useState(false);
+  useEffect(() => {
+    const read = () => setDark(document.documentElement.classList.contains('dark'));
+    read();
+    const mo = new MutationObserver(read);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => mo.disconnect();
+  }, []);
   // The current route, read on the client because this island never renders
   // on the server. It marks the destination the visitor is already on.
   const [path, setPath] = useState('');
@@ -214,11 +224,11 @@ export default function MobileNav({
             <div className="menu-head">
               <SheetTitle className="menu-eyebrow">Menu</SheetTitle>
               {/* The mark, top centre, where the header carries it: the board
-                  reads as the header opened up. One file serves both themes
-                  because the board is always bark. */}
-              {logoLightUrl && (
+                  reads as the header opened up. The header swaps this file
+                  with the theme; the same pair is passed in here. */}
+              {(logoLightUrl || logoDarkUrl) && (
                 <img
-                  src={logoLightUrl}
+                  src={dark ? logoDarkUrl || logoLightUrl : logoLightUrl || logoDarkUrl}
                   alt=""
                   aria-hidden="true"
                   width={108}
