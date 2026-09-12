@@ -19,9 +19,9 @@
 //
 // The preview routes themselves live in the site app: src/pages/preview/.
 // SINGLETON_PREVIEW_PATHS is the SAME map as SINGLETON_BY_PATH in
-// src/pages/preview/[...slug].astro, and as FIRST_SEGMENT_PREVIEWABLE in
-// src/layouts/PreviewLayout.astro's click interceptor. Three places, one truth:
-// change one and change all three.
+// src/pages/preview/[...slug].astro. Two places, one truth: change one and
+// change the other. (There was a third, FIRST_SEGMENT_PREVIEWABLE in
+// PreviewLayout.astro, which turned out to be dead code and is gone.)
 // =============================================================================
 import {
   defineDocuments,
@@ -29,16 +29,28 @@ import {
   type PresentationPluginOptions,
 } from 'sanity/presentation';
 
-/** Preview path per singleton type. */
+/**
+ * Preview path per singleton. THIS SITE HAS TWO.
+ *
+ * It inherited the starter's nine (about, services, process, faq, contact,
+ * journal, privacy), and none of those pages exist here: there is no
+ * src/pages/about.astro, no aboutPage document, no route. Two things went
+ * wrong because of it (2026-09-12).
+ *
+ * The Presentation tool listed all nine under "Main pages", so clicking About
+ * offered the race director a blank New About Page to fill in and publish, for
+ * a page the site cannot render.
+ *
+ * Worse, `contact` claimed the path. The real contact page is a `page`
+ * document with the slug "contact", but the singleton branch matched first and
+ * looked for a contactPage that does not exist, so /preview/contact answered
+ * "No document found" and the Contact page could not be previewed at all.
+ *
+ * The pages this site really has are the home page, the 404, and `page`
+ * documents (course, records, contact), which the :slug route handles.
+ */
 export const SINGLETON_PREVIEW_PATHS: Record<string, string> = {
   homePage: '/preview',
-  aboutPage: '/preview/about',
-  servicesPage: '/preview/services',
-  processPage: '/preview/process',
-  faqPage: '/preview/faq',
-  contactPage: '/preview/contact',
-  journalPage: '/preview/journal',
-  privacyPage: '/preview/privacy',
   notFoundPage: '/preview/404',
 };
 
@@ -71,21 +83,18 @@ export const resolve: PresentationPluginOptions['resolve'] = {
         return { locations: [{ title: doc?.title ?? slug, href: previewHref(slug) }] };
       },
     }),
-    // Collection docs have no draft-preview route of their own. Send each to
-    // the page it renders on, with a note when a detail page exists live.
-    journalEntry: {
-      locations: [{ title: 'Journal', href: '/preview/journal' }],
-      message: 'Journal entry pages preview on the live site after publish.',
-    },
-    service: { locations: [{ title: 'Services', href: '/preview/services' }] },
-    processStep: { locations: [{ title: 'Process', href: '/preview/process' }] },
-    philosophyPoint: { locations: [{ title: 'About', href: '/preview/about' }] },
-    testimonial: { locations: [{ title: 'Home', href: '/preview' }] },
-    faqItem: { locations: [{ title: 'FAQ', href: '/preview/faq' }] },
-    faqCategory: { locations: [{ title: 'FAQ', href: '/preview/faq' }] },
-    journalCategory: { locations: [{ title: 'Journal', href: '/preview/journal' }] },
+    // Collection docs have no draft-preview route of their own, so each is sent
+    // to the page it renders on. The starter's entries (journalEntry, service,
+    // processStep, faqItem and the rest) are gone with the pages they pointed
+    // at: see the note on SINGLETON_PREVIEW_PATHS. Every type below holds real
+    // documents on this site.
     announcement: { locations: [{ title: 'Home', href: '/preview' }] },
     siteSettings: { locations: [{ title: 'Home', href: '/preview' }] },
-    businessInfo: { locations: [{ title: 'Contact', href: '/preview/contact' }] },
+    race: { locations: [{ title: 'Home', href: '/preview' }] },
+    distance: { locations: [{ title: 'Home', href: '/preview' }] },
+    scheduleItem: { locations: [{ title: 'Home', href: '/preview' }] },
+    sponsor: { locations: [{ title: 'Home', href: '/preview' }] },
+    courseFeature: { locations: [{ title: 'The course', href: '/preview/course' }] },
+    recordEntry: { locations: [{ title: 'Records', href: '/preview/records' }] },
   },
 };

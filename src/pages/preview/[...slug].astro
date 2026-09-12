@@ -25,8 +25,9 @@
        12) and is deliberately not attempted here.
 
    Keep the path -> type map in sync with SINGLETON_PREVIEW_PATHS in
-   src/sanity/resolve.ts and FIRST_SEGMENT_PREVIEWABLE in
-   src/layouts/PreviewLayout.astro. noindex comes from PreviewLayout.
+   src/sanity/resolve.ts. (It used to name a third copy, FIRST_SEGMENT_PREVIEWABLE
+   in src/layouts/PreviewLayout.astro; that one was dead code and is gone.)
+   noindex comes from PreviewLayout.
    ============================================================================ */
 export const prerender = false;
 
@@ -57,22 +58,19 @@ Astro.response.headers.set('Cache-Control', 'no-store');
 const slug = (Astro.params.slug as string | undefined) || '';
 
 // Fixed preview path -> singleton type. Mirror of src/sanity/resolve.ts.
+// TWO ENTRIES, and `contact` is deliberately NOT one of them: it is a `page`
+// document here, and while this map claimed the path the slug branch below
+// never ran, so previewing Contact answered "No document found". See the note
+// on SINGLETON_PREVIEW_PATHS in src/sanity/resolve.ts.
 const SINGLETON_BY_PATH: Record<string, string> = {
   '': 'homePage',
-  about: 'aboutPage',
-  services: 'servicesPage',
-  process: 'processPage',
-  faq: 'faqPage',
-  contact: 'contactPage',
-  journal: 'journalPage',
-  privacy: 'privacyPage',
   '404': 'notFoundPage',
 };
 
 // The types whose whole body is the pageBuilder array. Everything else previews
 // as its editable surface only. `page` (custom pages) is a builder type too and
 // is handled by the slug branch below.
-const BUILDER_SINGLETONS = new Set(['homePage', 'aboutPage', 'servicesPage', 'processPage']);
+const BUILDER_SINGLETONS = new Set(['homePage']);
 
 // The heading-id prefix each live page passes to SectionRenderer. Matching it
 // here keeps generated ids identical to the live page, so an in-page anchor an

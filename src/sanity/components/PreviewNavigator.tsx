@@ -70,15 +70,16 @@ const APIV = '2026-05-01';
 
 // Main pages in the order a visitor meets them. Labels are static; the doc id
 // equals the type (the desk structure's singleton convention).
+//
+// TWO, NOT NINE. This carried the starter's list (About, Services, Process,
+// Journal, FAQ, Contact, Privacy), and this site has none of those pages.
+// Clicking one opened a blank "New About Page" with a Publish button under it,
+// inviting the race director to write a page the site cannot render, and
+// Contact appeared twice: once as a singleton that does not exist and once,
+// correctly, under Custom pages. The course, the records and the contact page
+// are `page` documents and list themselves below.
 const MAIN_PAGES: { type: string; label: string }[] = [
   { type: 'homePage', label: 'Home' },
-  { type: 'aboutPage', label: 'About' },
-  { type: 'servicesPage', label: 'Services' },
-  { type: 'processPage', label: 'Process' },
-  { type: 'journalPage', label: 'Journal' },
-  { type: 'faqPage', label: 'FAQ' },
-  { type: 'contactPage', label: 'Contact' },
-  { type: 'privacyPage', label: 'Privacy' },
   { type: 'notFoundPage', label: '404 page' },
 ];
 

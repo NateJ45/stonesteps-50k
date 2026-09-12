@@ -207,19 +207,14 @@ const footerAttr = docEditAttr('siteSettings', 'siteSettings', 'tagline');
       //  - Standalone /preview tab: NEW TAB, so the preview surface is never
       //    hijacked.
       //
-      // THE ROUTE MAP IS PER-SITE. FIRST_SEGMENT_PREVIEWABLE mirrors
-      // SINGLETON_BY_PATH in src/pages/preview/[...slug].astro (plus: any
-      // single-segment path is a custom `page` slug, which /preview/<slug> also
-      // renders). Keep the two in sync.
-      const FIRST_SEGMENT_PREVIEWABLE = new Set([
-        'about',
-        'services',
-        'process',
-        'faq',
-        'contact',
-        'journal',
-        'privacy',
-      ]);
+      // FIRST_SEGMENT_PREVIEWABLE USED TO LIVE HERE and did nothing. It listed
+      // the starter's singleton paths so they would be remapped into /preview,
+      // but the rule below already remaps EVERY single-segment path that is not
+      // in NEVER_REMAP, and every entry in that set was a single segment not in
+      // NEVER_REMAP. It could only ever repeat a decision already made. Worse,
+      // it read as the per-site route map and was three names out of date with
+      // the real one (2026-09-12). The map that matters is SINGLETON_BY_PATH in
+      // src/pages/preview/[...slug].astro.
       const NEVER_REMAP = new Set(['api', 'studio', 'preview', '404']);
 
       document.addEventListener(
@@ -257,10 +252,7 @@ const footerAttr = docEditAttr('siteSettings', 'siteSettings', 'tagline');
           if (path === window.location.pathname && url.hash) return;
 
           const segments = path === '/' ? [] : path.slice(1).split('/');
-          const previewable =
-            path === '/' ||
-            (segments.length === 1 && !NEVER_REMAP.has(first)) ||
-            (segments.length === 1 && FIRST_SEGMENT_PREVIEWABLE.has(first));
+          const previewable = path === '/' || (segments.length === 1 && !NEVER_REMAP.has(first));
 
           event.preventDefault();
           if (previewable) {
