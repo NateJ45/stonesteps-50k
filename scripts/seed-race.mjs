@@ -162,8 +162,11 @@ docs.push({
     },
   ],
   startTime: '8:00 am', // RunSignUp event details
-  trekkerNote: 'Trekkers may start at 7:00 am.', // RunSignUp event details
-  entryCap: 120, // RunSignUp participant_cap
+  // Quoted from the 50K's RunSignUp event details, re-verified 2026-09-11:
+  // "Race begins at 8:00 am 50k Trekkers may start at 7:00 am Course will
+  // close at approx. 4:30 pm".
+  trekkerNote: 'Trekkers may start at 7:00 am.',
+  entryCap: 120, // RunSignUp participant_cap, re-verified 2026-09-11
   runSignUpEventId: 1104726, // the 2026 50K
   featured: true,
   confirmed: true,
@@ -207,8 +210,11 @@ docs.push({
     },
   ],
   startTime: '8:30 am',
+  // Quoted from the 27K's RunSignUp event details, re-verified 2026-09-11:
+  // "27k Trekkers may start at 8:00 am (ineligible for age group and overall
+  // awards)".
   trekkerNote: 'Trekkers may start at 8:00 am and are ineligible for age group and overall awards.',
-  entryCap: 130,
+  entryCap: 130, // RunSignUp participant_cap, re-verified 2026-09-11
   runSignUpEventId: 1104727,
   featured: false,
   confirmed: true,

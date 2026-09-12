@@ -104,7 +104,9 @@ export const distance = defineType({
       name: 'entryCap',
       title: 'Entry cap',
       type: 'number',
-      description: 'Verified from RunSignUp: 120 for the 50K, 130 for the 27K.',
+      description:
+        "Verified from RunSignUp's participant_cap on the current events: 120 for the 50K, " +
+        '130 for the 27K (re-checked 2026-09-11). Leave empty rather than guessing.',
     }),
     defineField({
       name: 'runSignUpEventId',

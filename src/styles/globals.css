@@ -2142,9 +2142,9 @@ body::before {
   display: inline-flex;
   flex-direction: column;
   gap: 0.35rem;
-  max-width: 17rem;
+  max-width: 20rem;
   margin-top: 1.75rem;
-  padding: 0.85rem 1.1rem;
+  padding: 0.95rem 1.25rem;
   border: 2px solid var(--heading-accent);
   border-radius: 4px;
   color: var(--heading-accent);
@@ -2164,18 +2164,24 @@ body::before {
 }
 .claim-stamp__line {
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: 1.3rem;
   line-height: 1.05;
   letter-spacing: 0.02em;
 }
 .claim-stamp__edition {
   font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.24em;
+  /* The edition shipped at 0.625rem with 0.24em of tracking and whatever
+     weight the mono face defaults to, which on a rotated mark over a
+     photograph was the least readable thing in the hero. Bigger, bolder, and
+     less tracking: a stamp's second impression should still be a stamp, but
+     the letters have to touch each other enough to form words. */
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   /* A rule above it, so the edition reads as the stamp's second impression
      rather than as a third line of the claim. */
   border-top: 1px solid currentcolor;
-  padding-top: 0.35rem;
+  padding-top: 0.4rem;
 }
 @media (min-width: 64rem) {
   .claim-stamp {
@@ -2184,7 +2190,7 @@ body::before {
     top: 0;
     right: 0;
     margin-top: 0;
-    max-width: 15rem;
+    max-width: 17.5rem;
   }
 }
 

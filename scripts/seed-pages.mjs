@@ -350,6 +350,21 @@ docs.push({
         {
           _type: 'loopNote',
           _key: key(),
+          title: 'Cutoff',
+          // CONFIRMED, and it took a second look to know that. This note shipped
+          // as confirmed: false ("how that is enforced loop by loop is not
+          // published anywhere"), which was true of the enforcement and wrong
+          // about the close itself: the 50K's own RunSignUp event details read
+          // "Course will close at approx. 4:30 pm". Checked 2026-09-11. The
+          // eight and a half hours is that minus the 8:00 am start.
+          body:
+            'The course closes at approximately 4:30 pm, eight and a half hours after the ' +
+            '50K start.',
+          confirmed: true,
+        },
+        {
+          _type: 'loopNote',
+          _key: key(),
           title: 'Start and finish',
           body:
             'The Oval, Area 13, inside Mt. Airy Forest. Both distances start and finish in ' +
