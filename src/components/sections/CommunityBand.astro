@@ -116,7 +116,9 @@ const button: ProjectedCommunitySection['cta'] =
     color: var(--plate-ink);
     border: 2px solid var(--plate-edge);
     border-radius: var(--plate-radius);
-    box-shadow: var(--lift-lg);
+    /* The ground lift: this card sits on the page itself, so on bark its offset
+       is the warm one rather than a black that cannot be seen. */
+    box-shadow: var(--lift-ground-lg);
     /* A static shape, not an animation, so reduced motion leaves it alone: the
        same reasoning as the plate button's skew. */
     rotate: -0.7deg;

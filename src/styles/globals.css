@@ -1234,6 +1234,20 @@ body::before {
   --lift-sm: 2px 3px 0 rgb(0 0 0 / 0.5);
   --lift: 3px 4px 0 rgb(0 0 0 / 0.55);
   --lift-lg: 5px 7px 0 rgb(0 0 0 / 0.5);
+  /* THE GROUND LIFT: the same offset, for an object sitting on the PAGE'S OWN
+     ground rather than on a plate.
+     A hard offset is only visible when the ground is lighter than the shadow.
+     On the cream page that is always true and this is simply --lift; on bark it
+     is false, which is what the .dark block below does something about. The two
+     have to be separate tokens because the SAME class can sit on either kind of
+     ground: a cream plate button is on bark in the footer and on forest in the
+     parks band, and CSS cannot ask what is behind an element. So the choice is
+     made once, per usage, by which token the rule names. */
+  --lift-ground-sm: var(--lift-sm);
+  --lift-ground: var(--lift);
+  --lift-ground-lg: var(--lift-lg);
+  /* The plate button's reach-out shadow, which is bigger than its resting one. */
+  --lift-ground-hover: 5px 6px 0 rgb(0 0 0 / 0.55);
   /* THE PLATE, AND WHY IT FLIPS WITH THE THEME.
      A plate is an object sitting ON the page, and it only reads as one when
      there is real value distance between it and the ground. These were FIXED
@@ -1284,11 +1298,29 @@ body::before {
 }
 
 .dark {
-  /* Lighter shadows on bark: a 55%-black shadow on a near-black ground is
-     invisible, and the object loses its lift entirely. */
+  /* Deeper black for a shadow falling on a PLATE, which on bark is the cream
+     one: the stock is light, so black still reads and only needs more of it. */
   --lift-sm: 2px 3px 0 rgb(0 0 0 / 0.7);
   --lift: 3px 4px 0 rgb(0 0 0 / 0.75);
   --lift-lg: 5px 7px 0 rgb(0 0 0 / 0.7);
+
+  /* AND THE ONE ON THE PAGE ITSELF CANNOT BE BLACK AT ALL.
+     This block used to carry the note "a 55%-black shadow on a near-black
+     ground is invisible", and then raised the opacity, which cannot help: the
+     bark page is rgb(26,23,18) and a 70%-black offset on it renders
+     rgb(7,6,5). Nineteen values apart, next to a cream plate at 255, that is
+     not a shadow, it is a smudge along one edge, and every object on the page
+     lost its lift in dark mode. Measured on the deployed site 2026-09-13 across
+     twenty elements a page.
+     So on bark the offset goes the other way: the page ground carried TOWARD
+     the cream stock. Warm rather than grey because every other dark in this
+     palette is warm, and derived from the two colours it sits between rather
+     than written as a literal, so apply-brand carries it. */
+  --lift-ground-ink: color-mix(in srgb, var(--background) 80%, #ffebbb);
+  --lift-ground-sm: 2px 3px 0 var(--lift-ground-ink);
+  --lift-ground: 3px 4px 0 var(--lift-ground-ink);
+  --lift-ground-lg: 5px 7px 0 var(--lift-ground-ink);
+  --lift-ground-hover: 5px 6px 0 var(--lift-ground-ink);
 
   /* On bark the plate is the LIGHT object: cream stock, dark lettering. The
      original treatment, and the one the design was drawn around. */
@@ -1357,6 +1389,23 @@ body::before {
 /* Forest stock with gold lettering in BOTH themes, so it always wants it. */
 .ticket--feature {
   --display-shadow: var(--lift-sm);
+}
+
+/* THE SAME LIST DECIDES THE LIFT, for the same reason and with one addition.
+   A plate button sitting ON one of these stocks is not on the page ground, so
+   its shadow stays black however dark the page behind the plate is; only the
+   plate itself takes the ground lift. The parks band joins the list here and
+   not above because it is a forest ground in both themes: a black offset reads
+   on it perfectly well, and it never needed a display-shadow flip because its
+   lettering is already the lighter of the two.
+   Miss a stock off this list and the symptom is mild (a warm shadow on cream,
+   where black was wanted) rather than the invisible one the tokens fix. */
+:is(.ticket, .punch, .clip__sheet, .qa, .community__card, .parks) :is(.btn-plate, .menu-trigger) {
+  box-shadow: var(--lift);
+}
+:is(.ticket, .punch, .clip__sheet, .qa, .community__card, .parks)
+  :is(.btn-plate, .menu-trigger):hover {
+  box-shadow: 5px 6px 0 rgb(0 0 0 / 0.55);
 }
 
 /* ---------- The second ink -------------------------------------------- */
@@ -1741,7 +1790,7 @@ body::before {
   border-radius: var(--plate-radius);
   background: var(--primary);
   color: var(--primary-foreground);
-  box-shadow: var(--lift);
+  box-shadow: var(--lift-ground);
   transition:
     transform 0.16s ease,
     box-shadow 0.16s ease,
@@ -1751,7 +1800,10 @@ body::before {
 .btn-plate:hover {
   background: var(--primary-accent);
   transform: translate(-2px, -2px) skewX(var(--plate-skew));
-  box-shadow: 5px 6px 0 rgb(0 0 0 / 0.55);
+  /* The reach-out shadow has to follow the resting one onto the ground token,
+     or the plate would LOSE its shadow on hover in dark mode, which is the one
+     moment the shadow is doing the most work. */
+  box-shadow: var(--lift-ground-hover);
 }
 .btn-plate:active {
   transform: translate(2px, 3px) skewX(var(--plate-skew));
@@ -2608,7 +2660,7 @@ body::before {
      themes: the mark reads on it everywhere, and on bark it still separates
      from the page as a plate should. */
   background: #3a3128;
-  box-shadow: var(--lift-sm);
+  box-shadow: var(--lift-ground-sm);
   rotate: -1.5deg;
   transition:
     rotate 0.24s ease,
@@ -2646,7 +2698,7 @@ body::before {
 a:hover > .sign-badge,
 a:focus-visible > .sign-badge {
   rotate: 0deg;
-  box-shadow: var(--lift);
+  box-shadow: var(--lift-ground);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2902,7 +2954,7 @@ main > .band-torn:first-child::before {
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--plate-face) 8%, transparent), transparent 60%),
     color-mix(in srgb, var(--ground) 92%, #000);
-  box-shadow: var(--lift-lg);
+  box-shadow: var(--lift-ground-lg);
   padding: clamp(1.25rem, 4vw, 2.75rem);
 }
 @media (min-width: 768px) {
@@ -3070,7 +3122,7 @@ main > .band-torn:first-child::before {
   color: var(--plate-ink);
   border: 2px solid var(--plate-edge);
   border-radius: 14px;
-  box-shadow: var(--lift-lg);
+  box-shadow: var(--lift-ground-lg);
   transform: rotate(-0.8deg);
 }
 .punch__hole {
@@ -3144,7 +3196,7 @@ main > .band-torn:first-child::before {
   background: var(--muted);
   border: 2px solid var(--plate-edge);
   border-radius: 12px;
-  box-shadow: var(--lift-lg);
+  box-shadow: var(--lift-ground-lg);
 }
 .clip__clamp {
   position: absolute;
@@ -3156,7 +3208,7 @@ main > .band-torn:first-child::before {
   background: linear-gradient(#d6ccb8, #8d8574);
   border: 2px solid var(--plate-edge);
   border-radius: 7px;
-  box-shadow: var(--lift-sm);
+  box-shadow: var(--lift-ground-sm);
 }
 .clip__clamp::after {
   content: '';
@@ -3199,7 +3251,7 @@ main > .band-torn:first-child::before {
   color: var(--patch-ink);
   border: 2px solid var(--plate-edge);
   border-radius: 14px;
-  box-shadow: var(--lift);
+  box-shadow: var(--lift-ground);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
@@ -3318,7 +3370,7 @@ main > .band-torn:first-child::before {
   color: var(--plate-ink);
   border: 2px solid var(--plate-edge);
   border-radius: 10px;
-  box-shadow: var(--lift);
+  box-shadow: var(--lift-ground);
   padding: 1rem 1.1rem;
   transform: rotate(-0.7deg);
   transition: transform 0.2s ease;
@@ -3683,7 +3735,7 @@ main > .band-torn:first-child::before {
   border-radius: 6px;
   background: #ffebbb;
   color: #1a1712;
-  box-shadow: var(--lift-sm);
+  box-shadow: var(--lift-ground-sm);
   rotate: 1.5deg;
   font-family: var(--font-mono);
   font-size: 0.6875rem;
@@ -3697,7 +3749,7 @@ main > .band-torn:first-child::before {
 .menu-trigger:hover,
 .menu-trigger:focus-visible {
   rotate: 0deg;
-  box-shadow: var(--lift);
+  box-shadow: var(--lift-ground);
 }
 .menu-trigger__bars {
   display: grid;

@@ -185,8 +185,10 @@ const srText = !valid
   .clock {
     --led: #ff3b1f;
     background: #0d0b09;
+    /* --lift-ground, not --lift: the housing sits on the page's own ground, and
+       on bark a black offset behind a near-black housing is not a shadow. */
     box-shadow:
-      var(--lift),
+      var(--lift-ground),
       inset 0 2px 0 rgb(255 235 187 / 0.07);
   }
 
