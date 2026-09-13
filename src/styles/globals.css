@@ -1335,17 +1335,23 @@ body::before {
 }
 /* A plate carries the opposite treatment to the page it sits on, so it flips
    the rule back. Light theme: charcoal stock, cream lettering, shadow ON.
-   Dark theme: cream stock, dark lettering, shadow OFF. */
+   Dark theme: cream stock, dark lettering, shadow OFF.
+   ANY SURFACE PAINTED IN --plate-face BELONGS ON THIS LIST, and a new one that
+   forgets is wrong in BOTH themes at once: no shadow where the lettering is the
+   lighter of the two, and a black shadow behind near-black lettering where it
+   is not. The group card was added on 2026-09-13 for exactly that reason. */
 .ticket,
 .punch,
 .clip__sheet,
-.qa {
+.qa,
+.community__card {
   --display-shadow: var(--lift-sm);
 }
 .dark .ticket,
 .dark .punch,
 .dark .clip__sheet,
-.dark .qa {
+.dark .qa,
+.dark .community__card {
   --display-shadow: none;
 }
 /* Forest stock with gold lettering in BOTH themes, so it always wants it. */
