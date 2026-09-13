@@ -16,7 +16,7 @@ import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
-import { renderOg } from './lib/render-og.mjs';
+import { renderOg, closeRenderer } from './lib/render-og.mjs';
 import { loadEnv } from './lib/loadEnv.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -49,15 +49,37 @@ const client = createClient({
 
 const outDir = resolve(root, 'public/og');
 
-// Business name for the OG wordmark. Reads SITE_NAME from env first so CI can
-// override without touching source; falls back to the value in src/data/site.ts
-// (hard-coded here to avoid a TypeScript import from a plain .mjs script).
-// Update this default when you replace the starter identity in src/data/site.ts.
-const WORDMARK = env.SITE_NAME ?? 'Stone Steps 50K';
+// The strap under every headline: where the race is and when the next one is.
+// Read from The Race rather than typed, like everything else on this site.
+const raceDoc = await client
+  .fetch(`*[_type == "race"][0]{ venue, city, region, raceDate }`)
+  .catch(() => null);
+const STRAP = (() => {
+  const where = [raceDoc?.venue, raceDoc?.city].filter(Boolean).join(', ');
+  if (!raceDoc?.raceDate) return where || 'Mt. Airy Forest, Cincinnati';
+  const when = new Date(raceDoc.raceDate).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+  return where ? `${where} · ${when}` : when;
+})();
+
+// An seoTitle is written for a browser tab, so it usually ends in the site
+// name: "The course | Stone Steps 50K". The card already carries the race's
+// painted mark, so repeating the name in the headline spends the biggest type
+// on the card saying what the logo beside it just said.
+const SITE_SUFFIX = /\s*[|·–—-]\s*Stone Steps 50K\s*$/i;
+const headlineFor = (tagline) => String(tagline).replace(SITE_SUFFIX, '').trim();
 
 let count = 0;
 async function render(slug, tagline) {
-  await renderOg({ wordmark: WORDMARK, tagline, outPath: resolve(outDir, `${slug}.png`) });
+  await renderOg({
+    headline: headlineFor(tagline),
+    strap: STRAP,
+    outPath: resolve(outDir, `${slug}.png`),
+  });
   count += 1;
   const t = String(tagline);
   console.log(`  ${slug}.png — ${t.slice(0, 60)}${t.length > 60 ? '…' : ''}`);
@@ -111,5 +133,14 @@ for (const year of years) {
 const manifest = resolve(root, 'src/data/ogPages.json');
 writeFileSync(manifest, JSON.stringify([...slugs].sort(), null, 2) + '\n');
 console.log(`\nManifest: ${slugs.length} slugs -> src/data/ogPages.json`);
+
+// THIS IS NOT OPTIONAL. render-og.mjs keeps ONE chromium alive across the whole
+// run, because launching a browser per card turned a four second job into
+// ninety. A browser Playwright has not been told to close keeps the event loop
+// alive forever, so without this the script does all its work, prints the line
+// below, and then hangs: every card written, every timestamp correct, and the
+// process never exits. That looked exactly like a slow render the first time it
+// happened and cost two ten-minute timeouts before anyone suspected the exit.
+await closeRenderer();
 
 console.log(`\nDone. ${count} OG images written to ${outDir}`);

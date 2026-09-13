@@ -40,7 +40,8 @@
     "serve:dist": "http-server dist/client -p 4321 -s -c-1 --silent",
     "check:links": "linkinator ./dist/client --recurse --skip \"^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])\" --skip \"/studio\" --skip \"/preview\" --skip \"/runners\" --skip \"/api/\"",
     "test:visual": "playwright test -c playwright.visual.config.ts",
-    "test:visual:update": "playwright test -c playwright.visual.config.ts --update-snapshots=all"
+    "test:visual:update": "playwright test -c playwright.visual.config.ts --update-snapshots=all",
+    "favicon": "node scripts/generate-favicons.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.2.4",

@@ -1,0 +1,13 @@
+{
+  "name": "Stone Steps 50K",
+  "short_name": "Stone Steps",
+  "description": "Cincinnati's longest running ultramarathon, on the same trail since 2003.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#fbf6ea",
+  "theme_color": "#fbf6ea",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
