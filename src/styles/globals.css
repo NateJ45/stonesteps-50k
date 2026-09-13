@@ -4487,3 +4487,42 @@ main > .band-torn:first-child::before {
   padding-bottom: 0.75rem;
   border-bottom: 2px solid color-mix(in srgb, var(--foreground) 22%, transparent);
 }
+
+/* ---------- Fastest in each age group, on a year page ------------------- */
+/* Three columns that line up down both genders: the band, the runner, the
+   time. Same instinct as the archive rows, for the same reason: a name adrift
+   from its time is the thing these pages were rebuilt to stop. The band is
+   fixed so the two lists agree with each other, the time is fixed so the
+   figures right-align into a column, and the name takes what is left. */
+.ages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ages__row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) 4.75rem;
+  align-items: baseline;
+  gap: 0 0.75rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  font-size: 0.875rem;
+}
+.ages__row:last-child {
+  border-bottom: 0;
+}
+.ages__bracket {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.ages__name {
+  overflow-wrap: anywhere;
+}
+.ages__time {
+  text-align: right;
+  font-weight: 700;
+  white-space: nowrap;
+}

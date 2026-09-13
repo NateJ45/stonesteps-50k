@@ -20,6 +20,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getAllResults, getDistanceRefs, getSiteSettings } from '@/lib/queries';
 import { editionFor, summariseEditions, type ResultRow, type DistanceRef } from '@/lib/editions';
 import { formatRaceTime } from '@/lib/race-time';
+import { fastestByBracket } from '@/lib/bracket-leaders';
 
 export async function getStaticPaths() {
   const [results, distances] = await Promise.all([
@@ -129,6 +130,64 @@ const description = `Every finisher of the ${edition.year} Stone Steps 50K and 2
                 ))}
               </ul>
             )}
+
+            {/* FASTEST IN EACH AGE GROUP, NOT "AGE GROUP WINNERS". The race's
+              own divisions have moved around: 2007 awarded under 30 and 30-39,
+              2008 and 2009 replaced both with a single under 40, and several
+              years published no divisions at all. Calling these people winners
+              would name medals nobody received. The fastest time in an age band
+              is true in every year. See src/lib/bracket-leaders.ts.
+
+              Only brackets with somebody in them render, so a thin early field
+              shows three rows rather than six with gaps, and 2006 shows nothing
+              at all because its source published age ranges instead of ages. */}
+            {(() => {
+              const groups = [
+                { key: 'M', label: 'Men' },
+                { key: 'F', label: 'Women' },
+              ]
+                .map((g) => ({ ...g, leaders: fastestByBracket(d.rows, g.key) }))
+                .filter((g) => g.leaders.length > 0);
+              if (groups.length === 0) return null;
+              return (
+                <div class="mt-10 max-w-[46rem]">
+                  <p class="font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase">
+                    Fastest in each age group
+                  </p>
+                  <div class="mt-3 grid gap-x-10 gap-y-6 sm:grid-cols-2">
+                    {groups.map((g) => (
+                      <div>
+                        <p class="text-heading-accent font-mono text-[0.6875rem] tracking-[0.2em] uppercase">
+                          {g.label}
+                        </p>
+                        <ul class="ages mt-2">
+                          {g.leaders.map((l) => (
+                            <li class="ages__row">
+                              <span class="ages__bracket">{l.label}</span>
+                              <span class="ages__name">
+                                {l.row.slug ? (
+                                  <a
+                                    class="underline-offset-2 hover:text-link hover:underline"
+                                    href={`/runners/${l.row.slug}`}
+                                  >
+                                    {l.row.name}
+                                  </a>
+                                ) : (
+                                  l.row.name
+                                )}
+                              </span>
+                              <span class="ages__time tabular">
+                                {formatRaceTime(l.row.timeSeconds)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* THE TABLE TAKES A MEASURE, NOT THE COLUMN. Full width, the Name
               cell alone was 762px on a desktop, so a name sat at the left
