@@ -621,6 +621,17 @@ export interface ProjectedRaceWeatherSection {
   intro?: string;
 }
 
+export interface ProjectedCommunitySection {
+  _type: 'communitySection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  body?: string;
+  points?: string[];
+  cta?: ProjectedCtaBlock | null;
+  race?: { facebookUrl?: string } | null;
+}
+
 export interface ProjectedParksSection {
   _type: 'parksSection';
   _key: string;
@@ -696,6 +707,7 @@ export type PageBuilderBlock =
   | ProjectedContactSection
   | ProjectedFaqKioskSection
   | ProjectedTickerSection
+  | ProjectedCommunitySection
   | ProjectedParksSection
   | ProjectedRaceWeatherSection
   | ProjectedDynastiesSection

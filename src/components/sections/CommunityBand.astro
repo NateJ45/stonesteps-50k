@@ -1,0 +1,178 @@
+---
+// Foundation, edit with care
+//
+// The group: a notice pinned to the board.
+//
+// CONTENT block: receives a surface from the cadence in sectionCadence.ts.
+//
+// WHY THIS IS A CARD AND NOT A BAND. Everything else on the home page is a
+// stretch of the course: a ticket rail, a records board, a forest. This one is
+// an aside, a "come and talk to us" after the race director's name, and giving
+// it a full band of its own would make it read as another leg of the route.
+// A single notice on the page's own ground says what it is: somebody pinned
+// this up.
+//
+// THE ADDRESS IS NOT A FIELD. The group's URL lives on The Race, the same
+// singleton the header's icon link reads, and this block falls back to it when
+// no button is typed. Two copies of a link is two links that will eventually
+// point at different groups. The block's `cta` is the escape hatch for the day
+// the conversation moves somewhere else, not the normal case.
+//
+// COLOUR. The card is `--plate-face` on `--plate-ink`, which is the site's
+// inverted plate stock: charcoal-on-cream page, cream-on-bark page. That pair
+// is measured by the contrast gate wherever it is used, and it is why this
+// section does not paint a colour of its own.
+
+import CtaLink from '@/components/CtaLink.astro';
+import { surfaceClass } from '@/lib/surfaces';
+import type { ProjectedCommunitySection } from '@/lib/pageBuilder.types';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  body?: string;
+  points?: string[];
+  cta?: ProjectedCommunitySection['cta'];
+  race?: ProjectedCommunitySection['race'];
+  surface?: 'background' | 'muted';
+  headingId: string;
+};
+
+const {
+  eyebrow,
+  headline = 'The group knows first',
+  body,
+  points = [],
+  cta,
+  race,
+  surface = 'background',
+  headingId,
+} = Astro.props as Props;
+
+// A typed button wins. Otherwise the race's own Facebook address becomes one,
+// built as a real external ctaBlock so it gets the new tab and the rel that an
+// external link needs. With neither, the card simply has no button.
+const button: ProjectedCommunitySection['cta'] =
+  cta ??
+  (race?.facebookUrl
+    ? {
+        _type: 'ctaBlock',
+        label: 'Join the group on Facebook',
+        linkType: 'external',
+        externalUrl: race.facebookUrl,
+        openInNewTab: true,
+      }
+    : null);
+---
+
+{/* surfaceClass already carries `band-torn`, so the seam comes with the surface. */}
+<section
+  class:list={['community py-section-lg', surfaceClass(surface)]}
+  aria-labelledby={headingId}
+>
+  <div class="mx-auto w-full max-w-content px-6">
+    <div class="community__card">
+      {
+        eyebrow && (
+          <p class="community__eyebrow font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+            {eyebrow}
+          </p>
+        )
+      }
+      <h2 id={headingId} class="display mt-3 text-h2">{headline}</h2>
+      {body && <p class="community__body mt-4 max-w-[54ch]">{body}</p>}
+
+      {
+        points.length > 0 && (
+          <ul class="community__points mt-6 grid gap-2">
+            {points.map((point) => (
+              <li class="community__point font-mono text-[0.8125rem] tracking-[0.08em]">{point}</li>
+            ))}
+          </ul>
+        )
+      }
+
+      {
+        button && (
+          <div class="mt-8">
+            <CtaLink cta={button} class="btn-plate" />
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  /* The notice itself. Inverted plate stock, a hard black keyline and a degree
+     of rotation, exactly as the header's badge and the tickets wear it, so the
+     card reads as part of the same signage rather than as a web panel. */
+  .community__card {
+    position: relative;
+    max-width: 44rem;
+    margin-inline: auto;
+    padding: clamp(1.75rem, 1.2rem + 2.5vw, 3rem);
+    background: var(--plate-face);
+    color: var(--plate-ink);
+    border: 2px solid var(--plate-edge);
+    border-radius: var(--plate-radius);
+    box-shadow: var(--lift-lg);
+    /* A static shape, not an animation, so reduced motion leaves it alone: the
+       same reasoning as the plate button's skew. */
+    rotate: -0.7deg;
+  }
+
+  /* The two pins. Decorative, so they are drawn rather than marked up, and they
+     sit INSIDE the card's padding rather than over its edge: a pin head that
+     overhangs the keyline reads as a rendering slip at small sizes. */
+  .community__card::before,
+  .community__card::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--plate-ink) 55%, transparent);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--plate-edge) 60%, transparent);
+  }
+  .community__card::before {
+    left: 14px;
+  }
+  .community__card::after {
+    right: 14px;
+  }
+
+  /* Solid tokens for the small type, never the card's ink at an opacity nobody
+     measured. That is the mistake the parks band records. */
+  .community__eyebrow {
+    color: var(--plate-ink-soft);
+  }
+  .community__body {
+    color: var(--plate-ink);
+  }
+  /* NO `margin` HERE. Astro scopes this rule with a data attribute, which makes
+     it more specific than the `mt-6` utility on the element, so declaring a
+     margin in this block silently wins and the list closes up against the copy.
+     Only the list reset belongs here; the spacing stays a utility. */
+  .community__points {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+  /* A blaze, not a bullet: the same painted dash the trail wears. */
+  .community__point {
+    position: relative;
+    padding-left: 1.6rem;
+  }
+  .community__point::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 0.95rem;
+    height: 3px;
+    border-radius: 1px;
+    background: var(--primary);
+    rotate: -6deg;
+  }
+</style>

@@ -87,6 +87,7 @@ export const CONTENT_TYPES = new Set([
   'contactSection',
   'dynastiesSection',
   'gearSection',
+  'communitySection',
 ]);
 
 export interface SectionBlock {

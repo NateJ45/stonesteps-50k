@@ -643,6 +643,7 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
         'sponsorPatchesSection',
         'tickerSection',
         'parksSection',
+        'communitySection',
         'dynastiesSection',
         'gearSection',
         'photoBandSection',

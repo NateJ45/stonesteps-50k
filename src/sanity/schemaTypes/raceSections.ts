@@ -38,6 +38,7 @@ import {
   ImageIcon,
   PinIcon,
   StarFilledIcon,
+  UsersIcon,
   TrendUpwardIcon,
 } from '@sanity/icons';
 
@@ -723,6 +724,52 @@ export const parksSection = defineType({
   },
 });
 
+/* ---------- The group ------------------------------------------------------ */
+
+// The race's Facebook group, which is where the year actually happens: course
+// conditions after a storm, training runs, volunteer calls, the photos nobody
+// else has. It is one link, so it is one band, and the URL is NOT a field here.
+// It lives on The Race (facebookUrl), the same singleton the header's icon link
+// reads, because a link that appears in two places is a link that will
+// eventually point at two different groups.
+export const communitySection = defineType({
+  name: 'communitySection',
+  title: 'The group (community band)',
+  type: 'object',
+  icon: UsersIcon,
+  description:
+    'The Facebook group. The address comes from The Race, so only the words around it are typed here.',
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline', type: 'string' }),
+    defineField({ name: 'body', title: 'Body', type: 'text', rows: 4 }),
+    defineField({
+      name: 'points',
+      title: 'What is in there (optional)',
+      type: 'array',
+      of: [defineArrayMember({ type: 'string' })],
+      description:
+        'A few short lines. Three reads best; more than four and the card starts to list.',
+      validation: (Rule) => Rule.max(4),
+    }),
+    defineField({
+      name: 'cta',
+      title: 'Button (optional)',
+      type: 'ctaBlock',
+      description:
+        'Leave this empty and the button points at the group on The Race. Fill it in only to send people somewhere else.',
+    }),
+  ],
+  preview: {
+    select: { title: 'headline' },
+    prepare: ({ title }) => ({
+      title: title || 'The group',
+      subtitle: 'Link comes from The Race',
+      media: UsersIcon,
+    }),
+  },
+});
+
 /* ---------- Race-day weather ---------------------------------------------- */
 
 export const raceWeatherSection = defineType({
@@ -917,6 +964,7 @@ export const raceSectionSchemas = [
   sponsorPatchesSection,
   tickerSection,
   parksSection,
+  communitySection,
   raceWeatherSection,
   dynastiesSection,
   gearSection,

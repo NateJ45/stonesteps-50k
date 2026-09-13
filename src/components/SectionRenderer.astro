@@ -47,6 +47,7 @@ import ContactBand from '@/components/sections/ContactBand.astro';
 import FaqKiosk from '@/components/sections/FaqKiosk.astro';
 import Ticker from '@/components/sections/Ticker.astro';
 import ParksBand from '@/components/sections/ParksBand.astro';
+import CommunityBand from '@/components/sections/CommunityBand.astro';
 import RaceWeather from '@/components/sections/RaceWeather.astro';
 import Dynasties from '@/components/sections/Dynasties.astro';
 import GearBand from '@/components/sections/GearBand.astro';
@@ -462,6 +463,17 @@ const wrapAttrs = (key: string | undefined) =>
             showDirector={s.showDirector}
             cta={s.cta}
             race={s.race}
+            headingId={headingId}
+          />
+        ) : s._type === 'communitySection' ? (
+          <CommunityBand
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            body={s.body}
+            points={s.points ?? []}
+            cta={s.cta}
+            race={s.race}
+            surface={surface ?? 'background'}
             headingId={headingId}
           />
         ) : s._type === 'dynastiesSection' ? (

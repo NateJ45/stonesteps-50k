@@ -213,6 +213,14 @@ export function sectionsProjection(field = 'pageBuilder'): string {
         elevationProfile{ source, miles, gainFt, lowFt, highFt, points[]{ mile, ft } }
       }
     },
+    // The group's address is NOT a field on the block. It is read from The
+    // Race, the same singleton the header's icon link reads, so the two can
+    // never drift to different groups.
+    _type == "communitySection" => {
+      ...,
+      cta${CTA_PROJECTION},
+      "race": *[_type == "race"][0]{ facebookUrl }
+    },
     _type == "parksSection" => {
       ...,
       image${IMAGE_PROJECTION},

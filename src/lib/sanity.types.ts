@@ -93,6 +93,9 @@ export type SectionPreset = {
       } & ParksSection)
     | ({
         _key: string;
+      } & CommunitySection)
+    | ({
+        _key: string;
       } & RaceWeatherSection)
     | ({
         _key: string;
@@ -1300,6 +1303,15 @@ export type RaceWeatherSection = {
   intro?: string;
 };
 
+export type CommunitySection = {
+  _type: 'communitySection';
+  eyebrow?: string;
+  headline?: string;
+  body?: string;
+  points?: Array<string>;
+  cta?: CtaBlock;
+};
+
 export type ParksSection = {
   _type: 'parksSection';
   eyebrow?: string;
@@ -1598,6 +1610,9 @@ export type Page = {
     | ({
         _key: string;
       } & ParksSection)
+    | ({
+        _key: string;
+      } & CommunitySection)
     | ({
         _key: string;
       } & RaceWeatherSection)
@@ -2045,6 +2060,9 @@ export type ProcessPage = {
       } & ParksSection)
     | ({
         _key: string;
+      } & CommunitySection)
+    | ({
+        _key: string;
       } & RaceWeatherSection)
     | ({
         _key: string;
@@ -2153,6 +2171,9 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & ParksSection)
+    | ({
+        _key: string;
+      } & CommunitySection)
     | ({
         _key: string;
       } & RaceWeatherSection)
@@ -2303,6 +2324,9 @@ export type AboutPage = {
     | ({
         _key: string;
       } & ParksSection)
+    | ({
+        _key: string;
+      } & CommunitySection)
     | ({
         _key: string;
       } & RaceWeatherSection)
@@ -2512,6 +2536,9 @@ export type HomePage = {
     | ({
         _key: string;
       } & ParksSection)
+    | ({
+        _key: string;
+      } & CommunitySection)
     | ({
         _key: string;
       } & RaceWeatherSection)
@@ -2873,6 +2900,7 @@ export type AllSanitySchemaTypes =
   | GearSection
   | DynastiesSection
   | RaceWeatherSection
+  | CommunitySection
   | ParksSection
   | TickerSection
   | SponsorPatchesSection
