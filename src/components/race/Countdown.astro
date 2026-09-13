@@ -83,16 +83,23 @@ const TITLES: Record<Phase, string> = { count: label, race: 'Today', done: 'Next
 const MESSAGES: Record<Phase, string> = { count: '', race: 'Race time!', done: 'TBC' };
 
 const totalSeconds = Math.floor(ms / 1000);
-// NO SECOND HAND INLINE. A footer does not need one, and leaving it out means
-// the only cell that changes every second is absent, so the tick has nothing to
-// write for 59 of every 60 of them. The script reads its cells with
-// querySelector and skips the ones that are not there, so this needs no
-// counterpart in the script.
+// EVERY VARIANT KEEPS THE SECOND HAND. The inline one shipped without it on
+// 2026-09-13, to save a DOM write per second on a component that is now on
+// every page. It read as broken within the hour: minutes are the fastest thing
+// that changes, so the footer clock showed identical digits for up to a minute
+// while the hero's clock counted seconds a screen above it, and Nathan
+// reported it stuck. It was not stuck. Measured across nine navigation paths
+// (fresh loads, client-side navigations, back, forward, a hide and show) it was
+// correct every time, drift 0 minutes.
+//
+// That is the point: a clock with no visibly moving digit is indistinguishable
+// from a frozen one, and the saving was one `textContent` assignment per
+// second. A clock has to look alive to be believed.
 const units = [
   { key: 'days', value: Math.floor(totalSeconds / 86400), lbl: 'days' },
   { key: 'hours', value: Math.floor(totalSeconds / 3600) % 24, lbl: 'hrs' },
   { key: 'minutes', value: Math.floor(totalSeconds / 60) % 60, lbl: 'min' },
-  ...(inline ? [] : [{ key: 'seconds', value: totalSeconds % 60, lbl: 'sec' }]),
+  { key: 'seconds', value: totalSeconds % 60, lbl: 'sec' },
 ].map((u) => {
   const text = String(u.value).padStart(2, '0');
   return { ...u, text, ghost: '8'.repeat(text.length) };
