@@ -73,6 +73,23 @@ const button: ProjectedCommunitySection['cta'] =
   <div class="mx-auto w-full max-w-content px-6">
     <div class="community__card">
       {
+        /* THE MARK AS A WATERMARK, not as an icon. It is the one place on the
+          site where a third party's logo belongs: the card exists to send
+          people to that platform, and nominative use of a mark to point at the
+          thing it names is exactly what it is for. Drawn in the CARD'S OWN INK
+          through currentColor at a whisper, so it is the same material as the
+          type rather than a blue sticker pasted on, and so it flips with the
+          theme without a second asset.
+          aria-hidden and pointer-events:none: it says nothing the button does
+          not already say out loud, and a screen reader announcing "Facebook"
+          twice is noise. */
+      }
+      <svg class="community__mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path
+          d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+        ></path>
+      </svg>
+      {
         eyebrow && (
           <p class="community__eyebrow font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
             {eyebrow}
@@ -119,9 +136,55 @@ const button: ProjectedCommunitySection['cta'] =
     /* The ground lift: this card sits on the page itself, so on bark its offset
        is the warm one rather than a black that cannot be seen. */
     box-shadow: var(--lift-ground-lg);
+    /* Crops the watermark to the card. See the note on .community__mark. */
+    overflow: hidden;
     /* A static shape, not an animation, so reduced motion leaves it alone: the
        same reasoning as the plate button's skew. */
     rotate: -0.7deg;
+  }
+
+  /* The watermark. Sized off the CARD, not the viewport, so it keeps its
+     proportion as the card reflows, and hung off the right edge so the shape is
+     cropped rather than centred: a mark that is clearly bigger than its box
+     reads as printing, a mark that fits reads as a sticker.
+     `overflow: hidden` on the card above is what does the cropping. It cannot
+     clip the card's own drop shadow, which is painted outside the box. */
+  .community__mark {
+    position: absolute;
+    right: -6%;
+    top: 50%;
+    width: min(58%, 20rem);
+    height: auto;
+    translate: 0 -50%;
+    rotate: -14deg;
+    fill: currentcolor;
+    /* 7%. Measured rather than eyeballed, because axe cannot see a
+       low-opacity shape behind text and would pass this at any strength. The
+       worst REAL PIXEL behind any line of type on the card, sampled with the
+       type hidden: 6.20:1 in light and 5.24:1 in dark, against 7.34 and 6.08
+       with no mark at all. So it costs about a point of contrast and both stay
+       well clear of AA. Push it much past this and the body copy starts to sit
+       on a visible shape. */
+    opacity: 0.07;
+    pointer-events: none;
+  }
+
+  /* On a phone the copy runs the full width of the card, so the mark moves out
+     from behind the text rather than being dimmed out of the way: it goes to
+     the bottom corner, under the button, where nothing but the plate sits on
+     it. The first attempt did dim it, to 5% and further off the edge, and the
+     measurement is what said not to: the worst pixel on the phone is 7.53:1 in
+     light and 6.08:1 in dark, BETTER than the desktop's, because the mark is
+     not behind the type there. It was being hidden for a cost it was not
+     incurring, so it keeps the same 7% the desktop has. */
+  @media (width < 40rem) {
+    .community__mark {
+      width: 80%;
+      right: -14%;
+      top: auto;
+      bottom: -8%;
+      translate: none;
+    }
   }
 
   /* The two pins. Decorative, so they are drawn rather than marked up, and they
