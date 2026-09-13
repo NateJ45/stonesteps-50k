@@ -10,6 +10,12 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-13 — A Studio publish reaches the live site._
+
+The publish webhook had been configured since 2026-09-08 and had never delivered once. The cause was one missing word: the `Authorization` header carried the GitHub token on its own, with no `Bearer ` in front of it, so GitHub answered 401 every time. Everything else about the hook was already right. Fixed in the Sanity manage UI and proven with a forced revision, which produced `repository_dispatch` runs in seconds and deployed.
+
+The reason it took five days to find is worth keeping. The 2026-09-08 test wrote a document's existing value back to itself and concluded from the silence that nothing was being delivered. Sanity does not bump `_updatedAt` for a patch that changes nothing, so that test could never have fired the hook whatever the header said. A test that cannot fail for the reason you are testing is worse than no test: it produced a confident, wrong diagnosis that sat in `docs/PENDING.md` as fact. Closes PENDING 1f.
+
 _2026-09-06 — The starter catches up: Sanity phase 1, the family test standard, and two workflows harvested from the retiring church starter._
 
 The starter had become the odd one out. It is structurally the canonical source (57 files carry the `PORTABLE` marker, PORTS.md has 44 cards, every client repo's `scripts/sync-check.mjs` diffs against it), but its stack and its gates were older than the sites it governs.

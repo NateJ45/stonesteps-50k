@@ -143,37 +143,34 @@ muddy. Lightening the page cannot fix it (two light colours top out around
 1.5:1); inverting the objects to forest and charcoal on cream restores 7.7 to
 11.8:1 and makes the shadow correct again. Ordered plan is in section 6.
 
-### 1f. The Studio publish webhook exists but does NOT deliver
+### 1f. DONE 2026-09-13. The Studio publish webhook delivers
 
-Tested 2026-09-08 rather than assumed. `npx sanity hooks list` shows the hook is
-there and correctly aimed:
+The cause was the first row of the table this entry used to carry: the
+`Authorization` header held the token on its own, with no `Bearer ` in front of
+it, so GitHub answered 401 and Sanity had nothing to report beyond a failed
+attempt. Everything else was already correct: POST, the dispatches URL, the
+`production` dataset, create/update/delete ticked, the `!(_id in
+path("drafts.**"))` filter and a projection of exactly
+`{"event_type": "sanity-publish"}`, which matches `types: [sanity-publish]` in
+deploy.yml.
 
-    Name: Studio Publish
-    URL:  https://api.github.com/repos/NateJ45/stonesteps-50k/dispatches
-    POST, dataset production
+Fixed by prefixing the header value in the Sanity manage UI. Proven rather than
+assumed: a forced revision on `siteSettings` produced `repository_dispatch`
+runs within seconds, they deployed, and the deployed site was re-checked
+afterwards.
 
-But **no `repository_dispatch` event has ever reached GitHub**. Every one of the
-last 25 workflow runs was triggered by a push. A no-op publish to `siteSettings`
-(writing the existing tagline back, which changes `_updatedAt` and nothing else)
-produced no run after two minutes.
+TWO THINGS LEARNED WHILE TESTING, both worth knowing before anyone tests it
+again.
 
-So an editor publishing in the Studio does NOT get their change on the live
-site. That is the exact failure the Help guide warns about, and it is silent
-from both ends: Sanity reports the hook as configured, GitHub simply never hears
-from it.
-
-**How to find out which of three it is.** Open the webhook in the Sanity manage
-UI and read its **Attempts** tab. The status code names the cause:
-
-| Code          | Cause                                                                                                                                                                |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 401           | The `Authorization` header is missing or malformed. It must be `Bearer <token>`, the word, a space, then the token.                                                  |
-| 400           | The **Projection** is missing or wrong. GitHub needs a body of exactly `{"event_type": "sanity-publish"}`, which must match `types: [sanity-publish]` in deploy.yml. |
-| 404           | The token lacks **Contents: write** on this repo. GitHub returns 404 rather than 403 for permissions it will not confirm exist.                                      |
-| (no attempts) | The trigger settings are not firing. Check the dataset is `production` and that create/update/delete are ticked.                                                     |
-
-Until this delivers, a Studio publish reaches the live site only on the next
-push or the next scheduled results import.
+1. **A no-op patch does not fire it.** Writing a field's existing value back
+   leaves `_updatedAt` untouched, which is why the 2026-09-08 test concluded
+   nothing was being delivered when the header was the whole story. A real test
+   needs a real revision: change a value and change it back.
+2. **Queued dispatches collapse.** deploy.yml uses a `deploy-production`
+   concurrency group with `cancel-in-progress: false`, so runs queue rather than
+   abort, but GitHub keeps only the newest PENDING run and cancels the ones
+   behind it. Three dispatches produced two successes and one cancellation, and
+   that cancellation is the concurrency group working, not a failure.
 
 ### 1c. Nobody knows who the trekkers are after 2016
 
