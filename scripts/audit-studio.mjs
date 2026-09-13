@@ -88,6 +88,9 @@ const SYSTEM_KEYS = new Set([
   '_weak',
   '_strengthenOnPublish',
   '_originalId',
+  // Sanity's own document metadata, written by the platform rather than by
+  // a schema or an editor. It began appearing on 2026-09-13 and is not drift.
+  '_system',
   'orderRank',
 ]);
 
@@ -435,6 +438,38 @@ for (const [type, fields] of requiredFields()) {
 }
 if (!blanks) console.log('  none');
 problems += blanks;
+
+section('7. Transcribed records that duplicate a result (a hand copy that drifts)');
+// WHY THIS CHECK EXISTS. A recordEntry is for a record the results archive
+// CANNOT produce, which today means the 27K before 2015. Created for a record
+// that does have a result behind it, it becomes a hand copy of that row: the
+// board derives the record from the result anyway, so the copy adds nothing and
+// can only drift away from what it was copied from. That is what happened to
+// Katie Ruhlman's 27K 2:28:40, filed as 2010 against a result dated 2021, on a
+// distance with no 2010 results at all. Thirteen such copies were removed on
+// 2026-09-12, twelve agreeing and one already wrong; this stops them returning.
+{
+  const recs = await client.fetch(
+    `*[_type=="recordEntry"]{_id, bracket, gender, year, timeSeconds, "d": distance->slug.current}`,
+  );
+  const results = await client.fetch(
+    `*[_type=="raceResult"]{year, timeSeconds, "d": distance->slug.current}`,
+  );
+  let dupes = 0;
+  for (const r of recs) {
+    const hit = results.find((x) => x.d === r.d && x.timeSeconds === r.timeSeconds);
+    if (!hit) continue;
+    dupes++;
+    console.log(
+      `  ${r._id}: ${r.d} ${r.gender} ${r.bracket} is also a result` +
+        (hit.year === r.year
+          ? ' (same year, so it is simply redundant)'
+          : ` and they DISAGREE about the year: record ${r.year}, result ${hit.year}`),
+    );
+  }
+  if (!dupes) console.log('  none');
+  problems += dupes;
+}
 
 console.log(`\n${problems === 0 ? 'Studio is clean.' : `${problems} thing(s) to look at.`}`);
 process.exit(problems === 0 ? 0 : 1);
