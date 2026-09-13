@@ -374,6 +374,39 @@ Nathan should make rather than an optimisation:
   the model and real users both, but which part of the runner survives the crop
   is a design call.
 
+**2026-09-13, a second report, and the question of images settled.** Score 86.
+TBT 0ms and CLS 0 (both perfect), FCP 1.7s, SI 1.7s, LCP 4.1s. The report's
+"Improve image delivery, est savings of 232KiB" is the headline most people
+would act on. It is not the lever, and the proof is in the same report:
+
+- THE LCP ELEMENT IS TEXT. `span.stamp-word`, and its breakdown is TTFB 70ms
+  plus element render delay 190ms. There is no resource load delay and no
+  resource load duration, because nothing about the largest paint waits on an
+  image. No amount of image compression can move an LCP that is not an image.
+- HALF THE 232KiB IS THE AUDIT IGNORING DPR. It says the hero is "larger than
+  it needs to be (800x746) for its displayed dimensions (412x781)". Lighthouse's
+  own mobile emulation is 412 CSS px at DPR 1.75, which is 721 device pixels, so
+  800 is the correct rung to pick out of a ladder of 400/600/700/800/900/1200/ 1400. The nearest smaller rung is 700, a 3% linear shortfall, worth about 30KB.
+- THE OTHER HALF IS AN OPTIMISTIC RE-ENCODE ESTIMATE against a file that is
+  ALREADY AVIF. `w=800&q=62&auto=format` returns image/avif at 164,404 bytes,
+  which matches the 160.6KiB the report attributes to it.
+
+DO NOT LOWER THE QUALITY PARAMETER TO CHASE THIS. Measured on the CDN, the same
+image at the same width: q=62 is AVIF at 164KB, q=50 is WebP at 277KB, q=40 is
+WebP at 246KB, q=80 is WebP at 417KB. Lowering q made the file bigger every
+time. The reason is cache state, not a quality curve: a variant Sanity has not
+generated yet is served as WebP immediately and becomes AVIF once built. Probed
+q=55, 60, 65 and 70 three times each; 60 and 70 flipped to AVIF on the second
+request, 55 and 65 on the third, and each flip roughly halved the bytes. So any
+change to a width or a quality anywhere in the site cold-starts every variant it
+touches, and the first visitors get WebP at about twice the size until the CDN
+catches up. Worth knowing before a "quick compression win" is attempted.
+
+The conclusion is unchanged from the entry above: the remaining gap is Lantern's
+model of two render-blocking stylesheets, and the only two levers are cutting
+the stylesheet or art-directing a phone crop of the hero. Both are design
+trades, not optimisations.
+
 The CI gate asserts performance at 0.85 as a warning and passes.
 
 ### 11. The modern trail map: what is possible, and the one input missing
