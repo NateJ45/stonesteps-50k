@@ -21,10 +21,25 @@ interface Props {
   /** ISO datetime of the start. */
   target?: string | null;
   label?: string;
+  /**
+   * `clock` is the finish-line housing the hero wears. `inline` is the same
+   * clock with the housing taken off: no plate, no LED, the page's own ink, and
+   * days/hours/minutes only. The footer carries it beside the race date on
+   * every page, where a near-black plate with glowing digits would outshout the
+   * date it is there to support and fight the Register plate next to it.
+   *
+   * BOTH VARIANTS ARE THE SAME COMPONENT ON PURPOSE. The phase logic is the
+   * fiddly part (three states, a turnover worked out in the race's timezone,
+   * a script that must survive a client-side navigation), and a second
+   * component would be a second copy of it that drifts. The script binds
+   * `.clock[data-target]`, so an inline instance is driven by the same code.
+   */
+  variant?: 'clock' | 'inline';
   class?: string;
 }
 
-const { target, label = 'Gun time in', class: className = '' } = Astro.props;
+const { target, label = 'Gun time in', variant = 'clock', class: className = '' } = Astro.props;
+const inline = variant === 'inline';
 
 const targetDate = target ? new Date(target) : null;
 const valid = targetDate && !Number.isNaN(targetDate.getTime());
@@ -68,11 +83,16 @@ const TITLES: Record<Phase, string> = { count: label, race: 'Today', done: 'Next
 const MESSAGES: Record<Phase, string> = { count: '', race: 'Race time!', done: 'TBC' };
 
 const totalSeconds = Math.floor(ms / 1000);
+// NO SECOND HAND INLINE. A footer does not need one, and leaving it out means
+// the only cell that changes every second is absent, so the tick has nothing to
+// write for 59 of every 60 of them. The script reads its cells with
+// querySelector and skips the ones that are not there, so this needs no
+// counterpart in the script.
 const units = [
   { key: 'days', value: Math.floor(totalSeconds / 86400), lbl: 'days' },
   { key: 'hours', value: Math.floor(totalSeconds / 3600) % 24, lbl: 'hrs' },
   { key: 'minutes', value: Math.floor(totalSeconds / 60) % 60, lbl: 'min' },
-  { key: 'seconds', value: totalSeconds % 60, lbl: 'sec' },
+  ...(inline ? [] : [{ key: 'seconds', value: totalSeconds % 60, lbl: 'sec' }]),
 ].map((u) => {
   const text = String(u.value).padStart(2, '0');
   return { ...u, text, ghost: '8'.repeat(text.length) };
@@ -91,7 +111,12 @@ const srText = !valid
   valid && (
     <div class={className}>
       <div
-        class="clock inline-block rounded-[10px] border-2 border-black px-[1.15rem] pt-[0.9rem] pb-3"
+        class:list={[
+          'clock',
+          inline
+            ? 'clock--inline inline-flex items-baseline gap-x-3 gap-y-1'
+            : 'inline-block rounded-[10px] border-2 border-black px-[1.15rem] pt-[0.9rem] pb-3',
+        ]}
         data-target={target}
         data-phase={phase}
         data-title-count={label}
@@ -118,10 +143,14 @@ const srText = !valid
         <p class="clock__msg tabular" data-msg hidden={phase === 'count'}>
           {MESSAGES[phase]}
         </p>
-        <div class="flex items-end gap-2" data-digits hidden={phase !== 'count'}>
+        <div
+          class:list={['flex items-end', inline ? 'gap-3.5' : 'gap-2']}
+          data-digits
+          hidden={phase !== 'count'}
+        >
           {units.map((u, i) => (
             <>
-              {i > 0 && (
+              {i > 0 && !inline && (
                 <span class="clock__sep pb-4 font-mono text-2xl leading-none" aria-hidden="true">
                   :
                 </span>
@@ -152,6 +181,42 @@ const srText = !valid
     box-shadow:
       var(--lift),
       inset 0 2px 0 rgb(255 235 187 / 0.07);
+  }
+
+  /* ---------- The housing taken off ------------------------------------ */
+  /* The inline variant is the same clock in the page's own ink. It keeps the
+     grid stacking and the tabular figures, and drops everything that made the
+     hero's version an object: the plate, the LED, the glow, the unlit ghost
+     segments behind the digits. On the footer board those would compete with
+     the Register plate beside them and outshout the date they are supporting.
+
+     `flex-wrap` because the footer band narrows before it stacks, and three
+     unit groups plus a label is wider than a phone. */
+  .clock--inline {
+    background: none;
+    box-shadow: none;
+    flex-wrap: wrap;
+  }
+  .clock--inline .clock__title {
+    color: var(--muted-foreground);
+  }
+  .clock--inline .clock__ghost {
+    /* The unlit segments are the plate's trick and read as dirt without it. */
+    display: none;
+  }
+  .clock--inline .clock__val,
+  .clock--inline .clock__msg {
+    color: var(--foreground);
+    font-size: 1.25rem;
+    text-shadow: none;
+  }
+  .clock--inline .clock__lbl {
+    color: var(--muted-foreground);
+    /* Roomier than the plate's, because there are no colons between the groups
+       here: without separators the figures read as one number and the labels as
+       one phrase, so the grouping has to come from the gap instead. */
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
   }
 
   /* Digits stack over their ghost via grid areas, so the label never drifts

@@ -46,6 +46,7 @@ import {
 import { Phone } from 'lucide-react';
 import CopyEmailButton from '@/components/CopyEmailButton';
 import { externalLinkAttrs } from '@/lib/links';
+import Countdown from '@/components/race/Countdown.astro';
 import { getRace } from '@/lib/queries';
 // THE SVG, NOT THE PNG. The .png files in src/assets were the REID DESIGN
 // wordmark, inherited from the repo this project was forked from, and this
@@ -235,6 +236,22 @@ const rowClass = (label: string) =>
               {[editionLabel, wherePlace].filter(Boolean).join(' · ')}
             </p>
           </div>
+
+          {/* THE CLOCK, BESIDE THE DATE IT COUNTS TO. The hero wears the
+              finish-line housing; this is the same component with the housing
+              taken off, so the three-phase logic has exactly one home.
+
+              It counts to `raceDate`, the same instant the hero does, which
+              carries the gun time and not just the day.
+
+              The race/done phases look like dead code here, because the band
+              above hides itself once the date has passed. They are not: these
+              pages are statically built, so a page built the week before is
+              still being served at the gun, and the script turns it over to
+              RACE TIME! and then to TBC on a document nobody rebuilt. */}
+          {race?.raceDate && (
+            <Countdown target={race.raceDate} label="Gun time in" variant="inline" />
+          )}
           {race?.registerUrl && (
             <a
               class="btn-plate btn-plate--cream"

@@ -195,6 +195,24 @@ ARIA role for exactly this case. Note for anyone porting it: the scan is brace-b
 rather than a regex, because a timer's markup nests and a non-greedy `[\s\S]*?</div>`
 stops at the first inner close.
 
+**Rule 5 fixed 2026-09-13 (stonesteps-50k). PORT THIS.** The brace-balanced scan above
+was never balancing anything. It builds its walk pattern with
+``new RegExp(`<(/?)${tag}\b[^>]*>`)``, and inside a TEMPLATE LITERAL `\b` is a
+backspace character rather than a word boundary, so the pattern was
+`<(/?)div[^>]*>` and matched nothing. The walk never found a closing tag, `bodyEnd`
+fell through to the end of the document, and the first timer on a page swallowed
+everything after it.
+
+With one timer per page that still normalised consistently, which is exactly why it
+survived a month: the bug is invisible until a page has TWO. Stone Steps put a second
+countdown in the footer on 2026-09-13, the footer timer's opening tag landed inside the
+swallowed body where only text nodes are rewritten, its `aria-label="N seconds
+remaining"` went through untouched, and the home page failed parity on every rebuild
+again. One character: `\\b`. Any repo with a single timer will see no behaviour change
+from the fix itself, but its baselines DO move, because the swallowed region was being
+normalised far more aggressively than intended: re-capture after porting, and say so in
+the commit.
+
 **Parameterization done on the port:** the built-HTML root is auto-detected
 (`dist/client` when it holds an index.html, which is the adapter 14 shape, else `dist`,
 the adapter 13 shape) and can be overridden with `PARITY_DIST`. The chosen root prints
