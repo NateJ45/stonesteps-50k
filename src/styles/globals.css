@@ -3613,8 +3613,19 @@ main > .band-torn:first-child::before {
    poster (wrapper A) and the day (wrapper B), with the claim struck across
    its top edge. The picture is in the first screen now. */
 @media (width < 64rem) {
+  /* AND IT DOES NOT PAY FOR THE HEADER TWICE (2026-09-13). The line above used
+     to read `calc(var(--header-h) + 0.5rem)`, which is a full header height of
+     padding on top of a header that is `position: sticky` and therefore already
+     occupies its own space: the band's box starts at the header's bottom edge,
+     not underneath it. On a 390px phone that came to 127px of empty ground
+     between the nav and the date, and pushed the wordmark to start a third of
+     the way down an 844px screen.
+
+     A flat 2.5rem. The decoration still bleeds up across the header, because
+     the topo and the mud carry their own negative offsets and do not read
+     this value. */
   .hero-band {
-    padding-top: calc(var(--header-h) + 0.5rem);
+    padding-top: 2.5rem;
   }
   .hero-copy {
     text-align: center;

@@ -50,15 +50,41 @@ const FIELDS = [
         ],
       },
       {
+        // RE-SHAPED AND RE-SEEDED 2026-09-13. Two faults, one cause and one
+        // choice. The canvas was baked for a 390x1033 band and the band is
+        // 390x1298: the layer is `cover`ed, so the art was being scaled up 34%
+        // and cropped, which is what "sparse on mobile" actually was. Fewer,
+        // bigger blobs rather than the field the desktop gets. It is baked at
+        // the band's own aspect now (760x2530 = 390x1298), so a mark lands at
+        // the size it was drawn.
+        //
+        // And the density was 0.5 against the desktop's 1. That was set when
+        // the countdown's LABEL sat on the band, 12px over the mud, where axe
+        // blends the layers into a veil and measured it at 2.68:1. The label
+        // moved onto the clock's own plate on 2026-09-12 and the mud cannot
+        // reach it there, so the reason for halving this is gone.
         suffix: 'phone',
         W: 760,
-        H: 2013, // 390x1033 measured
-        density: 0.5,
+        H: 2530, // 390x1298 measured 2026-09-13
+        density: 1.2,
+        // `big` IS THE KNOB THAT MATTERED, not density. Mark size comes from
+        // `Math.min(W, H) / 933`, so on a 760x2530 canvas it is driven by the
+        // WIDTH, and that canvas is then shown at 390px against the desktop's
+        // 1600 shown at 1440. Multiply the two and a phone mark renders about
+        // two and a half times smaller than the same mark on a desktop: the
+        // field read as fine speckle rather than as mud. Doubling the count
+        // instead only took ink coverage from 4.0% to 5.4%, because more small
+        // marks mostly overlap each other.
+        big: 2.1,
         split: false,
+        // Fractions of the band, measured rather than guessed. Only the two
+        // runs of small copy are quieted: the wordmark is display type that
+        // reads through anything (the desktop does not quiet it either), the
+        // photograph is meant to have mud across it, and the clock is an opaque
+        // plate that hides whatever lands behind it.
         quiet: [
-          [0, 0.19, 1, 0.24], // the hero eyebrow
-          [0, 0.29, 1, 0.54], // the subhead and the buttons
-          [0, 0.82, 1, 0.87], // the countdown's label
+          [0, 0.02, 1, 0.055], // the hero eyebrow
+          [0, 0.655, 1, 0.83], // the subhead and the two buttons
         ],
       },
     ],
