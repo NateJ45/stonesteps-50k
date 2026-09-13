@@ -86,6 +86,21 @@ jobs:
         # Inherits the workflow-level env above.
         run: node scripts/public-data-audit.mjs
 
+      # The share cards in public/og are committed PNGs and nothing regenerates
+      # them on a content publish, so a title edited in the Studio leaves its
+      # card saying the old thing with no signal. This re-derives what each card
+      # would say now and compares it with the record written when they were
+      # last rendered: four GROQ reads, no browser, no rendering.
+      #
+      # It FAILS here and only WARNS in deploy.yml. A push is a human who can
+      # run `npm run og:pages`; a deploy can be an editor publishing in the
+      # Studio, and blocking that would mean a content change never reaching the
+      # live site because a picture is out of date.
+      #
+      # Anonymous, like the audit above. Inherits the workflow-level env.
+      - name: Share cards match the content
+        run: npm run og:check
+
       - name: Generate Sanity types
         env:
           NODE_OPTIONS: --max-old-space-size=4096

@@ -95,6 +95,16 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+      # WARNS, never fails. See the note on the matching step in ci.yml: this
+      # workflow also fires on repository_dispatch when an editor publishes, and
+      # a stale picture must not be able to stop a content change reaching the
+      # live site.
+      - name: Share cards match the content (warning only)
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: npm run og:check -- --warn
+
       - name: Build
         env:
           # Without these the build succeeds and ships EMPTY pages, because
