@@ -983,33 +983,31 @@
   transform: scaleY(1);
 }
 
-/* ---- View transitions: THE NEW PAGE RISES OVER THE OLD BEHIND A RIDGE. ----
+/* ---- View transitions: THE PAGES RACE PAST EACH OTHER. ----
    Header and footer are named and pinned with animation: none so they stay put
-   during the swap; only the content moves. Astro's ClientRouter is already
+   during the swap; only the content travels. Astro's ClientRouter is already
    wired in BaseLayout.
 
-   THE SHAPE IS NOT A NEW MOTIF. It is the same contour the site already tears
-   its section bands with (--ridge-mask, and .band-torn's note on why a single
-   cut reads as deliberate where a repeated one reads as a seam). Reusing it
-   means a navigation looks like more of the terrain arriving rather than like a
-   web page transition, which is the whole point of doing this at all.
+   THIS REPLACED A VERTICAL RIDGE WIPE (2026-09-13, same day). That one reused
+   the contour the section bands are torn with, which was the right instinct and
+   the wrong read: a 340ms wipe behind a ragged edge is a texture, and Nathan's
+   verdict was that it went by too fast to notice. Sideways is what reads as
+   SPEED. Two pages travelling left, the outgoing one ahead of the incoming one,
+   is the only shape that says the next page is racing to get here.
 
-   WHY A CLIP-PATH AND NOT THE MASK IMAGE. A mask would have been the obvious
-   reuse, but masks animate through mask-position, which resolves against the
-   difference between the element and the image and is a poor thing to reason
-   about on an element whose height changes per page. Two polygons with MATCHING
-   POINT COUNTS interpolate natively, cost nothing, and are the same shape.
-   If you edit one row of points you must edit the other: a mismatch does not
-   error, it silently falls back to a hard cut.
+   THE LEAN IS NOT A NEW IDEA EITHER. It is 7 degrees, the same --plate-skew
+   every plate button on the site already carries, so a page in motion leans the
+   way the buttons do rather than picking up an effect from somewhere else. The
+   incoming page overshoots by one and a half percent and settles, which is what
+   stops it reading as a slideshow.
 
-   THE OLD PAGE IS HELD AT FULL OPACITY on purpose. The default for
-   ::view-transition-old is a fade, and letting it fade means the not-yet-wiped
-   area shows the page background through it, so the crest arrives over a hole
-   instead of over the page it is replacing. That reads as a flicker.
+   DIRECTION FOLLOWS THE HISTORY. `data-vt` is written on <html> by a listener
+   in BaseLayout from the router's own `direction`, so browser-back sends the
+   pages the other way. Without it, going back looks identical to going forward,
+   which is the thing that makes slide transitions feel cheap.
 
-   340ms. At the ~1100ms it was auditioned at, the move is legible and lovely and
-   also unmistakably a thing you are waiting for, on a site where people click
-   through to look up a time. ---- */
+   TRANSFORM AND OPACITY ONLY. Both are compositor properties, so this costs no
+   layout and no paint, and the page's Total Blocking Time is still 0ms. ---- */
 main#main {
   view-transition-name: main-content;
 }
@@ -1020,64 +1018,65 @@ footer {
   view-transition-name: site-footer;
 }
 
-/* The two halves of the wipe. Thirteen points across, evenly spaced, plus the
-   two bottom corners that close the shape. The crest values are irregular on
-   purpose: an even wave reads as a graphic, and the ridge this borrows from is
-   a contour line off a map. */
-@keyframes vt-ridge-rise {
+@keyframes vt-zip-out-left {
   from {
-    clip-path: polygon(
-      0% 100%,
-      8.33% 100%,
-      16.67% 100%,
-      25% 100%,
-      33.33% 100%,
-      41.67% 100%,
-      50% 100%,
-      58.33% 100%,
-      66.67% 100%,
-      75% 100%,
-      83.33% 100%,
-      91.67% 100%,
-      100% 100%,
-      100% 100%,
-      0% 100%
-    );
-  }
-  to {
-    clip-path: polygon(
-      0% -10%,
-      8.33% -4%,
-      16.67% -13%,
-      25% -6%,
-      33.33% -15%,
-      41.67% -7%,
-      50% -12%,
-      58.33% -3%,
-      66.67% -14%,
-      75% -6%,
-      83.33% -11%,
-      91.67% -5%,
-      100% -9%,
-      100% 100%,
-      0% 100%
-    );
-  }
-}
-/* Holding, not fading. See the note above on why the old page stays opaque. */
-@keyframes vt-hold {
-  from {
+    transform: none;
     opacity: 1;
   }
   to {
-    opacity: 1;
+    transform: translateX(-42%) skewX(7deg);
+    opacity: 0;
   }
 }
+@keyframes vt-zip-in-right {
+  from {
+    transform: translateX(105%) skewX(-7deg);
+  }
+  60% {
+    transform: translateX(-1.5%) skewX(1.5deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes vt-zip-out-right {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+  to {
+    transform: translateX(42%) skewX(-7deg);
+    opacity: 0;
+  }
+}
+@keyframes vt-zip-in-left {
+  from {
+    transform: translateX(-105%) skewX(7deg);
+  }
+  60% {
+    transform: translateX(1.5%) skewX(-1.5deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
 ::view-transition-old(main-content) {
-  animation: vt-hold 340ms linear forwards;
+  animation: vt-zip-out-left 380ms cubic-bezier(0.6, 0, 0.95, 0.35) forwards;
 }
 ::view-transition-new(main-content) {
-  animation: vt-ridge-rise 340ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: vt-zip-in-right 380ms cubic-bezier(0.12, 0.9, 0.25, 1) forwards;
+}
+
+/* Going back runs it in reverse. The selector has NO SPACE before the
+   pseudo-element: the view-transition tree hangs off the root element itself,
+   so `:root[...] ::view-transition-old(...)` as a descendant would match
+   nothing at all and fail silently. */
+:root[data-vt='back']::view-transition-old(main-content) {
+  animation-name: vt-zip-out-right;
+}
+:root[data-vt='back']::view-transition-new(main-content) {
+  animation-name: vt-zip-in-left;
 }
 
 ::view-transition-old(site-header),
@@ -1089,8 +1088,8 @@ footer {
 
 /* A STRAIGHT CUT FOR ANYONE WHO ASKED FOR ONE. Astro's router already skips its
    own default animations under reduced motion, but these are OUR animations on
-   OUR pseudo-elements and it has no say over them: without this rule the ridge
-   would still sweep for a reader who has told the operating system they do not
+   OUR pseudo-elements and it has no say over them: without this rule the pages
+   would still fly for a reader who has told the operating system they do not
    want that. `animation: none` on the new page leaves it fully painted, which
    is exactly the instant swap wanted here. */
 @media (prefers-reduced-motion: reduce) {

@@ -40,7 +40,17 @@
           document.addEventListener('astro:after-swap', applyTheme);
         }
       })();
-    })();</script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.HASH.js"></script><link rel="stylesheet" href="/_astro/BaseLayout.HASH.css"><style>.lost[data-astro-cid-CID]{background:radial-gradient(110% 80% at 25% 0%, color-mix(in srgb, var(--primary) 8%, var(--background)) 0%, var(--background) 62%)}.tape[data-astro-cid-CID]{background:var(--primary);width:124%;color:var(--primary-foreground);border-block:2px solid var(--plate-edge);box-shadow:var(--lift);pointer-events:none;z-index:1;position:absolute;left:-12%;overflow:hidden}.tape[data-astro-cid-CID]>span[data-astro-cid-CID]{font-family:var(--font-display);letter-spacing:.28em;text-transform:uppercase;white-space:nowrap;padding:.35rem 0;font-size:.85rem;display:block}.tape--a[data-astro-cid-CID]{top:1rem;transform:rotate(-4deg)}.tape--b[data-astro-cid-CID]{bottom:1.5rem;transform:rotate(2.5deg)}@media (width<=700px){.tape--b[data-astro-cid-CID]{display:none}}
+    })();</script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.HASH.js"></script><script>
+      (() => {
+        let direction = 'forward';
+        document.addEventListener('astro:before-preparation', (event) => {
+          direction = event.direction === 'back' ? 'back' : 'forward';
+        });
+        document.addEventListener('astro:after-swap', () => {
+          document.documentElement.dataset.vt = direction;
+        });
+      })();
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.HASH.css"><style>.lost[data-astro-cid-CID]{background:radial-gradient(110% 80% at 25% 0%, color-mix(in srgb, var(--primary) 8%, var(--background)) 0%, var(--background) 62%)}.tape[data-astro-cid-CID]{background:var(--primary);width:124%;color:var(--primary-foreground);border-block:2px solid var(--plate-edge);box-shadow:var(--lift);pointer-events:none;z-index:1;position:absolute;left:-12%;overflow:hidden}.tape[data-astro-cid-CID]>span[data-astro-cid-CID]{font-family:var(--font-display);letter-spacing:.28em;text-transform:uppercase;white-space:nowrap;padding:.35rem 0;font-size:.85rem;display:block}.tape--a[data-astro-cid-CID]{top:1rem;transform:rotate(-4deg)}.tape--b[data-astro-cid-CID]{bottom:1.5rem;transform:rotate(2.5deg)}@media (width<=700px){.tape--b[data-astro-cid-CID]{display:none}}
 </style></head><body class="min-h-screen flex flex-col"><a href="#main" class="skip-link">Skip to main content</a><header class="site-header sign-board" data-astro-cid-CID><div class="relative mx-auto flex max-w-content items-center justify-center px-l py-m lg:justify-between border-b border-border" data-astro-cid-CID><a href="/" class="inline-flex items-center transition-opacity hover:opacity-80" aria-label="Stone Steps 50K home" data-astro-cid-CID><span class="sign-badge" data-astro-cid-CID><img alt="Stone Steps 50K" width="108" height="180" class="h-[4.5rem] w-auto lg:h-24" loading="eager" decoding="async" data-theme-logo data-logo-light-src="/_astro/logo-light.HASH.svg" data-logo-light-srcset="/_astro/logo-light.HASH.svg" data-logo-dark-src="/_astro/logo-dark.HASH.svg" data-logo-dark-srcset="/_astro/logo-dark.HASH.svg" data-astro-cid-CID></span></a><script>
       (function () {
         const img = document.querySelector('header img[data-theme-logo]');

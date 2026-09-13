@@ -298,6 +298,38 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     )}
 
     <ClientRouter />
+
+    {/* WHICH WAY THE PAGES TRAVEL.
+        The page transition sends the outgoing page sideways and brings the new
+        one in behind it (see "THE PAGES RACE PAST EACH OTHER" in globals.css).
+        Going BACK has to run the other way, or the browser's back button looks
+        identical to a forward click, which is the thing that makes a slide
+        transition feel like a slideshow.
+
+        The router already knows: `direction` on astro:before-preparation is
+        'forward' or 'back'. But it CANNOT BE WRITTEN THERE, which cost a build
+        to find out: the swap replaces the root element's attributes with the
+        incoming document's, so an attribute set before preparation is gone by
+        the time the new pseudo-element's animation is resolved, and every
+        navigation animated forwards. So the direction is remembered in a
+        variable and written in astro:after-swap, which runs inside the swap
+        callback, before the new snapshot is taken.
+
+        `is:inline` and on `document`: the listener is registered once per FULL
+        page load and the document survives every client-side navigation after
+        that, so it does not need re-attaching on astro:page-load the way the
+        polish-layer observers do. */}
+    <script is:inline>
+      (() => {
+        let direction = 'forward';
+        document.addEventListener('astro:before-preparation', (event) => {
+          direction = event.direction === 'back' ? 'back' : 'forward';
+        });
+        document.addEventListener('astro:after-swap', () => {
+          document.documentElement.dataset.vt = direction;
+        });
+      })();
+    </script>
   </head>
   <body class="min-h-screen flex flex-col">
     <a href="#main" class="skip-link">Skip to main content</a>
