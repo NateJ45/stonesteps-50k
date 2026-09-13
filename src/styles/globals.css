@@ -4198,7 +4198,10 @@ main > .band-torn:first-child::before {
   height: 35px;
   background-color: inherit;
   pointer-events: none;
-  z-index: 1;
+  /* Was 1. The mud now sits at 1 and has to paint ON this, so the board's torn
+     edge goes underneath it. It still covers the section above, because the
+     whole footer comes later in the document than that section. */
+  z-index: 0;
   -webkit-mask-image: var(--ridge-mask);
   mask-image: var(--ridge-mask);
   -webkit-mask-size: 100% 100%;
@@ -4228,30 +4231,85 @@ main > .band-torn:first-child::before {
    file blends once and models what is really painted. It is marked
    `data-contrast-media` so the contrast gate measures the type over it from
    pixels rather than trusting the model. */
+/* THE MUD HAS TO CROSS THE TORN EDGE.
+   It used to be `inset: 0`, which is the footer's box and therefore stops dead
+   at the top of it. The torn ridge above (.site-foot::before) is painted in the
+   board colour and carried no mud at all, so the field ended on a clean
+   horizontal line a few pixels below the tear: a straight cut across art whose
+   whole job is to not have straight cuts.
+
+   So the layer now starts at the TOP OF THE RIDGE and is clipped to the same
+   torn silhouette, which means three mask layers rather than one:
+
+     1. the mud art itself, `cover` over the whole taller box, so the throw is
+        one continuous field across the tear instead of two that have to be
+        lined up;
+     2. the ridge mask, sized to exactly the ridge band at the top;
+     3. a plain solid covering everything BELOW that band.
+
+   Composited as `mud INTERSECT (ridge UNION solid)`. Mask layers composite from
+   the last one upward, so the list reads in that order and the two composite
+   keywords sit on layers 1 and 2. Without the union, layer 3 alone would clip
+   the mud back to a rectangle and nothing would change; without the intersect,
+   the ridge would be filled with solid ink rather than with mud.
+
+   The -webkit- pair is not decoration. Prefixed mask-composite takes ENTIRELY
+   DIFFERENT keywords from the standard property (source-in for intersect,
+   source-over for add), so a browser on the prefixed path with the standard
+   keywords composites nothing and the mud returns to a rectangle. */
 .foot-mud {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  /* Reaches up over the ridge. Matches .site-foot::before's own top and height
+     below; these three numbers move together or the clip stops lining up. */
+  top: -20px;
+  /* ABOVE the ridge, below the content. The ridge paints the board colour and
+     would otherwise cover the mud that is now meant to sit on it. */
+  z-index: 1;
   pointer-events: none;
   background: color-mix(in srgb, var(--spatter-ink) 13%, transparent);
-  -webkit-mask-image: url('/mud/foot-phone.png');
-  mask-image: url('/mud/foot-phone.png');
-  -webkit-mask-size: cover;
-  mask-size: cover;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
+  -webkit-mask-image: url('/mud/foot-phone.png'), var(--ridge-mask), linear-gradient(#000, #000);
+  mask-image: url('/mud/foot-phone.png'), var(--ridge-mask), linear-gradient(#000, #000);
+  -webkit-mask-size:
+    cover,
+    100% 21px,
+    100% calc(100% - 21px);
+  mask-size:
+    cover,
+    100% 21px,
+    100% calc(100% - 21px);
+  -webkit-mask-position:
+    center,
+    left top,
+    left bottom;
+  mask-position:
+    center,
+    left top,
+    left bottom;
+  -webkit-mask-repeat: no-repeat, no-repeat, no-repeat;
+  mask-repeat: no-repeat, no-repeat, no-repeat;
+  -webkit-mask-composite: source-in, source-over;
+  mask-composite: intersect, add;
 }
 @media (min-width: 48rem) {
   .foot-mud {
-    -webkit-mask-image: url('/mud/foot-wide.png');
-    mask-image: url('/mud/foot-wide.png');
+    top: -34px;
+    -webkit-mask-image: url('/mud/foot-wide.png'), var(--ridge-mask), linear-gradient(#000, #000);
+    mask-image: url('/mud/foot-wide.png'), var(--ridge-mask), linear-gradient(#000, #000);
+    -webkit-mask-size:
+      cover,
+      100% 35px,
+      100% calc(100% - 35px);
+    mask-size:
+      cover,
+      100% 35px,
+      100% calc(100% - 35px);
   }
 }
 .foot-z {
   position: relative;
-  z-index: 1;
+  /* Above the mud, which now sits at 1. */
+  z-index: 2;
 }
 
 /* ---------- The date plate ---------------------------------------------- */
