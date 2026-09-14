@@ -18,6 +18,7 @@
 // the race is currently missing.
 
 import type { ProjectedFaqKioskSection } from '@/lib/pageBuilder.types';
+import { feeAnswer } from '@/lib/entry-fees';
 
 type Props = {
   eyebrow?: string;
@@ -26,6 +27,7 @@ type Props = {
   unansweredHeading?: string;
   unansweredNote?: string;
   unanswered?: string[];
+  distances?: ProjectedFaqKioskSection['distances'];
   headingId?: string;
 };
 
@@ -36,8 +38,22 @@ const {
   unansweredHeading,
   unansweredNote,
   unanswered = [],
+  distances = [],
   headingId = 'faq-heading',
 } = Astro.props as Props;
+
+// A card can ask the site to write its answer instead of storing one. Today
+// there is one of those, the entry fees, which used to be typed by hand and
+// drifted $5 away from the tickets (src/lib/entry-fees.ts explains).
+//
+// It FALLS BACK to the stored answer rather than rendering nothing: if the
+// distances are ever unreachable or unpriced, a card that says something
+// slightly out of date beats a card that says nothing at all.
+const DERIVED: Record<string, () => string | null> = {
+  fees: () => feeAnswer(distances),
+};
+const answerFor = (item: { answer?: string; derived?: string }) =>
+  (item.derived ? DERIVED[item.derived]?.() : null) ?? item.answer;
 ---
 
 {
@@ -75,7 +91,7 @@ const {
                           </span>
                           <span class="qa__i" aria-hidden="true" />
                         </summary>
-                        <p class="qa__a">{item.answer}</p>
+                        <p class="qa__a">{answerFor(item)}</p>
                       </details>
                     ))}
                 </div>

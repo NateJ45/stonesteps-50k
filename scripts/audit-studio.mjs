@@ -471,5 +471,47 @@ section('7. Transcribed records that duplicate a result (a hand copy that drifts
   problems += dupes;
 }
 
+// ---- 8. A price typed into prose --------------------------------------------
+// The site holds its money in structured fields: fee tiers on each distance,
+// parksDonation on The Race. Any OTHER document with a dollar amount in it is a
+// figure somebody typed a second time, and a number that exists twice is a
+// number that will eventually disagree with itself.
+//
+// This is not hypothetical. On 2026-09-13 the contact page's FAQ said the 50K
+// was $50 from February and $60 from October while the distance documents said
+// $45 and $55, and both were on the live site at the same time, so the price a
+// runner saw depended on which page they happened to read. That card is written
+// from the fee tiers now (src/lib/entry-fees.ts) and this is what stops the
+// next one going unnoticed for as long.
+section('8. Prices typed into prose');
+{
+  // The fields ALLOWED to hold money, because they are the source of it.
+  const STRUCTURED = new Set(['parksDonation', 'feeTiers', 'amount']);
+  const docs = await client.fetch(
+    `*[!(_type in ["raceResult", "recordEntry", "athlete", "sanity.imageAsset", "sanity.fileAsset"])]`,
+  );
+  const MONEY = /\$[\d,]+/g;
+  let typed = 0;
+  const walk = (node, doc, path) => {
+    if (Array.isArray(node)) return node.forEach((v, i) => walk(v, doc, `${path}[${i}]`));
+    if (node && typeof node === 'object') {
+      return Object.entries(node).forEach(([k, v]) => {
+        if (k.startsWith('_') || STRUCTURED.has(k)) return;
+        walk(v, doc, path ? `${path}.${k}` : k);
+      });
+    }
+    if (typeof node !== 'string') return;
+    const hits = node.match(MONEY);
+    if (!hits) return;
+    typed++;
+    console.log(
+      `  ${doc._type} ${doc.title || doc.name || doc._id}: ${hits.join(' ')} typed into ${path}`,
+    );
+  };
+  for (const d of docs) walk(d, d, '');
+  if (!typed) console.log('  none');
+  problems += typed;
+}
+
 console.log(`\n${problems === 0 ? 'Studio is clean.' : `${problems} thing(s) to look at.`}`);
 process.exit(problems === 0 ? 0 : 1);

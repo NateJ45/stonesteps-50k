@@ -92,6 +92,11 @@ const NON_STEGA_FIELDS = new Set([
   // photoBandSection.height picks a CSS class. Miss it and the band takes the
   // wrong height in the preview only.
   'height',
+  // faqKioskSection's cards: 'fees' switches the answer over to one written
+  // from the distance fee tiers. Encoded, it never equals 'fees', so the
+  // preview would quietly show the stored answer instead of the derived one,
+  // which is exactly the stale text this field exists to stop showing.
+  'derived',
   // Present in this template's schemas today (sections.ts, richSections.ts,
   // ctaBlock.ts, journalEntry.ts, announcement.ts, siteSettings.ts,
   // businessInfo.ts, testimonial.ts, faqItem.ts, page.ts, studioGuide.ts,

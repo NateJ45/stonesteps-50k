@@ -601,10 +601,16 @@ export interface ProjectedFaqKioskSection {
   _key: string;
   eyebrow?: string;
   headline?: string;
-  items?: { _key?: string; question?: string; answer?: string }[];
+  items?: { _key?: string; question?: string; answer?: string; derived?: string }[];
   unansweredHeading?: string;
   unansweredNote?: string;
   unanswered?: string[];
+  /** Fee tiers, for a card whose answer the site writes. See entry-fees.ts. */
+  distances?: {
+    name?: string;
+    entryCap?: number;
+    feeTiers?: { label?: string; amount?: number }[] | null;
+  }[];
 }
 
 export interface ProjectedTickerSection {

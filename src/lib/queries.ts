@@ -165,6 +165,14 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       secondaryCta${CTA_PROJECTION},
       "race": *[_type == "race"][0]{ raceDate, editionNumber, registerUrl, resultsUrl, confirmed }
     },
+    // The kiosk can write its own fee answer, so it needs the same fee tiers the
+    // tickets render from. Cheap: two documents, three fields each.
+    _type == "faqKioskSection" => {
+      ...,
+      "distances": *[_type == "distance"] | order(orderRank asc){
+        name, entryCap, feeTiers[]{ label, amount }
+      }
+    },
     _type == "distanceTicketsSection" => {
       ...,
       "distances": *[_type == "distance"] | order(orderRank asc){

@@ -441,6 +441,7 @@ const wrapAttrs = (key: string | undefined) =>
             unansweredHeading={s.unansweredHeading}
             unansweredNote={s.unansweredNote}
             unanswered={s.unanswered ?? []}
+            distances={s.distances ?? []}
             headingId={headingId}
           />
         ) : s._type === 'tickerSection' ? (

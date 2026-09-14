@@ -1414,6 +1414,7 @@ export type FaqKioskSection = {
   headline?: string;
   items?: Array<{
     question?: string;
+    derived?: 'fees';
     answer?: string;
     _type: 'faqCard';
     _key: string;

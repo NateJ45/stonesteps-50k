@@ -580,11 +580,32 @@ export const faqKioskSection = defineType({
               type: 'string',
               validation: (Rule) => Rule.required(),
             }),
+            // AN ANSWER THE SITE WRITES ITSELF, for the questions whose answer is
+            // already structured data somewhere. Added 2026-09-13 because the
+            // fee answer had been typed by hand and had drifted: the FAQ said
+            // the 50K was $50 from February, the distance documents said $45,
+            // and both were live at once. See src/lib/entry-fees.ts.
+            defineField({
+              name: 'derived',
+              title: 'Write this answer from the race data',
+              type: 'string',
+              options: {
+                list: [{ title: 'Entry fees, from the distances', value: 'fees' }],
+                layout: 'radio',
+              },
+              description:
+                'Leave empty to write the answer yourself. Set it and the answer is built ' +
+                'from the fee tiers on the distances, so it can never disagree with the ' +
+                'tickets on the home page.',
+            }),
             defineField({
               name: 'answer',
               title: 'Answer',
               type: 'text',
               rows: 4,
+              // Hidden, and not required, once the site is writing it. A stored
+              // answer sitting behind a derived one is the drift coming back.
+              hidden: ({ parent }) => Boolean(parent?.derived),
               options: {
                 canvasApp: {
                   purpose:
@@ -592,7 +613,12 @@ export const faqKioskSection = defineType({
                     'plainly if the answer is not known yet rather than hedging.',
                 },
               },
-              validation: (Rule) => Rule.required(),
+              validation: (Rule) =>
+                Rule.custom((value, context) =>
+                  (context.parent as { derived?: string } | undefined)?.derived || value
+                    ? true
+                    : 'An answer is required unless this card is written from the race data.',
+                ),
             }),
           ],
           preview: { select: { title: 'question' } },
