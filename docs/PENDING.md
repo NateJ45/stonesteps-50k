@@ -322,20 +322,19 @@ stale `studio/` path and every `studio:deploy` instruction in the live docs, but
 examples inside them were not retoned. Trust the patterns; fix nouns when you touch a
 file.
 
-### 9. The `\s` stega lesson is not in the starter or the sibling repos
+### 9. DONE 2026-09-13. The stega whitespace lesson is in the starter
 
-2026-09-12. A stega payload is written in U+200B, U+200C, U+200D and U+FEFF, and U+FEFF
-matches `\s`, so splitting a preview display string on whitespace shatters the payload
-into fake words. Here it turned the home hero's three-word wordmark into 157 words and
-grew the hero band from 1032px to 1879px, in the preview only. Fixed here by
-`src/lib/display-words.ts` (+ test), which is site-specific: the wordmark is this site's.
+Written into the starter's CLAUDE.md next to the existing "never compare a
+stega-encoded string" rule, as its companion: **never MEASURE one either, and
+clean a display string before any `split`, `length`, `slice`, truncation or word
+count.** U+FEFF is part of the payload and matches `\s`, so splitting a headline
+on whitespace shatters it into fake words; here that turned a three-word wordmark
+into 157 and grew the hero band from 1032px to 1879px, in the preview only.
 
-The LESSON is family-wide and is not written down anywhere the other repos will see it.
-`splitStega` already lives in the PORTABLE `src/lib/preview-stega.ts`, so nothing needs
-porting, only saying: **clean a display string before any `split`, `length`, `slice`,
-truncation or word count.** To close: add it to the starter's preview section in
-CLAUDE.md next to the existing "never compare a stega-encoded string" rule, and note it
-on the preview PORTS card. Vault note: `_vault/gotchas/stega-run-contains-whitespace.md`.
+Nothing needed porting in code: `splitStega()` already lives in the PORTABLE
+`src/lib/preview-stega.ts`, and `src/lib/display-words.ts` is site-specific
+because the wordmark is this site's. Vault note:
+`_vault/gotchas/stega-run-contains-whitespace.md`.
 
 ### 10. Lighthouse performance sits at 88, and the last lever is the stylesheet
 
