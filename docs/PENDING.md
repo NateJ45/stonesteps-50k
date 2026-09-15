@@ -16,6 +16,31 @@ sequence).
 
 ## Waiting on a human
 
+### 1h. The domain cutover, and the contact form that has to land first
+
+**Blocker: DNS and the Web3Forms key are both outside the repo.**
+
+David approved the new site on 2026-09-15 and asked only about the risk of
+switching 40 days before race day. `docs/DOMAIN-CUTOVER.md` is the answer and
+the runbook: registration lives on RunSignUp so a site outage cannot cost an
+entry, and the real exposure is the zone itself. stonesteps50k.com is on GoDaddy
+DNS with mail on Microsoft 365, so the MX and TXT records must survive an edit
+that only touches `@` and `www`.
+
+Two things have to happen before the switch, in this order:
+
+1. **Wire the contact form.** It is the only inbound path on the site and its
+   bindings are still commented out in `wrangler.jsonc`. Cloudflare's mail paths
+   are unavailable to this domain, so it is D1 plus a `WEB3FORMS_KEY` secret.
+   Submit a real message on the workers.dev URL and confirm both the row and the
+   email arrive.
+2. **Lower the TTL to 600s** and wait out the old TTL, so rollback is ten
+   minutes rather than a day.
+
+Close this by deleting it once the domain resolves to the Worker, a test email
+to the race address arrives, and `SITE_URL` is set with the uptime schedule
+uncommented.
+
 ### 1. Verify the live preview against a real Sanity project
 
 **Blocker: this template has no Sanity project, by design.**
