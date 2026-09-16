@@ -1,215 +1,82 @@
 ---
 // Foundation, edit with care
 /**
- * The course map: the route drawn on the trail network it actually runs on.
+ * The course map section: the map itself, and the list of what it runs on.
  *
- * THE GEOMETRY IS NOT EDITORIAL. Everything drawn here comes from
- * scripts/data/course-map.json, which scripts/build-course-map.mjs derives from
- * the GPS track. Nothing about the shape of this map can be typed into the
- * Studio, because a number an editor can retype is a number that can disagree
- * with the course.
+ * THE MAP IS MAPLIBRE. See CourseMapLibre.tsx for why, and for the two
+ * public-domain tile sources it uses. This file's job is the shell around it:
+ * the framed box, the legend, and the derived trail list underneath, which is
+ * the part a screen reader and a printer actually get.
  *
- * WHY THE BASEMAP IS OPENSTREETMAP AND NOT CINCINNATI PARKS' OWN ARTWORK, which
- * we do have permission to use: the Parks map cannot be registered to real
- * coordinates accurately enough to draw on. The measurement and the three
- * attempts are in the header of scripts/build-course-map.mjs. OSM is already in
- * real coordinates, so the course sits on it with no fitting at all, a median
- * of 13.7 ft from the nearest way. The Parks map is what let us confirm the
- * trail names, and it stays on the page as the printable official version.
- *
- * DRAWN AS INLINE SVG, NOT AS AN IMAGE, for three reasons that all matter here:
- * the trails and the route are real elements so they take their colours from
- * the theme and work in dark mode without a second asset; it stays sharp at any
- * zoom without tiles or a map service; and it prints.
- *
- * The pan/zoom island is a SIBLING, not a wrapper. It finds this SVG by id and
- * drives one transform attribute. That keeps ~850 path points out of React
- * entirely: the geometry is server-rendered once and never re-rendered, and the
- * only thing that hydrates is a handful of buttons.
+ * THE DATA IS NOT EDITORIAL. Everything here comes from
+ * scripts/data/course-map.json and course-geo.json, which
+ * scripts/build-course-map.mjs derives from the GPS track. Nothing about the
+ * route can be typed into the Studio, because a number an editor can retype is
+ * a number that can disagree with the course.
  */
-import courseMapData from '../../../scripts/data/course-map.json';
-import CourseMapControls from './CourseMapControls.tsx';
-import CourseMap3D from './CourseMap3D.tsx';
-import {
-  fitViewBox,
-  toPath,
-  toSvg,
-  labelPlacement,
-  labelWorthy,
-  oneLabelPerName,
-  type CourseMapData,
-  type FeetPoint,
-} from '@/lib/courseMap';
+import CourseMapLibre from './CourseMapLibre.tsx';
+import meta from '../../../scripts/data/course-map.json';
 
 interface Props {
-  /** A stable id, so a page could in principle carry two of these. */
   id?: string;
 }
 
 const { id = 'course-map' } = Astro.props as Props;
-const svgId = `${id}-svg`;
 
-const data = courseMapData as unknown as CourseMapData;
-
-// The viewBox frames the ROUTE, not the whole downloaded trail network. The
-// OSM fetch deliberately pulls a quarter mile of context beyond the course so
-// the map does not end in mid-air at its edges, but that context is scenery:
-// framing on it would shrink the thing the page is about.
-const routePoints: FeetPoint[] = data.loops.flatMap((l) => l.points);
-const PAD_FT = 350;
-// The island refits the viewBox to the container's real shape on mount, and it
-// only needs the corners to do it. Four numbers rather than 850 points.
-const bounds: [FeetPoint, FeetPoint] = [
-  [Math.min(...routePoints.map((p) => p[0])), Math.min(...routePoints.map((p) => p[1]))],
-  [Math.max(...routePoints.map((p) => p[0])), Math.max(...routePoints.map((p) => p[1]))],
-];
-const view = fitViewBox(routePoints, 4 / 3, PAD_FT);
-
-// One label per named trail, long ones only. Both rules exist because OSM
-// splits a trail into a new way at every tag change, so "Ponderosa Trail (B)"
-// arrives as nine separate ways and would otherwise print nine times.
-const labels = oneLabelPerName(labelWorthy(data.trails))
-  .map((t) => ({ name: t.name as string, at: labelPlacement(t.points) }))
-  .filter((l): l is { name: string; at: NonNullable<ReturnType<typeof labelPlacement>> } =>
-    Boolean(l.at),
-  );
-
-// The Oval is the first point of the first loop: the course starts and finishes
-// there and passes through it at the end of every loop.
-const oval = toSvg(data.loops[0].points[0]);
-
-const longMiles = data.loops.find((l) => l.kind === 'long')?.miles ?? 0;
-const shortMiles = data.loops.find((l) => l.kind === 'short')?.miles ?? 0;
+const longMiles = meta.loops.find((l) => l.kind === 'long')?.miles ?? 0;
+const shortMiles = meta.loops.find((l) => l.kind === 'short')?.miles ?? 0;
 ---
 
 <figure class="cmap" id={id} data-course-map>
-  <div class="cmap__frame">
-    <svg
-      id={svgId}
-      class="cmap__svg"
-      viewBox={`${view.minX.toFixed(1)} ${view.minY.toFixed(1)} ${view.width.toFixed(1)} ${view.height.toFixed(1)}`}
-      role="img"
-      aria-labelledby={`${id}-title ${id}-desc`}
-      tabindex="0"
-    >
-      <title id={`${id}-title`}>Map of the Stone Steps 50K course in Mt. Airy Forest</title>
-      <desc id={`${id}-desc`}>
-        Seven loops out of The Oval, four long loops of about {longMiles} miles alternating with three
-        short loops of about {shortMiles} miles, drawn on the Mt. Airy Forest trail network. The trails
-        the course uses are listed below the map.
-      </desc>
-
-      {
-        /* ONE GROUP CARRIES THE WHOLE DRAWING, and the island moves only this.
-        Transforming a single <g> lets the browser keep one composited layer
-        instead of recomputing 850 path segments per pointer move. */
-      }
-      <g data-pan-group>
-        {
-          /* The trail network first, so the course draws over it. Every trail is
-          drawn, not only the ones the race uses: a map showing only the route
-          tells you where to go and nothing about where you are. */
-        }
-        <g class="cmap__trails" aria-hidden="true">
-          {data.trails.map((t) => <path d={toPath(t.points)} />)}
-        </g>
-
-        {
-          /* The course, long loops and short loops distinguished. They are drawn
-          in order so loop 7 sits on top of loop 1 where they share trail, which
-          is most of the course. */
-        }
-        <g class="cmap__route" aria-hidden="true">
-          {
-            data.loops.map((l) => (
-              <path class={`cmap__loop is-${l.kind}`} d={toPath(l.points)} data-loop={l.index} />
-            ))
-          }
-        </g>
-
-        <g class="cmap__oval" aria-hidden="true">
-          <circle cx={oval[0]} cy={oval[1]} r="55"></circle>
-          <circle cx={oval[0]} cy={oval[1]} r="22"></circle>
-        </g>
-
-        {
-          /* LABELS ARE HIDDEN UNTIL THE MAP IS ZOOMED IN. At the default fit the
-          whole park is on screen and forty trail names is a wall of text over
-          the thing they describe. The island adds `is-zoomed` past a threshold.
-          They are aria-hidden throughout: the list under the map is the
-          accessible version and it carries more information than these do. */
-        }
-        <g class="cmap__labels" aria-hidden="true">
-          {
-            labels.map((l) => (
-              <text
-                x={l.at.x}
-                y={l.at.y}
-                transform={`rotate(${l.at.angle.toFixed(1)} ${l.at.x.toFixed(1)} ${l.at.y.toFixed(1)})`}
-                text-anchor="middle"
-              >
-                {l.name}
-              </text>
-            ))
-          }
-        </g>
-      </g>
-    </svg>
-
-    {
-      /* client:idle, NOT client:visible. An <astro-island> is `display: contents`,
-      so it has no box of its own, and this island's only child is absolutely
-      positioned, which takes it out of flow too. IntersectionObserver has
-      nothing with a rect to observe, so client:visible never fires and the map
-      silently stays un-pannable while looking completely fine. Same trap the
-      preview overlay records in CLAUDE.md: a `display: contents` element has no
-      rect. The component is three buttons, so idle costs nothing. */
-    }
-    <CourseMapControls client:idle svgId={svgId} bounds={bounds} padFt={PAD_FT} />
-  </div>
-
   {
-    /* THE 3D VIEW IS AN OFFER, NOT THE PAGE. What ships here is a button; the
-    renderer, the heightfield and the route arrive on click. See
-    CourseMap3D.tsx. */
+    /* client:visible, and this one is safe where the old control island was not:
+    that island's only child was absolutely positioned inside a
+    `display: contents` <astro-island>, so IntersectionObserver had no box to
+    observe and it never hydrated. This component's root is the map's own framed
+    box, which has a rect, so "when the reader reaches it" works. That timing is
+    the point: MapLibre is ~250KB and must not be in the page's measured load. */
   }
-  <CourseMap3D client:idle />
+  <CourseMapLibre client:visible />
 
-  <figcaption class="cmap__cap">
-    <span class="cmap__key">
-      <span class="cmap__swatch is-long"></span> Long loop, {longMiles} miles
-    </span>
-    <span class="cmap__key">
-      <span class="cmap__swatch is-short"></span> Short loop, {shortMiles} miles
-    </span>
-    <span class="cmap__key">
-      <span class="cmap__swatch is-oval"></span> The Oval, start, finish and aid
-    </span>
+  <figcaption class="cmap__figcap">
+    Seven loops out of The Oval: four long loops of about {longMiles} miles alternating with three short
+    loops of about {shortMiles} miles.
   </figcaption>
 
   {
     /* THE LIST IS THE ACCESSIBLE MAP, and it is not a fallback: it says
     something the drawing cannot, which is how much of the day is spent on each
-    trail. Derived from the track by the same script, never typed. */
+    trail. Derived from the track by matching it against the named trail
+    network, never typed. */
   }
   <div class="cmap__trailsUsed">
     <h3 class="cmap__trailsUsedTitle">What you run on</h3>
     <ul>
       {
-        data.trailsUsed.map((t) => (
+        meta.trailsUsed.map((t) => (
           <li>
             <span class="cmap__bar" style={`--pct:${t.percent}`} aria-hidden="true" />
             <span class="cmap__trailName">{t.name}</span>
-            {/* Always one decimal: a column reading 17.8 / 17.1 / 8 / 7.7 has
-                a number in it that looks like a different kind of quantity. */}
+            {/* Always one decimal: a column reading 17.2 / 16.6 / 8 / 7.4 has a
+                number in it that looks like a different kind of quantity. */}
             <span class="cmap__pct mono">{t.percent.toFixed(1)}%</span>
           </li>
         ))
       }
     </ul>
+    {
+      /* ATTRIBUTION IS A LICENCE TERM, NOT A COURTESY. OpenStreetMap is ODbL and
+      requires credit; USGS work is public domain and is credited anyway, because
+      saying where a measurement came from is the same discipline as the
+      elevation profile's caption. The map carries its own tile attribution; this
+      covers the trail tally, which is computed from OSM at build time and so
+      appears on the page whether or not the map ever loads. */
+    }
     <p class="cmap__provenance">
-      Measured from a recorded run of the course against the Mt. Airy trail network. Trail names are
-      Cincinnati Parks' own.
+      Measured from a recorded run of the course against the trail network. Map data{' '}
+      <span aria-hidden="true">&copy;</span>{' '}
+      <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> contributors,
+      ODbL. Trail names are Cincinnati Parks' own.
     </p>
   </div>
 </figure>
@@ -219,156 +86,76 @@ const shortMiles = data.loops.find((l) => l.kind === 'short')?.miles ?? 0;
     margin: 0;
   }
 
-  /* THE FRAME OWNS THE BOX, NOT THE SVG. The island fits the viewBox to this
-     element's measured shape, so the shape has to come from CSS rather than
-     from the drawing: if the frame simply wrapped an auto-height SVG, the
-     island would measure back the aspect it had just written and never move.
-     A phone gets a PORTRAIT box, because the course is taller than it is wide
-     and a landscape strip renders the whole thing 232px tall. */
-  .cmap__frame {
+  /* The frame is sized HERE, not by the engine. MapLibre fills whatever box it
+     is given, and giving it one that exists before it loads is what stops the
+     page reflowing when the map arrives. A phone gets a PORTRAIT box, because
+     the course is taller than it is wide. */
+  :global(.cmap__frame) {
     position: relative;
     aspect-ratio: 4 / 3;
     max-height: 70vh;
     border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     overflow: hidden;
-    /* --color-muted, NOT --color-bg-soft. The brand tokens in the @theme block
-       are CONSTANTS: --color-bg-soft is soft paper (#f4ebd6) in both themes, so
-       the panel stayed cream on the dark site while everything around it went
-       to bark, and the short loop, drawn in --color-foreground, turned cream on
-       cream a second time. Only the shadcn-mapped tokens (--color-muted,
-       --color-background, --color-foreground) flip. */
     background: var(--color-muted);
   }
 
-  .cmap__svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-    touch-action: none; /* the island owns pinch and drag */
-    cursor: grab;
+  :global(.cmap__status) {
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
   }
 
-  .cmap__svg:focus-visible {
-    outline: 2px solid var(--color-ring);
-    outline-offset: -2px;
-  }
-
-  /* The grab cursor is a lie until the island is listening. */
-  .cmap__svg:not([data-pan-ready]) {
-    cursor: default;
-  }
-
-  .cmap__svg[data-panning] {
-    cursor: grabbing;
-  }
-
-  /* VECTOR-EFFECT KEEPS STROKES HONEST UNDER ZOOM. Without it a 12-unit stroke
-     is 12 FEET wide and doubles in apparent thickness every time the map is
-     zoomed, so the trails swallow the course. With it the browser draws the
-     stroke in screen pixels and the line stays a line at every scale. */
-  .cmap__trails path {
-    fill: none;
-    stroke: var(--color-muted-foreground);
-    stroke-width: 1.1;
-    stroke-opacity: 0.38;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    vector-effect: non-scaling-stroke;
-  }
-
-  .cmap__loop {
-    fill: none;
-    stroke-width: 2.6;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    vector-effect: non-scaling-stroke;
-  }
-
-  .cmap__loop.is-long {
-    stroke: var(--color-primary);
-  }
-
-  /* NOT --color-accent. That name is defined TWICE: the @theme block sets it to
-     bark (#1a1712), and the shadcn :root block below it redefines it as the
-     pale surface token (#f0e6ce). The second one wins, so the short loops drew
-     cream on cream and simply were not there, while the legend looked fine
-     because a 3px swatch of nothing reads as a faint line. --color-foreground
-     is ink on cream and cream on bark, so it carries in both themes. */
-  .cmap__loop.is-short {
-    stroke: var(--color-foreground);
-    stroke-dasharray: 7 5;
-  }
-
-  .cmap__oval circle {
-    fill: none;
-    stroke: var(--color-foreground);
-    stroke-width: 2;
-    vector-effect: non-scaling-stroke;
-  }
-
-  .cmap__oval circle:last-child {
-    fill: var(--color-foreground);
-  }
-
-  .cmap__labels text {
-    fill: var(--color-foreground);
-    font-size: 26px;
-    font-family: var(--font-body);
-    opacity: 0;
-    transition: opacity 160ms ease;
-    paint-order: stroke;
-    stroke: var(--color-background);
-    stroke-width: 5px;
-    stroke-linejoin: round;
-  }
-
-  .cmap__svg.is-zoomed .cmap__labels text {
-    opacity: 0.85;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .cmap__labels text {
-      transition: none;
-    }
-  }
-
-  .cmap__cap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 1.25rem;
+  .cmap__figcap {
     margin-top: 0.75rem;
     font-size: 0.8125rem;
     color: var(--color-muted-foreground);
   }
 
-  .cmap__key {
+  :global(.cmap__cap) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
+  }
+
+  :global(.cmap__key) {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
   }
 
-  .cmap__swatch {
+  :global(.cmap__swatch) {
     width: 1.4rem;
     height: 0;
     border-top: 3px solid currentcolor;
     display: inline-block;
   }
 
-  .cmap__swatch.is-long {
-    border-color: var(--color-primary);
+  /* THESE MATCH THE LAYER COLOURS IN CourseMapLibre.tsx, and they are literals
+     on both sides on purpose. The map paints over an aerial photograph, not
+     over the page, so its line colours are chosen to carry on foliage rather
+     than to match the theme; pointing the legend at --color-primary would make
+     the swatch drift away from the line it describes the next time the brand
+     moves. */
+  :global(.cmap__swatch.is-long) {
+    border-color: #e2593c;
   }
 
-  .cmap__swatch.is-short {
+  :global(.cmap__swatch.is-short) {
     border-top-style: dashed;
-    border-color: var(--color-foreground);
+    border-color: #ffd9a0;
   }
 
-  .cmap__swatch.is-oval {
+  :global(.cmap__swatch.is-oval) {
     width: 0.7rem;
     height: 0.7rem;
     border: 2px solid var(--color-foreground);
     border-radius: 50%;
+    background: #fff;
   }
 
   .cmap__trailsUsed {
@@ -423,85 +210,9 @@ const shortMiles = data.loops.find((l) => l.kind === 'short')?.miles ?? 0;
     color: var(--color-muted-foreground);
   }
 
-  @media (max-width: 640px) {
-    .cmap__frame {
-      aspect-ratio: 3 / 4;
-      max-height: 65vh;
-    }
-  }
-
-  @media print {
-    .cmap__svg {
-      cursor: default;
-    }
-  }
-
-  /* THE CONTROLS ARE A REACT ISLAND, so Astro's scoped attribute never lands on
-     them. :global is the right tool here rather than moving these to
-     globals.css: they style one component and belong beside it. */
-  :global(.cmapctl) {
-    position: absolute;
-    top: 0.6rem;
-    right: 0.6rem;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  :global(.cmapctl button) {
-    min-width: 2.25rem;
-    min-height: 2.25rem;
-    padding: 0 0.5rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.375rem;
-    background: var(--color-background);
-    color: var(--color-foreground);
-    font-size: 0.875rem;
-    line-height: 1;
-    cursor: pointer;
-  }
-
-  :global(.cmapctl button:hover:not(:disabled)) {
-    background: var(--color-muted);
-  }
-
-  :global(.cmapctl button:disabled) {
-    opacity: 0.45;
-    cursor: default;
-  }
-
-  :global(.cmapctl button:focus-visible) {
-    outline: 2px solid var(--color-ring);
-    outline-offset: 2px;
-  }
-
-  /* VISUALLY HIDDEN, NOT DISPLAY:NONE. The hint is for someone who has just
-     tabbed onto the map and cannot see the cursor change; hiding it from the
-     accessibility tree too would defeat the point. */
-  :global(.cmapctl__hint) {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  @media print {
-    :global(.cmapctl) {
-      display: none;
-    }
-  }
-
-  :global(.cmap3d__bar) {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 0.9rem;
-    margin-top: 0.75rem;
+  .cmap__provenance a {
+    color: inherit;
+    text-decoration: underline;
   }
 
   :global(.cmap3d__btn) {
@@ -517,13 +228,8 @@ const shortMiles = data.loops.find((l) => l.kind === 'short')?.miles ?? 0;
     cursor: pointer;
   }
 
-  :global(.cmap3d__btn:hover:not(:disabled)) {
+  :global(.cmap3d__btn:hover) {
     background: var(--color-muted);
-  }
-
-  :global(.cmap3d__btn:disabled) {
-    opacity: 0.6;
-    cursor: default;
   }
 
   :global(.cmap3d__btn:focus-visible) {
@@ -531,40 +237,23 @@ const shortMiles = data.loops.find((l) => l.kind === 'short')?.miles ?? 0;
     outline-offset: 2px;
   }
 
-  :global(.cmap3d__hint),
-  :global(.cmap3d__note) {
+  :global(.cmap3d__hint) {
     font-size: 0.8125rem;
     color: var(--color-muted-foreground);
-    margin: 0;
-  }
-
-  :global(.cmap3d__note) {
-    margin-top: 0.75rem;
-  }
-
-  /* The stage borrows the flat map's box so switching between them does not
-     make the page jump. */
-  :global(.cmap3d__stage) {
-    position: relative;
-    margin-top: 0.75rem;
-    aspect-ratio: 4 / 3;
-    max-height: 70vh;
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    touch-action: none;
   }
 
   @media (max-width: 640px) {
-    :global(.cmap3d__stage) {
+    :global(.cmap__frame) {
       aspect-ratio: 3 / 4;
       max-height: 65vh;
     }
   }
 
+  /* A WebGL canvas does not print. The trail list below it does, and that is
+     the part worth carrying to an aid station on paper. */
   @media print {
-    :global(.cmap3d__bar),
-    :global(.cmap3d__stage) {
+    :global(.cmap__frame),
+    :global(.cmap__cap) {
       display: none;
     }
   }

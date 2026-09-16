@@ -115,21 +115,39 @@ export async function sampleElevations(points, batch = 200) {
     // long before that. The first real track run through this script died on
     // the very first batch (2026-09-16). POST puts the geometry in the body,
     // where there is no such ceiling.
-    const res = await fetch(SAMPLES_URL, {
-      method: 'POST',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/x-www-form-urlencoded',
-      },
-      body,
-    });
-    if (!res.ok) throw new Error(`3DEP ${res.status} ${res.statusText}`);
-    const json = await res.json();
-    if (json.error) throw new Error(`3DEP: ${json.error.message ?? JSON.stringify(json.error)}`);
-    const samples = json.samples ?? [];
-    if (samples.length !== chunk.length) {
-      throw new Error(`3DEP returned ${samples.length} samples for ${chunk.length} points`);
+    // RETRIED WITH BACKOFF, because a long run WILL be interrupted. A 256x256
+    // heightfield is 328 consecutive requests, and somewhere in the middle the
+    // service answers 502 or 503 for a second or two. Without this the whole
+    // job dies two thirds of the way through a several-minute run, which is
+    // both maddening and, worse, teaches you to lower the resolution rather
+    // than to retry. The batch is idempotent, so retrying is free.
+    let json;
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        const res = await fetch(SAMPLES_URL, {
+          method: 'POST',
+          headers: {
+            accept: 'application/json',
+            'content-type': 'application/x-www-form-urlencoded',
+          },
+          body,
+        });
+        if (!res.ok) throw new Error(`3DEP ${res.status} ${res.statusText}`);
+        json = await res.json();
+        if (json.error) {
+          throw new Error(`3DEP: ${json.error.message ?? JSON.stringify(json.error)}`);
+        }
+        const n = (json.samples ?? []).length;
+        if (n !== chunk.length) throw new Error(`3DEP returned ${n} for ${chunk.length} points`);
+        break;
+      } catch (err) {
+        if (attempt >= 5) throw err;
+        const wait = 800 * 2 ** attempt;
+        process.stdout.write(`\n  (${err.message}; retrying in ${wait}ms)`);
+        await new Promise((r) => setTimeout(r, wait));
+      }
     }
+    const samples = json.samples ?? [];
     // ORDER BY locationId, NOT BY ARRIVAL. getSamples is documented to return a
     // sample per input point but not to preserve input order, and a profile
     // assembled in the wrong order is a plausible-looking lie rather than an

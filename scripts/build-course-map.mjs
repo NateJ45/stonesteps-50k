@@ -1,8 +1,21 @@
 // scripts/build-course-map.mjs
 //
-// Builds the course map's data: the route, the trails it runs on, and the
-// ground under both. Writes committed JSON so the site build never needs the
-// network.
+// Builds the course map's data from the GPS track: the route as GeoJSON, and
+// which trails the course actually runs on. Writes committed files so the site
+// build never needs the network.
+//
+// WHAT THIS DELIBERATELY NO LONGER EMITS, and why. An earlier version of this
+// script also wrote the OSM basemap geometry, a 256x256 heightfield, marching-
+// squares contours and a USGS orthophotograph, because the map was a bespoke
+// SVG renderer and a three.js scene that had to be handed every pixel they drew.
+// The map is MapLibre now, which fetches imagery and terrain as tiles at the
+// zoom the reader is actually at, so all of that became a megabyte of committed
+// files reimplementing, worse, what a map engine does natively.
+//
+// The OSM fetch stays, because the trail ATTRIBUTION is a build-time
+// measurement: matching the track against the named trail network is how the
+// page can say the course is 17.8% Furnas Trail. Only the tally is kept; the
+// geometry is thrown away.
 //
 // Usage:
 //   node scripts/build-course-map.mjs course.gpx            # write the data files
@@ -99,44 +112,124 @@ function makeFrame(lat0, lon0) {
 /* ---------- OpenStreetMap ------------------------------------------------- */
 
 const OVERPASS = 'https://overpass-api.de/api/interpreter';
+const OVERPASS_MIRROR = 'https://overpass.kumi.systems/api/interpreter';
 
 /**
- * The trail network around the course.
+ * Everything in the box, not just the trails.
  *
- * CACHED TO DISK. Overpass is a volunteer service and this script is run by
- * hand whenever a new track arrives, so hammering it during development is
- * rude and slow. The cache lives under node_modules/.cache, which is already
- * ignored, and the OUTPUT is what gets committed.
+ * `nwr(bbox); out geom;` asks for every node, way and relation in the area and
+ * lets this script decide what is interesting. It is a blunt query and a
+ * deliberate one: a long filtered query is exactly what the public instances
+ * time out on, and this one returns in seconds where the filtered version
+ * failed repeatedly with "the server is probably too busy". It also means
+ * adding a layer later is a change HERE rather than another round trip.
+ *
+ * CACHED TO DISK under node_modules/.cache, which is already ignored. Overpass
+ * is a volunteer service and this script runs by hand whenever a new track
+ * arrives; the committed OUTPUT is what the site builds from.
  *
  * A User-Agent is not optional: without one the main instance answers
- * 406 Not Acceptable, which looks like a malformed query and is not.
+ * 406 Not Acceptable, which reads like a malformed query and is not.
  */
-async function fetchTrails(bbox) {
+async function fetchOsm(bbox) {
   mkdirSync(CACHE, { recursive: true });
-  const key = join(CACHE, `osm-${bbox.map((n) => n.toFixed(4)).join('_')}.json`);
+  const key = join(CACHE, `osm-all-${bbox.map((n) => n.toFixed(4)).join('_')}.json`);
   if (existsSync(key)) {
     console.log('  (osm from cache)');
     return JSON.parse(readFileSync(key, 'utf8'));
   }
 
-  const query = `[out:json][timeout:90];
-(
-  way["highway"~"path|footway|track|cycleway|service|unclassified|residential"](${bbox.join(',')});
-);
+  const query = `[out:json][timeout:180];
+nwr(${bbox.join(',')});
 out geom;`;
 
-  const res = await fetch(OVERPASS, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/x-www-form-urlencoded',
-      'user-agent': 'stonesteps50k-course-map/1.0 (+https://stonesteps50k.com)',
-    },
-    body: new URLSearchParams({ data: query }),
-  });
-  if (!res.ok) throw new Error(`Overpass ${res.status} ${res.statusText}`);
-  const json = await res.json();
-  writeFileSync(key, JSON.stringify(json));
-  return json;
+  let lastErr;
+  for (const host of [OVERPASS, OVERPASS_MIRROR]) {
+    try {
+      const res = await fetch(host, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          'user-agent': 'stonesteps50k-course-map/1.0 (+https://stonesteps50k.com)',
+        },
+        body: new URLSearchParams({ data: query }),
+      });
+      if (!res.ok) throw new Error(`Overpass ${res.status} ${res.statusText}`);
+      const text = await res.text();
+      // A BUSY INSTANCE ANSWERS 200 WITH AN HTML ERROR PAGE, so the status code
+      // is not the check. Parsing is.
+      if (!text.trimStart().startsWith('{')) {
+        throw new Error(text.includes('too busy') ? 'instance busy' : 'returned HTML');
+      }
+      const json = JSON.parse(text);
+      writeFileSync(key, JSON.stringify(json));
+      return json;
+    } catch (err) {
+      lastErr = err;
+      console.log(`  (${host.split('/')[2]}: ${err.message}, trying next)`);
+    }
+  }
+  throw lastErr;
+}
+
+/* ---------- What the map draws ------------------------------------------- */
+
+/**
+ * ROAD CLASSES, IN RANK ORDER, WITH THE ZOOM EACH APPEARS AT.
+ *
+ * A map where every line is the same weight reads as a circuit diagram. This
+ * ranking is the one every road atlas uses and it does two jobs: it sets stroke
+ * width, and it sets the zoom at which a class appears at all, so the default
+ * fit carries the highways and the park roads while driveways wait until
+ * somebody is actually looking closely.
+ */
+const ROAD_CLASSES = {
+  motorway: { rank: 1, minZoom: 1 },
+  trunk: { rank: 1, minZoom: 1 },
+  motorway_link: { rank: 3, minZoom: 1.6 },
+  trunk_link: { rank: 3, minZoom: 1.6 },
+  primary: { rank: 2, minZoom: 1 },
+  secondary: { rank: 2, minZoom: 1 },
+  primary_link: { rank: 3, minZoom: 1.8 },
+  tertiary: { rank: 3, minZoom: 1.4 },
+  residential: { rank: 4, minZoom: 2.2 },
+  unclassified: { rank: 4, minZoom: 2.2 },
+  living_street: { rank: 4, minZoom: 2.2 },
+  service: { rank: 5, minZoom: 3.4 },
+};
+
+/** Ways a person walks. Kept apart from roads so they can be drawn dashed. */
+const PATH_CLASSES = new Set(['path', 'footway', 'track', 'cycleway', 'bridleway', 'steps']);
+
+/**
+ * The point features a runner actually wants, and nothing else.
+ *
+ * Deliberately short. Every marker competes with the course line, and a map
+ * that shows bus stops and benches is a map you cannot find the toilets on.
+ */
+function poiKind(tags) {
+  if (!tags) return null;
+  if (tags.amenity === 'toilets') return 'toilets';
+  if (tags.amenity === 'drinking_water') return 'water';
+  if (tags.amenity === 'shelter') return 'shelter';
+  if (tags.tourism === 'picnic_site') return 'picnic';
+  if (tags.amenity === 'parking') return 'parking';
+  if (tags.highway === 'trailhead') return 'trailhead';
+  if (tags.tourism === 'viewpoint') return 'viewpoint';
+  return null;
+}
+
+/** Which filled area, if any, a way represents. Order matters: first match wins. */
+function areaKind(tags) {
+  if (!tags) return null;
+  if (tags.natural === 'water' || tags.water || tags.landuse === 'reservoir') return 'water';
+  if (tags.natural === 'wood' || tags.landuse === 'forest') return 'wood';
+  if (tags.leisure === 'nature_reserve' || tags.boundary === 'protected_area') return 'reserve';
+  if (tags.leisure === 'park' || tags.leisure === 'garden') return 'park';
+  if (tags.leisure === 'pitch' || tags.leisure === 'playground') return 'pitch';
+  if (tags.amenity === 'parking') return 'parking';
+  if (tags.building) return 'building';
+  return null;
 }
 
 /* ---------- Main ---------------------------------------------------------- */
@@ -145,10 +238,18 @@ async function main() {
   const track = readTrack(resolve(process.cwd(), file));
   console.log(`Track: ${track.length} points`);
 
-  // The frame is centred on the track, so coordinates stay small and readable.
+  // A local flat frame in FEET, used only for measurement: simplification
+  // tolerances and nearest-trail distances are both distances, and doing them
+  // in degrees would make them 25% tighter north-south than east-west. The
+  // OUTPUT is lon/lat, because that is what a map engine wants.
   const lat0 = track.reduce((s, p) => s + p[1], 0) / track.length;
   const lon0 = track.reduce((s, p) => s + p[0], 0) / track.length;
   const frame = makeFrame(lat0, lon0);
+  const k = Math.cos((lat0 * Math.PI) / 180) * FT_PER_DEG_LAT;
+  const unproject = ([x, y]) => [
+    Number((lon0 + x / k).toFixed(6)),
+    Number((lat0 + y / FT_PER_DEG_LAT).toFixed(6)),
+  ];
 
   // The loop split uses the SAME dense walk and the SAME detector the elevation
   // chart uses, so the map's loop boundaries and the chart's aid marks are the
@@ -157,11 +258,10 @@ async function main() {
   const laps = findLaps(dense);
   console.log(`Loops: ${laps.map((m) => m.toFixed(2)).join(', ')} miles`);
 
-  // Split the dense track into loops, project, and simplify each independently
-  // so a simplification never smooths across a loop boundary.
   const cum = [0];
-  for (let i = 1; i < dense.length; i += 1)
+  for (let i = 1; i < dense.length; i += 1) {
     cum.push(cum[i - 1] + haversineFt(dense[i - 1], dense[i]));
+  }
 
   const loops = [];
   let from = 0;
@@ -170,20 +270,21 @@ async function main() {
     let to = from;
     while (to < dense.length - 1 && cum[to] < endFt) to += 1;
     const slice = dense.slice(from, to + 1).map(frame.project);
-    const simplified = simplify(slice, 15);
     const lengthMiles = (cum[to] - cum[from]) / 5280;
     loops.push({
       index: li + 1,
       kind: lengthMiles >= 4 ? 'long' : 'short',
       miles: Number(lengthMiles.toFixed(2)),
-      points: simplified.map(([x, y]) => [Math.round(x), Math.round(y)]),
+      // 12 ft: fine enough that no bend a reader can see is lost, coarse enough
+      // to drop ~95% of the points a watch recorded.
+      coords: simplify(slice, 12).map(unproject),
     });
     from = to;
   });
-  const routePoints = loops.reduce((n, l) => n + l.points.length, 0);
-  console.log(`Route: ${routePoints} points after simplification (from ${dense.length})`);
+  const ptCount = loops.reduce((n, l) => n + l.coords.length, 0);
+  console.log(`Route: ${ptCount} points after simplifying (from ${dense.length})`);
 
-  /* --- Trails ------------------------------------------------------------ */
+  /* --- Which trails does the course run on? ------------------------------ */
 
   const lats = track.map((p) => p[1]);
   const lons = track.map((p) => p[0]);
@@ -194,32 +295,45 @@ async function main() {
     Math.max(...lats) + PAD,
     Math.max(...lons) + PAD,
   ];
-  console.log('Fetching the OSM trail network...');
-  const osm = await fetchTrails(bbox);
 
-  const ways = (osm.elements ?? [])
-    .filter((w) => (w.geometry ?? []).length > 1)
-    .map((w) => ({
-      name: w.tags?.name ?? null,
-      highway: w.tags?.highway ?? null,
-      points: w.geometry.map((g) => frame.project([g.lon, g.lat])),
-    }));
-  console.log(`  ${ways.length} ways`);
+  console.log('Fetching OpenStreetMap (for the trail tally only)...');
+  const osm = await fetchOsm(bbox);
+  const els = osm.elements ?? [];
+  console.log(`  ${els.length} elements`);
 
-  // One flat array of trail vertices, densified so "nearest vertex" is a fair
-  // proxy for "nearest point on the trail". Without this a long straight
-  // segment reports its ENDPOINTS as the nearest thing, and a course running
-  // along its middle looks 200 ft off a trail it is standing on.
+  // TRAILS AND ROADS BOTH, because the course genuinely runs on park roads:
+  // Trail Ridge Road, Blue Spruce Road, Lodge Road and Oak Ridge Road are all
+  // in the answer. Indexing only the paths dropped the share of the course
+  // found near a named way from 95% to 85%, which looked like the fit had
+  // broken and was really a missing layer.
+  const runnable = [];
+  for (const e of els) {
+    const t = e.tags ?? {};
+    const hw = t.highway;
+    if (!hw || !(ROAD_CLASSES[hw] || PATH_CLASSES.has(hw))) continue;
+    const geom = e.geometry ?? [];
+    if (geom.length < 2) continue;
+    runnable.push({
+      name: t.name ?? null,
+      points: geom.map((g) => frame.project([g.lon, g.lat])),
+    });
+  }
+  console.log(`  ${runnable.length} runnable ways`);
+
+  // Densified so "nearest vertex" is a fair proxy for "nearest point on the
+  // way": without it a long straight segment reports its ENDPOINTS as the
+  // nearest thing, and a course running along its middle looks 200 ft off a
+  // trail it is standing on.
   const flat = [];
   const owner = [];
-  ways.forEach((w, wi) => {
+  runnable.forEach((w, wi) => {
     for (let i = 1; i < w.points.length; i += 1) {
       const a = w.points[i - 1];
       const b = w.points[i];
       const L = Math.hypot(b[0] - a[0], b[1] - a[1]);
       const n = Math.max(1, Math.round(L / 25));
-      for (let k = 0; k < n; k += 1) {
-        flat.push([a[0] + ((b[0] - a[0]) * k) / n, a[1] + ((b[1] - a[1]) * k) / n]);
+      for (let c = 0; c < n; c += 1) {
+        flat.push([a[0] + ((b[0] - a[0]) * c) / n, a[1] + ((b[1] - a[1]) * c) / n]);
         owner.push(wi);
       }
     }
@@ -227,8 +341,6 @@ async function main() {
     owner.push(wi);
   });
   const nearest = gridIndex(flat, 60);
-
-  /* --- Attribution: which trails does the course run on? ----------------- */
 
   const sample = dense.filter((_, i) => i % 10 === 0).map(frame.project);
   const tally = new Map();
@@ -239,17 +351,15 @@ async function main() {
     residuals.push(dist);
     if (dist < 60 && index >= 0) {
       onTrail += 1;
-      const nm = ways[owner[index]].name;
+      const nm = runnable[owner[index]].name;
       if (nm) tally.set(nm, (tally.get(nm) ?? 0) + 1);
     }
   }
   residuals.sort((a, b) => a - b);
   const median = residuals[Math.floor(residuals.length / 2)];
   const p90 = residuals[Math.floor(residuals.length * 0.9)];
-  console.log(`Track to nearest trail: median ${median.toFixed(1)} ft, 90th ${p90.toFixed(1)} ft`);
-  console.log(
-    `  ${((onTrail / sample.length) * 100).toFixed(0)}% of the course is within 60 ft of a trail`,
-  );
+  console.log(`Track to nearest way: median ${median.toFixed(1)} ft, 90th ${p90.toFixed(1)} ft`);
+  console.log(`  ${((onTrail / sample.length) * 100).toFixed(0)}% within 60 ft of a named way`);
 
   const named = [...tally.entries()].sort((a, b) => b[1] - a[1]);
   const namedTotal = named.reduce((s, [, c]) => s + c, 0);
@@ -259,64 +369,44 @@ async function main() {
   console.log('Trails used:');
   for (const t of trailsUsed) console.log(`   ${String(t.percent).padStart(5)}%  ${t.name}`);
 
-  /* --- Terrain ----------------------------------------------------------- */
-
-  // A heightfield over the course box for the 3D view. GRID_N is the knob: the
-  // file is GRID_N^2 numbers, and 3DEP is sampled once per cell, so doubling it
-  // quadruples both the bytes and the number of API calls.
-  const GRID_N = 96;
-  const xs = sample.map((p) => p[0]);
-  const ys = sample.map((p) => p[1]);
-  const margin = 500;
-  const box = {
-    minX: Math.min(...xs) - margin,
-    maxX: Math.max(...xs) + margin,
-    minY: Math.min(...ys) - margin,
-    maxY: Math.max(...ys) + margin,
-  };
-  const gridPoints = [];
-  for (let j = 0; j < GRID_N; j += 1) {
-    for (let i = 0; i < GRID_N; i += 1) {
-      const x = box.minX + ((box.maxX - box.minX) * i) / (GRID_N - 1);
-      const y = box.minY + ((box.maxY - box.minY) * j) / (GRID_N - 1);
-      // Back to lon/lat for the DEM query.
-      const k = Math.cos((lat0 * Math.PI) / 180) * FT_PER_DEG_LAT;
-      gridPoints.push([lon0 + x / k, lat0 + y / FT_PER_DEG_LAT]);
-    }
-  }
-  console.log(`Sampling 3DEP for a ${GRID_N}x${GRID_N} heightfield...`);
-  const heights = await sampleElevations(gridPoints);
-
   /* --- Write ------------------------------------------------------------- */
 
-  const courseMap = {
-    generatedBy: 'scripts/build-course-map.mjs',
-    frame: { lat0: Number(lat0.toFixed(7)), lon0: Number(lon0.toFixed(7)) },
-    units: 'feet, x east, y north, relative to frame',
-    loops,
-    trails: ways
-      .filter((w) => w.points.length > 1)
-      .map((w) => ({
-        name: w.name,
-        kind: w.highway,
-        points: simplify(w.points, 12).map(([x, y]) => [Math.round(x), Math.round(y)]),
+  // GEOJSON, because that is the interchange format every map engine reads. One
+  // Feature per loop with its own properties, so MapLibre can style the long
+  // and short loops differently from one source without a second file.
+  const geojson = {
+    type: 'FeatureCollection',
+    features: [
+      ...loops.map((l) => ({
+        type: 'Feature',
+        properties: { kind: l.kind, index: l.index, miles: l.miles },
+        geometry: { type: 'LineString', coordinates: l.coords },
       })),
-    trailsUsed,
-    fit: { medianFt: Number(median.toFixed(1)), p90Ft: Number(p90.toFixed(1)) },
+      {
+        type: 'Feature',
+        properties: { kind: 'start', name: 'The Oval' },
+        geometry: { type: 'Point', coordinates: loops[0].coords[0] },
+      },
+    ],
   };
 
-  const terrain = {
+  const bounds = {
+    west: Math.min(...loops.flatMap((l) => l.coords.map((c) => c[0]))),
+    south: Math.min(...loops.flatMap((l) => l.coords.map((c) => c[1]))),
+    east: Math.max(...loops.flatMap((l) => l.coords.map((c) => c[0]))),
+    north: Math.max(...loops.flatMap((l) => l.coords.map((c) => c[1]))),
+  };
+
+  const meta = {
     generatedBy: 'scripts/build-course-map.mjs',
-    grid: GRID_N,
-    box: {
-      minX: Math.round(box.minX),
-      maxX: Math.round(box.maxX),
-      minY: Math.round(box.minY),
-      maxY: Math.round(box.maxY),
+    attribution: {
+      osm: 'Map data (c) OpenStreetMap contributors, ODbL',
+      usgs: 'Imagery and elevation courtesy of the U.S. Geological Survey',
     },
-    // Rounded to the foot. A 1 m DEM does not justify decimals and they double
-    // the file size.
-    heights: heights.map((h) => Math.round(h)),
+    bounds,
+    loops: loops.map((l) => ({ index: l.index, kind: l.kind, miles: l.miles })),
+    trailsUsed,
+    fit: { medianFt: Number(median.toFixed(1)), p90Ft: Number(p90.toFixed(1)) },
   };
 
   if (REPORT_ONLY) {
@@ -326,11 +416,14 @@ async function main() {
 
   // STABLE KEY ORDER AND NO TIMESTAMP, so a re-run with unchanged inputs
   // rewrites byte-identical files. Same rule as `npm run mud`: a generator that
-  // churns its output on every run makes every diff unreadable and trains
-  // people to ignore it.
-  writeFileSync(join(DATA, 'course-map.json'), `${JSON.stringify(courseMap)}\n`);
-  writeFileSync(join(DATA, 'course-terrain.json'), `${JSON.stringify(terrain)}\n`);
-  console.log('\nWrote scripts/data/course-map.json and course-terrain.json');
+  // churns its output makes every diff unreadable and trains people to ignore
+  // it.
+  // NAMED .json, NOT .geojson, on purpose: the bundler parses a .json import
+  // into an object and treats an unknown extension as an opaque asset it will
+  // not inline.
+  writeFileSync(join(DATA, 'course-geo.json'), `${JSON.stringify(geojson)}\n`);
+  writeFileSync(join(DATA, 'course-map.json'), `${JSON.stringify(meta)}\n`);
+  console.log('\nWrote scripts/data/course-geo.json and course-map.json');
 }
 
 main().catch((err) => {

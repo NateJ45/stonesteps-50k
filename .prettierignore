@@ -16,7 +16,7 @@ src/lib/sanity.types.ts
 # something. Pretty-printing thousands of coordinates would cost about four
 # times the bytes to say the same numbers.
 scripts/data/course-map.json
-scripts/data/course-terrain.json
+scripts/data/course-geo.json
 
 # Sanity typegen intermediate (also gitignored). Machine-written JSON.
 schema.json
