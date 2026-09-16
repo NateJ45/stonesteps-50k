@@ -499,6 +499,14 @@ argument is in the header of `scripts/build-course-map.mjs` and in
 The Parks permission is still what makes the trail NAMES safe to print, and the
 official map stays on the page as the printable version.
 
+A 3D orbit view sits under the flat map, behind a control that loads three.js
+only when pressed. Two things about it are deliberate and should survive edits.
+The vertical scale is EXAGGERATED and the view says so on itself: Mt. Airy's
+relief is under 5% of the course's width and at true proportions the model reads
+as a plate. And nothing may import `src/components/race/courseScene.ts` at the
+top level; a static import pulls three.js into /course's own bundle and the only
+symptom is a performance score nobody checks that week.
+
 WHAT IS STILL OPEN ON IT: whether the file may be republished as the course
 download. It is somebody's Strava export, and that is a permission to ask for
 rather than infer. Until it is granted, `race.gpxUrl` stays empty and the
