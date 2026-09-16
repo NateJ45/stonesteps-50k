@@ -29,6 +29,7 @@
  */
 import courseMapData from '../../../scripts/data/course-map.json';
 import CourseMapControls from './CourseMapControls.tsx';
+import CourseMap3D from './CourseMap3D.tsx';
 import {
   fitViewBox,
   toPath,
@@ -166,6 +167,13 @@ const shortMiles = data.loops.find((l) => l.kind === 'short')?.miles ?? 0;
     }
     <CourseMapControls client:idle svgId={svgId} bounds={bounds} padFt={PAD_FT} />
   </div>
+
+  {
+    /* THE 3D VIEW IS AN OFFER, NOT THE PAGE. What ships here is a button; the
+    renderer, the heightfield and the route arrive on click. See
+    CourseMap3D.tsx. */
+  }
+  <CourseMap3D client:idle />
 
   <figcaption class="cmap__cap">
     <span class="cmap__key">
@@ -484,6 +492,79 @@ const shortMiles = data.loops.find((l) => l.kind === 'short')?.miles ?? 0;
 
   @media print {
     :global(.cmapctl) {
+      display: none;
+    }
+  }
+
+  :global(.cmap3d__bar) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.9rem;
+    margin-top: 0.75rem;
+  }
+
+  :global(.cmap3d__btn) {
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  :global(.cmap3d__btn:hover:not(:disabled)) {
+    background: var(--color-muted);
+  }
+
+  :global(.cmap3d__btn:disabled) {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  :global(.cmap3d__btn:focus-visible) {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  :global(.cmap3d__hint),
+  :global(.cmap3d__note) {
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
+    margin: 0;
+  }
+
+  :global(.cmap3d__note) {
+    margin-top: 0.75rem;
+  }
+
+  /* The stage borrows the flat map's box so switching between them does not
+     make the page jump. */
+  :global(.cmap3d__stage) {
+    position: relative;
+    margin-top: 0.75rem;
+    aspect-ratio: 4 / 3;
+    max-height: 70vh;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    touch-action: none;
+  }
+
+  @media (max-width: 640px) {
+    :global(.cmap3d__stage) {
+      aspect-ratio: 3 / 4;
+      max-height: 65vh;
+    }
+  }
+
+  @media print {
+    :global(.cmap3d__bar),
+    :global(.cmap3d__stage) {
       display: none;
     }
   }
