@@ -340,6 +340,14 @@ export default function CourseMapLibre() {
           pitch: 55,
           bearing: -18,
           maxZoom: 18,
+          // A LEASH. Without it a stray two-finger drag sends the reader to
+          // Kansas with no way back except reloading, because there is no
+          // "recentre" affordance on a map this small. Generous enough that
+          // panning around the park never fights you.
+          maxBounds: [
+            [meta.bounds.west - 0.06, meta.bounds.south - 0.05],
+            [meta.bounds.east + 0.06, meta.bounds.north + 0.05],
+          ],
           attributionControl: false,
           // The scroll wheel belongs to the PAGE until somebody has decided to
           // use the map. A long article that eats your scroll halfway down is
@@ -371,6 +379,19 @@ export default function CourseMapLibre() {
           // enhancement on top of a working map, so its failure must not be able
           // to claim the map never arrived.
           setStatus('ready');
+
+          // COLLAPSE THE ATTRIBUTION ON A NARROW SCREEN. MapLibre's compact
+          // control renders expanded, and on a 375px map that is three lines of
+          // credits over the course. It stays in the DOM and is one tap away
+          // behind its own "i" button, which is what every mapping product
+          // does and what the licence asks for: attribution has to be
+          // reasonably available, not permanently in the way.
+          if (window.innerWidth < 720) {
+            m.getContainer()
+              .querySelector('.maplibregl-ctrl-attrib')
+              ?.classList.remove('maplibregl-compact-show');
+          }
+
           try {
             m.setTerrain({ source: 'terrain', exaggeration: EXAGGERATION });
           } catch (err) {
