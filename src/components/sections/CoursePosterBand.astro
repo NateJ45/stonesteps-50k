@@ -218,6 +218,12 @@ const totalLen = drawn.reduce((n, l) => n + l.len, 0);
     fill: none;
     stroke-linejoin: round;
     stroke-linecap: round;
+    /* SCREEN PIXELS, NOT USER UNITS. The viewBox is 933 wide and the band is
+       330 on a phone, so a 3.5 unit stroke arrives as about one pixel and the
+       course reads as a scratch. non-scaling-stroke keeps the line the same
+       weight at every width, which is the whole point of a route drawn over a
+       photograph. Measured at 390px before and after. */
+    vector-effect: non-scaling-stroke;
     /* A dark stroke under the line is what keeps it readable over a canopy,
        the same reason the real map carries a casing. Done with a filter rather
        than a second path so the markup stays half the size. */
@@ -226,12 +232,23 @@ const totalLen = drawn.reduce((n, l) => n + l.len, 0);
 
   .cposter__lap.is-long {
     stroke: #e2593c;
-    stroke-width: 3.5;
+    stroke-width: 3;
   }
 
   .cposter__lap.is-short {
     stroke: #f6d9b0;
-    stroke-width: 3;
+    stroke-width: 2.5;
+  }
+
+  /* Room for a heavier line once there is room for the picture. */
+  @media (min-width: 48rem) {
+    .cposter__lap.is-long {
+      stroke-width: 4;
+    }
+
+    .cposter__lap.is-short {
+      stroke-width: 3.25;
+    }
   }
 
   /* THE DRAW-ON. The dash pattern is the whole line, so moving the offset from
