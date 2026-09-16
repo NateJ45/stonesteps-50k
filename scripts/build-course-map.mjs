@@ -271,18 +271,80 @@ async function main() {
     while (to < dense.length - 1 && cum[to] < endFt) to += 1;
     const slice = dense.slice(from, to + 1).map(frame.project);
     const lengthMiles = (cum[to] - cum[from]) / 5280;
+    // 12 ft: fine enough that no bend a reader can see is lost, coarse enough
+    // to drop ~95% of the points a watch recorded.
+    const simplified = simplify(slice, 12);
     loops.push({
       index: li + 1,
       kind: lengthMiles >= 4 ? 'long' : 'short',
       miles: Number(lengthMiles.toFixed(2)),
-      // 12 ft: fine enough that no bend a reader can see is lost, coarse enough
-      // to drop ~95% of the points a watch recorded.
-      coords: simplify(slice, 12).map(unproject),
+      // Cumulative miles at the START of this loop, so a point's distance into
+      // the RACE can be computed without re-walking the whole route.
+      startMile: Number((cum[from] / 5280).toFixed(3)),
+      flat: simplified,
+      coords: simplified.map(unproject),
     });
     from = to;
   });
   const ptCount = loops.reduce((n, l) => n + l.coords.length, 0);
   console.log(`Route: ${ptCount} points after simplifying (from ${dense.length})`);
+
+  /* --- Elevation along the route ----------------------------------------- */
+
+  // EVERY ROUTE VERTEX GETS A HEIGHT, from the same USGS LiDAR the elevation
+  // profile uses. This is what lets the map do three things it otherwise
+  // could not: colour the line by gradient, drive a linked profile that
+  // scrubs with the flyover, and put the camera at a sensible altitude above
+  // ground rather than above sea level.
+  //
+  // The DEM, not the GPX's own barometric column, for the reason recorded in
+  // build-elevation.mjs: a watch's altimeter drifts with the weather over a
+  // morning, and taking the horizontal from the watch and the vertical from
+  // LiDAR uses each source for what it is good at.
+  const allVerts = loops.flatMap((l) => l.flat);
+  console.log(`Sampling 3DEP for ${allVerts.length} route vertices...`);
+  const vertHeights = await sampleElevations(allVerts.map(unproject));
+
+  let vi = 0;
+  for (const loop of loops) {
+    loop.ele = loop.flat.map(() => Math.round(vertHeights[vi++]));
+  }
+
+  // Distance into the race, and gradient, per vertex. GRADIENT IS SMOOTHED OVER
+  // A WINDOW, not taken between neighbouring points: simplification leaves
+  // vertices anywhere from a few feet to a few hundred apart, and a raw
+  // rise-over-run between two close points is mostly DEM noise, which paints a
+  // gradient-coloured line as confetti. 150 ft is about the shortest run over
+  // which a change of slope is something a runner would actually feel.
+  const GRADE_WINDOW_FT = 150;
+  for (const loop of loops) {
+    const n = loop.flat.length;
+    const d = [0];
+    for (let i = 1; i < n; i += 1) {
+      d.push(
+        d[i - 1] +
+          Math.hypot(loop.flat[i][0] - loop.flat[i - 1][0], loop.flat[i][1] - loop.flat[i - 1][1]),
+      );
+    }
+    loop.mile = d.map((ft) => Number((loop.startMile + ft / 5280).toFixed(4)));
+    loop.grade = d.map((_, i) => {
+      let a = i;
+      let b = i;
+      while (a > 0 && d[i] - d[a] < GRADE_WINDOW_FT / 2) a -= 1;
+      while (b < n - 1 && d[b] - d[i] < GRADE_WINDOW_FT / 2) b += 1;
+      const run = d[b] - d[a];
+      if (run < 1) return 0;
+      return Number((((loop.ele[b] - loop.ele[a]) / run) * 100).toFixed(1));
+    });
+  }
+
+  const grades = loops.flatMap((l) => l.grade);
+  const steepest = Math.max(...grades);
+  const steepestDown = Math.min(...grades);
+  console.log(
+    `Gradient: ${steepestDown.toFixed(1)}% to +${steepest.toFixed(1)}% ` +
+      `over a ${GRADE_WINDOW_FT} ft window`,
+  );
 
   /* --- Which trails does the course run on? ------------------------------ */
 
@@ -374,13 +436,56 @@ async function main() {
   // GEOJSON, because that is the interchange format every map engine reads. One
   // Feature per loop with its own properties, so MapLibre can style the long
   // and short loops differently from one source without a second file.
+  // GRADIENT IS PAINTED WITH A LINE-GRADIENT, which needs `lineMetrics` on the
+  // source and a per-vertex position along the line. MapLibre cannot read a
+  // property array off a LineString, so each loop also ships as a run of short
+  // two-point segments carrying their own grade. That is more features, and it
+  // is the only way to colour a line by a value that varies along it.
+  const gradeSegments = [];
+  for (const loop of loops) {
+    for (let i = 1; i < loop.coords.length; i += 1) {
+      gradeSegments.push({
+        type: 'Feature',
+        properties: { grade: loop.grade[i], loop: loop.index },
+        geometry: { type: 'LineString', coordinates: [loop.coords[i - 1], loop.coords[i]] },
+      });
+    }
+  }
+
+  // A marker at every whole mile. Runners plan in miles, and on a seven-loop
+  // course "where is mile 20" is genuinely hard to see otherwise.
+  const mileMarkers = [];
+  const totalMiles = loops[loops.length - 1].mile[loops[loops.length - 1].mile.length - 1];
+  for (let m = 1; m <= Math.floor(totalMiles); m += 1) {
+    let best = null;
+    for (const loop of loops) {
+      for (let i = 0; i < loop.mile.length; i += 1) {
+        const diff = Math.abs(loop.mile[i] - m);
+        if (!best || diff < best.diff) best = { diff, coord: loop.coords[i], ele: loop.ele[i] };
+      }
+    }
+    if (best && best.diff < 0.05) {
+      mileMarkers.push({
+        type: 'Feature',
+        properties: { mile: m, ele: best.ele },
+        geometry: { type: 'Point', coordinates: best.coord },
+      });
+    }
+  }
+
   const geojson = {
     type: 'FeatureCollection',
     features: [
       ...loops.map((l) => ({
         type: 'Feature',
-        properties: { kind: l.kind, index: l.index, miles: l.miles },
-        geometry: { type: 'LineString', coordinates: l.coords },
+        properties: { kind: l.kind, index: l.index, miles: l.miles, startMile: l.startMile },
+        // THREE-COMPONENT COORDINATES. GeoJSON allows an altitude as the third
+        // element, MapLibre ignores it for drawing, and the flyover reads it to
+        // put the camera above the GROUND rather than above sea level.
+        geometry: {
+          type: 'LineString',
+          coordinates: l.coords.map((c, i) => [c[0], c[1], l.ele[i]]),
+        },
       })),
       {
         type: 'Feature',
@@ -389,6 +494,29 @@ async function main() {
       },
     ],
   };
+
+  const gradeGeojson = { type: 'FeatureCollection', features: gradeSegments };
+  const mileGeojson = { type: 'FeatureCollection', features: mileMarkers };
+
+  // The flyover and the linked profile both walk the whole course as one list,
+  // so it is flattened once here rather than stitched back together in the
+  // browser every time somebody presses play.
+  const profile = [];
+  for (const loop of loops) {
+    for (let i = 0; i < loop.coords.length; i += 1) {
+      // The loops share a vertex at each boundary; keeping both would put a
+      // zero-length step in the flyover and a duplicate point in the profile.
+      if (profile.length && i === 0) continue;
+      profile.push([
+        loop.coords[i][0],
+        loop.coords[i][1],
+        loop.ele[i],
+        loop.mile[i],
+        loop.grade[i],
+        loop.index,
+      ]);
+    }
+  }
 
   const bounds = {
     west: Math.min(...loops.flatMap((l) => l.coords.map((c) => c[0]))),
@@ -404,7 +532,18 @@ async function main() {
       usgs: 'Imagery and elevation courtesy of the U.S. Geological Survey',
     },
     bounds,
-    loops: loops.map((l) => ({ index: l.index, kind: l.kind, miles: l.miles })),
+    loops: loops.map((l) => ({
+      index: l.index,
+      kind: l.kind,
+      miles: l.miles,
+      startMile: l.startMile,
+    })),
+    totalMiles: Number(totalMiles.toFixed(2)),
+    gradeRange: { min: steepestDown, max: steepest },
+    elevation: {
+      lowFt: Math.min(...loops.flatMap((l) => l.ele)),
+      highFt: Math.max(...loops.flatMap((l) => l.ele)),
+    },
     trailsUsed,
     fit: { medianFt: Number(median.toFixed(1)), p90Ft: Number(p90.toFixed(1)) },
   };
@@ -422,8 +561,15 @@ async function main() {
   // into an object and treats an unknown extension as an opaque asset it will
   // not inline.
   writeFileSync(join(DATA, 'course-geo.json'), `${JSON.stringify(geojson)}\n`);
+  writeFileSync(join(DATA, 'course-grade.json'), `${JSON.stringify(gradeGeojson)}\n`);
+  writeFileSync(join(DATA, 'course-miles.json'), `${JSON.stringify(mileGeojson)}\n`);
+  writeFileSync(join(DATA, 'course-profile.json'), `${JSON.stringify({ points: profile })}\n`);
   writeFileSync(join(DATA, 'course-map.json'), `${JSON.stringify(meta)}\n`);
-  console.log('\nWrote scripts/data/course-geo.json and course-map.json');
+  console.log(
+    `\nWrote course-geo.json, course-grade.json (${gradeSegments.length} segments), ` +
+      `course-miles.json (${mileMarkers.length} markers), course-profile.json ` +
+      `(${profile.length} points) and course-map.json`,
+  );
 }
 
 main().catch((err) => {
