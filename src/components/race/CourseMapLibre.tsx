@@ -370,14 +370,20 @@ export default function CourseMapLibre() {
                 id: 'miles',
                 type: 'circle',
                 source: 'miles',
-                // Every mile from zoom 14; every fifth below that, because at
-                // the default fit 27 markers a third of an inch apart is a
-                // dotted line, not information.
-                filter: ['==', ['%', ['get', 'mile'], 5], 0],
+                // NO FILTER ANY MORE. These used to be 29 markers counting
+                // miles into the RACE, which on a lapped course put several
+                // numbers on one piece of ground, so only every fifth was
+                // drawn and the map showed a bare "15" and "25". They now
+                // count miles round each LOOP, the way the 1998 race map
+                // numbered them and the way a marker on a post has to work, so
+                // there are eight in total and all eight can be shown.
                 paint: {
                   'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 3, 16, 7],
-                  'circle-color': '#1a1712',
-                  'circle-stroke-color': '#ffffff',
+                  // The marker takes the colour of the loop it counts, because
+                  // "mile 3" is a different place on the long loop than on the
+                  // short one and the numbers repeat.
+                  'circle-color': ['match', ['get', 'kind'], 'short', '#f6d9b0', '#e2593c'],
+                  'circle-stroke-color': '#1a1712',
                   'circle-stroke-width': 1.5,
                 },
               },
@@ -385,7 +391,6 @@ export default function CourseMapLibre() {
                 id: 'mile-labels',
                 type: 'symbol',
                 source: 'miles',
-                filter: ['==', ['%', ['get', 'mile'], 5], 0],
                 layout: {
                   'text-field': ['to-string', ['get', 'mile']],
                   'text-size': 11,
@@ -1199,6 +1204,12 @@ export default function CourseMapLibre() {
         )}
         <span className="cmap__key">
           <span className="cmap__swatch is-oval" /> The Oval
+        </span>
+        {/* The numbers repeat, so the legend has to say what they count. Mile 3
+            on the long loop and mile 3 on the short loop are different places,
+            and the dot takes its loop's colour to tell them apart. */}
+        <span className="cmap__key">
+          <span className="cmap__swatch is-mile" /> Miles, counted round each loop
         </span>
         {/* SAYING SO IS NOT OPTIONAL, for the same reason the elevation profile
             captions itself: a 3D picture of terrain is read as a measurement
