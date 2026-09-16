@@ -235,23 +235,38 @@ it a scroll option. Worth a look if the Studio is upgraded, or if it turns out
 an in-Studio click (rather than a pasted URL, which is how this was tested)
 already scrolls.
 
-### 0b. `npm run dev` logs "Invalid hook call" on every island render
+### 0b. DONE 2026-09-16. The dev server's React instances are one again
 
-**Blocker: the second React instance is inside the workerd dev runtime, past the config knobs.**
+2026-09-16. Fixed, and the earlier diagnosis in this entry was wrong in a way worth
+recording: nothing was arriving "raw". Measured this time by making the candidate files
+THROW on evaluation rather than reading stack traces, because the traces are source-mapped
+back to `node_modules/react/cjs/react.development.js` and read as a raw require when the
+module actually came from `deps_ssr`. A `console.log` from inside the workerd runner never
+reaches the log either, so the first two probes both returned false negatives.
 
-Under the Cloudflare adapter the dev SSR environment is named `astro` and runs through
-workerd's module runner. Diagnosed 2026-09-11: `react-dom/server` and the islands' `react`
-were arriving by different paths (raw `node_modules` vs Vite's transform), so `react` was
-evaluated twice and `ThemeToggle` / `StatsCounter` threw `Cannot read properties of null
-(reading 'useRef')` during SSR; Astro fell back and the page still rendered. Pre-bundling the
-React family for that environment (`vite.environments.astro.optimizeDeps.include` in
-`astro.config.mjs`) fixed the throw: renders now succeed and the SSR HTML is complete. React
-still prints its dev-only "Invalid hook call" warning once per island per render, which means
-it can still see two module instances somewhere in that runtime. Production builds do not run
-the optimizer and are unaffected (CI smoke and Lighthouse render the islands fine). Tried and
-rejected: `optimizeDeps.include: ['react/compiler-runtime']` (made it worse). Next things to
-try: `resolve.noExternal: ['react', 'react-dom']` on the `astro` environment, or a newer
-`@astrojs/cloudflare` that names or handles the environment itself.
+The real cause is a MID-REQUEST OPTIMIZER RELOAD. `astro/app/manifest` and
+`astro/logger/json` are discovered by Vite's dep scanner during the first render rather
+than at startup, the optimizer re-bundles and reloads the module graph mid-flight, and
+`react-dom/server` is left holding a React instance from the previous pass whose hook
+dispatcher is null. Every island then fails to server-render. That is
+withastro/astro#17834, fixed upstream in `@astrojs/cloudflare` by pre-bundling
+`astro/logger/json`; we cannot take that release while the adapter is pinned at 14.2.4
+(entry 4 below), so the same deps are listed in `vite.environments.ssr.optimizeDeps.include`
+in `astro.config.mjs` and bundled at startup instead.
+
+Also learned: the environment that RENDERS in dev is `ssr`, not `astro`. The previous fix
+was aimed at `astro`, which is why it never fully worked. Verified with a
+`configEnvironment` probe, and by A/B: removing the `ssr` block puts the failure back
+(3 reloads, 27 warnings, 10 TypeErrors on one cold request), removing the `astro` block
+changes nothing measurable.
+
+What remains is benign and is NOT the old bug: React prints its dev-only "Invalid hook
+call" warning about twice per render, with no error after it, from `@astrojs/mdx`'s
+`check()` calling each island's component function outside a React render to work out
+which renderer owns it. Renderer detection, not a second React.
+
+Closed by pre-bundling the two deps; the map, and every other island, now hydrate under
+`npm run dev`. Remove the workaround when the adapter pin moves and re-measure.
 
 ### 0a. Five race dates are unknown, so the weather strip starts in 2006 with gaps
 
@@ -316,7 +331,9 @@ Drop it during a slop sweep (card 16) if it is still unused then.
 14's original failure does not reproduce here; the pin holds the pair together because
 14.2.5 peers `wrangler ^4.125.0`, one minor from the version that rejects the field.
 Revisit when a newer adapter's peer range and emitted config are both checked by hand
-against a real `wrangler dev` and a real deploy.
+against a real `wrangler dev` and a real deploy. There is now a second reason to: a newer
+adapter carries the upstream fix for withastro/astro#17834, which would let the dep
+pre-bundling workaround in `vite.environments.ssr` come back out (entry 0b).
 
 ### 5. Seven eslint warnings, all unused bindings
 

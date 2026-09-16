@@ -210,8 +210,14 @@ export default defineConfig({
       // the SSR environment ran two React instances and every island render
       // logged "Invalid hook call" from react-dom/server. Do not add it back.
     },
-    // THE DEV SSR ENVIRONMENT IS CALLED `astro`, NOT `ssr`, under the
-    // Cloudflare adapter (it runs in workerd through the module runner), and
+    // THE DEV SERVER HAS THREE ENVIRONMENTS AND THEY ALL NEED WORK HERE:
+    // `astro` (the workerd module runner), `ssr` and `client`. Measured with a
+    // configEnvironment probe rather than assumed, because the one that
+    // RENDERS is `ssr`, and a fix aimed at the wrong one changes nothing while
+    // looking correct.
+    //
+    // The `astro` block below: under the
+    // Cloudflare adapter (it runs in workerd through the module runner),
     // @astrojs/react only pre-bundles react + react-dom together for
     // environments named `ssr`. Left alone, react-dom/server loads raw from
     // node_modules and resolves `react` itself while the islands get `react`
@@ -229,6 +235,51 @@ export default defineConfig({
             'react/jsx-dev-runtime',
             'react-dom',
             'react-dom/server',
+          ],
+        },
+      },
+      // A MID-REQUEST OPTIMIZER RELOAD BREAKS REACT SSR, AND THESE TWO ARE
+      // WHAT TRIGGERED IT. Both are discovered by Vite's dep scanner DURING
+      // the first render rather than at startup, which makes the optimizer
+      // re-bundle and reload the module graph mid-flight. react-dom/server is
+      // then holding a React instance from the previous pass, its hook
+      // dispatcher reads null, and EVERY island fails to server-render:
+      // "Invalid hook call" followed by "Cannot read properties of null
+      // (reading 'useState')". The page still answers 200, so it looks like a
+      // component bug rather than a build one, and the map simply sat at
+      // "Loading the map..." forever.
+      //
+      // This is withastro/astro#17834, fixed upstream in @astrojs/cloudflare
+      // by pre-bundling `astro/logger/json` when JSON logging is on. We cannot
+      // take that release yet: the adapter is pinned at 14.2.4 because 14.2.5
+      // demands a wrangler we do not carry (see CLAUDE.md rule 8). Listing the
+      // deps here does the same job, at startup, with no version movement.
+      //
+      // Measured on this repo, one request to /course from a cold cache:
+      //   without this block   3 optimizer reloads, 27 dispatcher warnings, 10 TypeErrors
+      //   with it              0 reloads,            0 TypeErrors
+      // Remove it when the adapter pin moves, and check those numbers again.
+      //
+      // `astro/logger/json` only loads when the dev server logs JSON, which is
+      // what `astro dev --background` does, so a foreground terminal may never
+      // show this. `astro/app/manifest` is not conditional.
+      ssr: {
+        optimizeDeps: {
+          include: ['astro/app/manifest', 'astro/logger/json'],
+        },
+      },
+      // Same class of problem, browser side and merely annoying rather than
+      // broken: these are discovered when the first page loads, so the
+      // optimizer re-bundles and the tab hard-reloads under you a second after
+      // it settles. Pre-bundling them keeps the first load still.
+      client: {
+        optimizeDeps: {
+          include: [
+            'astro/virtual-modules/transitions-events.js',
+            'astro/virtual-modules/transitions-router.js',
+            'astro/virtual-modules/transitions-swap-functions.js',
+            'astro/virtual-modules/transitions-types.js',
+            'lenis',
           ],
         },
       },
