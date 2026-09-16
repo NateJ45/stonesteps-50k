@@ -57,6 +57,7 @@ import {
   LON,
   LAT,
   MILE,
+  LOOP,
   type ProfilePoint,
 } from '@/lib/courseFlyover';
 
@@ -649,6 +650,93 @@ export default function CourseMapLibre() {
           }
 
           drawRoute(m);
+
+          // POSTER MODE, for scripts/capture-map-poster.mjs and nothing else.
+          //
+          // The home page shows a STILL of this map with the route drawn over
+          // it in SVG, so the still must contain the terrain and none of the
+          // route: leaving the line in would draw it twice, once photographed
+          // and once animated, a pixel apart. This strips the map back to its
+          // photograph and hands the capture script the route already projected
+          // into the same frame, so the overlay cannot drift from the picture.
+          //
+          // Inert unless the URL asks for it, which nothing the public reaches
+          // ever does. It lives here rather than in the script because the
+          // whole point is that the poster is THIS map, at this camera, with
+          // this terrain exaggeration, rather than a second rendering that
+          // quietly disagrees with it.
+          const posterParams = new URLSearchParams(window.location.search);
+          if (posterParams.has('poster')) {
+            // SETTLE FIRST, THEN HIDE. Settling ends the draw-on animation, and
+            // part of ending it is turning the mile markers, arrows and start
+            // dot back on. Hiding before settling therefore un-hides them, and
+            // the first poster came out with "15" and "25" floating over the
+            // forest.
+            settleRoute(m);
+            // THE POSTER IS A COMPOSITION, NOT A SCREENSHOT OF THE DEFAULT
+            // VIEW. The interactive map opens wide on purpose, so a reader can
+            // see where the park sits in the city. A still on the home page is
+            // doing the opposite job: it has one second to say "this is a run
+            // through a forest on a hill", so the course fills the frame and
+            // the suburbs stay at the edges. jumpTo, not fitBounds, because the
+            // capture has to be the same picture every run.
+            // The committed composition, overridable from the URL so the
+            // camera can be auditioned against the real imagery rather than
+            // guessed at in numbers. The capture script passes nothing, so what
+            // ships is what is written here.
+            const num = (k: string, fallback: number) => {
+              const v = Number(posterParams.get(k));
+              return Number.isFinite(v) && posterParams.has(k) ? v : fallback;
+            };
+            m.jumpTo({
+              center: [
+                (meta.bounds.west + meta.bounds.east) / 2 + num('dx', 0),
+                (meta.bounds.south + meta.bounds.north) / 2 + num('dy', -0.004),
+              ],
+              zoom: num('z', 14.6),
+              pitch: num('p', 63),
+              bearing: num('b', -22),
+            });
+            for (const id of [
+              'course-glow',
+              'course-casing',
+              'course-draw',
+              'course-long',
+              'course-short',
+              'course-grade',
+              'course-arrows',
+              'miles',
+              'mile-labels',
+              'course-start',
+              'poi',
+              'poi-labels',
+              'landmark-labels',
+              'cursor',
+              'cursor-halo',
+            ]) {
+              if (m.getLayer(id)) m.setLayoutProperty(id, 'visibility', 'none');
+            }
+            (window as any).__poster = {
+              /** Route points projected to CSS pixels in the map's own frame. */
+              project: () =>
+                profileRef.current.map((q) => {
+                  // locationPoint3D, not project: project() ignores the terrain
+                  // and at 66 degrees of pitch a point on a hillside lands tens
+                  // of pixels from where it is drawn.
+                  const t = (m as any).transform;
+                  const ll = { lng: q[LON], lat: q[LAT] };
+                  const pt =
+                    typeof t?.locationPoint3D === 'function'
+                      ? t.locationPoint3D(ll)
+                      : m.project([q[LON], q[LAT]]);
+                  return [Math.round(pt.x * 10) / 10, Math.round(pt.y * 10) / 10, q[LOOP]];
+                }),
+              size: () => {
+                const c = m.getCanvas();
+                return [c.clientWidth, c.clientHeight];
+              },
+            };
+          }
         });
 
         // A tile service failing is not a broken page: the course is its own

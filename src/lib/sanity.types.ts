@@ -87,6 +87,9 @@ export type SectionPreset = {
       } & CourseMapSection)
     | ({
         _key: string;
+      } & CoursePosterSection)
+    | ({
+        _key: string;
       } & SponsorPatchesSection)
     | ({
         _key: string;
@@ -1346,6 +1349,13 @@ export type SponsorPatchesSection = {
   headline?: string;
 };
 
+export type CoursePosterSection = {
+  _type: 'coursePosterSection';
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+};
+
 export type CourseMapSection = {
   _type: 'courseMapSection';
   eyebrow?: string;
@@ -1617,6 +1627,9 @@ export type Page = {
     | ({
         _key: string;
       } & CourseMapSection)
+    | ({
+        _key: string;
+      } & CoursePosterSection)
     | ({
         _key: string;
       } & SponsorPatchesSection)
@@ -2070,6 +2083,9 @@ export type ProcessPage = {
       } & CourseMapSection)
     | ({
         _key: string;
+      } & CoursePosterSection)
+    | ({
+        _key: string;
       } & SponsorPatchesSection)
     | ({
         _key: string;
@@ -2184,6 +2200,9 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & CourseMapSection)
+    | ({
+        _key: string;
+      } & CoursePosterSection)
     | ({
         _key: string;
       } & SponsorPatchesSection)
@@ -2340,6 +2359,9 @@ export type AboutPage = {
     | ({
         _key: string;
       } & CourseMapSection)
+    | ({
+        _key: string;
+      } & CoursePosterSection)
     | ({
         _key: string;
       } & SponsorPatchesSection)
@@ -2555,6 +2577,9 @@ export type HomePage = {
     | ({
         _key: string;
       } & CourseMapSection)
+    | ({
+        _key: string;
+      } & CoursePosterSection)
     | ({
         _key: string;
       } & SponsorPatchesSection)
@@ -2932,6 +2957,7 @@ export type AllSanitySchemaTypes =
   | ParksSection
   | TickerSection
   | SponsorPatchesSection
+  | CoursePosterSection
   | CourseMapSection
   | ElevationSection
   | LoopCardSection

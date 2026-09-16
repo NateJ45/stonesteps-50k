@@ -469,6 +469,35 @@ export const courseMapSection = defineType({
   },
 });
 
+/**
+ * The home page's link through to the course map: a baked still of the real
+ * map with the route drawing itself over it.
+ *
+ * NO IMAGE FIELD, ON PURPOSE. The picture is not editorial, it is generated
+ * from the map by `npm run map-poster` and committed, exactly like the OG image
+ * and the hero mud. An editor who could swap it could put a photograph of
+ * anywhere behind a line drawn from this course's own coordinates, and the two
+ * would silently disagree.
+ */
+export const coursePosterSection = defineType({
+  name: 'coursePosterSection',
+  title: 'Course map poster',
+  type: 'object',
+  icon: PinIcon,
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline (optional)', type: 'string' }),
+    defineField({ name: 'intro', title: 'Intro (optional)', type: 'text', rows: 3 }),
+  ],
+  preview: {
+    select: { title: 'headline' },
+    prepare: ({ title }) => ({
+      title: title || 'Course map poster',
+      subtitle: 'Still of the map, links to /course',
+    }),
+  },
+});
+
 /* ---------- Sponsors ------------------------------------------------------ */
 
 export const sponsorPatchesSection = defineType({
@@ -1017,6 +1046,7 @@ export const raceSectionSchemas = [
   loopCardSection,
   elevationSection,
   courseMapSection,
+  coursePosterSection,
   sponsorPatchesSection,
   tickerSection,
   parksSection,

@@ -83,6 +83,9 @@ export const CONTENT_TYPES = new Set([
   'recordsBoardSection',
   'courseFeaturesSection',
   'elevationSection',
+  // The poster band takes the cadence's surface the way the elevation band
+  // does: the picture is a block inside the band, not the band itself.
+  'coursePosterSection',
   'raceWeatherSection',
   'contactSection',
   'dynastiesSection',
