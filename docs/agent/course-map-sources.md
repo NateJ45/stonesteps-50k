@@ -4,8 +4,8 @@
 one uniquely holds, and what can legally and accurately be taken from it.
 
 The short version: **OpenStreetMap is the only source we can take geometry from,
-the Parks map is worth taking TEXT from, the old race map is worth taking one
-question to Dave from, and Google is worth taking nothing from.**
+the Parks map is worth taking TEXT from, the old race map corroborates the
+published loop length, and Google is worth taking nothing from.**
 
 ---
 
@@ -104,9 +104,31 @@ arrows and labels are the race's own overlay.
   direction, so this is corroboration rather than new information, but it is
   corroboration from the race itself.
 - **Numbered waypoints**: 1 to 5 on the red long loop, 1 to 3 on the blue short
-  loop. Nothing else we hold explains what these are. Aid points? Marshal
-  positions? Segment splits? **This is a question for Dave**, and it is the single
-  most interesting unknown on the sheet.
+  loop. **These are MILE MARKERS.** Nathan proposed it and the GPX confirms it.
+  Predicting where each loop-mile falls and comparing with the sheet:
+
+  |           | Predicted from the track | On the sheet                 |
+  | --------- | ------------------------ | ---------------------------- |
+  | short (1) | W of The Oval            | left / west                  |
+  | short (2) | NNW                      | upper left                   |
+  | short (3) | NNE, 0.13 mi out         | centre, just before The Oval |
+  | long (1)  | ESE                      | east                         |
+  | long (2)  | SE                       | south east                   |
+  | long (3)  | SSE                      | south, centre                |
+  | long (4)  | SSW                      | bottom, by Area 22           |
+
+  The counts fit too: a 5.04 mile loop takes markers at 1 to 5, a 3.21 mile loop
+  takes 1 to 3.
+
+  THE ONE MISMATCH IS THE INTERESTING PART. On the recorded track, mile 5 of the
+  long loop lands 0.01 miles from The Oval, which is the finish. On the sheet,
+  marker 5 sits at the far WEST with a clear run still to go. That is exactly
+  what you would see if the old long loop were the **5.3 miles the race
+  publishes** rather than the 5.04 the track measures: mile 5 would fall about a
+  third of a mile short of home, out west, and then run back in. So the sheet
+  independently corroborates the punch-card figure against the shorter recorded
+  route, and it is more evidence that the current line is not the old one.
+
 - **"Stone Steps" and "The Oval"** called out with pointers, which confirms both
   against OSM's `Area 19, Stone Steps` and `Area 13, Oval`.
 - It draws the **pre-COVID route**. Dave has said his GPX carries the reroute on
