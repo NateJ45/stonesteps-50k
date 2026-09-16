@@ -7,11 +7,33 @@
 //   node scripts/build-elevation.mjs course.gpx                 # report only
 //   node scripts/build-elevation.mjs course.gpx --write         # save to Sanity
 //   node scripts/build-elevation.mjs course.gpx --loops 4,3     # long/short counts
+//   node scripts/build-elevation.mjs course.gpx --out p.json    # save to disk, not Sanity
 //
 // Accepts .gpx or a GeoJSON LineString/Feature.
 //
 // ---------------------------------------------------------------------------
-// WHY THIS EXISTS, AND WHY IT HAS NO INPUT YET
+// A TRACK ARRIVED ON 2026-09-16. David Corfman sent a Strava GPX of the 50K,
+// with the caveat that its small loop is a slightly different route carrying
+// the COVID reroute. What it measures, run through this script:
+//
+//   30.11 miles raw, 29.68 after resampling, in 7 laps out of The Oval at
+//   5.05 / 3.26 / 5.12 / 3.22 / 5.12 / 3.25 / 5.06 miles, which is the
+//   L S L S L S L the site already describes.
+//   4,673 ft of climb and 4,683 ft of descent off the LiDAR, so 9,356 ft of
+//   total change, against the 10,726 ft the race publishes.
+//
+// THAT GAP IS ACCOUNTING, NOT DISAGREEMENT, and it matters for what the page is
+// allowed to claim. The same file's own barometric column, summed with no
+// threshold at all the way a watch reports it, gives 10,125 ft. The race's
+// figure is that kind of figure, over a route about three quarters of a mile
+// longer than this one. The LiDAR number here is the conservative one because
+// computeGain below requires a sustained 10 ft before it banks a rise.
+//
+// So: do not "correct" the published 10,726 ft against this. Two ways of
+// counting the same hills are not a contradiction, and the race's number is the
+// one runners have compared notes about for twenty years.
+//
+// WHY THIS EXISTS
 //
 // The elevation profile on the site is currently SYNTHETIC: it illustrates the
 // loop structure and says so in its own caption. Replacing it needs the one
@@ -38,15 +60,15 @@
 // A profile built on that would look surveyed and would not be. That is worse
 // than the honest synthetic one, so it was not built.
 //
-// WHAT UNBLOCKS THIS: any GPX. The race is chip-timed and the Facebook group
-// has over a thousand members, so one finisher's watch file is a single post
-// away, and it gives the CURRENT route rather than a 1998 reconstruction. Point
-// this script at it and the site has a real profile and a real download.
+// WHAT UNBLOCKED IT: a GPX, as expected. See the note at the top. The one
+// question the file does not answer is whose watch recorded it and whether it
+// may be republished as a download, which is a permission to get rather than a
+// thing to infer.
 // ---------------------------------------------------------------------------
 
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { createClient } from '@sanity/client';
 import { loadEnv } from './lib/loadEnv.mjs';
 
@@ -57,10 +79,16 @@ const env = loadEnv(root);
 const args = process.argv.slice(2);
 const file = args.find((a) => !a.startsWith('--'));
 const WRITE = args.includes('--write');
-const loopArg = args[args.indexOf('--loops') + 1];
+// GUARDED, NOT args[indexOf + 1]. With no --loops flag indexOf returns -1 and
+// args[0] is the GPX path, which is truthy, so the report printed a stray
+// "NaN long + undefined short" line on every ordinary run.
+const loopArg = args.includes('--loops') ? args[args.indexOf('--loops') + 1] : null;
+const OUT = args.includes('--out') ? args[args.indexOf('--out') + 1] : null;
 
 if (!file) {
-  console.log('Usage: node scripts/build-elevation.mjs <course.gpx> [--write] [--loops 4,3]');
+  console.log(
+    'Usage: node scripts/build-elevation.mjs <course.gpx> [--write] [--out file.json] [--loops 4,3]',
+  );
   process.exit(0);
 }
 
@@ -147,27 +175,42 @@ async function sampleElevations(points, batch = 200) {
   const out = [];
   for (let i = 0; i < points.length; i += batch) {
     const chunk = points.slice(i, i + batch);
-    const geometry = JSON.stringify({
-      points: chunk.map(([lon, lat]) => [lon, lat]),
-      spatialReference: { wkid: 4326 },
+    const body = new URLSearchParams({
+      geometry: JSON.stringify({
+        points: chunk.map(([lon, lat]) => [lon, lat]),
+        spatialReference: { wkid: 4326 },
+      }),
+      geometryType: 'esriGeometryMultipoint',
+      returnFirstValueOnly: 'true',
+      f: 'json',
+      sampleCount: String(chunk.length),
     });
-    const url =
-      `${SAMPLES_URL}?` +
-      new URLSearchParams({
-        geometry,
-        geometryType: 'esriGeometryMultipoint',
-        returnFirstValueOnly: 'true',
-        f: 'json',
-        sampleCount: String(chunk.length),
-      });
 
-    const res = await fetch(url, { headers: { accept: 'application/json' } });
+    // POST, NOT GET. A batch of 200 points is about 5KB of geometry once it is
+    // URL-encoded, and the ArcGIS front end answers 414 Request-URI Too Large
+    // long before that. The first real track run through this script died on
+    // the very first batch (2026-09-16). POST puts the geometry in the body,
+    // where there is no such ceiling.
+    const res = await fetch(SAMPLES_URL, {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+      body,
+    });
     if (!res.ok) throw new Error(`3DEP ${res.status} ${res.statusText}`);
     const json = await res.json();
+    if (json.error) throw new Error(`3DEP: ${json.error.message ?? JSON.stringify(json.error)}`);
     const samples = json.samples ?? [];
     if (samples.length !== chunk.length) {
       throw new Error(`3DEP returned ${samples.length} samples for ${chunk.length} points`);
     }
+    // ORDER BY locationId, NOT BY ARRIVAL. getSamples is documented to return a
+    // sample per input point but not to preserve input order, and a profile
+    // assembled in the wrong order is a plausible-looking lie rather than an
+    // obvious failure. locationId is the index into the batch.
+    samples.sort((a, b) => Number(a.locationId) - Number(b.locationId));
     // Metres in, feet out.
     for (const s of samples) out.push(Number(s.value) * 3.28084);
     process.stdout.write(`\r  sampled ${out.length}/${points.length}`);
@@ -241,7 +284,9 @@ async function main() {
   console.log(
     `\nElevation ${lo.toFixed(0)} to ${hi.toFixed(0)} ft (relief ${(hi - lo).toFixed(0)} ft)`,
   );
-  console.log(`Gain ${gain.toFixed(0)} ft, loss ${loss.toFixed(0)} ft, per lap`);
+  console.log(
+    `Gain ${gain.toFixed(0)} ft, loss ${loss.toFixed(0)} ft, total change ${(gain + loss).toFixed(0)} ft`,
+  );
 
   if (loopArg) {
     const [long, short] = loopArg.split(',').map(Number);
@@ -268,6 +313,12 @@ async function main() {
     sampledAt: new Date().toISOString(),
     miles: Number((total / 5280).toFixed(2)),
     gainFt: Math.round(gain),
+    // LOSS IS NOT A CURIOSITY, it is half the headline. The caption the profile
+    // replaces reads "10,726 ft total elevation change", which is up AND down
+    // added together. Saving only the gain made the page swap a both-ways
+    // figure for a one-way one under the same words, and the race would have
+    // read as less than half as hilly the day a real track landed.
+    lossFt: Math.round(loss),
     lowFt: Math.round(lo),
     highFt: Math.round(hi),
     points: points.map(([m, e]) => ({
@@ -277,6 +328,15 @@ async function main() {
       ft: e,
     })),
   };
+
+  // --out WRITES THE PROFILE TO DISK WITHOUT TOUCHING SANITY. The race document
+  // is production content and a patch to it is a rebuild away from the public
+  // site, so there has to be a way to read the numbers off a candidate track and
+  // argue about them before any of that happens.
+  if (OUT) {
+    writeFileSync(resolve(process.cwd(), OUT), `${JSON.stringify(profile, null, 2)}\n`);
+    console.log(`\nWrote ${OUT}`);
+  }
 
   if (!WRITE) {
     console.log(`\n${profile.points.length} profile points ready. Re-run with --write to save.`);

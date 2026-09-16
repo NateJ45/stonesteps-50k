@@ -16,6 +16,32 @@ sequence).
 
 ## Waiting on a human
 
+### 1h. The page states two different climbing figures, and Dave's GPX settles it
+
+2026-09-16. The course copy in Sanity says "Over 6,000 ft" of climbing, and the
+elevation chart underneath it still captions itself "10,726 ft total elevation
+change". Both appear on the home page and on /course. Neither is wrong on its
+own terms, but together they read as a contradiction, and one of them is not
+supported by the track Dave sent.
+
+What the track measures (see entry 11, and `scripts/build-elevation.mjs`):
+
+| Counted as                 | Off USGS LiDAR | Off the file's own barometer |
+| -------------------------- | -------------- | ---------------------------- |
+| Climbing, one way          | 4,673 ft       | 5,075 ft                     |
+| Total change, up plus down | 9,356 ft       | 10,125 ft                    |
+
+So 10,726 ft is a total-change figure, and it holds up: the barometric
+both-ways sum is 10,125 ft over a route about three quarters of a mile shorter
+than the real one. "Over 6,000 feet of climbing" is above every one-way figure
+here, and no way of counting this track reaches it.
+
+WHAT WOULD CLOSE IT: Dave choosing. Either the copy goes back to the race's own
+both-ways figure, or it states climbing at about 4,700 to 5,100 ft, or the two
+lines are rewritten to say which is which. It is his race's number and runners
+have compared notes about it for twenty years, so it is not a number to change
+on a measurement he did not ask for.
+
 ### 1. Verify the live preview against a real Sanity project
 
 **Blocker: this template has no Sanity project, by design.**
@@ -437,12 +463,23 @@ WHAT IS ESTABLISHED, so nobody re-derives it:
 - Neither RunSignUp nor the current WordPress site holds a GPX, a KML or any
   course file. RunSignUp's race page links only to Google and Apple directions.
 
-WHAT WOULD CLOSE IT: a GPX from any recent running, Dave's watch or any
-finisher's. With real coordinates the route goes onto the modern base directly,
-no tracing and no georeferencing, and the result is accurate rather than
-transcribed. That is a short job once the file exists. Failing that, Dave
-marking up a printout of the East Section map would do: the alignment only has
-to be good enough to name the trails, and he knows them.
+THE GPX ARRIVED ON 2026-09-16. Dave sent a Strava track of the 50K, flagging
+that its small loop is a slightly different route carrying the COVID reroute, so
+it is close rather than exact. It is enough to close the mapping question: with
+real coordinates the route goes onto the modern base directly, no tracing and no
+georeferencing. What it measures, from `node scripts/build-elevation.mjs`:
+
+- 30.11 miles raw, in seven laps out of The Oval at 5.05 / 3.26 / 5.12 / 3.22 /
+  5.12 / 3.25 / 5.06 miles. That is the L S L S L S L the site already
+  describes, with a long loop of about 5.1 rather than the 5.3 on the punch
+  card.
+- 4,673 ft of climb and 4,683 ft of descent off USGS 1 m LiDAR, so 9,356 ft of
+  total change. The file's own barometric column, summed the way a watch does
+  it, gives 5,075 up and 5,049 down, so 10,125 ft of total change.
+
+WHAT IS STILL OPEN ON IT: whether the file may be republished as the course
+download. It is somebody's Strava export, and that is a permission to ask for
+rather than infer.
 
 ONE THING TO SETTLE BEFORE PUBLISHING EITHER WAY: the base map is Cincinnati
 Parks' copyrighted artwork. Ask them before republishing a modified version.

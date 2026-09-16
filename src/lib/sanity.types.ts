@@ -512,6 +512,7 @@ export type Race = {
     sampledAt?: string;
     miles?: number;
     gainFt?: number;
+    lossFt?: number;
     lowFt?: number;
     highFt?: number;
     points?: Array<{

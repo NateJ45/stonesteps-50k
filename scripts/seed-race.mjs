@@ -71,7 +71,11 @@ docs.push({
   _type: 'race',
   name: 'Stone Steps 50K',
   tagline: "Cincinnati's longest running ultra marathon.",
-  editionNumber: 23, // RunSignUp race description: "back for its 23rd edition"
+  // 24, NOT THE 23 RUNSIGNUP PRINTS. The listing's blurb carries over year to
+  // year and had not been moved up; David Corfman confirmed 2026 is the 24th
+  // running (2026-09-16). The archive agrees: /results holds 2003 through 2025
+  // with no year missed, which is 23 runnings, so 2026 is the 24th.
+  editionNumber: 24,
   // AN INSTANT, IN UTC. RunSignUp lists the gun at 10/25/2026 08:00 in
   // America/New_York, which is still on daylight time on race day (UTC-4), so
   // the instant is 12:00Z. It was seeded as 08:00Z (4 am Eastern) and the

@@ -37,6 +37,7 @@ interface Props {
     source?: string;
     miles?: number;
     gainFt?: number;
+    lossFt?: number;
     lowFt?: number;
     highFt?: number;
     points?: { mile?: number; ft?: number }[];
@@ -63,6 +64,23 @@ const measured =
         ft: number;
       }[])
     : null;
+
+/**
+ * The measured headline, COUNTED THE SAME WAY the synthetic one is.
+ *
+ * "10,726 ft total elevation change" is up and down added together, which is
+ * how the race states it and how a watch reports it. Gain alone is a shade over
+ * half that, so printing gain under the words "total elevation change" would
+ * have flattened the race on the day a real track arrived. Both halves, or the
+ * caption keeps the race's own figure and says nothing it cannot support.
+ */
+const measuredChange =
+  measured && typeof profile?.gainFt === 'number' && typeof profile?.lossFt === 'number'
+    ? Math.round(profile.gainFt + profile.lossFt)
+    : null;
+
+/** Whole miles for the description, so it reads "30 miles" rather than "29.68". */
+const measuredMiles = measured && typeof profile?.miles === 'number' ? profile.miles : null;
 
 /**
  * THE CHART IS DRAWN TWICE, ON TWO CANVASES, and that is a phone fix. The
@@ -222,9 +240,16 @@ const canvases = [
           {ci === 0 && (
             <>
               <title id="elev-title">Stone Steps 50K elevation profile</title>
+              {/* THE DESCRIPTION IS THE CHART, for anyone who cannot see it, so
+                it has to move when the chart does. It used to state 10,726 ft
+                and 31 miles as literals, which a measured profile would have
+                silently contradicted: the picture would show one race and the
+                screen reader would announce another. */}
               <desc id="elev-desc">
                 Seven loops from The Oval: four long loops alternating with three short loops of
-                just over three miles, totalling 10,726 feet of elevation change across 31 miles.
+                just over three miles, totalling{' '}
+                {measuredChange ? measuredChange.toLocaleString() : '10,726'} feet of elevation
+                change across {measuredMiles ? Math.round(measuredMiles) : 31} miles.
               </desc>
             </>
           )}
@@ -266,8 +291,8 @@ const canvases = [
 
       <figcaption class="elev__cap">
         <span class="mono">
-          <b>{measured && profile?.gainFt ? `${profile.gainFt.toLocaleString()} ft` : totalGain}</b>{' '}
-          total elevation change
+          <b>{measuredChange ? `${measuredChange.toLocaleString()} ft` : totalGain}</b> total
+          elevation change
         </span>
         {measured ? (
           <span class="elev__note">

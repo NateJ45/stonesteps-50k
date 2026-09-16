@@ -49,7 +49,10 @@ export const race = defineType({
       title: 'Which edition is this?',
       type: 'number',
       group: 'basics',
-      description: "The 2026 race is the 23rd edition, per the race's own RunSignUp listing.",
+      description:
+        'The 2026 race is the 24th running, confirmed by David Corfman. Count it off the ' +
+        'archive rather than the RunSignUp blurb: /results holds 2003 through 2025 with no ' +
+        'year missed, so 2026 is the 24th. The RunSignUp listing still says 23rd.',
     }),
     defineField({
       name: 'raceDate',
@@ -156,6 +159,7 @@ export const race = defineType({
         defineField({ name: 'sampledAt', title: 'Sampled at', type: 'datetime' }),
         defineField({ name: 'miles', title: 'Length (miles)', type: 'number' }),
         defineField({ name: 'gainFt', title: 'Gain (ft)', type: 'number' }),
+        defineField({ name: 'lossFt', title: 'Loss (ft)', type: 'number' }),
         defineField({ name: 'lowFt', title: 'Lowest point (ft)', type: 'number' }),
         defineField({ name: 'highFt', title: 'Highest point (ft)', type: 'number' }),
         defineField({
