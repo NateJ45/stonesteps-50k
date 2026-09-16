@@ -160,6 +160,15 @@ export const race = defineType({
         defineField({ name: 'miles', title: 'Length (miles)', type: 'number' }),
         defineField({ name: 'gainFt', title: 'Gain (ft)', type: 'number' }),
         defineField({ name: 'lossFt', title: 'Loss (ft)', type: 'number' }),
+        defineField({
+          name: 'aidMiles',
+          title: 'Aid station mile marks',
+          type: 'array',
+          of: [defineArrayMember({ type: 'number' })],
+          description:
+            'Where the track came back through the start, in miles. Drives the aid verticals ' +
+            'on the chart. Derived from the track by the script, not typed.',
+        }),
         defineField({ name: 'lowFt', title: 'Lowest point (ft)', type: 'number' }),
         defineField({ name: 'highFt', title: 'Highest point (ft)', type: 'number' }),
         defineField({

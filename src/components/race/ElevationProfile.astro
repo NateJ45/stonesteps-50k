@@ -38,6 +38,7 @@ interface Props {
     miles?: number;
     gainFt?: number;
     lossFt?: number;
+    aidMiles?: number[];
     lowFt?: number;
     highFt?: number;
     points?: { mile?: number; ft?: number }[];
@@ -157,10 +158,11 @@ function build(W: number, H: number) {
 
   const area = `${line} L ${W} ${BASE} L 0 ${BASE} Z`;
 
-  // A measured profile replaces both paths and the aid markers. Scaled to the
-  // same viewBox so every style rule below keeps applying unchanged.
+  // A measured profile replaces both paths. Scaled to the same viewBox so every
+  // style rule below keeps applying unchanged.
   let mLine = '';
   let mArea = '';
+  let mMarkers: typeof markers = [];
   if (measured) {
     const maxMile = Math.max(...measured.map((p) => p.mile)) || 1;
     const lo = Math.min(...measured.map((p) => p.ft));
@@ -172,6 +174,38 @@ function build(W: number, H: number) {
       .map((p, i) => `${i === 0 ? 'M' : 'L'} ${sx(p.mile).toFixed(1)} ${sy(p.ft).toFixed(1)}`)
       .join(' ');
     mArea = `${mLine} L ${W} ${BASE} L 0 ${BASE} Z`;
+
+    /**
+     * THE AID MARKS COME OFF THE SAME AXIS THE LINE DOES.
+     *
+     * `aidMiles` is where the recorded track came back through the start, so
+     * both the line and its verticals are scaled by the same `maxMile` and can
+     * never drift apart. Deriving them instead from the punch-card loop lengths
+     * would put them on a 30.8 mile axis over a line drawn on a 29.68 mile one,
+     * and every mark would sit a little left of the dip it is meant to name.
+     *
+     * `kind` is read back from the gap to the previous mark rather than
+     * assumed, because it only decides which colour the number takes and a
+     * measured lap is whatever length it turned out to be.
+     */
+    /**
+     * CLAMPED TO THE LINE'S END, NOT FILTERED AGAINST IT. The last lap boundary
+     * IS the end of the track, but `maxMile` comes from the DOWNSAMPLED points
+     * and the downsample keeps every Nth one, so the last point kept usually
+     * falls a little short of the finish. Filtering on `m <= maxMile` therefore
+     * dropped the seventh mark and the chart drew six loops for a seven-loop
+     * race. The tolerance is what still rejects genuinely bad data, rather than
+     * parking it on the right edge and calling it the finish.
+     */
+    const TOLERANCE_MILES = 0.5;
+    mMarkers = (profile?.aidMiles ?? [])
+      .filter((m) => typeof m === 'number' && m > 0 && m <= maxMile + TOLERANCE_MILES)
+      .map((m, i, all) => ({
+        x: sx(Math.min(m, maxMile)),
+        label: `Loop ${i + 1}`,
+        kind: (m - (i === 0 ? 0 : all[i - 1]) >= 4 ? 'long' : 'short') as Loop['kind'],
+        mile: m,
+      }));
   }
 
   return {
@@ -179,7 +213,7 @@ function build(W: number, H: number) {
     H,
     BASE,
     PEAK,
-    markers,
+    markers: measured ? mMarkers : markers,
     line: measured ? mLine : line,
     area: measured ? mArea : area,
   };
@@ -258,31 +292,34 @@ const canvases = [
             </linearGradient>
           </defs>
 
-          {/* Aid-station verticals: you pass through The Oval at the end of every loop. */}
-          {!measured &&
-            c.markers.map((m) => (
-              <g class="elev__aid" style={`--t:${(m.x / c.W).toFixed(3)}`}>
-                <line x1={m.x} y1={c.PEAK - 20} x2={m.x} y2={c.BASE} />
-                <circle cx={m.x} cy={c.BASE} r={ci === 0 ? 4 : 6} />
-              </g>
-            ))}
+          {/* Aid-station verticals: you pass through The Oval at the end of every
+              loop. Drawn on BOTH charts now. They used to be synthetic-only,
+              because a measured line has no loop boundaries of its own, and
+              dropping them cost the chart the one thing a runner plans against.
+              The track knows where it came back through the start, so the marks
+              are read off `aidMiles` rather than off the punch card. */}
+          {c.markers.map((m) => (
+            <g class="elev__aid" style={`--t:${(m.x / c.W).toFixed(3)}`}>
+              <line x1={m.x} y1={c.PEAK - 20} x2={m.x} y2={c.BASE} />
+              <circle cx={m.x} cy={c.BASE} r={ci === 0 ? 4 : 6} />
+            </g>
+          ))}
 
           <path d={c.area} class="elev__area" fill={`url(#elevFill-${ci})`} />
           <path d={c.line} class="elev__line" pathLength="1" />
           <line x1="0" y1={c.BASE} x2={c.W} y2={c.BASE} class="elev__base" />
 
-          {!measured &&
-            c.markers.map((m, i) => (
-              <text
-                x={m.x}
-                y={c.BASE + (ci === 0 ? 26 : 34)}
-                class={`elev__lbl ${m.kind === 'long' ? 'is-long' : ''}`}
-                style={`font-size:${c.lbl}px`}
-                text-anchor="middle"
-              >
-                {i + 1}
-              </text>
-            ))}
+          {c.markers.map((m, i) => (
+            <text
+              x={m.x}
+              y={c.BASE + (ci === 0 ? 26 : 34)}
+              class={`elev__lbl ${m.kind === 'long' ? 'is-long' : ''}`}
+              style={`font-size:${c.lbl}px`}
+              text-anchor="middle"
+            >
+              {i + 1}
+            </text>
+          ))}
         </svg>
       ))}
 
@@ -311,14 +348,11 @@ const canvases = [
             Download the course GPX
           </a>
         )}
-        {/* A KEY FOR MARKS THAT ARE DRAWN. The aid verticals and their dots are
-            rendered only on the synthetic chart, because a measured profile has
-            no loop boundaries to hang them on. Left unconditional, the measured
-            chart printed a legend dot for a symbol that appears nowhere above
-            it, which is the one thing a key must never do. The fact itself is
-            not lost: the section's intro says every loop returns you through
-            the aid station at The Oval. */}
-        {!measured && (
+        {/* A KEY FOR MARKS THAT ARE DRAWN, which is the one thing a key must
+            never get wrong. Both charts carry aid marks now, but a measured
+            profile whose `aidMiles` never got written would have none, so the
+            key asks the chart rather than assuming. */}
+        {wide.markers.length > 0 && (
           <span class="elev__key">
             <span class="elev__dot" /> Aid station at the end of every loop
           </span>

@@ -513,6 +513,7 @@ export type Race = {
     miles?: number;
     gainFt?: number;
     lossFt?: number;
+    aidMiles?: Array<number>;
     lowFt?: number;
     highFt?: number;
     points?: Array<{

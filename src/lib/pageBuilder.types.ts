@@ -552,6 +552,7 @@ export interface ProjectedElevationSection {
       miles?: number;
       gainFt?: number;
       lossFt?: number;
+      aidMiles?: number[];
       lowFt?: number;
       highFt?: number;
       points?: { mile?: number; ft?: number }[];

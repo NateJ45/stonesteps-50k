@@ -261,6 +261,66 @@ function computeGain(elevations, thresholdFt = 10) {
   return { gain, loss };
 }
 
+/* ---------- Laps ---------------------------------------------------------- */
+
+/**
+ * Where the track came back through the start, in miles along the track.
+ *
+ * This is what puts the aid-station marks on a measured chart. The synthetic
+ * chart could place them from the punch-card loop lengths because it DREW the
+ * loops; a measured line has no loop boundaries of its own, so before this the
+ * marks were simply dropped and the chart lost the one piece of information a
+ * runner actually plans against.
+ *
+ * MEASURED ON THE DENSE TRACK, NOT THE RAW ONE, because the profile's x axis is
+ * the dense walk. Detecting laps on the raw track and drawing them on the dense
+ * one puts every mark about 1.4% to the right, which is a quarter mile out by
+ * the end, and the error is invisible because the dots still look plausible.
+ *
+ * Two rules, and both come from watching the raw detection on Dave's file:
+ *
+ * 1. TAKE THE CLOSEST POINT OF EACH VISIT, not the first point inside the
+ *    radius. Which point crosses an arbitrary circle first depends on how the
+ *    watch happened to sample the approach; the nearest approach to The Oval is
+ *    a real feature of the route.
+ * 2. REQUIRE A MINIMUM SEPARATION. The raw run reported returns at 16.65 AND
+ *    16.70 miles, because leaving the aid station means stepping out of a 250 ft
+ *    circle and back into it while sorting a drop bag. Anything closer together
+ *    than the shortest loop is one visit, not two.
+ */
+function findLaps(dense, { radiusFt = 250, minLapMiles = 1.5 } = {}) {
+  const start = dense[0];
+  const cum = [0];
+  for (let i = 1; i < dense.length; i += 1) {
+    cum.push(cum[i - 1] + haversineFt(dense[i - 1], dense[i]));
+  }
+
+  // Group the points inside the radius into visits, keeping each visit's
+  // nearest approach.
+  const visits = [];
+  let best = null;
+  for (let i = 0; i < dense.length; i += 1) {
+    const d = haversineFt(start, dense[i]);
+    if (d <= radiusFt) {
+      if (!best || d < best.d) best = { d, mile: cum[i] / 5280 };
+    } else if (best) {
+      visits.push(best);
+      best = null;
+    }
+  }
+  if (best) visits.push(best);
+
+  // The first visit is the start line, not a lap. Everything after it is a lap
+  // boundary as long as it is far enough from the one before.
+  const laps = [];
+  for (const v of visits) {
+    if (v.mile < minLapMiles) continue;
+    if (laps.length && v.mile - laps[laps.length - 1] < minLapMiles) continue;
+    laps.push(v.mile);
+  }
+  return laps;
+}
+
 /* ---------- Main --------------------------------------------------------- */
 
 async function main() {
@@ -294,6 +354,14 @@ async function main() {
       `\nIf this is one long loop: ${long} long + ${short} short would need the short loop too.`,
     );
   }
+  const laps = findLaps(dense);
+  console.log(
+    `\nBack through the start at: ${laps.map((m) => m.toFixed(2)).join(', ')} miles` +
+      `\n  loop lengths: ${laps
+        .map((m, i) => (m - (i === 0 ? 0 : laps[i - 1])).toFixed(2))
+        .join(', ')}`,
+  );
+
   console.log(`\nCross-check: the race publishes 10,726 ft for the full 50K.`);
   console.log('A reconstruction far from that figure is wrong and should not be published.');
 
@@ -319,6 +387,9 @@ async function main() {
     // figure for a one-way one under the same words, and the race would have
     // read as less than half as hilly the day a real track landed.
     lossFt: Math.round(loss),
+    // The aid station is at The Oval and you pass through it at the end of every
+    // loop, so these are the mile marks the chart draws its verticals on.
+    aidMiles: laps.map((m) => Number(m.toFixed(3))),
     lowFt: Math.round(lo),
     highFt: Math.round(hi),
     points: points.map(([m, e]) => ({
