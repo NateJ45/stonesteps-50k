@@ -79,9 +79,6 @@ const measuredChange =
     ? Math.round(profile.gainFt + profile.lossFt)
     : null;
 
-/** Whole miles for the description, so it reads "30 miles" rather than "29.68". */
-const measuredMiles = measured && typeof profile?.miles === 'number' ? profile.miles : null;
-
 /**
  * THE CHART IS DRAWN TWICE, ON TWO CANVASES, and that is a phone fix. The
  * profile is a 1400 x 320 drawing, a 4.4:1 strip that reads as a ridge line on
@@ -249,7 +246,7 @@ const canvases = [
                 Seven loops from The Oval: four long loops alternating with three short loops of
                 just over three miles, totalling{' '}
                 {measuredChange ? measuredChange.toLocaleString() : '10,726'} feet of elevation
-                change across {measuredMiles ? Math.round(measuredMiles) : 31} miles.
+                change across 31 miles.
               </desc>
             </>
           )}
@@ -294,10 +291,15 @@ const canvases = [
           <b>{measuredChange ? `${measuredChange.toLocaleString()} ft` : totalGain}</b> total
           elevation change
         </span>
+        {/* THE TRACK'S OWN MILEAGE DOES NOT GO IN THIS NOTE. A GPS track under
+            canopy reads short, and this one measures 29.68 against a 50K's
+            31.07. On a race page that sentence is not a caption, it is an
+            accusation that the course is short, and it would be the first thing
+            a runner screenshotted. The profile is drawn from the track; the
+            distance is the race's, and the race states it elsewhere. */}
         {measured ? (
           <span class="elev__note">
-            Measured from USGS 1 m LiDAR along the recorded course
-            {profile?.miles ? `, ${profile.miles} miles` : ''}
+            Measured from USGS 1 m LiDAR along a recorded run of the course
           </span>
         ) : (
           <span class="elev__note">
@@ -309,9 +311,18 @@ const canvases = [
             Download the course GPX
           </a>
         )}
-        <span class="elev__key">
-          <span class="elev__dot" /> Aid station at the end of every loop
-        </span>
+        {/* A KEY FOR MARKS THAT ARE DRAWN. The aid verticals and their dots are
+            rendered only on the synthetic chart, because a measured profile has
+            no loop boundaries to hang them on. Left unconditional, the measured
+            chart printed a legend dot for a symbol that appears nowhere above
+            it, which is the one thing a key must never do. The fact itself is
+            not lost: the section's intro says every loop returns you through
+            the aid station at The Oval. */}
+        {!measured && (
+          <span class="elev__key">
+            <span class="elev__dot" /> Aid station at the end of every loop
+          </span>
+        )}
       </figcaption>
     </figure>
   )
