@@ -20,10 +20,28 @@ import { MILE, ELE, GRADE, LOOP, type ProfilePoint } from '@/lib/courseFlyover';
 
 interface Props {
   points: ProfilePoint[];
-  /** Mile the playhead sits at, or null when nothing is selected. */
+  /**
+   * Mile the playhead sits at, or null when nothing is selected.
+   *
+   * This is the EFFECTIVE mile: the parent hands us the live hover when there
+   * is one and the pinned mile when there is not, so everything drawn from it
+   * (the playhead, the readout, the slider value) survives the pointer leaving.
+   */
   cursorMile: number | null;
+  /**
+   * The placed marker's mile, or null when nothing is placed.
+   *
+   * THE MILE, NOT A BOOLEAN. A boolean cannot answer "did they just click the
+   * marker they already placed", because the pointer is over the chart at that
+   * moment and the component is therefore showing a hover, not the pin. The
+   * first version took `pinned: boolean` and the click-to-clear gesture could
+   * never fire.
+   */
+  pinnedMile: number | null;
   onScrub: (mile: number | null) => void;
   onSeek: (mile: number) => void;
+  /** Place the marker at a mile, or null to clear it. */
+  onPin: (mile: number | null) => void;
   /** When set, only this loop is drawn solid and the rest is dimmed. */
   activeLoop: number | null;
 }
@@ -36,8 +54,10 @@ const PAD_BOTTOM = 18;
 export default function CourseProfileStrip({
   points,
   cursorMile,
+  pinnedMile,
   onScrub,
   onSeek,
+  onPin,
   activeLoop,
 }: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -99,6 +119,13 @@ export default function CourseProfileStrip({
 
   if (!geom) return null;
 
+  // Drawn at the pinned mile, whether that is because the pointer left or
+  // because the pointer is hovering the pin. Gating this on "not hovering"
+  // instead would mean clicking your own marker changed nothing on screen.
+  const PIN_EPS = 0.2;
+  const showsPin =
+    pinnedMile != null && cursorMile != null && Math.abs(cursorMile - pinnedMile) <= PIN_EPS;
+
   const cursor =
     cursorMile == null
       ? null
@@ -128,9 +155,29 @@ export default function CourseProfileStrip({
         aria-label={`Elevation profile of the course, ${Math.round(geom.lo)} to ${Math.round(geom.hi)} feet over ${geom.totalMiles.toFixed(1)} miles. Interactive: use the slider below to move along it.`}
         onPointerMove={(e) => onScrub(mileFromEvent(e.clientX))}
         onPointerLeave={() => onScrub(null)}
+        // A CLICK LEAVES THE MARKER BEHIND. Hover alone is a mouse-only,
+        // moment-only answer: move the pointer away to look at the map and the
+        // thing you were looking at is gone. Clicking pins it, and clicking the
+        // marker again takes it away, which is the same gesture used to place
+        // and unplace a pin everywhere else.
         onPointerDown={(e) => {
           const m = mileFromEvent(e.clientX);
-          if (m != null) onSeek(m);
+          if (m == null) return;
+          // WITHIN SIX PIXELS, not within a fixed number of miles. The chart is
+          // one route at any width, so a mile is a different distance on a
+          // phone than on a desktop, and a tolerance in miles would be
+          // unmissable on one and unhittable on the other.
+          const rect = svgRef.current?.getBoundingClientRect();
+          const perPixel = rect && rect.width > 0 ? geom.totalMiles / rect.width : 0;
+          if (pinnedMile != null && Math.abs(m - pinnedMile) <= perPixel * 6) {
+            // Unpin only. The hover is still live and still sits here, so the
+            // marker stays under the pointer and goes when the pointer does,
+            // which is what "no longer pinned" should look like.
+            onPin(null);
+            return;
+          }
+          onPin(m);
+          onSeek(m);
         }}
       >
         {/* Loop bands first, under everything. */}
@@ -172,7 +219,7 @@ export default function CourseProfileStrip({
         ))}
 
         {cursor && (
-          <g className="cprof__cursor">
+          <g className={showsPin ? 'cprof__cursor is-pinned' : 'cprof__cursor'}>
             <line x1={cursor.x} y1={PAD_TOP} x2={cursor.x} y2={H - PAD_BOTTOM} />
             <circle cx={cursor.x} cy={geom.y(cursor.p[ELE])} r="5" />
           </g>
@@ -192,7 +239,8 @@ export default function CourseProfileStrip({
           </>
         ) : (
           <span className="cprof__hint">
-            Hover the profile to place yourself on the map, or drag the slider.
+            Hover the profile to place yourself on the map, click to leave a marker there, or drag
+            the slider.
           </span>
         )}
       </div>
@@ -214,6 +262,9 @@ export default function CourseProfileStrip({
             const m = Number(e.target.value);
             onScrub(m);
             onSeek(m);
+            // The keyboard path has no "leave", so without this the marker a
+            // keyboard user places would be the only one that never persists.
+            onPin(m);
           }}
           aria-valuetext={
             cursorMile == null

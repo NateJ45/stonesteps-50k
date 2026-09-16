@@ -402,6 +402,19 @@ const shortMiles = meta.loops.find((l) => l.kind === 'short')?.miles ?? 0;
     vector-effect: non-scaling-stroke;
   }
 
+  /* A PLACED MARKER LOOKS PLACED. Same shape, filled in the route's own colour
+     and with a heavier rule, so a reader who moved the pointer away can tell at
+     a glance that the playhead is something they left there rather than
+     something that failed to clear. */
+  :global(.cprof__cursor.is-pinned circle) {
+    /* The literal, for the reason given above the legend swatches. */
+    fill: #e2593c;
+  }
+
+  :global(.cprof__cursor.is-pinned line) {
+    stroke-width: 2;
+  }
+
   :global(.cprof__readout) {
     display: flex;
     flex-wrap: wrap;
