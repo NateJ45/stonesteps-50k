@@ -483,9 +483,21 @@ georeferencing. What it measures, from `node scripts/build-elevation.mjs`:
   total change. The file's own barometric column, summed the way a watch does
   it, gives 5,075 up and 5,049 down, so 10,125 ft of total change.
 
-The profile is built and live in the race document as of 2026-09-16, so the
-elevation chart is this track. The MAP is still not drawn; that is the job the
-coordinates unblock and it has not been done yet.
+THE MAP IS DRAWN AS OF 2026-09-16, and not the way this entry assumed. Dave
+granted permission for the Parks artwork, and it still cannot be used as a
+basemap: registering the 2017 PDF against the track fails at 112 ft median and
+453 ft at the 90th percentile, tried three ways, with the scale parameter
+drifting to the edge of its search range. Everything above about the 1998 map
+applies to the 2017 one for the same reason.
+
+OpenStreetMap needs no registration and the track sits 13.7 ft from the nearest
+way with no fitting at all, so the basemap is rendered from OSM plus 3DEP in the
+site's own colours. It is live on /course as a `courseMapSection`. The full
+argument is in the header of `scripts/build-course-map.mjs` and in
+`docs/superpowers/specs/2026-09-16-course-map-design.md`.
+
+The Parks permission is still what makes the trail NAMES safe to print, and the
+official map stays on the page as the printable version.
 
 WHAT IS STILL OPEN ON IT: whether the file may be republished as the course
 download. It is somebody's Strava export, and that is a permission to ask for
