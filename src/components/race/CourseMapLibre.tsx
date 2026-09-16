@@ -129,13 +129,16 @@ export default function CourseMapLibre() {
         // NAMESPACE IMPORT, not a default one: maplibre-gl v6 ships named
         // exports and no default, so `{ default: maplibregl }` is undefined at
         // runtime and only fails when you try to construct a Map.
-        const [maplibregl, courseMod, gradeMod, milesMod, profileMod] = await Promise.all([
-          import('maplibre-gl'),
-          import('../../../scripts/data/course-geo.json'),
-          import('../../../scripts/data/course-grade.json'),
-          import('../../../scripts/data/course-miles.json'),
-          import('../../../scripts/data/course-profile.json'),
-        ]);
+        const [maplibregl, courseMod, gradeMod, milesMod, profileMod, poiMod, landmarkMod] =
+          await Promise.all([
+            import('maplibre-gl'),
+            import('../../../scripts/data/course-geo.json'),
+            import('../../../scripts/data/course-grade.json'),
+            import('../../../scripts/data/course-miles.json'),
+            import('../../../scripts/data/course-profile.json'),
+            import('../../../scripts/data/course-poi.json'),
+            import('../../../scripts/data/course-landmarks.json'),
+          ]);
         if (cancelled || !hostRef.current) return;
         maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
@@ -145,6 +148,8 @@ export default function CourseMapLibre() {
         const course = (courseMod.default ?? courseMod) as unknown as GeoData;
         const gradeData = (gradeMod.default ?? gradeMod) as unknown as GeoData;
         const milesData = (milesMod.default ?? milesMod) as unknown as GeoData;
+        const poiData = (poiMod.default ?? poiMod) as unknown as GeoData;
+        const landmarkData = (landmarkMod.default ?? landmarkMod) as unknown as GeoData;
         const pts = ((profileMod.default ?? profileMod) as unknown as { points: ProfilePoint[] })
           .points;
         profileRef.current = pts;
@@ -178,6 +183,8 @@ export default function CourseMapLibre() {
               course: { type: 'geojson', data: course },
               grade: { type: 'geojson', data: gradeData },
               miles: { type: 'geojson', data: milesData },
+              poi: { type: 'geojson', data: poiData },
+              landmarks: { type: 'geojson', data: landmarkData },
               // The scrub marker. Starts empty and is fed a single point as the
               // reader moves along the profile.
               cursor: {
@@ -278,6 +285,105 @@ export default function CourseMapLibre() {
                   'text-halo-width': 1.4,
                 },
               },
+              // DIRECTION OF TRAVEL. Which way round the loops go is not
+              // guessable from a drawn line, and on a course that runs the same
+              // trails seven times it is the difference between a map and a
+              // diagram. The arrows are placed ALONG the line and rotated with
+              // the map, so they always point the way the race runs.
+              {
+                id: 'course-arrows',
+                type: 'symbol',
+                source: 'course',
+                filter: ['==', ['geometry-type'], 'LineString'],
+                layout: {
+                  'symbol-placement': 'line',
+                  'symbol-spacing': 90,
+                  'icon-image': 'course-arrow',
+                  'icon-size': ['interpolate', ['linear'], ['zoom'], 12, 0.5, 16, 0.95],
+                  'icon-rotation-alignment': 'map',
+                  'icon-allow-overlap': false,
+                  'icon-ignore-placement': false,
+                },
+                // Off at low zoom: at the default fit the arrows crowd the line
+                // into a dotted mess.
+                minzoom: 13.5,
+              },
+              // FACILITIES. Toilets and water are the two things a runner plans
+              // around, so they get colour; shelters and picnic areas are
+              // context and stay quiet.
+              {
+                id: 'poi',
+                type: 'circle',
+                source: 'poi',
+                filter: ['in', ['get', 'kind'], ['literal', ['toilets', 'water', 'shelter']]],
+                minzoom: 13,
+                paint: {
+                  'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 4, 17, 9],
+                  'circle-color': [
+                    'match',
+                    ['get', 'kind'],
+                    'toilets',
+                    '#3b7dd8',
+                    'water',
+                    '#2fa3a3',
+                    '#8a7f66',
+                  ],
+                  'circle-stroke-color': '#ffffff',
+                  'circle-stroke-width': 1.5,
+                },
+              },
+              {
+                id: 'poi-labels',
+                type: 'symbol',
+                source: 'poi',
+                filter: ['in', ['get', 'kind'], ['literal', ['toilets', 'water']]],
+                minzoom: 14.2,
+                layout: {
+                  // WHAT THE LABEL SAYS DEPENDS ON WHETHER YOU COME BACK. On a
+                  // seven-loop course most of these are passed several times,
+                  // and printing one mile implies it is the only one: the water
+                  // by The Oval is reachable from mile 0 and passed eight
+                  // times, and an earlier version labelled it "Water 24.7".
+                  // Passed once, the mile is the useful fact. Passed more, the
+                  // COUNT is, and the miles are in the list below the map.
+                  'text-field': [
+                    'concat',
+                    ['case', ['==', ['get', 'kind'], 'toilets'], 'WC ', 'Water '],
+                    [
+                      'case',
+                      ['>', ['get', 'passes'], 1],
+                      ['concat', '×', ['to-string', ['get', 'passes']]],
+                      ['to-string', ['get', 'mile']],
+                    ],
+                  ],
+                  'text-size': 11,
+                  'text-offset': [0, 1.3],
+                  'text-optional': true,
+                },
+                paint: {
+                  'text-color': '#ffffff',
+                  'text-halo-color': '#1a1712',
+                  'text-halo-width': 1.4,
+                },
+              },
+              {
+                id: 'landmark-labels',
+                type: 'symbol',
+                source: 'landmarks',
+                minzoom: 14,
+                layout: {
+                  'text-field': ['get', 'name'],
+                  'text-size': 12,
+                  'text-offset': [0, 0.9],
+                  'text-optional': true,
+                  'text-max-width': 9,
+                },
+                paint: {
+                  'text-color': '#ffe9c4',
+                  'text-halo-color': '#1a1712',
+                  'text-halo-width': 1.6,
+                },
+              },
               {
                 id: 'course-start',
                 type: 'circle',
@@ -373,6 +479,35 @@ export default function CourseMapLibre() {
 
         m.on('load', () => {
           if (cancelled) return;
+
+          // THE ARROW IS DRAWN, NOT A FONT GLYPH. A text symbol would need the
+          // style to carry a glyphs endpoint and would depend on the arrow
+          // existing in whatever font got substituted; a canvas image is
+          // guaranteed and is 24 lines.
+          if (!m.hasImage('course-arrow')) {
+            const S = 24;
+            const c = document.createElement('canvas');
+            c.width = S;
+            c.height = S;
+            const ctx = c.getContext('2d');
+            if (ctx) {
+              ctx.translate(S / 2, S / 2);
+              // Point along +x: MapLibre rotates a line symbol so the image's
+              // right edge follows the direction of the line.
+              ctx.beginPath();
+              ctx.moveTo(7, 0);
+              ctx.lineTo(-4, -5.5);
+              ctx.lineTo(-4, 5.5);
+              ctx.closePath();
+              ctx.fillStyle = '#ffffff';
+              ctx.strokeStyle = 'rgba(26,23,18,0.75)';
+              ctx.lineWidth = 1.5;
+              ctx.fill();
+              ctx.stroke();
+              m.addImage('course-arrow', ctx.getImageData(0, 0, S, S), { pixelRatio: 2 });
+            }
+          }
+
           // READY FIRST, TERRAIN SECOND. Doing these the other way round meant a
           // throw from setTerrain aborted the whole handler: no terrain, and the
           // status stuck over a map that was plainly finished. The 3D is an

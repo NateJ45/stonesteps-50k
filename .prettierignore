@@ -20,6 +20,8 @@ scripts/data/course-geo.json
 scripts/data/course-grade.json
 scripts/data/course-miles.json
 scripts/data/course-profile.json
+scripts/data/course-poi.json
+scripts/data/course-landmarks.json
 
 # Sanity typegen intermediate (also gitignored). Machine-written JSON.
 schema.json

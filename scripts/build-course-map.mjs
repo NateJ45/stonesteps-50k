@@ -219,6 +219,86 @@ function poiKind(tags) {
   return null;
 }
 
+/**
+ * The park's own published trail lengths, transcribed from the 2017 Cincinnati
+ * Parks "Mt. Airy Forest East Section" sheet.
+ *
+ * TRANSCRIBED, NOT MEASURED, and that is the point: these are the figures on the
+ * sign and on the map in the car park, so they are the numbers a runner will
+ * have already read. Ours are computed from OSM geometry and agree with seven of
+ * the eight trails that sit wholly inside our extract to within 11%, two of them
+ * exactly, which is why both can be shown side by side without embarrassment.
+ *
+ * The map is the only source for these: OSM carries the geometry but not the
+ * park's official length, and the two are different claims.
+ *
+ * Trails (E) and (I) are absent from the sheet. That is the park's numbering,
+ * not a gap in the transcription.
+ */
+const PARKS_TRAIL_MILES = {
+  'Colerain Trail (A)': 0.74,
+  'Ponderosa Trail (B)': 3.76,
+  'Red Oak Trail (C)': 0.82,
+  'Quarry Trail (D)': 2.48,
+  'Furnas Trail (F)': 1.46,
+  'Twin Bridge Trail (G)': 0.25,
+  'Beechwood Trail (H)': 1.15,
+  'Blue Spruce (J)': 0.78,
+  'Lingo Trail (K)': 1.41,
+  'Cedar Trail (L)': 0.37,
+  'Diehl Ridge Trail': 1.81,
+};
+
+/**
+ * Match our trail name to the park's, which are not always spelled alike.
+ *
+ * OSM says "Blue Spruce Trail (J)" where the sheet says "Blue Spruce (J)", so an
+ * exact-key lookup silently drops it. The letter in brackets is the park's own
+ * identifier and is the reliable join; the words around it are not.
+ */
+function officialMiles(name) {
+  if (PARKS_TRAIL_MILES[name] != null) return PARKS_TRAIL_MILES[name];
+  const letter = /\(([A-Z])\)/.exec(name)?.[1];
+  if (letter) {
+    for (const [k, v] of Object.entries(PARKS_TRAIL_MILES)) {
+      if (k.endsWith(`(${letter})`)) return v;
+    }
+  }
+  return null;
+}
+
+/**
+ * What a runner wants marked, and nothing else.
+ *
+ * A toilet at mile 8.5 is worth more than every picnic table in the park put
+ * together, so the list is short on purpose. Picnic areas are in because the
+ * race names its start as one of them ("The Oval, Area 13") and because the
+ * numbered areas are how the park itself gives directions.
+ */
+function facilityKind(tags) {
+  if (!tags) return null;
+  if (tags.amenity === 'toilets') return 'toilets';
+  if (tags.amenity === 'drinking_water') return 'water';
+  if (tags.amenity === 'shelter') return 'shelter';
+  if (tags.tourism === 'picnic_site') return 'picnic';
+  if (tags.highway === 'trailhead') return 'trailhead';
+  if (tags.tourism === 'viewpoint') return 'viewpoint';
+  return null;
+}
+
+/**
+ * Landmarks worth a label: things with a name that a runner would use to say
+ * where they are. Buildings, water and shelters, not every mapped bench.
+ */
+function landmarkName(tags) {
+  if (!tags?.name) return null;
+  if (tags.natural === 'water') return tags.name;
+  if (tags.amenity === 'community_centre' || tags.amenity === 'shelter') return tags.name;
+  if (tags.building && tags.name) return tags.name;
+  if (tags.leisure === 'disc_golf_course') return tags.name;
+  return null;
+}
+
 /** Which filled area, if any, a way represents. Order matters: first match wins. */
 function areaKind(tags) {
   if (!tags) return null;
@@ -426,10 +506,139 @@ async function main() {
   const named = [...tally.entries()].sort((a, b) => b[1] - a[1]);
   const namedTotal = named.reduce((s, [, c]) => s + c, 0);
   const trailsUsed = named
-    .map(([name, count]) => ({ name, percent: Number(((count / namedTotal) * 100).toFixed(1)) }))
+    .map(([name, count]) => ({
+      name,
+      percent: Number(((count / namedTotal) * 100).toFixed(1)),
+      // The park's own published length, where the sheet lists one. Null for
+      // the park ROADS the course also uses, which the trail sheet does not
+      // measure, and for anything the sheet does not name.
+      officialMiles: officialMiles(name),
+    }))
     .filter((t) => t.percent >= 0.5);
   console.log('Trails used:');
   for (const t of trailsUsed) console.log(`   ${String(t.percent).padStart(5)}%  ${t.name}`);
+
+  /* --- What is beside the course ----------------------------------------- */
+
+  // NEAREST POINT ON THE ROUTE, AND THE MILE THERE. A toilet is only useful if
+  // you know when you reach it, so every facility is reported as a distance
+  // from the course AND a distance into the race.
+  const routePts = [];
+  const routeMiles = [];
+  for (const loop of loops) {
+    for (let i = 0; i < loop.flat.length; i += 1) {
+      routePts.push(loop.flat[i]);
+      routeMiles.push(loop.mile[i]);
+    }
+  }
+  /**
+   * Every time the course comes within reach of a point, not just the closest.
+   *
+   * THE NEAREST PASS IS A LIE ON A LOOP COURSE. The first version of this
+   * reported only the closest approach, which labelled the drinking water by
+   * The Oval as "Water 24.7" when it is in fact reachable from MILE 0.0 and
+   * passed eight times; one toilet block came out as "WC 5.1" and is passed
+   * ten times. A runner reading that would plan around the wrong lap. So each
+   * facility carries the mile of every distinct pass, and the label says how
+   * many there are.
+   *
+   * A pass ENDS when the course leaves the radius, which is what stops one slow
+   * curve past a building from counting as six.
+   */
+  const passesNear = (x, y, withinFt) => {
+    const out = [];
+    let best = Infinity;
+    let inRange = false;
+    for (let i = 0; i < routePts.length; i += 1) {
+      const d = Math.hypot(routePts[i][0] - x, routePts[i][1] - y);
+      if (d < best) best = d;
+      const near = d < withinFt;
+      if (near && !inRange) out.push(Number(routeMiles[i].toFixed(1)));
+      inRange = near;
+    }
+    return { dist: best, passes: out };
+  };
+
+  // 160 FT. Wide enough to catch a toilet block set back from the trail behind
+  // a screen of trees, tight enough that nothing across the valley qualifies.
+  // At 200 ft the list starts collecting facilities you cannot see from the
+  // course, which is worse than not listing them.
+  const NEAR_FT = 160;
+  const facilities = [];
+  const landmarks = [];
+  const seen = new Set();
+
+  for (const e of els) {
+    const t = e.tags ?? {};
+    let pt = null;
+    if (e.type === 'node' && typeof e.lat === 'number') pt = frame.project([e.lon, e.lat]);
+    else if ((e.geometry ?? []).length) {
+      const ps = e.geometry.map((g) => frame.project([g.lon, g.lat]));
+      pt = [
+        ps.reduce((a, q) => a + q[0], 0) / ps.length,
+        ps.reduce((a, q) => a + q[1], 0) / ps.length,
+      ];
+    }
+    if (!pt) continue;
+
+    const { dist, passes } = passesNear(pt[0], pt[1], NEAR_FT);
+    if (dist > NEAR_FT) continue;
+    const mile = passes.length ? passes[0] : 0;
+
+    const kind = facilityKind(t);
+    if (kind) {
+      // The same toilet block can be mapped as a node AND as a building. Key on
+      // position so it is marked once.
+      const key = `${kind}:${Math.round(pt[0] / 40)}:${Math.round(pt[1] / 40)}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        facilities.push({
+          type: 'Feature',
+          properties: {
+            kind,
+            name: t.name ?? null,
+            ref: t.ref ?? null,
+            // The mile you FIRST reach it, and how many times in total.
+            mile,
+            passes: passes.length,
+            everyMile: passes,
+            offsetFt: Math.round(dist),
+          },
+          geometry: { type: 'Point', coordinates: unproject(pt) },
+        });
+      }
+    }
+
+    const lname = landmarkName(t);
+    if (lname && !seen.has(`L:${lname}`)) {
+      seen.add(`L:${lname}`);
+      landmarks.push({
+        type: 'Feature',
+        properties: { name: lname, mile },
+        geometry: { type: 'Point', coordinates: unproject(pt) },
+      });
+    }
+  }
+
+  facilities.sort((a, b) => a.properties.mile - b.properties.mile);
+  const byKind = facilities.reduce((m, f) => {
+    m[f.properties.kind] = (m[f.properties.kind] ?? 0) + 1;
+    return m;
+  }, {});
+  console.log(
+    `Beside the course (within ${NEAR_FT} ft): ` +
+      Object.entries(byKind)
+        .map(([k, n]) => `${n} ${k}`)
+        .join(', ') +
+      `, ${landmarks.length} named landmarks`,
+  );
+  for (const f of facilities.filter((q) => ['toilets', 'water'].includes(q.properties.kind))) {
+    const pr = f.properties;
+    console.log(
+      `   ${pr.kind.padEnd(8)} first at mile ${String(pr.mile).padStart(5)}` +
+        `, passed ${pr.passes}x  (${pr.everyMile.join(', ')})`,
+    );
+  }
 
   /* --- Write ------------------------------------------------------------- */
 
@@ -563,11 +772,21 @@ async function main() {
   writeFileSync(join(DATA, 'course-geo.json'), `${JSON.stringify(geojson)}\n`);
   writeFileSync(join(DATA, 'course-grade.json'), `${JSON.stringify(gradeGeojson)}\n`);
   writeFileSync(join(DATA, 'course-miles.json'), `${JSON.stringify(mileGeojson)}\n`);
+  writeFileSync(
+    join(DATA, 'course-poi.json'),
+    `${JSON.stringify({ type: 'FeatureCollection', features: facilities })}\n`,
+  );
+  writeFileSync(
+    join(DATA, 'course-landmarks.json'),
+    `${JSON.stringify({ type: 'FeatureCollection', features: landmarks })}\n`,
+  );
   writeFileSync(join(DATA, 'course-profile.json'), `${JSON.stringify({ points: profile })}\n`);
   writeFileSync(join(DATA, 'course-map.json'), `${JSON.stringify(meta)}\n`);
   console.log(
     `\nWrote course-geo.json, course-grade.json (${gradeSegments.length} segments), ` +
-      `course-miles.json (${mileMarkers.length} markers), course-profile.json ` +
+      `course-miles.json (${mileMarkers.length} markers), ` +
+      `course-poi.json (${facilities.length}), course-landmarks.json (${landmarks.length}), ` +
+      `course-profile.json ` +
       `(${profile.length} points) and course-map.json`,
   );
 }
