@@ -499,6 +499,88 @@ argument is in the header of `scripts/build-course-map.mjs` and in
 The Parks permission is still what makes the trail NAMES safe to print, and the
 official map stays on the page as the printable version.
 
+THE MAP IS MAPLIBRE GL JS as of 2026-09-16, not a renderer of ours. It carries
+USGS orthoimagery, terrain from the AWS Terrarium DEM at 1.5x exaggeration, and
+the course as GeoJSON, with no API key and no tile bill. Three things about it
+should survive edits.
+
+- `maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url` and the `setWorkerUrl`
+  call next to it are LOAD-BEARING. MapLibre v6 resolves its worker against
+  `import.meta.url`, Astro's bundling breaks that, and the failure is silent:
+  raster tiles still draw, every GeoJSON source stays un-loaded forever, `load`
+  never fires and nothing logs an error. The symptom is a perfect satellite map
+  with no route on it.
+- The stylesheet must be imported STATICALLY. Through a dynamic import Vite
+  routes it via the preload helper, and Astro's client and server passes hash
+  the same file differently, so the browser requests a name the build never
+  wrote.
+- The vertical scale is exaggerated and the caption says so, for the same reason
+  the elevation profile captions itself.
+
+WHAT WAS DELETED GETTING HERE, so nobody rebuilds it: a hand-drawn SVG basemap
+with zoom tiers, marching-squares contours, a 256x256 heightfield, a committed
+orthophotograph and a three.js orbit scene. All of it worked; all of it was
+reimplementing a map engine, and the page is 28KB gzipped now against 97KB then.
+
+### 11. The modern trail map: what is possible, and the one input missing
+
+2026-09-12. Nathan asked whether the Stone Steps course could be printed onto
+Cincinnati Parks' current trail map instead of the 1998 scan the course page
+carries today. Investigated properly; the answer is yes, but not from the two
+maps alone.
+
+WHAT IS ESTABLISHED, so nobody re-derives it:
+
+- Parks publishes two PDFs. The "printable trail map" is a raster-heavy poster
+  (7.2MB, 67 embedded images). The "East Section" map is CLEAN VECTOR: 1,992
+  paths, and every named trail is separable by stroke colour and dash pattern
+  (Colerain dark green 2pt [2 2], Ponderosa brown 1.5pt [2 2], Beechwood yellow
+  2pt [1 2], Furnas light green 1.5pt [3 4], Arboretum orange 1.5pt [3 4], and
+  so on). A route drawn from those paths would be real geometry, not a tracing.
+- The race's own 1998 map extracts cleanly too: thresholding its red and blue
+  gives two continuous, unbroken loop polylines plus the direction arrows.
+- The site knows the loops are 5.3 and 3.2 miles out of The Oval. It does NOT
+  record which trails they use, and no named trail is either length, so each
+  loop is several trails plus connectors.
+- The two maps are in DIFFERENT ORIENTATIONS. An affine fitted to three
+  landmarks (Arboretum Center, Oak Ridge Lodge, the disc golf course) comes out
+  at roughly 55 degrees of rotation and 0.91 scale, and lands the Stone Steps
+  about 90 map-points from where the 2017 map labels them. On a map where
+  neighbouring trails are 30 to 60 points apart, that is not close enough to
+  say which trail a line is on.
+- Neither RunSignUp nor the current WordPress site holds a GPX, a KML or any
+  course file. RunSignUp's race page links only to Google and Apple directions.
+
+THE GPX ARRIVED ON 2026-09-16. Dave sent a Strava track of the 50K, flagging
+that its small loop is a slightly different route carrying the COVID reroute, so
+it is close rather than exact. It is enough to close the mapping question: with
+real coordinates the route goes onto the modern base directly, no tracing and no
+georeferencing. What it measures, from `node scripts/build-elevation.mjs`:
+
+- 30.11 miles raw, in seven laps out of The Oval at 5.05 / 3.26 / 5.12 / 3.22 /
+  5.12 / 3.25 / 5.06 miles. That is the L S L S L S L the site already
+  describes, with a long loop of about 5.1 rather than the 5.3 on the punch
+  card.
+- 4,673 ft of climb and 4,683 ft of descent off USGS 1 m LiDAR, so 9,356 ft of
+  total change. The file's own barometric column, summed the way a watch does
+  it, gives 5,075 up and 5,049 down, so 10,125 ft of total change.
+
+THE MAP IS DRAWN AS OF 2026-09-16, and not the way this entry assumed. Dave
+granted permission for the Parks artwork, and it still cannot be used as a
+basemap: registering the 2017 PDF against the track fails at 112 ft median and
+453 ft at the 90th percentile, tried three ways, with the scale parameter
+drifting to the edge of its search range. Everything above about the 1998 map
+applies to the 2017 one for the same reason.
+
+OpenStreetMap needs no registration and the track sits 13.7 ft from the nearest
+way with no fitting at all, so the basemap is rendered from OSM plus 3DEP in the
+site's own colours. It is live on /course as a `courseMapSection`. The full
+argument is in the header of `scripts/build-course-map.mjs` and in
+`docs/superpowers/specs/2026-09-16-course-map-design.md`.
+
+The Parks permission is still what makes the trail NAMES safe to print, and the
+official map stays on the page as the printable version.
+
 A 3D orbit view sits under the flat map, behind a control that loads three.js
 only when pressed. Two things about it are deliberate and should survive edits.
 The vertical scale is EXAGGERATED and the view says so on itself: Mt. Airy's
