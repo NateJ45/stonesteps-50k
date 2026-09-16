@@ -97,6 +97,14 @@ const FLY_ZOOM = 15.2;
 const REST_PITCH = 66;
 
 /**
+ * How long the route takes to draw itself in, once, on arrival.
+ *
+ * Long enough to read as the course being traced and short enough that nobody
+ * waiting to use the map is annoyed by it. It runs ONCE and never again.
+ */
+const DRAW_SECONDS = 2.2;
+
+/**
  * Does this reader want motion at all?
  *
  * Read at the moment of use rather than cached, because the setting can change
@@ -130,6 +138,8 @@ export default function CourseMapLibre() {
   const flyFromMileRef = useRef(0);
   const bearingRef = useRef(0);
   const playingRef = useRef(false);
+  const drawRafRef = useRef(0);
+  const drawDoneRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -165,6 +175,36 @@ export default function CourseMapLibre() {
           .points;
         profileRef.current = pts;
         setProfile(pts);
+
+        // ONE LINESTRING, AND ONLY THE FIRST TWO LOOPS OF IT.
+        //
+        // It is one feature because `line-gradient` measures progress along one
+        // feature: animating the seven loop features would grow all seven at
+        // once, each from its own start, which reads as a spider rather than as
+        // a course being run.
+        //
+        // IT STOPS AFTER LOOP 2 BECAUSE THE REST IS THE SAME GROUND. Loops 3, 5
+        // and 7 retrace loop 1 and loop 6 retraces loop 2, so a reveal of the
+        // full 29.6 miles spends its first 28% lighting up every pixel the
+        // course will ever touch and the remaining 72% redrawing pixels that are
+        // already lit. Measured at 42% through: the map looks finished. That
+        // reads as the animation stalling, not as a lap. The unique geometry is
+        // loops 1 and 2, so that is what draws, and every frame of it puts new
+        // line on the map.
+        const uniqueGeometry = pts.filter((q) => q[5] <= 2);
+        const wholeRoute = {
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'LineString',
+                coordinates: uniqueGeometry.map((q) => [q[LON], q[LAT]]),
+              },
+            },
+          ],
+        } as unknown as GeoData;
         const b = meta.bounds;
 
         map = new maplibregl.Map({
@@ -192,6 +232,9 @@ export default function CourseMapLibre() {
                 attribution: 'Elevation: AWS Terrain Tiles',
               },
               course: { type: 'geojson', data: course },
+              // lineMetrics is what makes ['line-progress'] available, and
+              // without it line-gradient silently does nothing at all.
+              whole: { type: 'geojson', data: wholeRoute, lineMetrics: true },
               grade: { type: 'geojson', data: gradeData },
               miles: { type: 'geojson', data: milesData },
               poi: { type: 'geojson', data: poiData },
@@ -236,6 +279,32 @@ export default function CourseMapLibre() {
                   'line-color': '#1a1712',
                   'line-opacity': 0.55,
                   'line-width': ['interpolate', ['linear'], ['zoom'], 11, 5, 16, 11],
+                },
+              },
+              // THE DRAW-ON LINE. Visible only while it is drawing; the real
+              // per-loop colouring takes over the instant it finishes, because
+              // this one line cannot distinguish a long loop from a short one.
+              {
+                id: 'course-draw',
+                type: 'line',
+                source: 'whole',
+                layout: { 'line-cap': 'round', 'line-join': 'round' },
+                paint: {
+                  'line-width': ['interpolate', ['linear'], ['zoom'], 11, 3, 16, 7],
+                  'line-opacity': 0,
+                  'line-gradient': [
+                    'interpolate',
+                    ['linear'],
+                    ['line-progress'],
+                    0,
+                    '#e2593c',
+                    0.0001,
+                    '#e2593c',
+                    0.0002,
+                    'rgba(226,89,60,0)',
+                    1,
+                    'rgba(226,89,60,0)',
+                  ],
                 },
               },
               {
@@ -564,6 +633,8 @@ export default function CourseMapLibre() {
             console.error('Terrain failed; the map stays flat', err);
             setTerrainOn(false);
           }
+
+          drawRoute(m);
         });
 
         // A tile service failing is not a broken page: the course is its own
@@ -583,6 +654,7 @@ export default function CourseMapLibre() {
       cancelled = true;
       playingRef.current = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (drawRafRef.current) cancelAnimationFrame(drawRafRef.current);
       // remove() releases the WebGL context. Without it, navigating away and
       // back leaks a context per visit until the browser starts dropping them.
       map?.remove();
@@ -591,6 +663,96 @@ export default function CourseMapLibre() {
   }, []);
 
   const getMap = () => mapRef.current as import('maplibre-gl').Map | null;
+
+  /** The route's resting appearance, once the draw-on is out of the way. */
+  const settleRoute = useCallback((m: import('maplibre-gl').Map) => {
+    drawDoneRef.current = true;
+    if (drawRafRef.current) cancelAnimationFrame(drawRafRef.current);
+    drawRafRef.current = 0;
+    if (m.getLayer('course-draw')) m.setPaintProperty('course-draw', 'line-opacity', 0);
+    for (const id of ['course-long', 'course-short']) {
+      if (m.getLayer(id)) m.setPaintProperty(id, 'line-opacity', 1);
+    }
+    if (m.getLayer('course-glow')) m.setPaintProperty('course-glow', 'line-opacity', 0.34);
+    if (m.getLayer('course-casing')) m.setPaintProperty('course-casing', 'line-opacity', 0.55);
+    for (const id of ['course-arrows', 'miles', 'mile-labels', 'course-start']) {
+      if (m.getLayer(id)) m.setLayoutProperty(id, 'visibility', 'visible');
+    }
+  }, []);
+
+  /**
+   * Trace the course once, on arrival.
+   *
+   * THE GRADIENT IS THE ANIMATION. Four stops walk along ['line-progress']: solid
+   * up to the head, then transparent past it. Moving the head from 0 to 1 draws
+   * the line. This is a paint property on one layer, so it costs a frame rather
+   * than a source update, which is what makes it smooth on a phone.
+   *
+   * THE STOPS MUST STAY STRICTLY ASCENDING or MapLibre rejects the whole
+   * expression, which is why the head is clamped away from both ends rather
+   * than allowed to sit exactly on 0 or 1.
+   *
+   * Everything that would spoil the reveal (mile markers, arrows, the start dot)
+   * is hidden until it finishes, so the map arrives empty and fills in.
+   */
+  const drawRoute = useCallback(
+    (m: import('maplibre-gl').Map) => {
+      if (drawDoneRef.current) return;
+
+      // Reduced motion gets the finished map. A line that draws itself is
+      // decoration, and decoration is exactly what that setting refuses.
+      if (prefersReducedMotion()) {
+        settleRoute(m);
+        return;
+      }
+
+      for (const id of ['course-arrows', 'miles', 'mile-labels', 'course-start']) {
+        if (m.getLayer(id)) m.setLayoutProperty(id, 'visibility', 'none');
+      }
+      for (const id of ['course-long', 'course-short']) {
+        if (m.getLayer(id)) m.setPaintProperty(id, 'line-opacity', 0);
+      }
+      if (m.getLayer('course-glow')) m.setPaintProperty('course-glow', 'line-opacity', 0);
+      // THE CASING IS DRAWN FROM THE WHOLE COURSE AND IT WAS NEVER HIDDEN.
+      // Measured: with every other route layer at zero the map still showed a
+      // finished course, because this dark stroke under it was still at 0.55.
+      // The reveal had been running correctly the whole time and was invisible
+      // underneath its own outline.
+      if (m.getLayer('course-casing')) m.setPaintProperty('course-casing', 'line-opacity', 0);
+      if (m.getLayer('course-draw')) m.setPaintProperty('course-draw', 'line-opacity', 1);
+
+      const started = performance.now();
+      const step = () => {
+        const t = Math.min(1, (performance.now() - started) / (DRAW_SECONDS * 1000));
+        // Ease out, so the line leaves The Oval quickly and settles into the
+        // finish rather than stopping dead.
+        const eased = 1 - (1 - t) ** 2.2;
+        const head = Math.min(0.9996, Math.max(0.0002, eased));
+        if (m.getLayer('course-draw')) {
+          m.setPaintProperty('course-draw', 'line-gradient', [
+            'interpolate',
+            ['linear'],
+            ['line-progress'],
+            0,
+            '#e2593c',
+            head,
+            '#ffb27a',
+            Math.min(0.9999, head + 0.0015),
+            'rgba(226,89,60,0)',
+            1,
+            'rgba(226,89,60,0)',
+          ]);
+        }
+        if (t >= 1) {
+          settleRoute(m);
+          return;
+        }
+        drawRafRef.current = requestAnimationFrame(step);
+      };
+      drawRafRef.current = requestAnimationFrame(step);
+    },
+    [settleRoute],
+  );
 
   /**
    * Put the scrub marker at a mile, without moving the camera.
@@ -637,6 +799,7 @@ export default function CourseMapLibre() {
       const pts = profileRef.current;
       if (!map || !pts.length) return;
       stopFly();
+      settleRoute(map);
       const i = indexAtMile(pts, mile);
       const p = sampleAt(pts, i);
       const bearing = bearingAt(pts, i);
@@ -679,6 +842,7 @@ export default function CourseMapLibre() {
       const map = getMap();
       const pts = profileRef.current;
       if (!map || !pts.length) return;
+      settleRoute(map);
 
       // REDUCED MOTION GETS THE DESTINATION, NOT THE JOURNEY. A 90 second
       // camera flight is exactly the kind of motion the setting exists to
@@ -777,6 +941,7 @@ export default function CourseMapLibre() {
 
   const toggleGrade = () => {
     const map = getMap();
+    if (map) settleRoute(map);
     const next = !gradeOn;
     setGradeOn(next);
     if (!map) return;
