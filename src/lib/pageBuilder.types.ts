@@ -538,6 +538,14 @@ export interface ProjectedLoopCardSection {
   aside?: { _key?: string; title?: string; body?: string; confirmed?: boolean }[];
 }
 
+export interface ProjectedCourseMapSection {
+  _type: 'courseMapSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+}
+
 export interface ProjectedElevationSection {
   _type: 'elevationSection';
   _key: string;
@@ -710,6 +718,7 @@ export type PageBuilderBlock =
   | ProjectedCourseFeaturesSection
   | ProjectedLoopCardSection
   | ProjectedElevationSection
+  | ProjectedCourseMapSection
   | ProjectedSponsorPatchesSection
   | ProjectedPageHeaderSection
   | ProjectedContactSection

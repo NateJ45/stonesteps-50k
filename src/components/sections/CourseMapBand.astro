@@ -1,0 +1,49 @@
+---
+// Foundation, edit with care
+//
+// The course map band: heading, intro, and the map itself.
+//
+// CONTENT block: receives a surface from the cadence in sectionCadence.ts, like
+// every other content band. It carries no colour field of its own (CLAUDE.md
+// rule 9, enforced by src/lib/section-fields.test.ts).
+//
+// The map's geometry is not editorial and cannot be set from the Studio. See
+// src/components/race/CourseMap.astro for why, and for why the basemap is
+// OpenStreetMap rather than Cincinnati Parks' own artwork.
+
+import SectionHeading from '@/components/SectionHeading.astro';
+import CourseMap from '@/components/race/CourseMap.astro';
+
+type Props = {
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+  surface?: string;
+  headingId?: string;
+};
+
+const {
+  eyebrow,
+  headline = 'Where it goes',
+  intro,
+  surface = 'background',
+  headingId = 'course-map-heading',
+} = Astro.props as Props;
+
+const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
+---
+
+<section class={`relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+  {
+    /* THE SAME CONTENT COLUMN EVERY OTHER BAND USES. There is no
+    `.container-page` in this codebase; a band that invents one gets a div with
+    no max-width, which silently renders full-bleed and looks deliberate. */
+  }
+  <div class="mob-center relative z-10 mx-auto w-full max-w-content px-6">
+    <SectionHeading {eyebrow} {headline} {headingId} labelDisplay />
+    {intro && <p class="mx-auto mt-4 max-w-[52ch] text-muted-foreground lg:mx-0">{intro}</p>}
+    <div class="mt-10">
+      <CourseMap />
+    </div>
+  </div>
+</section>
