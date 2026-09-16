@@ -16,9 +16,9 @@ sequence).
 
 ## Waiting on a human
 
-### 1h. The page states two different climbing figures, and Dave's GPX settles it
+### 1h. DONE 2026-09-16. The two climbing figures are one set of figures
 
-2026-09-16. The course copy in Sanity says "Over 6,000 ft" of climbing, and the
+2026-09-16. The course copy in Sanity said "Over 6,000 ft" of climbing, and the
 elevation chart underneath it still captions itself "10,726 ft total elevation
 change". Both appear on the home page and on /course. Neither is wrong on its
 own terms, but together they read as a contradiction, and one of them is not
@@ -36,11 +36,17 @@ both-ways sum is 10,125 ft over a route about three quarters of a mile shorter
 than the real one. "Over 6,000 feet of climbing" is above every one-way figure
 here, and no way of counting this track reaches it.
 
-WHAT WOULD CLOSE IT: Dave choosing. Either the copy goes back to the race's own
-both-ways figure, or it states climbing at about 4,700 to 5,100 ft, or the two
-lines are rewritten to say which is which. It is his race's number and runners
-have compared notes about it for twenty years, so it is not a number to change
-on a measurement he did not ask for.
+RESOLVED by Nathan the same day: the copy matches the track. Climbing reads
+about 4,700 ft, elevation change reads 9,356 ft, and the contact FAQ gives both
+and names which is which. The measured profile is written to the race document,
+so the chart is Dave's track rather than the synthetic saw teeth.
+
+ONE THING TO PUT TO DAVE, because it is his race's number and runners have
+compared notes about it for twenty years: 10,726 ft no longer appears on the
+site. It was never wrong, it is a both-ways figure and the barometric both-ways
+sum off his own file is 10,125 ft over a slightly shorter route. If he wants it
+back, it belongs on the lines that say "elevation change", not the ones that say
+"climbing".
 
 ### 1. Verify the live preview against a real Sanity project
 
@@ -477,9 +483,14 @@ georeferencing. What it measures, from `node scripts/build-elevation.mjs`:
   total change. The file's own barometric column, summed the way a watch does
   it, gives 5,075 up and 5,049 down, so 10,125 ft of total change.
 
+The profile is built and live in the race document as of 2026-09-16, so the
+elevation chart is this track. The MAP is still not drawn; that is the job the
+coordinates unblock and it has not been done yet.
+
 WHAT IS STILL OPEN ON IT: whether the file may be republished as the course
 download. It is somebody's Strava export, and that is a permission to ask for
-rather than infer.
+rather than infer. Until it is granted, `race.gpxUrl` stays empty and the
+caption offers no download.
 
 ONE THING TO SETTLE BEFORE PUBLISHING EITHER WAY: the base map is Cincinnati
 Parks' copyrighted artwork. Ask them before republishing a modified version.
