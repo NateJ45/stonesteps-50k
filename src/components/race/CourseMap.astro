@@ -1,12 +1,26 @@
 ---
 // Foundation, edit with care
 /**
- * The course map section: the map itself, and the list of what it runs on.
+ * The course map section: the framed map and the caption that describes it.
  *
  * THE MAP IS MAPLIBRE. See CourseMapLibre.tsx for why, and for the two
  * public-domain tile sources it uses. This file's job is the shell around it:
- * the framed box, the legend, and the derived trail list underneath, which is
- * the part a screen reader and a printer actually get.
+ * the framed box, the legend and the figcaption.
+ *
+ * TWO LISTS USED TO LIVE HERE and were cut on 2026-09-16: the park's toilets
+ * and water, and the tally of which trails the course runs on. The facilities
+ * list was eleven unnamed rows of mile numbers that no runner could tell apart,
+ * for facilities the race does not staff, under a caption saying aid is at The
+ * Oval. Both are still DERIVED by scripts/build-course-map.mjs and still sit in
+ * course-map.json and course-poi.json, because the map draws the facilities as
+ * dots and the trail tally is how we know what the course runs on. Rendering
+ * either as a list again is a content decision, not a rebuild.
+ *
+ * ATTRIBUTION MOVED WITH THEM. The trail tally was OSM-derived text on the page
+ * and carried its own ODbL credit; now the only OSM-derived content here is
+ * inside the map, and MapLibre's own attribution control covers it. If anything
+ * OSM-derived is ever printed in this shell again, its credit has to come back
+ * with it, because the map's control is not on the page when the map is not.
  *
  * THE DATA IS NOT EDITORIAL. Everything here comes from
  * scripts/data/course-map.json and course-geo.json, which
@@ -16,7 +30,6 @@
  */
 import CourseMapLibre from './CourseMapLibre.tsx';
 import meta from '../../../scripts/data/course-map.json';
-import poi from '../../../scripts/data/course-poi.json';
 
 interface Props {
   id?: string;
@@ -26,16 +39,6 @@ const { id = 'course-map' } = Astro.props as Props;
 
 const longMiles = meta.loops.find((l) => l.kind === 'long')?.miles ?? 0;
 const shortMiles = meta.loops.find((l) => l.kind === 'short')?.miles ?? 0;
-
-// WHAT A RUNNER PLANS AROUND. Derived from OpenStreetMap by the build script and
-// reported as EVERY mile the course comes within 160 ft, because on a seven-loop
-// course a single mile is misleading: the water by The Oval is reachable from
-// mile 0 and passed eight times.
-type Poi = { kind: string; mile: number; passes: number; everyMile: number[] };
-const facilities = (poi.features as { properties: Poi }[])
-  .map((f) => f.properties)
-  .filter((f) => f.kind === 'toilets' || f.kind === 'water')
-  .sort((a, b) => a.mile - b.mile);
 ---
 
 <figure class="cmap" id={id} data-course-map>
@@ -53,72 +56,6 @@ const facilities = (poi.features as { properties: Poi }[])
     Seven loops out of The Oval: four long loops of about {longMiles} miles alternating with three short
     loops of about {shortMiles} miles.
   </figcaption>
-
-  {
-    /* THE LIST IS THE ACCESSIBLE MAP, and it is not a fallback: it says
-    something the drawing cannot, which is how much of the day is spent on each
-    trail. Derived from the track by matching it against the named trail
-    network, never typed. */
-  }
-  <div class="cmap__trailsUsed">
-    <h3 class="cmap__trailsUsedTitle">Toilets and water on the course</h3>
-    <ul class="cmap__facilities">
-      {
-        facilities.map((f) => (
-          <li>
-            <span class={`cmap__fdot is-${f.kind}`} aria-hidden="true" />
-            <span class="cmap__fkind">{f.kind === 'toilets' ? 'Toilets' : 'Drinking water'}</span>
-            <span class="cmap__fmiles mono">{f.everyMile.map((m) => m.toFixed(1)).join(', ')}</span>
-          </li>
-        ))
-      }
-    </ul>
-    <p class="cmap__provenance">
-      Every mile the course passes within about 50 metres. Aid is at The Oval; these are the park's
-      own facilities, which are not staffed on race day.
-    </p>
-
-    <h3 class="cmap__trailsUsedTitle">What you run on</h3>
-    <ul>
-      {
-        meta.trailsUsed.map((t) => (
-          <li>
-            <span class="cmap__bar" style={`--pct:${t.percent}`} aria-hidden="true" />
-            <span class="cmap__trailName">
-              {t.name}
-              {
-                /* THE PARK'S OWN LENGTH, beside our share of the course. Two
-                different claims: how long the trail is, and how much of the day
-                is spent on it. The park roads the course also uses carry no
-                official length, because the trail sheet does not measure them,
-                and printing nothing is better than implying it is zero. */
-                t.officialMiles != null && (
-                  <span class="cmap__official"> {t.officialMiles} mi trail</span>
-                )
-              }
-            </span>
-            {/* Always one decimal: a column reading 17.2 / 16.6 / 8 / 7.4 has a
-                number in it that looks like a different kind of quantity. */}
-            <span class="cmap__pct mono">{t.percent.toFixed(1)}%</span>
-          </li>
-        ))
-      }
-    </ul>
-    {
-      /* ATTRIBUTION IS A LICENCE TERM, NOT A COURTESY. OpenStreetMap is ODbL and
-      requires credit; USGS work is public domain and is credited anyway, because
-      saying where a measurement came from is the same discipline as the
-      elevation profile's caption. The map carries its own tile attribution; this
-      covers the trail tally, which is computed from OSM at build time and so
-      appears on the page whether or not the map ever loads. */
-    }
-    <p class="cmap__provenance">
-      Measured from a recorded run of the course against the trail network. Map data{' '}
-      <span aria-hidden="true">&copy;</span>{' '}
-      <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> contributors,
-      ODbL. Trail names are Cincinnati Parks' own.
-    </p>
-  </div>
 </figure>
 
 <style>
@@ -370,124 +307,6 @@ const facilities = (poi.features as { properties: Poi }[])
     background: #fff;
   }
 
-  .cmap__trailsUsed {
-    margin-top: 1.75rem;
-  }
-
-  /* The block holds two lists now, so the second heading needs air above it.
-     Scoped to "not the first" so the block's own top spacing stays where the
-     section sets it. */
-  .cmap__trailsUsedTitle:not(:first-child) {
-    margin-top: 1.6rem;
-  }
-
-  .cmap__trailsUsedTitle {
-    font-family: var(--font-display);
-    font-size: 1rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    margin-bottom: 0.6rem;
-  }
-
-  .cmap__trailsUsed ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.3rem;
-  }
-
-  .cmap__trailsUsed li {
-    display: grid;
-    grid-template-columns: 4.5rem minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.875rem;
-  }
-
-  /* The bar is decoration for a number that is already printed, so it is
-     aria-hidden and never the only way to read the value. */
-  .cmap__bar {
-    height: 0.4rem;
-    border-radius: 999px;
-    background: var(--color-primary);
-    /* 18% is the largest share; scaling to it uses the full width instead of
-       leaving every bar in the first fifth of the column. */
-    width: calc(var(--pct) / 18 * 100%);
-    max-width: 100%;
-    opacity: 0.55;
-  }
-
-  .cmap__facilities {
-    list-style: none;
-    margin: 0 0 0.25rem;
-    padding: 0;
-    display: grid;
-    gap: 0.3rem;
-  }
-
-  .cmap__facilities li {
-    display: grid;
-    grid-template-columns: 0.7rem 8.5rem minmax(0, 1fr);
-    align-items: center;
-    gap: 0.6rem;
-    font-size: 0.875rem;
-  }
-
-  .cmap__fdot {
-    width: 0.65rem;
-    height: 0.65rem;
-    border-radius: 50%;
-    border: 1.5px solid var(--color-background);
-  }
-
-  /* The same two colours the map paints these in. */
-  .cmap__fdot.is-toilets {
-    background: #3b7dd8;
-  }
-
-  .cmap__fdot.is-water {
-    background: #2fa3a3;
-  }
-
-  .cmap__fmiles {
-    color: var(--color-muted-foreground);
-    font-size: 0.8125rem;
-  }
-
-  @media (max-width: 480px) {
-    .cmap__facilities li {
-      grid-template-columns: 0.7rem minmax(0, 1fr);
-      row-gap: 0.1rem;
-    }
-
-    .cmap__fmiles {
-      grid-column: 2;
-    }
-  }
-
-  .cmap__official {
-    color: var(--color-muted-foreground);
-    font-size: 0.75rem;
-    opacity: 0.85;
-  }
-
-  .cmap__pct {
-    color: var(--color-muted-foreground);
-    font-size: 0.8125rem;
-  }
-
-  .cmap__provenance {
-    margin-top: 0.75rem;
-    font-size: 0.75rem;
-    color: var(--color-muted-foreground);
-  }
-
-  .cmap__provenance a {
-    color: inherit;
-    text-decoration: underline;
-  }
-
   :global(.cmap3d__btn) {
     padding: 0.4rem 0.85rem;
     border: 1px solid var(--color-border);
@@ -581,6 +400,19 @@ const facilities = (poi.features as { properties: Poi }[])
     stroke: var(--color-foreground);
     stroke-width: 1.5;
     vector-effect: non-scaling-stroke;
+  }
+
+  /* A PLACED MARKER LOOKS PLACED. Same shape, filled in the route's own colour
+     and with a heavier rule, so a reader who moved the pointer away can tell at
+     a glance that the playhead is something they left there rather than
+     something that failed to clear. */
+  :global(.cprof__cursor.is-pinned circle) {
+    /* The literal, for the reason given above the legend swatches. */
+    fill: #e2593c;
+  }
+
+  :global(.cprof__cursor.is-pinned line) {
+    stroke-width: 2;
   }
 
   :global(.cprof__readout) {

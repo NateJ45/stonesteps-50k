@@ -125,6 +125,20 @@ export default function CourseMapLibre() {
   const [activeLoop, setActiveLoop] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [cursorMile, setCursorMile] = useState<number | null>(null);
+  /**
+   * The mile the reader PLACED, as opposed to the one they are hovering.
+   *
+   * Hover is a moment: move the pointer onto the map to look at where you just
+   * were and the marker you were reading is already gone. The pin outlives the
+   * pointer, and the map marker shows the hover when there is one and the pin
+   * when there is not.
+   *
+   * Mirrored into a ref because the callbacks below are memoised and are also
+   * handed to MapLibre event handlers: reading the state in them would either
+   * capture a stale value or force every handler to be rebuilt on each hover.
+   */
+  const [pinnedMile, setPinnedMile] = useState<number | null>(null);
+  const pinnedRef = useRef<number | null>(null);
   const [profile, setProfile] = useState<ProfilePoint[]>([]);
   const mapRef = useRef<unknown>(null);
 
@@ -787,10 +801,35 @@ export default function CourseMapLibre() {
   const onScrub = useCallback(
     (mile: number | null) => {
       setCursorMile(mile);
+      // Leaving the profile does not clear the marker, it falls back to the
+      // pinned one. Passing `mile` straight through here is what made the
+      // marker vanish the moment the pointer left.
+      showCursorAt(mile ?? pinnedRef.current);
+    },
+    [showCursorAt],
+  );
+
+  /** Place or clear the marker that outlives the pointer. */
+  const onPin = useCallback(
+    (mile: number | null) => {
+      pinnedRef.current = mile;
+      setPinnedMile(mile);
       showCursorAt(mile);
     },
     [showCursorAt],
   );
+
+  // ESCAPE CLEARS IT. Anything a reader can place has to come off without
+  // hunting for the exact pixel they placed it on, and Escape is what every
+  // other dismissable thing on this page already answers to.
+  useEffect(() => {
+    if (pinnedMile == null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onPin(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [pinnedMile, onPin]);
 
   /** Fly the camera to a mile, as a one-off move rather than a playback. */
   const onSeek = useCallback(
@@ -979,10 +1018,14 @@ export default function CourseMapLibre() {
           <button
             type="button"
             className="cmapbar__btn is-primary"
-            onClick={() => (playing ? stopFly() : startFly(cursorMile ?? 0))}
+            onClick={() => (playing ? stopFly() : startFly(cursorMile ?? pinnedMile ?? 0))}
             disabled={status !== 'ready'}
           >
-            {playing ? 'Stop' : cursorMile ? 'Fly from here' : 'Fly the course'}
+            {playing
+              ? 'Stop'
+              : (cursorMile ?? pinnedMile) != null
+                ? 'Fly from here'
+                : 'Fly the course'}
           </button>
           <button type="button" className="cmapbar__btn" onClick={toggleTerrain}>
             {terrainOn ? 'Flatten' : '3D'}
@@ -1001,16 +1044,21 @@ export default function CourseMapLibre() {
       {status === 'loading' && <p className="cmap__status">Loading the map...</p>}
       {status === 'failed' && (
         <p className="cmap__status" role="status">
-          The map could not load. The trails the course uses are listed below.
+          The map could not load. The elevation profile below still shows the whole course.
         </p>
       )}
 
       {status === 'ready' && profile.length > 0 && (
         <CourseProfileStrip
           points={profile}
-          cursorMile={cursorMile}
+          // The live hover wins while there is one; the placed marker is what
+          // the strip falls back to, so its readout and playhead stay put for
+          // the same reason the map marker does.
+          cursorMile={cursorMile ?? pinnedMile}
+          pinnedMile={pinnedMile}
           onScrub={onScrub}
           onSeek={onSeek}
+          onPin={onPin}
           activeLoop={activeLoop}
         />
       )}
