@@ -218,7 +218,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       ...,
       "race": *[_type == "race"][0]{
         gpxUrl,
-        elevationProfile{ source, miles, gainFt, lowFt, highFt, points[]{ mile, ft } }
+        elevationProfile{ source, miles, gainFt, lossFt, aidMiles, lowFt, highFt, points[]{ mile, ft } }
       }
     },
     // The group's address is NOT a field on the block. It is read from The
@@ -514,7 +514,7 @@ export async function getRace() {
       streetAddress, city, region, postalCode, geo,
       registerUrl, resultsUrl, facebookUrl, gpxUrl,
       feeTiers[]{ label, amount, processingFee, endsOn },
-      elevationProfile{ source, sampledAt, miles, gainFt, lowFt, highFt, points[]{ mile, ft } },
+      elevationProfile{ source, sampledAt, miles, gainFt, lossFt, aidMiles, lowFt, highFt, points[]{ mile, ft } },
       directorName, directorNote, parksDonation, confirmed
     }`,
     {},

@@ -41,6 +41,7 @@ import PhotoBand from '@/components/sections/PhotoBand.astro';
 import CourseFeatures from '@/components/sections/CourseFeatures.astro';
 import LoopCard from '@/components/sections/LoopCard.astro';
 import ElevationBand from '@/components/sections/ElevationBand.astro';
+import CourseMapBand from '@/components/sections/CourseMapBand.astro';
 import SponsorPatches from '@/components/sections/SponsorPatches.astro';
 import PageHeader from '@/components/sections/PageHeader.astro';
 import ContactBand from '@/components/sections/ContactBand.astro';
@@ -403,6 +404,14 @@ const wrapAttrs = (key: string | undefined) =>
             intro={s.intro}
             totalGain={s.totalGain}
             race={s.race}
+            surface={surface ?? 'background'}
+            headingId={headingId}
+          />
+        ) : s._type === 'courseMapSection' ? (
+          <CourseMapBand
+            eyebrow={s.eyebrow}
+            headline={s.headline}
+            intro={s.intro}
             surface={surface ?? 'background'}
             headingId={headingId}
           />

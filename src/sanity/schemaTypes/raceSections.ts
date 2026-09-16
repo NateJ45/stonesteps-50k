@@ -440,6 +440,35 @@ export const elevationSection = defineType({
   },
 });
 
+/* ---------- Course map ---------------------------------------------------- */
+
+/**
+ * The course map.
+ *
+ * EDITORIAL FIELDS ONLY. The map's geometry comes from
+ * scripts/data/course-map.json, which is derived from the GPS track, and there
+ * is deliberately nothing here to override it with. A coordinate an editor can
+ * retype is a coordinate that can disagree with the course.
+ */
+export const courseMapSection = defineType({
+  name: 'courseMapSection',
+  title: 'Course map',
+  type: 'object',
+  icon: PinIcon,
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline (optional)', type: 'string' }),
+    defineField({ name: 'intro', title: 'Intro (optional)', type: 'text', rows: 3 }),
+  ],
+  preview: {
+    select: { title: 'headline' },
+    prepare: ({ title }) => ({
+      title: title || 'Course map',
+      subtitle: 'Drawn from the recorded track',
+    }),
+  },
+});
+
 /* ---------- Sponsors ------------------------------------------------------ */
 
 export const sponsorPatchesSection = defineType({
@@ -987,6 +1016,7 @@ export const raceSectionSchemas = [
   courseFeaturesSection,
   loopCardSection,
   elevationSection,
+  courseMapSection,
   sponsorPatchesSection,
   tickerSection,
   parksSection,

@@ -84,6 +84,9 @@ export type SectionPreset = {
       } & ElevationSection)
     | ({
         _key: string;
+      } & CourseMapSection)
+    | ({
+        _key: string;
       } & SponsorPatchesSection)
     | ({
         _key: string;
@@ -512,6 +515,8 @@ export type Race = {
     sampledAt?: string;
     miles?: number;
     gainFt?: number;
+    lossFt?: number;
+    aidMiles?: Array<number>;
     lowFt?: number;
     highFt?: number;
     points?: Array<{
@@ -1341,6 +1346,13 @@ export type SponsorPatchesSection = {
   headline?: string;
 };
 
+export type CourseMapSection = {
+  _type: 'courseMapSection';
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+};
+
 export type ElevationSection = {
   _type: 'elevationSection';
   eyebrow?: string;
@@ -1602,6 +1614,9 @@ export type Page = {
     | ({
         _key: string;
       } & ElevationSection)
+    | ({
+        _key: string;
+      } & CourseMapSection)
     | ({
         _key: string;
       } & SponsorPatchesSection)
@@ -2052,6 +2067,9 @@ export type ProcessPage = {
       } & ElevationSection)
     | ({
         _key: string;
+      } & CourseMapSection)
+    | ({
+        _key: string;
       } & SponsorPatchesSection)
     | ({
         _key: string;
@@ -2163,6 +2181,9 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & ElevationSection)
+    | ({
+        _key: string;
+      } & CourseMapSection)
     | ({
         _key: string;
       } & SponsorPatchesSection)
@@ -2316,6 +2337,9 @@ export type AboutPage = {
     | ({
         _key: string;
       } & ElevationSection)
+    | ({
+        _key: string;
+      } & CourseMapSection)
     | ({
         _key: string;
       } & SponsorPatchesSection)
@@ -2528,6 +2552,9 @@ export type HomePage = {
     | ({
         _key: string;
       } & ElevationSection)
+    | ({
+        _key: string;
+      } & CourseMapSection)
     | ({
         _key: string;
       } & SponsorPatchesSection)
@@ -2905,6 +2932,7 @@ export type AllSanitySchemaTypes =
   | ParksSection
   | TickerSection
   | SponsorPatchesSection
+  | CourseMapSection
   | ElevationSection
   | LoopCardSection
   | CourseFeaturesSection

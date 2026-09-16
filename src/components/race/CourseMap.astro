@@ -1,0 +1,718 @@
+---
+// Foundation, edit with care
+/**
+ * The course map section: the map itself, and the list of what it runs on.
+ *
+ * THE MAP IS MAPLIBRE. See CourseMapLibre.tsx for why, and for the two
+ * public-domain tile sources it uses. This file's job is the shell around it:
+ * the framed box, the legend, and the derived trail list underneath, which is
+ * the part a screen reader and a printer actually get.
+ *
+ * THE DATA IS NOT EDITORIAL. Everything here comes from
+ * scripts/data/course-map.json and course-geo.json, which
+ * scripts/build-course-map.mjs derives from the GPS track. Nothing about the
+ * route can be typed into the Studio, because a number an editor can retype is
+ * a number that can disagree with the course.
+ */
+import CourseMapLibre from './CourseMapLibre.tsx';
+import meta from '../../../scripts/data/course-map.json';
+import poi from '../../../scripts/data/course-poi.json';
+
+interface Props {
+  id?: string;
+}
+
+const { id = 'course-map' } = Astro.props as Props;
+
+const longMiles = meta.loops.find((l) => l.kind === 'long')?.miles ?? 0;
+const shortMiles = meta.loops.find((l) => l.kind === 'short')?.miles ?? 0;
+
+// WHAT A RUNNER PLANS AROUND. Derived from OpenStreetMap by the build script and
+// reported as EVERY mile the course comes within 160 ft, because on a seven-loop
+// course a single mile is misleading: the water by The Oval is reachable from
+// mile 0 and passed eight times.
+type Poi = { kind: string; mile: number; passes: number; everyMile: number[] };
+const facilities = (poi.features as { properties: Poi }[])
+  .map((f) => f.properties)
+  .filter((f) => f.kind === 'toilets' || f.kind === 'water')
+  .sort((a, b) => a.mile - b.mile);
+---
+
+<figure class="cmap" id={id} data-course-map>
+  {
+    /* client:visible, and this one is safe where the old control island was not:
+    that island's only child was absolutely positioned inside a
+    `display: contents` <astro-island>, so IntersectionObserver had no box to
+    observe and it never hydrated. This component's root is the map's own framed
+    box, which has a rect, so "when the reader reaches it" works. That timing is
+    the point: MapLibre is ~250KB and must not be in the page's measured load. */
+  }
+  <CourseMapLibre client:visible />
+
+  <figcaption class="cmap__figcap">
+    Seven loops out of The Oval: four long loops of about {longMiles} miles alternating with three short
+    loops of about {shortMiles} miles.
+  </figcaption>
+
+  {
+    /* THE LIST IS THE ACCESSIBLE MAP, and it is not a fallback: it says
+    something the drawing cannot, which is how much of the day is spent on each
+    trail. Derived from the track by matching it against the named trail
+    network, never typed. */
+  }
+  <div class="cmap__trailsUsed">
+    <h3 class="cmap__trailsUsedTitle">Toilets and water on the course</h3>
+    <ul class="cmap__facilities">
+      {
+        facilities.map((f) => (
+          <li>
+            <span class={`cmap__fdot is-${f.kind}`} aria-hidden="true" />
+            <span class="cmap__fkind">{f.kind === 'toilets' ? 'Toilets' : 'Drinking water'}</span>
+            <span class="cmap__fmiles mono">{f.everyMile.map((m) => m.toFixed(1)).join(', ')}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="cmap__provenance">
+      Every mile the course passes within about 50 metres. Aid is at The Oval; these are the park's
+      own facilities, which are not staffed on race day.
+    </p>
+
+    <h3 class="cmap__trailsUsedTitle">What you run on</h3>
+    <ul>
+      {
+        meta.trailsUsed.map((t) => (
+          <li>
+            <span class="cmap__bar" style={`--pct:${t.percent}`} aria-hidden="true" />
+            <span class="cmap__trailName">
+              {t.name}
+              {
+                /* THE PARK'S OWN LENGTH, beside our share of the course. Two
+                different claims: how long the trail is, and how much of the day
+                is spent on it. The park roads the course also uses carry no
+                official length, because the trail sheet does not measure them,
+                and printing nothing is better than implying it is zero. */
+                t.officialMiles != null && (
+                  <span class="cmap__official"> {t.officialMiles} mi trail</span>
+                )
+              }
+            </span>
+            {/* Always one decimal: a column reading 17.2 / 16.6 / 8 / 7.4 has a
+                number in it that looks like a different kind of quantity. */}
+            <span class="cmap__pct mono">{t.percent.toFixed(1)}%</span>
+          </li>
+        ))
+      }
+    </ul>
+    {
+      /* ATTRIBUTION IS A LICENCE TERM, NOT A COURTESY. OpenStreetMap is ODbL and
+      requires credit; USGS work is public domain and is credited anyway, because
+      saying where a measurement came from is the same discipline as the
+      elevation profile's caption. The map carries its own tile attribution; this
+      covers the trail tally, which is computed from OSM at build time and so
+      appears on the page whether or not the map ever loads. */
+    }
+    <p class="cmap__provenance">
+      Measured from a recorded run of the course against the trail network. Map data{' '}
+      <span aria-hidden="true">&copy;</span>{' '}
+      <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> contributors,
+      ODbL. Trail names are Cincinnati Parks' own.
+    </p>
+  </div>
+</figure>
+
+<style>
+  .cmap {
+    margin: 0;
+  }
+
+  /* The frame is sized HERE, not by the engine. MapLibre fills whatever box it
+     is given, and giving it one that exists before it loads is what stops the
+     page reflowing when the map arrives. A phone gets a PORTRAIT box, because
+     the course is taller than it is wide. */
+  :global(.cmap__frame) {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    max-height: 70vh;
+    overflow: hidden;
+    background: var(--color-muted);
+
+    /* NO BORDER AND NO RADIUS. A hairline rectangle around a photograph is the
+       thing that makes a map read as an embed rather than as part of the page.
+       The edge is the ridge below instead, which is the same contour every band
+       on this site is cut with. */
+
+    /* IT ESCAPES THE COLUMN, a little. Not 100vw: that includes the scrollbar
+       and produces a horizontal scroll on Windows, which is a worse bug than a
+       narrow map. A fixed bleed on each side is predictable and still reads as
+       breaking out of the text.
+
+       ONE VARIABLE, USED THREE TIMES. The bleed also has to inset every control
+       that sits in a corner, or they hang off the edge of the screen: the first
+       version pushed the play button half out of the viewport and cut the scale
+       bar in two. Deriving the insets from the same number is what keeps them
+       together when it changes. */
+    /* 1.5rem IS ALWAYS SAFE because it is exactly the content column's own
+       px-6 padding, so the frame reaches the column's outer edge and no
+       further. */
+    --cmap-bleed: 1.5rem;
+    margin-inline: calc(-1 * var(--cmap-bleed));
+  }
+
+  /* 16:9 EARLIER THAN THE BIGGER BLEED. The shape is safe at any width; the
+     bleed is not. */
+  @media (min-width: 64rem) {
+    :global(.cmap__frame) {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  /* A DEEPER BLEED ONLY WHERE THERE IS PROVABLY ROOM FOR IT. The content column
+     maxes out at --container-content (82.5rem), so free space beside it only
+     exists past that width; below it the column is viewport-bound and there is
+     nothing to bleed into but the padding. Setting 4rem at 64rem overflowed the
+     page by 40px at exactly 1024px, which the reflow test caught. 96rem leaves
+     108px of free space each side for a 64px bleed. */
+  @media (min-width: 96rem) {
+    :global(.cmap__frame) {
+      --cmap-bleed: 4rem;
+    }
+  }
+
+  /* MapLibre puts its own controls in the frame's corners, which the bleed has
+     just moved off screen. Shift each corner in by the bleed. */
+  :global(.cmap__frame .maplibregl-ctrl-bottom-left) {
+    left: var(--cmap-bleed);
+    bottom: 1.4rem;
+  }
+
+  :global(.cmap__frame .maplibregl-ctrl-bottom-right) {
+    right: var(--cmap-bleed);
+    bottom: 1.4rem;
+  }
+
+  :global(.cmap__frame .maplibregl-ctrl-top-right) {
+    right: var(--cmap-bleed);
+    top: 1.2rem;
+  }
+
+  :global(.cmap__canvas) {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* THE SAME CUT AS EVERY BAND ON THIS SITE. --ridge-mask is the contour the
+     page already separates its bands with, drawn off the topography this course
+     runs over. Using it here means the map is bounded by terrain rather than by
+     a box, and it is the difference between a widget dropped on the page and a
+     band of the page that happens to be alive.
+
+     Painted in the BAND'S colour, passed down as --cmap-band-bg, so the cut is
+     the band closing over the map exactly as one band closes over another. */
+  :global(.cmap__ridge) {
+    position: absolute;
+    inset-inline: 0;
+    height: 34px;
+    background-color: var(--cmap-band-bg, var(--color-background));
+    pointer-events: none;
+    z-index: 1;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+
+  :global(.cmap__ridge.is-top) {
+    top: 0;
+    /* The band mask draws the solid part BELOW the contour, so the top edge
+       uses it flipped. */
+    transform: scaleY(-1);
+    -webkit-mask-image: var(--ridge-mask);
+    mask-image: var(--ridge-mask);
+  }
+
+  :global(.cmap__ridge.is-bottom) {
+    bottom: 0;
+    -webkit-mask-image: var(--ridge-mask);
+    mask-image: var(--ridge-mask);
+  }
+
+  @media (width < 48rem) {
+    :global(.cmap__ridge) {
+      height: 22px;
+    }
+  }
+
+  /* ---- the floating control bar ----------------------------------------- */
+
+  :global(.cmapbar) {
+    position: absolute;
+    left: calc(var(--cmap-bleed) + 0.9rem);
+    /* CLEAR OF MAPLIBRE'S OWN BOTTOM ROW. The scale bar and the attribution sit
+       at 1.4rem; measured, a 3.4rem bar overlapped the scale by 7px, which is
+       the sort of thing that reads as sloppy rather than as a bug. */
+    bottom: 3.9rem;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    padding: 0.3rem;
+    border-radius: 999px;
+    /* Glass, but with a solid fallback first: backdrop-filter is still absent
+       on some browsers and a transparent bar over a forest is unreadable. */
+    background: color-mix(in srgb, var(--color-background) 88%, transparent);
+    box-shadow: var(--lift-sm);
+  }
+
+  @supports (backdrop-filter: blur(8px)) {
+    :global(.cmapbar) {
+      background: color-mix(in srgb, var(--color-background) 62%, transparent);
+      backdrop-filter: blur(10px) saturate(1.15);
+    }
+  }
+
+  :global(.cmapbar__btn) {
+    padding: 0.32rem 0.7rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-foreground);
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  :global(.cmapbar__btn:hover:not(:disabled)) {
+    background: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+  }
+
+  :global(.cmapbar__btn:focus-visible) {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 1px;
+  }
+
+  :global(.cmapbar__btn:disabled) {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  :global(.cmapbar__btn.is-primary) {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
+  @media (max-width: 40rem) {
+    :global(.cmapbar) {
+      left: calc(var(--cmap-bleed) + 0.5rem);
+      right: calc(var(--cmap-bleed) + 0.5rem);
+      bottom: 4.2rem;
+      justify-content: center;
+    }
+  }
+
+  :global(.cmap__status) {
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
+  }
+
+  .cmap__figcap {
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
+  }
+
+  :global(.cmap__cap) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
+  }
+
+  :global(.cmap__key) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  :global(.cmap__swatch) {
+    width: 1.4rem;
+    height: 0;
+    border-top: 3px solid currentcolor;
+    display: inline-block;
+  }
+
+  /* THESE MATCH THE LAYER COLOURS IN CourseMapLibre.tsx, and they are literals
+     on both sides on purpose. The map paints over an aerial photograph, not
+     over the page, so its line colours are chosen to carry on foliage rather
+     than to match the theme; pointing the legend at --color-primary would make
+     the swatch drift away from the line it describes the next time the brand
+     moves. */
+  :global(.cmap__swatch.is-long) {
+    border-color: #e2593c;
+  }
+
+  :global(.cmap__swatch.is-short) {
+    border-top-style: dashed;
+    border-color: #ffd9a0;
+  }
+
+  :global(.cmap__swatch.is-oval) {
+    width: 0.7rem;
+    height: 0.7rem;
+    border: 2px solid var(--color-foreground);
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  .cmap__trailsUsed {
+    margin-top: 1.75rem;
+  }
+
+  /* The block holds two lists now, so the second heading needs air above it.
+     Scoped to "not the first" so the block's own top spacing stays where the
+     section sets it. */
+  .cmap__trailsUsedTitle:not(:first-child) {
+    margin-top: 1.6rem;
+  }
+
+  .cmap__trailsUsedTitle {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .cmap__trailsUsed ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .cmap__trailsUsed li {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  /* The bar is decoration for a number that is already printed, so it is
+     aria-hidden and never the only way to read the value. */
+  .cmap__bar {
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--color-primary);
+    /* 18% is the largest share; scaling to it uses the full width instead of
+       leaving every bar in the first fifth of the column. */
+    width: calc(var(--pct) / 18 * 100%);
+    max-width: 100%;
+    opacity: 0.55;
+  }
+
+  .cmap__facilities {
+    list-style: none;
+    margin: 0 0 0.25rem;
+    padding: 0;
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .cmap__facilities li {
+    display: grid;
+    grid-template-columns: 0.7rem 8.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.875rem;
+  }
+
+  .cmap__fdot {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-background);
+  }
+
+  /* The same two colours the map paints these in. */
+  .cmap__fdot.is-toilets {
+    background: #3b7dd8;
+  }
+
+  .cmap__fdot.is-water {
+    background: #2fa3a3;
+  }
+
+  .cmap__fmiles {
+    color: var(--color-muted-foreground);
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 480px) {
+    .cmap__facilities li {
+      grid-template-columns: 0.7rem minmax(0, 1fr);
+      row-gap: 0.1rem;
+    }
+
+    .cmap__fmiles {
+      grid-column: 2;
+    }
+  }
+
+  .cmap__official {
+    color: var(--color-muted-foreground);
+    font-size: 0.75rem;
+    opacity: 0.85;
+  }
+
+  .cmap__pct {
+    color: var(--color-muted-foreground);
+    font-size: 0.8125rem;
+  }
+
+  .cmap__provenance {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-muted-foreground);
+  }
+
+  .cmap__provenance a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  :global(.cmap3d__btn) {
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  :global(.cmap3d__btn:hover) {
+    background: var(--color-muted);
+  }
+
+  :global(.cmap3d__btn:focus-visible) {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  :global(.cmap3d__hint) {
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
+  }
+
+  @media (max-width: 640px) {
+    :global(.cmap__frame) {
+      aspect-ratio: 3 / 4;
+      max-height: 65vh;
+    }
+  }
+
+  /* ---- the profile strip / flyover scrubber ----------------------------- */
+
+  :global(.cprof) {
+    margin-top: 0.75rem;
+  }
+
+  :global(.cprof__svg) {
+    display: block;
+    width: 100%;
+    height: 120px;
+    cursor: crosshair;
+    touch-action: pan-y;
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    background: var(--color-muted);
+  }
+
+  /* The bands alternate so the seven loops are countable without reading the
+     numbers, and the long/short rhythm is visible as a rhythm. */
+  :global(.cprof__band.is-odd) {
+    fill: color-mix(in srgb, var(--color-secondary) 12%, transparent);
+  }
+
+  :global(.cprof__band.is-even) {
+    fill: transparent;
+  }
+
+  :global(.cprof__band.is-dim) {
+    fill: color-mix(in srgb, var(--color-muted-foreground) 26%, transparent);
+  }
+
+  :global(.cprof__area) {
+    fill: color-mix(in srgb, var(--color-primary) 22%, transparent);
+  }
+
+  :global(.cprof__line) {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  :global(.cprof__loopNum) {
+    fill: var(--color-muted-foreground);
+    font-size: 11px;
+    font-family: var(--font-body);
+  }
+
+  :global(.cprof__cursor line) {
+    stroke: var(--color-foreground);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  :global(.cprof__cursor circle) {
+    fill: #ffd9a0;
+    stroke: var(--color-foreground);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  :global(.cprof__readout) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1rem;
+    margin-top: 0.4rem;
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
+    /* RESERVED HEIGHT. Without it the readout appears and disappears as the
+       pointer enters and leaves the profile, and the whole page below it jumps
+       by a line every time. */
+    min-height: 1.3rem;
+  }
+
+  :global(.cprof__readout b) {
+    color: var(--color-foreground);
+  }
+
+  :global(.cprof__sliderLabel) {
+    display: block;
+    margin-top: 0.4rem;
+  }
+
+  /* Visually hidden, not display:none: the slider is the keyboard path to the
+     scrubber and its label has to reach a screen reader. */
+  :global(.cprof__sliderText) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  :global(.cprof__slider) {
+    width: 100%;
+    accent-color: var(--color-primary);
+  }
+
+  /* ---- loop chips -------------------------------------------------------- */
+
+  :global(.cmaploops) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.6rem;
+  }
+
+  :global(.cmaploops__chip) {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+
+  :global(.cmaploops__chip:hover) {
+    background: var(--color-muted);
+  }
+
+  :global(.cmaploops__chip:focus-visible) {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  :global(.cmaploops__chip.is-on) {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+    border-color: var(--color-primary);
+  }
+
+  :global(.cmaploops__miles) {
+    font-size: 0.6875rem;
+    opacity: 0.75;
+  }
+
+  /* ---- gradient legend --------------------------------------------------- */
+
+  /* The same seven stops the map paints with, so the key cannot drift from the
+     line it describes. */
+  :global(.cmapgrade) {
+    display: inline-block;
+    width: 6rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: linear-gradient(
+      to right,
+      #3b7dd8,
+      #6fb1e3,
+      #cfe3f2,
+      #f2efe6,
+      #f6d68a,
+      #e2763c,
+      #a8231a
+    );
+  }
+
+  :global(.cmap3d__btn.is-primary) {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+    border-color: var(--color-primary);
+  }
+
+  :global(.cmap3d__btn.is-primary:hover:not(:disabled)) {
+    background: var(--color-primary-dark, var(--color-primary));
+  }
+
+  :global(.cmap3d__btn:disabled) {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  @media print {
+    :global(.cmaploops),
+    :global(.cprof__sliderLabel) {
+      display: none;
+    }
+  }
+
+  /* A WebGL canvas does not print. The trail list below it does, and that is
+     the part worth carrying to an aid station on paper. */
+  @media print {
+    :global(.cmap__frame),
+    :global(.cmap__cap) {
+      display: none;
+    }
+  }
+</style>

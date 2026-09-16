@@ -16,6 +16,38 @@ sequence).
 
 ## Waiting on a human
 
+### 1h. DONE 2026-09-16. The two climbing figures are one set of figures
+
+2026-09-16. The course copy in Sanity said "Over 6,000 ft" of climbing, and the
+elevation chart underneath it still captions itself "10,726 ft total elevation
+change". Both appear on the home page and on /course. Neither is wrong on its
+own terms, but together they read as a contradiction, and one of them is not
+supported by the track Dave sent.
+
+What the track measures (see entry 11, and `scripts/build-elevation.mjs`):
+
+| Counted as                 | Off USGS LiDAR | Off the file's own barometer |
+| -------------------------- | -------------- | ---------------------------- |
+| Climbing, one way          | 4,673 ft       | 5,075 ft                     |
+| Total change, up plus down | 9,356 ft       | 10,125 ft                    |
+
+So 10,726 ft is a total-change figure, and it holds up: the barometric
+both-ways sum is 10,125 ft over a route about three quarters of a mile shorter
+than the real one. "Over 6,000 feet of climbing" is above every one-way figure
+here, and no way of counting this track reaches it.
+
+RESOLVED by Nathan the same day: the copy matches the track. Climbing reads
+about 4,700 ft, elevation change reads 9,356 ft, and the contact FAQ gives both
+and names which is which. The measured profile is written to the race document,
+so the chart is Dave's track rather than the synthetic saw teeth.
+
+ONE THING TO PUT TO DAVE, because it is his race's number and runners have
+compared notes about it for twenty years: 10,726 ft no longer appears on the
+site. It was never wrong, it is a both-ways figure and the barometric both-ways
+sum off his own file is 10,125 ft over a slightly shorter route. If he wants it
+back, it belongs on the lines that say "elevation change", not the ones that say
+"climbing".
+
 ### 1. Verify the live preview against a real Sanity project
 
 **Blocker: this template has no Sanity project, by design.**
@@ -203,23 +235,38 @@ it a scroll option. Worth a look if the Studio is upgraded, or if it turns out
 an in-Studio click (rather than a pasted URL, which is how this was tested)
 already scrolls.
 
-### 0b. `npm run dev` logs "Invalid hook call" on every island render
+### 0b. DONE 2026-09-16. The dev server's React instances are one again
 
-**Blocker: the second React instance is inside the workerd dev runtime, past the config knobs.**
+2026-09-16. Fixed, and the earlier diagnosis in this entry was wrong in a way worth
+recording: nothing was arriving "raw". Measured this time by making the candidate files
+THROW on evaluation rather than reading stack traces, because the traces are source-mapped
+back to `node_modules/react/cjs/react.development.js` and read as a raw require when the
+module actually came from `deps_ssr`. A `console.log` from inside the workerd runner never
+reaches the log either, so the first two probes both returned false negatives.
 
-Under the Cloudflare adapter the dev SSR environment is named `astro` and runs through
-workerd's module runner. Diagnosed 2026-09-11: `react-dom/server` and the islands' `react`
-were arriving by different paths (raw `node_modules` vs Vite's transform), so `react` was
-evaluated twice and `ThemeToggle` / `StatsCounter` threw `Cannot read properties of null
-(reading 'useRef')` during SSR; Astro fell back and the page still rendered. Pre-bundling the
-React family for that environment (`vite.environments.astro.optimizeDeps.include` in
-`astro.config.mjs`) fixed the throw: renders now succeed and the SSR HTML is complete. React
-still prints its dev-only "Invalid hook call" warning once per island per render, which means
-it can still see two module instances somewhere in that runtime. Production builds do not run
-the optimizer and are unaffected (CI smoke and Lighthouse render the islands fine). Tried and
-rejected: `optimizeDeps.include: ['react/compiler-runtime']` (made it worse). Next things to
-try: `resolve.noExternal: ['react', 'react-dom']` on the `astro` environment, or a newer
-`@astrojs/cloudflare` that names or handles the environment itself.
+The real cause is a MID-REQUEST OPTIMIZER RELOAD. `astro/app/manifest` and
+`astro/logger/json` are discovered by Vite's dep scanner during the first render rather
+than at startup, the optimizer re-bundles and reloads the module graph mid-flight, and
+`react-dom/server` is left holding a React instance from the previous pass whose hook
+dispatcher is null. Every island then fails to server-render. That is
+withastro/astro#17834, fixed upstream in `@astrojs/cloudflare` by pre-bundling
+`astro/logger/json`; we cannot take that release while the adapter is pinned at 14.2.4
+(entry 4 below), so the same deps are listed in `vite.environments.ssr.optimizeDeps.include`
+in `astro.config.mjs` and bundled at startup instead.
+
+Also learned: the environment that RENDERS in dev is `ssr`, not `astro`. The previous fix
+was aimed at `astro`, which is why it never fully worked. Verified with a
+`configEnvironment` probe, and by A/B: removing the `ssr` block puts the failure back
+(3 reloads, 27 warnings, 10 TypeErrors on one cold request), removing the `astro` block
+changes nothing measurable.
+
+What remains is benign and is NOT the old bug: React prints its dev-only "Invalid hook
+call" warning about twice per render, with no error after it, from `@astrojs/mdx`'s
+`check()` calling each island's component function outside a React render to work out
+which renderer owns it. Renderer detection, not a second React.
+
+Closed by pre-bundling the two deps; the map, and every other island, now hydrate under
+`npm run dev`. Remove the workaround when the adapter pin moves and re-measure.
 
 ### 0a. Five race dates are unknown, so the weather strip starts in 2006 with gaps
 
@@ -284,7 +331,9 @@ Drop it during a slop sweep (card 16) if it is still unused then.
 14's original failure does not reproduce here; the pin holds the pair together because
 14.2.5 peers `wrangler ^4.125.0`, one minor from the version that rejects the field.
 Revisit when a newer adapter's peer range and emitted config are both checked by hand
-against a real `wrangler dev` and a real deploy.
+against a real `wrangler dev` and a real deploy. There is now a second reason to: a newer
+adapter carries the upstream fix for withastro/astro#17834, which would let the dep
+pre-bundling workaround in `vite.environments.ssr` come back out (entry 0b).
 
 ### 5. Seven eslint warnings, all unused bindings
 
@@ -437,12 +486,130 @@ WHAT IS ESTABLISHED, so nobody re-derives it:
 - Neither RunSignUp nor the current WordPress site holds a GPX, a KML or any
   course file. RunSignUp's race page links only to Google and Apple directions.
 
-WHAT WOULD CLOSE IT: a GPX from any recent running, Dave's watch or any
-finisher's. With real coordinates the route goes onto the modern base directly,
-no tracing and no georeferencing, and the result is accurate rather than
-transcribed. That is a short job once the file exists. Failing that, Dave
-marking up a printout of the East Section map would do: the alignment only has
-to be good enough to name the trails, and he knows them.
+THE GPX ARRIVED ON 2026-09-16. Dave sent a Strava track of the 50K, flagging
+that its small loop is a slightly different route carrying the COVID reroute, so
+it is close rather than exact. It is enough to close the mapping question: with
+real coordinates the route goes onto the modern base directly, no tracing and no
+georeferencing. What it measures, from `node scripts/build-elevation.mjs`:
+
+- 30.11 miles raw, in seven laps out of The Oval at 5.05 / 3.26 / 5.12 / 3.22 /
+  5.12 / 3.25 / 5.06 miles. That is the L S L S L S L the site already
+  describes, with a long loop of about 5.1 rather than the 5.3 on the punch
+  card.
+- 4,673 ft of climb and 4,683 ft of descent off USGS 1 m LiDAR, so 9,356 ft of
+  total change. The file's own barometric column, summed the way a watch does
+  it, gives 5,075 up and 5,049 down, so 10,125 ft of total change.
+
+THE MAP IS DRAWN AS OF 2026-09-16, and not the way this entry assumed. Dave
+granted permission for the Parks artwork, and it still cannot be used as a
+basemap: registering the 2017 PDF against the track fails at 112 ft median and
+453 ft at the 90th percentile, tried three ways, with the scale parameter
+drifting to the edge of its search range. Everything above about the 1998 map
+applies to the 2017 one for the same reason.
+
+OpenStreetMap needs no registration and the track sits 13.7 ft from the nearest
+way with no fitting at all, so the basemap is rendered from OSM plus 3DEP in the
+site's own colours. It is live on /course as a `courseMapSection`. The full
+argument is in the header of `scripts/build-course-map.mjs` and in
+`docs/superpowers/specs/2026-09-16-course-map-design.md`.
+
+The Parks permission is still what makes the trail NAMES safe to print, and the
+official map stays on the page as the printable version.
+
+THE MAP IS MAPLIBRE GL JS as of 2026-09-16, not a renderer of ours. It carries
+USGS orthoimagery, terrain from the AWS Terrarium DEM at 1.5x exaggeration, and
+the course as GeoJSON, with no API key and no tile bill. Three things about it
+should survive edits.
+
+- `maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url` and the `setWorkerUrl`
+  call next to it are LOAD-BEARING. MapLibre v6 resolves its worker against
+  `import.meta.url`, Astro's bundling breaks that, and the failure is silent:
+  raster tiles still draw, every GeoJSON source stays un-loaded forever, `load`
+  never fires and nothing logs an error. The symptom is a perfect satellite map
+  with no route on it.
+- The stylesheet must be imported STATICALLY. Through a dynamic import Vite
+  routes it via the preload helper, and Astro's client and server passes hash
+  the same file differently, so the browser requests a name the build never
+  wrote.
+- The vertical scale is exaggerated and the caption says so, for the same reason
+  the elevation profile captions itself.
+
+WHAT WAS DELETED GETTING HERE, so nobody rebuilds it: a hand-drawn SVG basemap
+with zoom tiers, marching-squares contours, a 256x256 heightfield, a committed
+orthophotograph and a three.js orbit scene. All of it worked; all of it was
+reimplementing a map engine, and the page is 28KB gzipped now against 97KB then.
+
+### 11. The modern trail map: what is possible, and the one input missing
+
+2026-09-12. Nathan asked whether the Stone Steps course could be printed onto
+Cincinnati Parks' current trail map instead of the 1998 scan the course page
+carries today. Investigated properly; the answer is yes, but not from the two
+maps alone.
+
+WHAT IS ESTABLISHED, so nobody re-derives it:
+
+- Parks publishes two PDFs. The "printable trail map" is a raster-heavy poster
+  (7.2MB, 67 embedded images). The "East Section" map is CLEAN VECTOR: 1,992
+  paths, and every named trail is separable by stroke colour and dash pattern
+  (Colerain dark green 2pt [2 2], Ponderosa brown 1.5pt [2 2], Beechwood yellow
+  2pt [1 2], Furnas light green 1.5pt [3 4], Arboretum orange 1.5pt [3 4], and
+  so on). A route drawn from those paths would be real geometry, not a tracing.
+- The race's own 1998 map extracts cleanly too: thresholding its red and blue
+  gives two continuous, unbroken loop polylines plus the direction arrows.
+- The site knows the loops are 5.3 and 3.2 miles out of The Oval. It does NOT
+  record which trails they use, and no named trail is either length, so each
+  loop is several trails plus connectors.
+- The two maps are in DIFFERENT ORIENTATIONS. An affine fitted to three
+  landmarks (Arboretum Center, Oak Ridge Lodge, the disc golf course) comes out
+  at roughly 55 degrees of rotation and 0.91 scale, and lands the Stone Steps
+  about 90 map-points from where the 2017 map labels them. On a map where
+  neighbouring trails are 30 to 60 points apart, that is not close enough to
+  say which trail a line is on.
+- Neither RunSignUp nor the current WordPress site holds a GPX, a KML or any
+  course file. RunSignUp's race page links only to Google and Apple directions.
+
+THE GPX ARRIVED ON 2026-09-16. Dave sent a Strava track of the 50K, flagging
+that its small loop is a slightly different route carrying the COVID reroute, so
+it is close rather than exact. It is enough to close the mapping question: with
+real coordinates the route goes onto the modern base directly, no tracing and no
+georeferencing. What it measures, from `node scripts/build-elevation.mjs`:
+
+- 30.11 miles raw, in seven laps out of The Oval at 5.05 / 3.26 / 5.12 / 3.22 /
+  5.12 / 3.25 / 5.06 miles. That is the L S L S L S L the site already
+  describes, with a long loop of about 5.1 rather than the 5.3 on the punch
+  card.
+- 4,673 ft of climb and 4,683 ft of descent off USGS 1 m LiDAR, so 9,356 ft of
+  total change. The file's own barometric column, summed the way a watch does
+  it, gives 5,075 up and 5,049 down, so 10,125 ft of total change.
+
+THE MAP IS DRAWN AS OF 2026-09-16, and not the way this entry assumed. Dave
+granted permission for the Parks artwork, and it still cannot be used as a
+basemap: registering the 2017 PDF against the track fails at 112 ft median and
+453 ft at the 90th percentile, tried three ways, with the scale parameter
+drifting to the edge of its search range. Everything above about the 1998 map
+applies to the 2017 one for the same reason.
+
+OpenStreetMap needs no registration and the track sits 13.7 ft from the nearest
+way with no fitting at all, so the basemap is rendered from OSM plus 3DEP in the
+site's own colours. It is live on /course as a `courseMapSection`. The full
+argument is in the header of `scripts/build-course-map.mjs` and in
+`docs/superpowers/specs/2026-09-16-course-map-design.md`.
+
+The Parks permission is still what makes the trail NAMES safe to print, and the
+official map stays on the page as the printable version.
+
+A 3D orbit view sits under the flat map, behind a control that loads three.js
+only when pressed. Two things about it are deliberate and should survive edits.
+The vertical scale is EXAGGERATED and the view says so on itself: Mt. Airy's
+relief is under 5% of the course's width and at true proportions the model reads
+as a plate. And nothing may import `src/components/race/courseScene.ts` at the
+top level; a static import pulls three.js into /course's own bundle and the only
+symptom is a performance score nobody checks that week.
+
+WHAT IS STILL OPEN ON IT: whether the file may be republished as the course
+download. It is somebody's Strava export, and that is a permission to ask for
+rather than infer. Until it is granted, `race.gpxUrl` stays empty and the
+caption offers no download.
 
 ONE THING TO SETTLE BEFORE PUBLISHING EITHER WAY: the base map is Cincinnati
 Parks' copyrighted artwork. Ask them before republishing a modified version.
