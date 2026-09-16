@@ -134,10 +134,182 @@ const facilities = (poi.features as { properties: Poi }[])
     position: relative;
     aspect-ratio: 4 / 3;
     max-height: 70vh;
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
     overflow: hidden;
     background: var(--color-muted);
+
+    /* NO BORDER AND NO RADIUS. A hairline rectangle around a photograph is the
+       thing that makes a map read as an embed rather than as part of the page.
+       The edge is the ridge below instead, which is the same contour every band
+       on this site is cut with. */
+
+    /* IT ESCAPES THE COLUMN, a little. Not 100vw: that includes the scrollbar
+       and produces a horizontal scroll on Windows, which is a worse bug than a
+       narrow map. A fixed bleed on each side is predictable and still reads as
+       breaking out of the text.
+
+       ONE VARIABLE, USED THREE TIMES. The bleed also has to inset every control
+       that sits in a corner, or they hang off the edge of the screen: the first
+       version pushed the play button half out of the viewport and cut the scale
+       bar in two. Deriving the insets from the same number is what keeps them
+       together when it changes. */
+    /* 1.5rem IS ALWAYS SAFE because it is exactly the content column's own
+       px-6 padding, so the frame reaches the column's outer edge and no
+       further. */
+    --cmap-bleed: 1.5rem;
+    margin-inline: calc(-1 * var(--cmap-bleed));
+  }
+
+  /* 16:9 EARLIER THAN THE BIGGER BLEED. The shape is safe at any width; the
+     bleed is not. */
+  @media (min-width: 64rem) {
+    :global(.cmap__frame) {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  /* A DEEPER BLEED ONLY WHERE THERE IS PROVABLY ROOM FOR IT. The content column
+     maxes out at --container-content (82.5rem), so free space beside it only
+     exists past that width; below it the column is viewport-bound and there is
+     nothing to bleed into but the padding. Setting 4rem at 64rem overflowed the
+     page by 40px at exactly 1024px, which the reflow test caught. 96rem leaves
+     108px of free space each side for a 64px bleed. */
+  @media (min-width: 96rem) {
+    :global(.cmap__frame) {
+      --cmap-bleed: 4rem;
+    }
+  }
+
+  /* MapLibre puts its own controls in the frame's corners, which the bleed has
+     just moved off screen. Shift each corner in by the bleed. */
+  :global(.cmap__frame .maplibregl-ctrl-bottom-left) {
+    left: var(--cmap-bleed);
+    bottom: 1.4rem;
+  }
+
+  :global(.cmap__frame .maplibregl-ctrl-bottom-right) {
+    right: var(--cmap-bleed);
+    bottom: 1.4rem;
+  }
+
+  :global(.cmap__frame .maplibregl-ctrl-top-right) {
+    right: var(--cmap-bleed);
+    top: 1.2rem;
+  }
+
+  :global(.cmap__canvas) {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* THE SAME CUT AS EVERY BAND ON THIS SITE. --ridge-mask is the contour the
+     page already separates its bands with, drawn off the topography this course
+     runs over. Using it here means the map is bounded by terrain rather than by
+     a box, and it is the difference between a widget dropped on the page and a
+     band of the page that happens to be alive.
+
+     Painted in the BAND'S colour, passed down as --cmap-band-bg, so the cut is
+     the band closing over the map exactly as one band closes over another. */
+  :global(.cmap__ridge) {
+    position: absolute;
+    inset-inline: 0;
+    height: 34px;
+    background-color: var(--cmap-band-bg, var(--color-background));
+    pointer-events: none;
+    z-index: 1;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+
+  :global(.cmap__ridge.is-top) {
+    top: 0;
+    /* The band mask draws the solid part BELOW the contour, so the top edge
+       uses it flipped. */
+    transform: scaleY(-1);
+    -webkit-mask-image: var(--ridge-mask);
+    mask-image: var(--ridge-mask);
+  }
+
+  :global(.cmap__ridge.is-bottom) {
+    bottom: 0;
+    -webkit-mask-image: var(--ridge-mask);
+    mask-image: var(--ridge-mask);
+  }
+
+  @media (width < 48rem) {
+    :global(.cmap__ridge) {
+      height: 22px;
+    }
+  }
+
+  /* ---- the floating control bar ----------------------------------------- */
+
+  :global(.cmapbar) {
+    position: absolute;
+    left: calc(var(--cmap-bleed) + 0.9rem);
+    /* CLEAR OF MAPLIBRE'S OWN BOTTOM ROW. The scale bar and the attribution sit
+       at 1.4rem; measured, a 3.4rem bar overlapped the scale by 7px, which is
+       the sort of thing that reads as sloppy rather than as a bug. */
+    bottom: 3.9rem;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    padding: 0.3rem;
+    border-radius: 999px;
+    /* Glass, but with a solid fallback first: backdrop-filter is still absent
+       on some browsers and a transparent bar over a forest is unreadable. */
+    background: color-mix(in srgb, var(--color-background) 88%, transparent);
+    box-shadow: var(--lift-sm);
+  }
+
+  @supports (backdrop-filter: blur(8px)) {
+    :global(.cmapbar) {
+      background: color-mix(in srgb, var(--color-background) 62%, transparent);
+      backdrop-filter: blur(10px) saturate(1.15);
+    }
+  }
+
+  :global(.cmapbar__btn) {
+    padding: 0.32rem 0.7rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-foreground);
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  :global(.cmapbar__btn:hover:not(:disabled)) {
+    background: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+  }
+
+  :global(.cmapbar__btn:focus-visible) {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 1px;
+  }
+
+  :global(.cmapbar__btn:disabled) {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  :global(.cmapbar__btn.is-primary) {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
+  @media (max-width: 40rem) {
+    :global(.cmapbar) {
+      left: calc(var(--cmap-bleed) + 0.5rem);
+      right: calc(var(--cmap-bleed) + 0.5rem);
+      bottom: 4.2rem;
+      justify-content: center;
+    }
   }
 
   :global(.cmap__status) {

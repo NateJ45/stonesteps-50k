@@ -42,7 +42,16 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
   <div class="mob-center relative z-10 mx-auto w-full max-w-content px-6">
     <SectionHeading {eyebrow} {headline} {headingId} labelDisplay />
     {intro && <p class="mx-auto mt-4 max-w-[52ch] text-muted-foreground lg:mx-0">{intro}</p>}
-    <div class="mt-10">
+    {
+      /* THE RIDGE THAT CUTS THE MAP IS PAINTED IN THIS BAND'S COLOUR, so the cut
+      reads as the band closing over the map, exactly as one band closes over
+      another. The surface is only known here, so it is handed down as a custom
+      property rather than guessed inside the map. */
+    }
+    <div
+      class="mt-10"
+      style={`--cmap-band-bg: var(${surface === 'muted' ? '--color-muted' : '--color-background'})`}
+    >
       <CourseMap />
     </div>
   </div>

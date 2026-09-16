@@ -81,9 +81,20 @@ const TERRAIN_DEM = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}
  */
 const FLYOVER_SECONDS = 90;
 
-/** Camera while flying. Pitched hard, because the point is the terrain. */
-const FLY_PITCH = 68;
-const FLY_ZOOM = 15.4;
+/**
+ * Camera while flying. Pitched hard, because the point is the terrain.
+ *
+ * MAPLIBRE'S DEFAULT CEILING IS 60 AND IT CLAMPS SILENTLY. This was 68 for a
+ * while and was quietly rendered at 60, which is why the frame was always full
+ * of ground with no horizon in it: the single most Earth-like thing a 3D map
+ * does is show its own sky, and we had switched it off by accident. maxPitch is
+ * raised on the map below, and past about 70 the horizon comes into frame.
+ */
+const FLY_PITCH = 74;
+const FLY_ZOOM = 15.2;
+
+/** The resting shot. High enough to put sky in the frame rather than only dirt. */
+const REST_PITCH = 66;
 
 /**
  * Does this reader want motion at all?
@@ -194,6 +205,24 @@ export default function CourseMapLibre() {
             },
             layers: [
               { id: 'imagery', type: 'raster', source: 'imagery' },
+              // A GLOW UNDER THE CASING. Wide, blurred and warm, so the route
+              // reads as LIT rather than drawn on top: it lifts the line off a
+              // busy forest canopy without thickening it, which a heavier
+              // stroke would. Cheap, and it is most of the difference between
+              // "a line on a photo" and "a route".
+              {
+                id: 'course-glow',
+                type: 'line',
+                source: 'course',
+                filter: ['==', ['geometry-type'], 'LineString'],
+                layout: { 'line-cap': 'round', 'line-join': 'round' },
+                paint: {
+                  'line-color': '#ff9a5c',
+                  'line-opacity': 0.34,
+                  'line-blur': ['interpolate', ['linear'], ['zoom'], 11, 6, 16, 16],
+                  'line-width': ['interpolate', ['linear'], ['zoom'], 11, 10, 16, 26],
+                },
+              },
               // A CASING UNDER THE COURSE. Over a photograph of a forest a bare
               // coloured line disappears into the canopy; a dark stroke behind
               // it is what keeps the route readable on any ground.
@@ -443,9 +472,11 @@ export default function CourseMapLibre() {
             [b.east, b.north],
           ],
           fitBoundsOptions: { padding: 40 },
-          pitch: 55,
+          pitch: REST_PITCH,
           bearing: -18,
           maxZoom: 18,
+          // Past the default 60 the horizon appears. See FLY_PITCH.
+          maxPitch: 85,
           // A LEASH. Without it a stray two-finger drag sends the reader to
           // Kansas with no way back except reloading, because there is no
           // "recentre" affordance on a map this small. Generous enough that
@@ -762,12 +793,46 @@ export default function CourseMapLibre() {
     const next = !terrainOn;
     setTerrainOn(next);
     map.setTerrain(next ? { source: 'terrain', exaggeration: EXAGGERATION } : null);
-    map.easeTo({ pitch: next ? 55 : 0, duration: 600 });
+    map.easeTo({ pitch: next ? REST_PITCH : 0, duration: 600 });
   };
 
   return (
     <div className="cmapwrap">
-      <div className="cmap__frame" ref={hostRef} aria-hidden="true" />
+      <div className="cmap__frame">
+        <div className="cmap__canvas" ref={hostRef} aria-hidden="true" />
+        {/* The ridge that cuts the top and bottom edges. Two elements rather
+            than a mask on the frame, because masking a live WebGL canvas costs
+            a compositing layer and this only has to cover it. */}
+        <span className="cmap__ridge is-top" aria-hidden="true" />
+        <span className="cmap__ridge is-bottom" aria-hidden="true" />
+        {/* ON THE MAP, NOT UNDER IT. A row of rectangles beneath a rectangle is
+          three boxes; a single translucent bar sitting on the terrain is one
+          object, and it is what every mapping product does with its controls.
+          Placed bottom-left, clear of MapLibre's own zoom and compass stack in
+          the top right and of the attribution bottom right. */}
+        <div className="cmapbar">
+          <button
+            type="button"
+            className="cmapbar__btn is-primary"
+            onClick={() => (playing ? stopFly() : startFly(cursorMile ?? 0))}
+            disabled={status !== 'ready'}
+          >
+            {playing ? 'Stop' : cursorMile ? 'Fly from here' : 'Fly the course'}
+          </button>
+          <button type="button" className="cmapbar__btn" onClick={toggleTerrain}>
+            {terrainOn ? 'Flatten' : '3D'}
+          </button>
+          <button
+            type="button"
+            className="cmapbar__btn"
+            onClick={toggleGrade}
+            aria-pressed={gradeOn}
+            disabled={status !== 'ready'}
+          >
+            {gradeOn ? 'Loops' : 'Gradient'}
+          </button>
+        </div>
+      </div>
       {status === 'loading' && <p className="cmap__status">Loading the map...</p>}
       {status === 'failed' && (
         <p className="cmap__status" role="status">
@@ -784,29 +849,6 @@ export default function CourseMapLibre() {
           activeLoop={activeLoop}
         />
       )}
-
-      <div className="cmap__cap">
-        <button
-          type="button"
-          className="cmap3d__btn is-primary"
-          onClick={() => (playing ? stopFly() : startFly(cursorMile ?? 0))}
-          disabled={status !== 'ready'}
-        >
-          {playing ? 'Stop' : cursorMile ? 'Fly from here' : 'Fly the course'}
-        </button>
-        <button type="button" className="cmap3d__btn" onClick={toggleTerrain}>
-          {terrainOn ? 'Flatten' : '3D terrain'}
-        </button>
-        <button
-          type="button"
-          className="cmap3d__btn"
-          onClick={toggleGrade}
-          aria-pressed={gradeOn}
-          disabled={status !== 'ready'}
-        >
-          {gradeOn ? 'Loop colours' : 'Colour by gradient'}
-        </button>
-      </div>
 
       {/* LOOP CHIPS. Seven buttons is the fastest way to answer "which bit is
           the short loop", and each one is a real button so the whole feature
