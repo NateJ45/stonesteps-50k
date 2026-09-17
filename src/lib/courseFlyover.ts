@@ -67,62 +67,15 @@ export function sampleAt(points: ProfilePoint[], index: number): ProfilePoint {
   ];
 }
 
-/**
- * Compass bearing from one point to another, in degrees clockwise from north.
- *
- * Used to point the flyover camera down the trail. The great-circle formula
- * rather than a flat atan2 of the coordinate difference: over a mile it makes
- * no practical difference, but the flat version is wrong in a way that grows
- * with latitude and there is no reason to ship the wrong one.
+/*
+ * THE BEARING HELPERS LIVED HERE and were removed on 2026-09-17, when the
+ * flyover stopped chasing the direction of travel and locked to north. They
+ * were bearingBetween, bearingAt, angleDelta and easeBearing, and the reasoning
+ * in them (look ahead by DISTANCE not by vertex count, and ease the short way
+ * round the compass) is worth reading in the history if heading-follow ever
+ * comes back. Keeping four tested but uncalled functions in the shipped module
+ * would be carrying a feature nobody can see.
  */
-export function bearingBetween(
-  [lon1, lat1]: [number, number],
-  [lon2, lat2]: [number, number],
-): number {
-  const r = Math.PI / 180;
-  const y = Math.sin((lon2 - lon1) * r) * Math.cos(lat2 * r);
-  const x =
-    Math.cos(lat1 * r) * Math.sin(lat2 * r) -
-    Math.sin(lat1 * r) * Math.cos(lat2 * r) * Math.cos((lon2 - lon1) * r);
-  return (Math.atan2(y, x) / r + 360) % 360;
-}
-
-/**
- * The bearing the camera should hold at a point on the route.
- *
- * LOOKS AHEAD BY A DISTANCE, not by a fixed number of vertices. The route is
- * simplified, so consecutive vertices are anywhere from a few feet to a few
- * hundred apart; a fixed look-ahead of "three points" swings wildly through
- * switchbacks and barely moves on a straight. Averaging the heading over a
- * fixed distance ahead is what makes the camera read as following a trail
- * rather than being yanked around by it.
- */
-export function bearingAt(points: ProfilePoint[], index: number, aheadMiles = 0.06): number {
-  const here = sampleAt(points, index);
-  const ahead = sampleAt(points, indexAtMile(points, here[MILE] + aheadMiles));
-  // At the very end there is nothing ahead; hold the last real heading.
-  if (ahead[MILE] <= here[MILE] + 1e-6) {
-    const back = sampleAt(points, indexAtMile(points, here[MILE] - aheadMiles));
-    return bearingBetween([back[LON], back[LAT]], [here[LON], here[LAT]]);
-  }
-  return bearingBetween([here[LON], here[LAT]], [ahead[LON], ahead[LAT]]);
-}
-
-/**
- * Shortest signed angular difference, for easing a bearing without spinning.
- *
- * THE 359-TO-1 PROBLEM. Interpolating bearings as plain numbers sends the
- * camera the long way round the compass whenever the route crosses north, which
- * on a loop course happens constantly and looks like the map having a seizure.
- */
-export function angleDelta(from: number, to: number): number {
-  return ((((to - from) % 360) + 540) % 360) - 180;
-}
-
-/** Ease a bearing towards a target by a fraction, the short way round. */
-export function easeBearing(from: number, to: number, amount: number): number {
-  return (from + angleDelta(from, to) * amount + 360) % 360;
-}
 
 /**
  * How far along the route a flyover should be, given elapsed time.
@@ -138,6 +91,110 @@ export function mileAtElapsed(
 ): number {
   if (durationSeconds <= 0) return totalMiles;
   return Math.max(0, Math.min(totalMiles, (seconds / durationSeconds) * totalMiles));
+}
+
+/**
+ * How fast a runner moves on a given gradient, as a multiple of their flat
+ * speed.
+ *
+ * THIS IS A MODEL, NOT DAVE'S WATCH. The GPX he sent carries no timestamps at
+ * all (22,412 track points, zero <time> elements, which is what Strava exports
+ * for a route rather than an activity), so his real pace is not available. The
+ * shape below is the standard one from the literature on the energy cost of
+ * gradient running: climbing costs steeply and roughly linearly, descending
+ * buys speed up to about 12% and then starts costing again as braking takes
+ * over. The constants are chosen for a technical trail rather than a track.
+ *
+ * If a timed file ever arrives, this function is the only thing that has to
+ * change: everything downstream asks it how long a stretch should take.
+ */
+export function gradeSpeedFactor(gradePct: number): number {
+  const g = Math.max(-40, Math.min(40, gradePct));
+  let cost: number;
+  if (g >= 0) {
+    // Uphill: about 60% slower at 10%, and by 20% most of this field is
+    // walking, which is what the flattening second term stands in for.
+    cost = 1 + 0.06 * g + 0.0016 * g * g;
+  } else if (g > -12) {
+    // Downhill, still free speed.
+    cost = 1 + 0.028 * g;
+  } else {
+    // Past about 12% down, braking costs more than gravity gives back. This
+    // course touches -38%, and the steps are not run fast.
+    cost = 0.664 + 0.022 * (-g - 12);
+  }
+  // A flyover that crawls is as bad as one that rockets: the clamp keeps the
+  // whole range inside something watchable.
+  return 1 / Math.max(0.62, Math.min(2.6, cost));
+}
+
+/**
+ * Cumulative EFFORT along the course, in flat-mile equivalents.
+ *
+ * The flyover used to advance at a constant ground speed, which is honest about
+ * distance and wrong about running: it crossed the steepest climb on the course
+ * at the same rate as the road round The Oval. Weighting each step by
+ * gradeSpeedFactor means the camera slows on the climbs and runs the descents,
+ * and because the total is normalised the whole flight still takes exactly as
+ * long as it did.
+ */
+export function buildPacing(pts: ProfilePoint[]): number[] {
+  const cum = new Array<number>(pts.length);
+  cum[0] = 0;
+  for (let i = 1; i < pts.length; i += 1) {
+    const d = pts[i][MILE] - pts[i - 1][MILE];
+    // The grade of the step being taken, not of the point being left.
+    const g = (pts[i][GRADE] + pts[i - 1][GRADE]) / 2;
+    cum[i] = cum[i - 1] + Math.max(0, d) / gradeSpeedFactor(g);
+  }
+  return cum;
+}
+
+/**
+ * The mile the camera should be at, `seconds` into a flight that starts at
+ * `fromMile` and lasts `durationSeconds`, paced by the course's gradient.
+ *
+ * Binary search over the cumulative effort, then interpolate within the step,
+ * so the camera moves smoothly rather than snapping between samples.
+ */
+export function pacedMileAtElapsed(
+  pts: ProfilePoint[],
+  cum: number[],
+  fromMile: number,
+  seconds: number,
+  durationSeconds: number,
+): number {
+  if (!pts.length) return 0;
+  const lastMile = pts[pts.length - 1][MILE];
+  if (durationSeconds <= 0) return lastMile;
+
+  const startEffort = effortAtMile(pts, cum, fromMile);
+  const endEffort = cum[cum.length - 1];
+  const span = endEffort - startEffort;
+  if (span <= 0) return lastMile;
+
+  const t = Math.max(0, Math.min(1, seconds / durationSeconds));
+  const target = startEffort + t * span;
+
+  let lo = 0;
+  let hi = cum.length - 1;
+  while (lo < hi - 1) {
+    const mid = (lo + hi) >> 1;
+    if (cum[mid] <= target) lo = mid;
+    else hi = mid;
+  }
+  const denom = cum[hi] - cum[lo];
+  const f = denom > 0 ? (target - cum[lo]) / denom : 0;
+  return pts[lo][MILE] + f * (pts[hi][MILE] - pts[lo][MILE]);
+}
+
+/** Cumulative effort at an arbitrary mile, interpolated between samples. */
+export function effortAtMile(pts: ProfilePoint[], cum: number[], mile: number): number {
+  const i = indexAtMile(pts, mile);
+  const lo = Math.floor(i);
+  const hi = Math.min(pts.length - 1, lo + 1);
+  const f = i - lo;
+  return cum[lo] + f * (cum[hi] - cum[lo]);
 }
 
 /**

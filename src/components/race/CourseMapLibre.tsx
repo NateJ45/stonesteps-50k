@@ -50,9 +50,8 @@ import CourseProfileStrip from './CourseProfileStrip';
 import {
   indexAtMile,
   sampleAt,
-  bearingAt,
-  easeBearing,
-  mileAtElapsed,
+  buildPacing,
+  pacedMileAtElapsed,
   gradeExpressionStops,
   LON,
   LAT,
@@ -68,6 +67,15 @@ const EXAGGERATION = 1.5;
 
 const USGS_IMAGERY =
   'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}';
+
+/**
+ * The same National Map service, drawn as a topographic quad instead of a
+ * photograph. Public domain, no key, and it answers a different question:
+ * the photograph shows what the ground looks like, the topo shows the contours,
+ * the creeks and the names the park itself uses.
+ */
+const USGS_TOPO =
+  'https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}';
 
 /** Terrarium-encoded DEM. NOT mapbox encoding: the two are not interchangeable. */
 const TERRAIN_DEM = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
@@ -92,6 +100,18 @@ const FLYOVER_SECONDS = 90;
  * raised on the map below, and past about 70 the horizon comes into frame.
  */
 const FLY_PITCH = 74;
+
+/**
+ * NORTH, AND IT STAYS THERE.
+ *
+ * The flyover used to swing the camera round to face the direction of travel.
+ * On a course of switchbacks that is a camera turning almost continuously, and
+ * on a seven-lap course it turns the same corners four times: it reads as being
+ * thrown around rather than as following a trail, and a reader loses track of
+ * which way the park is pointing. Fixed north means every frame can be compared
+ * with every other one, and with the resting map.
+ */
+const FLY_BEARING = 0;
 const FLY_ZOOM = 15.2;
 
 /** The resting shot. High enough to put sky in the frame rather than only dirt. */
@@ -124,6 +144,15 @@ export default function CourseMapLibre() {
   const [terrainOn, setTerrainOn] = useState(true);
   const [gradeOn, setGradeOn] = useState(false);
   const [activeLoop, setActiveLoop] = useState<number | null>(null);
+  const [basemap, setBasemap] = useState<'satellite' | 'topo'>('satellite');
+  /**
+   * Hover handling lives behind a ref because the map's listeners are attached
+   * once, inside the mount effect, while the callbacks they need are defined
+   * further down the component. Attaching through a ref means the listener
+   * always calls the current one rather than the one that existed at mount.
+   */
+  const hoverRef = useRef<((lngLat: [number, number], px: [number, number]) => void) | null>(null);
+  const activeLoopRef = useRef<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [cursorMile, setCursorMile] = useState<number | null>(null);
   /**
@@ -151,7 +180,18 @@ export default function CourseMapLibre() {
   const rafRef = useRef(0);
   const flyStartRef = useRef(0);
   const flyFromMileRef = useRef(0);
-  const bearingRef = useRef(0);
+  /**
+   * Whether the map is in 3D, mirrored into a ref.
+   *
+   * FLATTEN HAS TO SURVIVE THE NEXT CLICK. Seeking and flying both set the
+   * camera, and both used to set the pitch unconditionally, so a reader who had
+   * deliberately flattened the map got 3D back the moment they touched the
+   * profile. A view the reader chose outranks the view the feature prefers.
+   */
+  const terrainRef = useRef(true);
+
+  /** Cumulative gradient-weighted effort, built once the profile lands. */
+  const pacingRef = useRef<number[] | null>(null);
   const playingRef = useRef(false);
   const drawRafRef = useRef(0);
   const drawDoneRef = useRef(false);
@@ -165,16 +205,17 @@ export default function CourseMapLibre() {
         // NAMESPACE IMPORT, not a default one: maplibre-gl v6 ships named
         // exports and no default, so `{ default: maplibregl }` is undefined at
         // runtime and only fails when you try to construct a Map.
-        const [maplibregl, courseMod, gradeMod, milesMod, profileMod, poiMod, landmarkMod] =
-          await Promise.all([
-            import('maplibre-gl'),
-            import('../../../scripts/data/course-geo.json'),
-            import('../../../scripts/data/course-grade.json'),
-            import('../../../scripts/data/course-miles.json'),
-            import('../../../scripts/data/course-profile.json'),
-            import('../../../scripts/data/course-poi.json'),
-            import('../../../scripts/data/course-landmarks.json'),
-          ]);
+        // The facilities and landmark files are NOT loaded any more: they are
+        // still built (they are true, and the audit that found them is worth
+        // keeping) but nothing on this map draws them, so shipping them to the
+        // browser would be bytes for a layer that does not exist.
+        const [maplibregl, courseMod, gradeMod, milesMod, profileMod] = await Promise.all([
+          import('maplibre-gl'),
+          import('../../../scripts/data/course-geo.json'),
+          import('../../../scripts/data/course-grade.json'),
+          import('../../../scripts/data/course-miles.json'),
+          import('../../../scripts/data/course-profile.json'),
+        ]);
         if (cancelled || !hostRef.current) return;
         maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
@@ -184,8 +225,6 @@ export default function CourseMapLibre() {
         const course = (courseMod.default ?? courseMod) as unknown as GeoData;
         const gradeData = (gradeMod.default ?? gradeMod) as unknown as GeoData;
         const milesData = (milesMod.default ?? milesMod) as unknown as GeoData;
-        const poiData = (poiMod.default ?? poiMod) as unknown as GeoData;
-        const landmarkData = (landmarkMod.default ?? landmarkMod) as unknown as GeoData;
         const pts = ((profileMod.default ?? profileMod) as unknown as { points: ProfilePoint[] })
           .points;
         profileRef.current = pts;
@@ -235,8 +274,11 @@ export default function CourseMapLibre() {
                 tiles: [USGS_IMAGERY],
                 tileSize: 256,
                 maxzoom: 16,
+                // "Basemap", not "Imagery": this source serves the photograph
+                // OR the topographic quad depending on which the reader has
+                // chosen, and the credit has to be true of both.
                 attribution:
-                  'Imagery &copy; <a href="https://www.usgs.gov/">USGS</a> The National Map',
+                  'Basemap &copy; <a href="https://www.usgs.gov/">USGS</a> The National Map',
               },
               terrain: {
                 type: 'raster-dem',
@@ -252,8 +294,28 @@ export default function CourseMapLibre() {
               whole: { type: 'geojson', data: wholeRoute, lineMetrics: true },
               grade: { type: 'geojson', data: gradeData },
               miles: { type: 'geojson', data: milesData },
-              poi: { type: 'geojson', data: poiData },
-              landmarks: { type: 'geojson', data: landmarkData },
+              // ONE NAMED PLACE, AND IT IS THE ONE THE RACE IS NAMED AFTER.
+              // The facility dots and the park's building labels came off on
+              // 2026-09-16: on a map whose subject is a route, a scatter of
+              // shelters, toilets and taps reads as clutter around the thing
+              // you came to look at. What is left answers "where am I round the
+              // loop" and "where are the Stone Steps", which are the two
+              // questions this map exists for.
+              steps: {
+                type: 'geojson',
+                data: {
+                  type: 'FeatureCollection',
+                  features: meta.stoneSteps
+                    ? [
+                        {
+                          type: 'Feature',
+                          properties: { name: 'Stone Steps' },
+                          geometry: { type: 'Point', coordinates: meta.stoneSteps },
+                        },
+                      ]
+                    : [],
+                } as unknown as GeoData,
+              },
               // The scrub marker. Starts empty and is fed a single point as the
               // reader moves along the profile.
               cursor: {
@@ -426,75 +488,31 @@ export default function CourseMapLibre() {
                 // into a dotted mess.
                 minzoom: 13.5,
               },
-              // FACILITIES. Toilets and water are the two things a runner plans
-              // around, so they get colour; shelters and picnic areas are
-              // context and stay quiet.
+              // THE STONE STEPS THEMSELVES. The race is named after them, they
+              // are 2.7% of it, and until now the map did not say which 2.7%.
+              // Placed by the build script from the middle of the sampled track
+              // points whose nearest named way is the Stone Steps, so the
+              // marker sits on the course rather than at the end of the way.
               {
-                id: 'poi',
+                id: 'steps',
                 type: 'circle',
-                source: 'poi',
-                filter: ['in', ['get', 'kind'], ['literal', ['toilets', 'water', 'shelter']]],
-                minzoom: 13,
+                source: 'steps',
                 paint: {
-                  'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 4, 17, 9],
-                  'circle-color': [
-                    'match',
-                    ['get', 'kind'],
-                    'toilets',
-                    '#3b7dd8',
-                    'water',
-                    '#2fa3a3',
-                    '#8a7f66',
-                  ],
+                  'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 4, 16, 8],
+                  'circle-color': '#1a1712',
                   'circle-stroke-color': '#ffffff',
-                  'circle-stroke-width': 1.5,
+                  'circle-stroke-width': 2,
                 },
               },
               {
-                id: 'poi-labels',
+                id: 'steps-label',
                 type: 'symbol',
-                source: 'poi',
-                filter: ['in', ['get', 'kind'], ['literal', ['toilets', 'water']]],
-                minzoom: 14.2,
-                layout: {
-                  // WHAT THE LABEL SAYS DEPENDS ON WHETHER YOU COME BACK. On a
-                  // seven-loop course most of these are passed several times,
-                  // and printing one mile implies it is the only one: the water
-                  // by The Oval is reachable from mile 0 and passed eight
-                  // times, and an earlier version labelled it "Water 24.7".
-                  // Passed once, the mile is the useful fact. Passed more, the
-                  // COUNT is, and the miles are in the list below the map.
-                  'text-field': [
-                    'concat',
-                    ['case', ['==', ['get', 'kind'], 'toilets'], 'WC ', 'Water '],
-                    [
-                      'case',
-                      ['>', ['get', 'passes'], 1],
-                      ['concat', '×', ['to-string', ['get', 'passes']]],
-                      ['to-string', ['get', 'mile']],
-                    ],
-                  ],
-                  'text-size': 11,
-                  'text-offset': [0, 1.3],
-                  'text-optional': true,
-                },
-                paint: {
-                  'text-color': '#ffffff',
-                  'text-halo-color': '#1a1712',
-                  'text-halo-width': 1.4,
-                },
-              },
-              {
-                id: 'landmark-labels',
-                type: 'symbol',
-                source: 'landmarks',
-                minzoom: 14,
+                source: 'steps',
                 layout: {
                   'text-field': ['get', 'name'],
                   'text-size': 12,
-                  'text-offset': [0, 0.9],
+                  'text-offset': [0, 1.1],
                   'text-optional': true,
-                  'text-max-width': 9,
                 },
                 paint: {
                   'text-color': '#ffe9c4',
@@ -652,6 +670,7 @@ export default function CourseMapLibre() {
           } catch (err) {
             console.error('Terrain failed; the map stays flat', err);
             setTerrainOn(false);
+            terrainRef.current = false;
           }
 
           drawRoute(m);
@@ -713,9 +732,8 @@ export default function CourseMapLibre() {
               'miles',
               'mile-labels',
               'course-start',
-              'poi',
-              'poi-labels',
-              'landmark-labels',
+              'steps',
+              'steps-label',
               'cursor',
               'cursor-halo',
             ]) {
@@ -746,6 +764,24 @@ export default function CourseMapLibre() {
 
         // A tile service failing is not a broken page: the course is its own
         // source and still draws. Only a hard style error is worth reporting.
+        // HOVERING THE ROUTE ON THE MAP PLACES THE SAME MARKER the profile
+        // does. Throttled to one lookup per frame: a mousemove can fire far
+        // more often than the map can paint.
+        let hoverPending = false;
+        m.on('mousemove', (e) => {
+          if (hoverPending) return;
+          hoverPending = true;
+          requestAnimationFrame(() => {
+            hoverPending = false;
+            hoverRef.current?.([e.lngLat.lng, e.lngLat.lat], [e.point.x, e.point.y]);
+          });
+        });
+        // Leaving the canvas clears the hover, exactly as leaving the profile
+        // does. The pin, if there is one, stays.
+        m.on('mouseout', () => {
+          hoverRef.current?.([NaN, NaN], [NaN, NaN]);
+        });
+
         m.on('error', (e) => {
           // A tile 404 arrives here, not as a thrown error. Warn rather than
           // fail: a missing tile is a gap in the photograph, not a broken page.
@@ -912,6 +948,64 @@ export default function CourseMapLibre() {
     [showCursorAt],
   );
 
+  /**
+   * Turn a point on the map into a mile on the course.
+   *
+   * THE LOOPS ARE THE PROBLEM, and they are not solvable by geometry: a tree on
+   * the Furnas Trail is mile 2.1, 8.6, 15.1 and 21.6 of the same race, and no
+   * amount of hovering it will say which one the reader means. So the answer is
+   * chosen rather than computed.
+   *
+   * With a loop isolated by the chips, the question has one answer and that lap
+   * is used. With all seven showing, the FIRST lap to cover that ground is used
+   * (loop 1 or 2), which is the same geometry the draw-on animation treats as
+   * the whole course, and the readout names the loop so nothing is implied that
+   * is not true.
+   *
+   * Nearest point is found in lng/lat and then checked in PIXELS, because 25
+   * pixels means the same thing to a reader at every zoom and 200 feet does
+   * not.
+   */
+  useEffect(() => {
+    hoverRef.current = (lngLat, px) => {
+      const map = getMap();
+      const pts = profileRef.current;
+      // The flyover owns the marker while it is playing; a stray mousemove must
+      // not yank the camera's own readout sideways.
+      if (!map || !pts.length || playingRef.current) return;
+      if (!Number.isFinite(lngLat[0])) {
+        onScrub(null);
+        return;
+      }
+
+      const loop = activeLoopRef.current;
+      let best = -1;
+      let bestD = Infinity;
+      for (let i = 0; i < pts.length; i += 1) {
+        const p = pts[i];
+        if (loop == null ? p[LOOP] > 2 : p[LOOP] !== loop) continue;
+        // Squared degrees, with longitude scaled for latitude. Comparing only,
+        // so no square root and no haversine.
+        const dx = (p[LON] - lngLat[0]) * 0.77;
+        const dy = p[LAT] - lngLat[1];
+        const d = dx * dx + dy * dy;
+        if (d < bestD) {
+          bestD = d;
+          best = i;
+        }
+      }
+      if (best < 0) {
+        onScrub(null);
+        return;
+      }
+
+      const p = pts[best];
+      const at = map.project([p[LON], p[LAT]]);
+      const away = Math.hypot(at.x - px[0], at.y - px[1]);
+      onScrub(away <= 25 ? p[MILE] : null);
+    };
+  }, [onScrub]);
+
   // ESCAPE CLEARS IT. Anything a reader can place has to come off without
   // hunting for the exact pixel they placed it on, and Escape is what every
   // other dismissable thing on this page already answers to.
@@ -934,12 +1028,11 @@ export default function CourseMapLibre() {
       settleRoute(map);
       const i = indexAtMile(pts, mile);
       const p = sampleAt(pts, i);
-      const bearing = bearingAt(pts, i);
-      bearingRef.current = bearing;
       map.easeTo({
         center: [p[LON], p[LAT]],
-        bearing,
-        pitch: FLY_PITCH,
+        bearing: FLY_BEARING,
+        // Flat stays flat. See terrainRef.
+        pitch: terrainRef.current ? FLY_PITCH : 0,
         zoom: FLY_ZOOM,
         duration: prefersReducedMotion() ? 0 : 900,
       });
@@ -987,9 +1080,14 @@ export default function CourseMapLibre() {
       const total = pts[pts.length - 1][MILE];
       flyFromMileRef.current = fromMile >= total - 0.05 ? 0 : fromMile;
       flyStartRef.current = performance.now();
-      bearingRef.current = bearingAt(pts, indexAtMile(pts, flyFromMileRef.current));
       playingRef.current = true;
       setPlaying(true);
+
+      // Built once per flight rather than per frame: it is one pass over 972
+      // points, and doing it inside the rAF loop would be 60 of those a second
+      // for a number that cannot change.
+      if (!pacingRef.current) pacingRef.current = buildPacing(pts);
+      const pacing = pacingRef.current;
 
       const step = () => {
         if (!playingRef.current) return;
@@ -997,21 +1095,24 @@ export default function CourseMapLibre() {
         if (!m) return;
         const elapsed = (performance.now() - flyStartRef.current) / 1000;
         const remaining = total - flyFromMileRef.current;
-        const mile =
-          flyFromMileRef.current +
-          mileAtElapsed(remaining, elapsed, (remaining / total) * FLYOVER_SECONDS);
+        // PACED BY THE GRADIENT, not by distance. The camera used to cross the
+        // steepest climb on the course at the same rate as the road round The
+        // Oval. The flight still takes the same total time; only how it spends
+        // it has changed.
+        const mile = pacedMileAtElapsed(
+          pts,
+          pacing,
+          flyFromMileRef.current,
+          elapsed,
+          (remaining / total) * FLYOVER_SECONDS,
+        );
         const i = indexAtMile(pts, mile);
         const p = sampleAt(pts, i);
 
-        // The bearing is eased towards the trail's heading rather than set to
-        // it, and easeBearing takes the short way round the compass. Without
-        // that, every time the route crosses north the camera spins 340 degrees.
-        bearingRef.current = easeBearing(bearingRef.current, bearingAt(pts, i), 0.06);
-
         m.jumpTo({
           center: [p[LON], p[LAT]],
-          bearing: bearingRef.current,
-          pitch: FLY_PITCH,
+          bearing: FLY_BEARING,
+          pitch: terrainRef.current ? FLY_PITCH : 0,
           zoom: FLY_ZOOM,
         });
         setCursorMile(mile);
@@ -1033,6 +1134,7 @@ export default function CourseMapLibre() {
     const map = getMap();
     const pts = profileRef.current;
     setActiveLoop(loop);
+    activeLoopRef.current = loop;
     if (!map) return;
     stopFly();
 
@@ -1084,11 +1186,24 @@ export default function CourseMapLibre() {
     }
   };
 
+  /** Swap the photograph for the topographic quad, or back. */
+  const toggleBasemap = () => {
+    const map = mapRef.current as import('maplibre-gl').Map | null;
+    if (!map) return;
+    const next = basemap === 'satellite' ? 'topo' : 'satellite';
+    setBasemap(next);
+    const src = map.getSource('imagery') as import('maplibre-gl').RasterTileSource | undefined;
+    // setTiles rather than a new style: reloading the style would drop every
+    // GeoJSON source, the terrain and the route's draw state with it.
+    src?.setTiles([next === 'topo' ? USGS_TOPO : USGS_IMAGERY]);
+  };
+
   const toggleTerrain = () => {
     const map = mapRef.current as import('maplibre-gl').Map | null;
     if (!map) return;
     const next = !terrainOn;
     setTerrainOn(next);
+    terrainRef.current = next;
     map.setTerrain(next ? { source: 'terrain', exaggeration: EXAGGERATION } : null);
     map.easeTo({ pitch: next ? REST_PITCH : 0, duration: 600 });
   };
@@ -1122,6 +1237,14 @@ export default function CourseMapLibre() {
           </button>
           <button type="button" className="cmapbar__btn" onClick={toggleTerrain}>
             {terrainOn ? 'Flatten' : '3D'}
+          </button>
+          <button
+            type="button"
+            className="cmapbar__btn"
+            onClick={toggleBasemap}
+            aria-pressed={basemap === 'topo'}
+          >
+            {basemap === 'topo' ? 'Satellite' : 'Topo'}
           </button>
           <button
             type="button"
@@ -1181,7 +1304,11 @@ export default function CourseMapLibre() {
             aria-pressed={activeLoop === l.index}
           >
             {l.index}
-            <span className="cmaploops__miles">{l.miles} mi</span>
+            {/* THE PUBLISHED LENGTH, NOT THE WATCH'S. The track reads 5.04,
+                5.00 and 4.96 for the same ground across three laps, which is
+                GPS under a canopy rather than three different loops. Every
+                distance a reader sees is the race's own. */}
+            <span className="cmaploops__miles">{l.publishedMiles} mi</span>
           </button>
         ))}
       </div>

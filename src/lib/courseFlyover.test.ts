@@ -1,20 +1,19 @@
 // Tests for the flyover maths.
 //
-// Three of these guard bugs that are invisible in code review and obvious on
-// screen: a camera that spins the long way round the compass, a camera that
-// races the straights and crawls the switchbacks, and a colour ramp whose scale
-// is set by one staircase.
+// These guard bugs that are invisible in code review and obvious on screen: a
+// camera that races the straights and crawls the switchbacks, a flyover that
+// takes the climbs at road pace, and a colour ramp whose scale is set by one
+// staircase.
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   indexAtMile,
   sampleAt,
-  bearingBetween,
-  bearingAt,
-  angleDelta,
-  easeBearing,
   mileAtElapsed,
+  gradeSpeedFactor,
+  buildPacing,
+  pacedMileAtElapsed,
   GRADE_STOPS,
   gradeExpressionStops,
   MILE,
@@ -73,58 +72,6 @@ describe('sampleAt', () => {
   });
 });
 
-describe('bearingBetween', () => {
-  it('reads due east as 90 and due north as 0', () => {
-    assert.ok(Math.abs(bearingBetween([-84.6, 39.17], [-84.5, 39.17]) - 90) < 0.5);
-    assert.ok(Math.abs(bearingBetween([-84.6, 39.17], [-84.6, 39.27]) - 0) < 0.5);
-    assert.ok(Math.abs(bearingBetween([-84.6, 39.17], [-84.7, 39.17]) - 270) < 0.5);
-  });
-});
-
-describe('bearingAt', () => {
-  it('points down the route', () => {
-    assert.ok(Math.abs(bearingAt(straight, 0) - 90) < 2);
-  });
-
-  it('holds the last heading at the finish instead of returning nothing', () => {
-    const b = bearingAt(straight, 3);
-    assert.ok(Number.isFinite(b));
-    assert.ok(Math.abs(b - 90) < 2);
-  });
-});
-
-describe('angleDelta and easeBearing', () => {
-  it('takes the SHORT way round the compass', () => {
-    // 350 to 10 is +20, not -340. Getting this wrong makes the camera spin
-    // most of a full turn every time the route crosses north, which on a loop
-    // course is constantly.
-    assert.equal(angleDelta(350, 10), 20);
-    assert.equal(angleDelta(10, 350), -20);
-    // Exactly half a turn is genuinely ambiguous: -180 and +180 describe the
-    // same rotation and either is a correct answer. Assert the magnitude, not
-    // a sign the implementation was never obliged to pick.
-    assert.equal(Math.abs(angleDelta(0, 180)), 180);
-  });
-
-  it('eases across the 360 boundary without spinning', () => {
-    const b = easeBearing(350, 10, 0.5);
-    // Halfway from 350 to 10 the short way is 0, not 180.
-    assert.ok(b > 359 || b < 1, `eased to ${b}`);
-  });
-
-  it('stays inside 0..360', () => {
-    for (const [from, to] of [
-      [350, 10],
-      [10, 350],
-      [0, 359],
-      [180, 0],
-    ]) {
-      const b = easeBearing(from, to, 0.3);
-      assert.ok(b >= 0 && b < 360, `${from}->${to} gave ${b}`);
-    }
-  });
-});
-
 describe('mileAtElapsed', () => {
   it('advances at a constant ground speed', () => {
     assert.equal(mileAtElapsed(30, 0, 60), 0);
@@ -176,5 +123,80 @@ describe('GRADE_STOPS', () => {
       assert.equal(typeof flat[i], 'number');
       assert.equal(typeof flat[i + 1], 'string');
     }
+  });
+});
+
+describe('gradeSpeedFactor', () => {
+  it('is 1 on the flat', () => {
+    assert.equal(gradeSpeedFactor(0), 1);
+  });
+
+  it('slows going up and never speeds up going up', () => {
+    assert.ok(gradeSpeedFactor(5) < 1);
+    assert.ok(gradeSpeedFactor(15) < gradeSpeedFactor(5));
+    assert.ok(gradeSpeedFactor(30) < gradeSpeedFactor(15));
+  });
+
+  it('buys speed on a runnable descent', () => {
+    assert.ok(gradeSpeedFactor(-8) > 1);
+  });
+
+  // The one people get wrong: a -35% descent is not four times a -8% one. Past
+  // about 12% braking costs more than gravity gives back, and this course
+  // touches -38%.
+  it('gives the speed back on a descent too steep to run', () => {
+    assert.ok(gradeSpeedFactor(-35) < gradeSpeedFactor(-10));
+  });
+
+  it('stays inside a watchable range at the extremes', () => {
+    for (const g of [-60, -38, 0, 38, 60]) {
+      const f = gradeSpeedFactor(g);
+      assert.ok(f > 0.3 && f < 2, `factor out of range at ${g}%: ${f}`);
+    }
+  });
+});
+
+describe('buildPacing and pacedMileAtElapsed', () => {
+  /** Half a mile of flat, then half a mile at a punishing 20%. */
+  const pts: ProfilePoint[] = [];
+  for (let i = 0; i <= 20; i += 1) {
+    const mile = i / 20;
+    const grade = mile <= 0.5 ? 0 : 20;
+    pts.push([-84.6 + mile * 0.01, 39.17, 800, mile, grade, 1] as ProfilePoint);
+  }
+  const cum = buildPacing(pts);
+
+  it('is monotonic, because time does not run backwards', () => {
+    for (let i = 1; i < cum.length; i += 1) assert.ok(cum[i] >= cum[i - 1]);
+  });
+
+  it('starts at the start and ends at the end', () => {
+    assert.equal(pacedMileAtElapsed(pts, cum, 0, 0, 60), 0);
+    assert.equal(pacedMileAtElapsed(pts, cum, 0, 60, 60), pts[pts.length - 1][MILE]);
+  });
+
+  // THE WHOLE POINT. At the halfway mark in TIME the camera must still be on
+  // the flat half, because the climbing half costs more per mile.
+  it('spends longer on the climb than on the flat', () => {
+    const half = pacedMileAtElapsed(pts, cum, 0, 30, 60);
+    assert.ok(half > 0.5, `expected to be past the flat at halfway, got ${half}`);
+  });
+
+  it('never goes backwards as time advances', () => {
+    let last = -1;
+    for (let t = 0; t <= 60; t += 1) {
+      const m = pacedMileAtElapsed(pts, cum, 0, t, 60);
+      assert.ok(m >= last, `went backwards at ${t}s`);
+      last = m;
+    }
+  });
+
+  it('honours a start part way along', () => {
+    const m = pacedMileAtElapsed(pts, cum, 0.75, 0, 60);
+    assert.ok(Math.abs(m - 0.75) < 0.01, `expected to start at 0.75, got ${m}`);
+  });
+
+  it('survives a degenerate duration rather than dividing by zero', () => {
+    assert.equal(pacedMileAtElapsed(pts, cum, 0, 5, 0), pts[pts.length - 1][MILE]);
   });
 });

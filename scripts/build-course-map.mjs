@@ -235,6 +235,18 @@ function poiKind(tags) {
  * Trails (E) and (I) are absent from the sheet. That is the park's numbering,
  * not a gap in the transcription.
  */
+/**
+ * THE RACE'S OWN LOOP LENGTHS, which is what the site says everywhere else:
+ * four long loops and three short ones, 30.8 miles for the 50K.
+ *
+ * The recorded track reads 5.04 and 3.21, and the laps disagree with each other
+ * (5.04, 5.00, 4.96) on ground that cannot change length between laps. That is
+ * GPS under a canopy reading short, not the course, so where a DISTANCE is
+ * shown to a reader it is the published one, and the track is used for where
+ * things ARE rather than how far apart they are.
+ */
+const PUBLISHED_LOOP_MILES = { long: 5.3, short: 3.2 };
+
 const PARKS_TRAIL_MILES = {
   'Colerain Trail (A)': 0.74,
   'Ponderosa Trail (B)': 3.76,
@@ -503,6 +515,29 @@ async function main() {
   console.log(`Track to nearest way: median ${median.toFixed(1)} ft, 90th ${p90.toFixed(1)} ft`);
   console.log(`  ${((onTrail / sample.length) * 100).toFixed(0)}% within 60 ft of a named way`);
 
+  /*
+   * WHERE THE STONE STEPS ACTUALLY ARE.
+   *
+   * The race is named after them and they are 2.7% of it, and until now the map
+   * did not say which 2.7%. Found the same way the trail tally is: every
+   * sampled point on the track whose nearest named way is the Stone Steps, then
+   * the middle one of those, so the marker sits ON the course rather than on
+   * the nearest end of the way.
+   */
+  const stepPts = [];
+  for (const [x, y] of sample) {
+    const { dist, index } = nearest(x, y);
+    if (dist < 60 && index >= 0 && /stone steps/i.test(runnable[owner[index]].name ?? '')) {
+      stepPts.push([x, y]);
+    }
+  }
+  const stoneSteps = stepPts.length ? unproject(stepPts[Math.floor(stepPts.length / 2)]) : null;
+  console.log(
+    stoneSteps
+      ? `Stone Steps: ${stepPts.length} sampled points, marker at ${stoneSteps.map((n) => n.toFixed(5)).join(', ')}`
+      : 'Stone Steps: NOT FOUND on the track, no marker emitted',
+  );
+
   const named = [...tally.entries()].sort((a, b) => b[1] - a[1]);
   const namedTotal = named.reduce((s, [, c]) => s + c, 0);
   const trailsUsed = named
@@ -688,11 +723,29 @@ async function main() {
     const loop = loops.find((l) => l.kind === kind);
     if (!loop) continue;
     const start = loop.mile[0];
-    const loopMiles = loop.mile[loop.mile.length - 1] - start;
-    for (let m = 1; m <= Math.floor(loopMiles); m += 1) {
+    const measured = loop.mile[loop.mile.length - 1] - start;
+    const published = PUBLISHED_LOOP_MILES[kind];
+
+    /*
+     * MARKERS ARE PLACED AGAINST THE PUBLISHED LENGTH, NOT THE WATCH'S.
+     *
+     * The track reads 5.04 and 3.21 where the race publishes 5.3 and 3.2, and
+     * the lap-to-lap spread (5.04, 5.00, 4.96) is the giveaway: the same ground
+     * cannot be three different lengths, so that is GPS under canopy, not the
+     * course. The 1998 map said the same thing, with its marker 5 sitting out
+     * west with a run still to go, which is what a 5.3 mile loop looks like.
+     *
+     * So a marker labelled 3 goes where THREE PUBLISHED MILES have been run,
+     * which on a track that reads about 5% short is watch-mile 2.85. Scaling
+     * assumes the error is spread evenly round the loop, which is the best
+     * assumption available and is right to within a few hundred feet.
+     */
+    const scale = measured / published;
+    for (let m = 1; m <= Math.floor(published); m += 1) {
+      const target = m * scale;
       let best = null;
       for (let i = 0; i < loop.mile.length; i += 1) {
-        const diff = Math.abs(loop.mile[i] - start - m);
+        const diff = Math.abs(loop.mile[i] - start - target);
         if (!best || diff < best.diff) best = { diff, coord: loop.coords[i], ele: loop.ele[i] };
       }
       // 0.05 miles is 264 ft: past that the track has no sample near the mile
@@ -769,10 +822,19 @@ async function main() {
     loops: loops.map((l) => ({
       index: l.index,
       kind: l.kind,
+      // What the watch recorded, kept because every placement on the map is
+      // measured against it.
       miles: l.miles,
+      // What the race publishes, which is what a reader is ever shown.
+      publishedMiles: PUBLISHED_LOOP_MILES[l.kind],
       startMile: l.startMile,
     })),
     totalMiles: Number(totalMiles.toFixed(2)),
+    // 4 x 5.3 + 3 x 3.2 = 30.8, the punch card's own total.
+    publishedTotalMiles: Number(
+      loops.reduce((n, l) => n + PUBLISHED_LOOP_MILES[l.kind], 0).toFixed(1),
+    ),
+    stoneSteps,
     gradeRange: { min: steepestDown, max: steepest },
     elevation: {
       lowFt: Math.min(...loops.flatMap((l) => l.ele)),
