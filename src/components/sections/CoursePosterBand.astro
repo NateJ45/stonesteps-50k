@@ -10,10 +10,18 @@
  * makes clicking through to /course worth doing. The site's design record
  * already declined WebGL on the home page for both reasons.
  *
- * WHY IT IS STILL HONEST. The photograph is THIS SITE'S map, captured from the
+ * WHY IT IS STILL HONEST. The picture is THIS SITE'S map, captured from the
  * built page by `npm run map-poster`, and the route over it was projected by
  * that same map at the same instant, so the line cannot drift off the picture.
  * Re-run the command after any change to the map's camera or terrain.
+ *
+ * IT IS THE TOPOGRAPHIC QUAD, NOT THE SATELLITE IMAGERY, since 2026-09-16.
+ * Nathan chose it. Satellite at this size is a continuous green canopy: the
+ * relief the course is famous for is under the leaves, so the still showed a
+ * route on a lawn. The USGS quad draws the contours, the creeks and the street
+ * names, and the terrain exaggeration in the map's camera is still in the
+ * picture, so the ridges read as ridges. `POSTER_BASEMAP=satellite npm run
+ * map-poster` captures the old version for comparison.
  *
  * THE WHOLE THING IS A LINK. Nothing here is interactive on its own: a still
  * that behaves like a map invites people to drag it and conclude the site is
@@ -68,7 +76,7 @@ const H = poster.height;
             height={H}
             loading="lazy"
             decoding="async"
-            alt="Mt. Airy Forest seen from the air, with the Stone Steps 50K course drawn on the ridges it runs, mile markers round each loop, and the Stone Steps themselves marked."
+            alt="A topographic map of Mt. Airy Forest, tilted into its hills, with the Stone Steps 50K course drawn on the ridges it runs, mile markers round each loop, and the Stone Steps themselves marked."
           />
         </picture>
 
@@ -161,11 +169,26 @@ const H = poster.height;
     flex-wrap: wrap;
     align-items: baseline;
     gap: 0.25rem 0.75rem;
-    padding: 2.5rem 1rem 1rem;
+    padding: 3.5rem 1rem 1rem;
     color: #fff;
     /* Bottom-up scrim rather than a flat panel: the text has to be legible over
-       whatever the photograph happens to be doing under it. */
-    background: linear-gradient(to top, rgba(26, 23, 18, 0.85), rgba(26, 23, 18, 0));
+       whatever the picture happens to be doing under it.
+
+       DEEPENED FOR THE TOPO, 2026-09-16. A two-stop ramp over the satellite
+       capture was fine, because the bottom of that picture was dark canopy and
+       the scrim only had to finish a job the photograph had started. The
+       topographic quad is pale olive down there, and measured at the caption's
+       own height the old ramp had only reached about 0.3 alpha: white type on
+       a light map, which is the one combination this scrim exists to prevent.
+       Four stops and a taller box put the text band at 0.88 or better, which
+       is about 13:1 for the CTA and 9:1 for the note at its 0.85 ink. */
+    background: linear-gradient(
+      to top,
+      rgba(26, 23, 18, 0.94) 0%,
+      rgba(26, 23, 18, 0.88) 45%,
+      rgba(26, 23, 18, 0.5) 72%,
+      rgba(26, 23, 18, 0) 100%
+    );
   }
 
   .cposter__cta {
