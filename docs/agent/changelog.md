@@ -10,6 +10,76 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-17 — Material and typography on the five bands that were still template._
+
+Tier 3 of the design pass, and the brief for it was light touches: **no new objects**.
+The site already has as many as it can carry (GearBand's note has the count argument), so
+nothing here becomes a thing from the race's world that was not one already. What changed
+is stock, size and ink on the five places that still read as a starter kit with a good
+palette dropped over it.
+
+**The numbers row.** Four figures under the ticker, and the one band on the home page
+that still looked like a widget: rust numerals in a row over a black hairline, with the
+unit in the forest green, a hue that does no other typographic work anywhere on this site.
+The numeral is the page ink now, set three steps larger and carrying `.display` rather
+than `font-display`, which is the difference that matters: the class hands it
+`--display-shadow`, so it takes no echo on the cream page (dark lettering, where an offset
+thickens the letterforms) and the hard offset on bark (cream lettering, where the offset
+is a real shadow). Same call the archive year on /results made this morning, from the same
+token. The rust moves to the unit, where the second ink does what it does everywhere else:
+rank a small mark under a big one. And the rule above each figure is the tickets' dashed
+tear line instead of 2px of `--plate-edge`, which was a black hairline on a near-black
+page in dark mode and therefore not there at all.
+
+`statSection` has carried an optional `heading` field since it was written and
+`SectionRenderer` threw it away; it is rendered as `.section-label` now, the outlined
+display word the other content bands wear. No schema change, and a band with nothing typed
+renders exactly as it did.
+
+**The two plain lists stay plain, and now they match.** CourseFeatures keeps its numbered
+list, and the numerals move from 14px, where they ranked under the body copy beneath them,
+to a size that reads as a marker. GearBand's four labels go from `text-h5` to the
+features' `text-h4`: the two lists sit five hundred pixels apart on /course, do the same
+job, and were set at two different sizes for no recorded reason. The course photograph
+takes `--lift-ground-lg` instead of `--lift-lg`: it sits on the page, not on a plate, so
+its black offset had been invisible on bark while the plate button below it kept a shadow.
+
+**The weather strip gets stocks.** A dry year was `--foreground` at 62%, which resolves on
+the cream page to a flat neutral grey, the one colour nowhere else in this palette, two
+dozen times in a row. Dry years are bark now and wet ones rust, both under the paper
+grain, which meant lifting the body's noise tile into a `--paper-grain` token so there is
+still exactly one grain on the site and no new asset. Two forks the file explains: the dry
+stock flips with the theme (bark on bark is a hole), and the grain has to be INVERTED on
+the cream page, because the tile is black noise and screening black is a no-op. The axis
+and the year labels go to 13px from 48rem, which is the width where the columns have room
+for it; the phone keeps 11px and its every-other-year rule. And a rain year's label is set
+in the second ink, so "which years did it rain" is answerable from the label row instead
+of from a 6px foot you have to have read the key to decode.
+
+**The records board gets a frame and nothing else.** The tables are exactly as plain as
+the file's header promises, because the argument there is still right: forty rows of times
+have to stay scannable. What changed is what they sit on. Each distance's panel goes on
+the FAQ's recessed kiosk, the same `.kiosk` stock and the same inset shadow, so the page
+called The records is finally on a board rather than floating on the band.
+
+Reusing that object has one trap, and it was worth the second pass to find it.
+`.kiosk :is(h1-h6)` paints every heading inside a kiosk in `--plate-ink`, and it is right
+to, because on the FAQ every heading sits on an index CARD and a card is a plate. Nothing
+on this board is a plate, so "Men 50K" came out cream on cream in the light theme and
+near-black on bark in the dark one: the exact failure that rule was written to stop,
+arriving from the other side. `.kiosk--records` takes its headings back to the page ink.
+
+The big faint time moved onto the board with the rows, and per distance. It used to be one
+mark for the whole section, derived from the 50K board alone, so the 27K tab printed a 50K
+record behind a table headed Women 27K. An opaque board would have hidden it outright,
+which forced the question early; each panel now prints its own record on its own board.
+The ghost photograph stays on the band and still bleeds past the board's edge.
+
+Nothing was added to the strike-in reveal Tier 2 gave the record board, on purpose: one
+entrance animation of that weight per site.
+
+---
+
 _2026-09-17 — The names go on a board, results become the timing sheet, and the
 contact page stops showing somebody else's map._
 

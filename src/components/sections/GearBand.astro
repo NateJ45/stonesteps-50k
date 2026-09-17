@@ -7,6 +7,15 @@
 // decorated pieces land.
 //
 // CONTENT block: receives a surface from the cadence in sectionCadence.ts.
+//
+// THE LABELS MATCH THE FEATURE TITLES (2026-09-17). They were `text-h5`, one
+// step under the numbered list in CourseFeatures, for no reason anybody wrote
+// down: the two lists sit five hundred pixels apart on /course, do the same job
+// (four short things you need to know before race day) and were set at two
+// different sizes, so they read as two systems rather than one. Same display
+// face, same `text-h4`. Nothing else here moves, and the rust rule stays: that
+// rule IS this band's whole treatment, and it earns its place by being the
+// cheapest possible one.
 
 import SectionHeading from '@/components/SectionHeading.astro';
 import type { ProjectedGearSection } from '@/lib/pageBuilder.types';
@@ -39,7 +48,7 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
         <ul class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((item) => (
             <li class="border-l-[3px] border-primary pl-5">
-              <h3 class="display text-h5">{item.title}</h3>
+              <h3 class="display text-h4">{item.title}</h3>
               {item.body && <p class="mt-2 text-sm text-muted-foreground">{item.body}</p>}
             </li>
           ))}
