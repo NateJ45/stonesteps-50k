@@ -554,25 +554,35 @@ through it. Two consequences: the LCP gate now describes delivery rather than
 the runner's disk, and every earlier CI Lighthouse number in this entry was
 taken uncompressed and is not comparable with numbers from here on.
 
-### 11a. 2026-09-17. The proper course arrived, and the climbing figure is now a decision
+### 11a. DONE 2026-09-17. The climbing figure is LiDAR on the proper course
 
-Dave sent "Stone Steps 50k #14", the course as it stands, replacing the COVID-year recording
-with the rerouted short loop. It went through both pipelines. The map, the mile markers, the
-Stone Steps marker and both posters are rebuilt from it, and the COVID note on the map is
-gone. It has no timestamps either (20,527 points, zero `<time>` elements), so the flyover's
-pace stays a model.
+Nathan's call: "go with the most accurate number." The site now says about 5,200 ft of
+climbing and 10,344 ft of total elevation change, from USGS 1 m LiDAR sampled along
+Dave's proper-course track ("Stone Steps 50k #14"), banked at 10 ft. `race.elevationProfile`
+is written, and the eight typed copies of the old figures (hero, ticker, two elevation
+headlines and captions, two meta descriptions, the FAQ) were updated in the same pass.
 
-What it measures off USGS 1 m LiDAR: 29.95 miles, gain 5,167 ft, loss 5,177 ft, total change
-10,344 ft, low 524 ft, high 886 ft. The previous track gave 4,673 / 9,356. The total change
-now sits within 4% of the race's traditional 10,726 ft. But Dave's own file reports about
-4,600 ft of gain, and the site currently says "about 4,700 ft" in the hero, the stat band,
-the elevation caption and the FAQ, all of them derived from `race.elevationProfile.gainFt`.
-Sampling LiDAR along a GPS track counts every lateral wobble across a slope as climb, so it
-runs high on a noisy track; a watch's barometer runs its own way. Which figure the site
-publishes is a call for Nathan and Dave, not a script: the new profile is NOT written to
-Sanity until it is made. Options are the LiDAR figure on the proper course ("about 5,200
-ft"), Dave's watch ("about 4,600 ft"), or leaving 4,700. Whatever is chosen, the FAQ's
-sentence about gain versus change stays true.
+WHAT WAS TESTED BEFORE CHOOSING, so nobody repeats it:
+
+- **Snapping the track to the OSM trail centreline before sampling is WRONG.** The idea
+  was that GPS wobble across a sidehill adds phantom climb and the drawn trail does not.
+  Point-by-point snapping made it worse: 88% of points moved a median 17.9 ft, the track
+  got 0.85 miles LONGER (29.95 to 30.80) from sideways jogs wherever consecutive points
+  landed on different ways or one snapped and the next did not, and gain rose to 5,416.
+  That the total (10,834) landed near 10,726 and the length on exactly 30.8 is coincidence
+  from the jitter, not confirmation. Proper map-matching needs a continuity model and is
+  a project, not a script.
+- **Lateral smoothing shows the wobble is small.** A 5-point (about 40 ft) moving average
+  moved gain from 5,167 to 5,145; an 11-point (about 90 ft) one to 5,054 while shortening
+  the track to 29.30 miles, which is cutting real switchbacks. So GPS noise inflates the
+  LiDAR climb by under 3%: 5,167 is robust to about plus or minus 100 ft.
+- Dave's file reports about 4,600 ft, which is Strava's own elevation model and
+  smoothing over a route export, coarser than 1 m LiDAR. The rerouted year's track gave
+  4,673 off LiDAR and 5,075 off its barometer, so the two sources have no consistent
+  bias between them; the LiDAR figure is the one whose method the caption can state.
+
+The number the race's own site publishes, 10,726 ft of total change, now sits 3.6% from
+the measured 10,344.
 
 ### 11. The modern trail map: what is possible, and the one input missing
 

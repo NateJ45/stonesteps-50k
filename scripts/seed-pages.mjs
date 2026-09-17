@@ -110,13 +110,14 @@ docs.push({
   _type: 'homePage',
   seoTitle: 'Stone Steps 50K and 27K Trail Run | Mt. Airy Forest, Cincinnati',
   seoDescription:
-    // "about 4,700' of climbing", matching the live copy since 2026-09-16. This
-    // used to say "10,726 feet of climbing", which was the old site's TOTAL
-    // ELEVATION CHANGE (up plus down) relabelled as one-way climbing: a re-seed
-    // would have put a figure back that the FAQ on the same site explains is
-    // a different kind of number. See docs/PENDING.md item 1h.
+    // "about 5,200' of climbing": USGS 1 m LiDAR along the proper-course track,
+    // the figure the live copy has carried since 2026-09-17 (docs/PENDING.md
+    // item 11a). This once said "10,726 feet of climbing", which was the old
+    // site's TOTAL ELEVATION CHANGE (up plus down) relabelled as one-way
+    // climbing, and for a day it said 4,700, the rerouted year's track. A seed
+    // string is a re-seed away from being live, so it has to match.
     "Cincinnati's longest running ultra marathon. Big and small single-track loops through " +
-    "Mt. Airy Forest, about 4,700' of climbing, Sunday 25 October 2026.",
+    "Mt. Airy Forest, about 5,200' of climbing, Sunday 25 October 2026.",
   pageBuilder: [
     {
       _type: 'raceHeroSection',
