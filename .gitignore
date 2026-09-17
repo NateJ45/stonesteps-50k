@@ -55,3 +55,7 @@ test-results/
 # Local scratch space for one-off calculations.
 .scratch/
 .tmp-shots/
+
+# The owner's scratch folder of mockups. Never source, never committed; see
+# the matching @source exclusion in src/styles/globals.css.
+design/

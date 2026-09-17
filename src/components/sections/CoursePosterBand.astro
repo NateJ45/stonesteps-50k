@@ -302,6 +302,43 @@ const H = poster.height;
     opacity: 0.85;
   }
 
+  /* THE SCRIM WAS SIZED FOR THE DESKTOP PLATE AND IT ATE THE PHONE ONE.
+     Measured at 390px: the figure is 184px tall and the caption's box was
+     141.5px of it, so 77% of a picture whose whole job is to show the terrain
+     was gradient, and the route below the first ridge read as a smear. The
+     same box on the 621px desktop plate is 22%, which is why this was never
+     visible where it was designed. The 3.5rem top pad is the whole difference:
+     it is run-up for the ramp, and a plate a third of the height needs a third
+     of the run-up.
+
+     THE RAMP IS RE-CUT, NOT JUST SQUEEZED, and that is the half of this worth
+     keeping. The desktop stops over a box 40px shorter put the caption's own
+     top line at 4.16:1, WORSE than the 6.25 it had before the box shrank,
+     because a shorter box moves the type up into the thin end of the same
+     ramp. Pulling the stops up with it measures better on every count than the
+     version this replaces: the CTA 9.64:1 against 6.25, the note 14.53 against
+     12.94, and the picture's clear area 83px against 42px of a 184px figure.
+     All four numbers read off the rendered pixels at 390px with the type
+     hidden, so they are the background and nothing else.
+
+     BELOW `.cposter__cap` ON PURPOSE: this override and the base rule have the
+     same specificity, the base rule sets `padding` as a shorthand, and the
+     first version of this lived in the ridge-height media block forty lines
+     up, where the shorthand simply won and the built CSS showed the override
+     ahead of the rule it was overriding. */
+  @media (width < 48rem) {
+    .cposter__cap {
+      padding-top: 1rem;
+      background: linear-gradient(
+        to top,
+        rgba(26, 23, 18, 0.94) 0%,
+        rgba(26, 23, 18, 0.92) 60%,
+        rgba(26, 23, 18, 0.78) 86%,
+        rgba(26, 23, 18, 0) 100%
+      );
+    }
+  }
+
   /* A line that draws itself is decoration, and decoration is what this setting
      refuses. The route is simply there.
 

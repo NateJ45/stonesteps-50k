@@ -468,8 +468,9 @@ The two entries above named cutting the stylesheet or art-directing the hero as
 the only levers left. There was a third and it was free: stop making the
 stylesheet a REQUEST. `build.inlineStylesheets: 'always'` in `astro.config.mjs`.
 
-Measured on a harness built for this and not on `npm run serve:dist`, because
-`http-server` does not compress and the entry above records what that costs.
+Measured on a harness built for this and not on `npm run serve:dist` as it
+then was, because `http-server` does not compress and the entry above records
+what that costs. (`serve:dist` now runs `scripts/serve-dist.mjs`, which does.)
 The harness gzips text, sets immutable cache headers on `/_astro/*` and delays
 every response by 50ms, so it models a network rather than a memory bus. Three
 Lighthouse mobile runs per variant, medians:
@@ -531,6 +532,22 @@ both are trades somebody should choose rather than an agent:
 
 The hero phone crop from the entry above was NOT taken. It is still a design
 decision Dave and Nathan have not made, and the numbers no longer need it.
+
+**2026-09-17, later: CI was measuring an uncompressed site, and had been all
+along.** After the inlining landed, the Lighthouse job's home LCP did not move:
+4.2 to 4.9s before and after, on the same 4.5s gate, still flapping. The reason
+is in `lighthouserc.json`: `staticDistDir` uses lhci's own static server, which
+sends every byte raw. The home HTML is 435KB raw and 84KB gzipped, and at the
+mobile throttle the raw file alone is about two seconds of download before any
+CSS can run. Production is Cloudflare and compresses everything, so CI was
+penalising the exact change that helped every reader. Measured on one machine,
+Lighthouse mobile, three runs each: through `http-server`, LCP 10,447 /
+10,476 / 10,435ms and performance 59; through `scripts/serve-dist.mjs`
+(brotli/gzip, the deploy's cache headers), LCP 3,829 / 3,827 / 3,826ms and
+performance 87. lhci now starts that server (`startServerCommand`) and audits
+through it. Two consequences: the LCP gate now describes delivery rather than
+the runner's disk, and every earlier CI Lighthouse number in this entry was
+taken uncompressed and is not comparable with numbers from here on.
 
 ### 11. The modern trail map: what is possible, and the one input missing
 
@@ -690,3 +707,52 @@ ONE THING TO SETTLE BEFORE PUBLISHING EITHER WAY: the base map is Cincinnati
 Parks' copyrighted artwork. Ask them before republishing a modified version.
 The race already partners with them and gives them $2,000 a year, so this is a
 conversation rather than an obstacle, but it should happen first.
+
+### 12. An untracked `design/` folder is in Tailwind's scan path
+
+**Nathan's call: one line in `.gitignore` closes it.**
+
+2026-09-17. Found while fixing the parity feedback loop (entry 13). Tailwind 4
+scans the whole project for candidate class names and skips only what git
+ignores, so the untracked `design/` folder in the repo root is read as source.
+Measured on the home page, same commit, same lockfile: 287,773 bytes of inline
+stylesheet with it moved out of the tree, 351,502 with it back. That is **63,729
+bytes added to every page**, and because the stylesheet is inlined it is 62KB of
+HTML per page rather than 62KB of one shared file. `text-tertiary` alone appears
+75 times in `design/` and nowhere in `src/`.
+
+IT NEVER REACHES ANYBODY. `design/` is not committed, so CI checks out a tree
+without it and what deploys is the 287KB build. This is a local-build effect
+only, which is exactly why it is easy to leave in place for months.
+
+It does have one real consequence today: `npm run parity` is unstable on a
+machine where `design/` exists, because the stylesheet it inlines into all 31
+baselines differs from the one CI would produce. The baselines committed on
+2026-09-17 were captured from a build with `design/` held out. Anyone
+recapturing should do the same, or gitignore the folder and stop thinking about
+it.
+
+### 13. DONE 2026-09-17. The parity baselines are out of Tailwind's scan path
+
+`scripts/.parity/*.html` is committed on purpose and was therefore being read as
+Tailwind source. Harmless while a baseline was markup; not harmless once
+`build.inlineStylesheets: 'always'` (entry 10) put the compiled stylesheet
+inside every baseline and took the directory from 2.1MB to 9.6MB. The scanner
+then harvested candidates out of Tailwind's own selectors: `.top-5\.5` yields
+`top-5`, `.bg-foreground\/30` yields `bg-foreground`. Worth 26,455 bytes of dead
+utilities on every page, and it made the parity gate unwinnable, because each
+capture changed the next build's CSS and the CSS is in all 31 pages.
+
+Closed with `@source not '../../scripts/.parity'` in `globals.css`, which
+carries the full argument. Capture, rebuild, compare is a fixed point now.
+
+`docs/` IS EXCLUDED TOO, AND THIS ENTRY IS WHY. Markdown is scanned, so the
+first draft of these two paragraphs named two of the harvested utilities as
+examples and the next build emitted both of them and broke parity on all 31
+pages again. A registry that cannot describe a CSS bug without reproducing it is
+a trap laid for whoever documents the next one. Excluding `docs/` also dropped
+45 rules that were only ever prose in the first place, the starter's generic
+`bg-gray-50` and `bg-indigo-600` examples among them, for another 4,350 bytes a
+page. Verified by rendered HTML rather than by reasoning: markup byte-identical
+on every page, and none of the 45 appears in a class attribute anywhere in the
+build.

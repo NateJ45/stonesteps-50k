@@ -4,6 +4,62 @@
    carries everywhere the design system is referenced. */
 
 @import 'tailwindcss';
+
+/* THE PARITY BASELINES ARE OUTPUT, AND TAILWIND WAS READING THEM AS SOURCE.
+   Tailwind 4 scans the whole project for candidate class names, skipping only
+   what git ignores, and `scripts/.parity/*.html` is committed on purpose, so it
+   was in scope. That was harmless while the baselines were markup. It stopped
+   being harmless on 2026-09-16, when `build.inlineStylesheets: 'always'` put
+   the COMPILED STYLESHEET inside every baseline and took them from 2.1MB to
+   9.6MB: the scanner then read 31 copies of Tailwind's own output and harvested
+   candidates out of the selectors in it.
+
+   It is a ratchet, and it was already turning. `.top-5\.5` in the baseline
+   yields the candidate `top-5`, `.bg-foreground\/30` yields `bg-foreground`,
+   `.ring-foreground\/10` yields `ring-foreground`, and each one is a rule the
+   next build emits and the next capture writes back for the one after that to
+   read. Proven by holding the directory out: built with `scripts/.parity`
+   moved aside, `.text-tertiary{` and `.top-5{` are absent from the home page;
+   moved back, both are present, and neither string appears anywhere in `src/`.
+
+   The second cost is that `npm run parity compare` could not be made green
+   honestly. Every capture changed the next build's CSS, which is inlined into
+   all 31 pages, so all 31 broke again on a change that touched two of them.
+
+   Worth 26,455 bytes of dead utilities on the home page, and because the
+   stylesheet is inlined that is 26KB off the HTML of every page rather than off
+   one shared file. After the exclusion, capture, rebuild and compare is a fixed
+   point: 31/31, then a full rebuild against the fresh baselines, then 31/31
+   again.
+
+   Excluded rather than gitignored, because the baselines have to stay
+   committed: that is the whole point of a baseline. A CSS file is not scanned
+   for candidates, which is the only reason this comment can name `top-5` and
+   `bg-foreground` without conjuring them. */
+@source not '../../scripts/.parity';
+
+/* AND THE PROSE IS NOT SOURCE EITHER. Markdown IS scanned, and `docs/` is where
+   this repo explains its own CSS, so writing a class name into a doc creates
+   that class in the shipped stylesheet. Not hypothetical: the PENDING entry for
+   the rule above named two of the harvested utilities as examples, and the very
+   next build emitted both of them and broke parity on all 31 pages again. A
+   registry that cannot describe a CSS bug without reproducing it is a trap, and
+   the trap is laid for whoever documents the next one.
+
+   Nothing under `docs/` is markup that ships, so excluding it can only remove
+   utilities no page asked for. Checked rather than assumed: with `docs/` out of
+   scope the build still reproduces the committed baselines exactly, 31/31,
+   which is the whole site's rendered HTML agreeing that nothing was lost. */
+@source not '../../docs';
+
+/* THE OWNER'S SCRATCH FOLDER IS NOT SOURCE. `design/` sits in the repo root,
+   untracked, holding mockups and a flier. Tailwind scans it anyway and found
+   63,729 bytes of utilities in it, so a local build shipped more CSS than CI's
+   and `npm run parity` could never agree with itself on this machine. The
+   folder is also gitignored now, so it can neither be committed by accident
+   nor change what a build emits. */
+@source not '../../design';
+
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource/staatliches/400.css';
