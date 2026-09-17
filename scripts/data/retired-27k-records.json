@@ -1,0 +1,153 @@
+{
+  "retired": "2026-09-17",
+  "why": "The 27K began in 2015 (Dave, 2026-09-17). These marks were transcribed from the old site records page and match no result on file. See docs/PENDING.md item 1j.",
+  "restore": "client.createOrReplace(doc) for each entry in docs, then athletes.",
+  "docs": [
+    {
+      "_createdAt": "2026-09-07T18:33:06Z",
+      "_id": "record-27k-M-30s",
+      "_rev": "7ROVCEO16GacwiuJkjPYq1",
+      "_type": "recordEntry",
+      "_updatedAt": "2026-09-08T18:19:42Z",
+      "athlete": {
+        "_ref": "athlete-paul-odipo",
+        "_type": "reference"
+      },
+      "bracket": "30s",
+      "distance": {
+        "_ref": "distance-27k",
+        "_type": "reference"
+      },
+      "gender": "M",
+      "timeSeconds": 7694,
+      "year": 2013
+    },
+    {
+      "_createdAt": "2026-09-07T18:33:08Z",
+      "_id": "record-27k-M-40s",
+      "_rev": "7ROVCEO16GacwiuJkjPZ2J",
+      "_type": "recordEntry",
+      "_updatedAt": "2026-09-08T18:19:44Z",
+      "athlete": {
+        "_ref": "athlete-daniel-campbell",
+        "_type": "reference"
+      },
+      "bracket": "40s",
+      "distance": {
+        "_ref": "distance-27k",
+        "_type": "reference"
+      },
+      "gender": "M",
+      "timeSeconds": 8247,
+      "year": 2011
+    },
+    {
+      "_createdAt": "2026-09-07T18:33:09Z",
+      "_id": "record-27k-M-50s",
+      "_rev": "1774y2HB1zXj7U6P8FrB2s",
+      "_type": "recordEntry",
+      "_updatedAt": "2026-09-08T18:19:45Z",
+      "athlete": {
+        "_ref": "athlete-daniel-heffernan",
+        "_type": "reference"
+      },
+      "bracket": "50s",
+      "distance": {
+        "_ref": "distance-27k",
+        "_type": "reference"
+      },
+      "gender": "M",
+      "timeSeconds": 9276,
+      "year": 2014
+    },
+    {
+      "_createdAt": "2026-09-07T18:33:10Z",
+      "_id": "record-27k-M-60s",
+      "_rev": "1774y2HB1zXj7U6P8FrBEU",
+      "_type": "recordEntry",
+      "_updatedAt": "2026-09-08T18:19:46Z",
+      "athlete": {
+        "_ref": "athlete-charles-lowery",
+        "_type": "reference"
+      },
+      "bracket": "60s",
+      "distance": {
+        "_ref": "distance-27k",
+        "_type": "reference"
+      },
+      "gender": "M",
+      "timeSeconds": 11055,
+      "year": 2010
+    },
+    {
+      "_createdAt": "2026-09-07T18:33:04Z",
+      "_id": "record-27k-M-u30",
+      "_rev": "1774y2HB1zXj7U6P8FrAXu",
+      "_type": "recordEntry",
+      "_updatedAt": "2026-09-08T18:19:41Z",
+      "athlete": {
+        "_ref": "athlete-brian-list",
+        "_type": "reference"
+      },
+      "bracket": "u30",
+      "distance": {
+        "_ref": "distance-27k",
+        "_type": "reference"
+      },
+      "gender": "M",
+      "sourceNote": "The live site publishes this time as 2010 in the age row and 2011 in the course row. It also spells the name \"Brain List\" in one of its two tables.",
+      "timeSeconds": 7116,
+      "year": 2010
+    }
+  ],
+  "athletes": [
+    {
+      "_createdAt": "2026-09-07T18:32:13Z",
+      "_id": "athlete-brian-list",
+      "_rev": "1774y2HB1zXj7U6P8Fr6UI",
+      "_type": "athlete",
+      "_updatedAt": "2026-09-08T18:18:46Z",
+      "name": "Brian List",
+      "slug": {
+        "_type": "slug",
+        "current": "brian-list"
+      }
+    },
+    {
+      "_createdAt": "2026-09-07T18:32:09Z",
+      "_id": "athlete-daniel-campbell",
+      "_rev": "3vYEUMP89Fio0oTd49DlJz",
+      "_type": "athlete",
+      "_updatedAt": "2026-09-08T18:18:43Z",
+      "name": "Daniel Campbell",
+      "slug": {
+        "_type": "slug",
+        "current": "daniel-campbell"
+      }
+    },
+    {
+      "_createdAt": "2026-09-07T18:32:08Z",
+      "_id": "athlete-daniel-heffernan",
+      "_rev": "7ROVCEO16GacwiuJkjPQFR",
+      "_type": "athlete",
+      "_updatedAt": "2026-09-08T18:18:41Z",
+      "name": "Daniel Heffernan",
+      "slug": {
+        "_type": "slug",
+        "current": "daniel-heffernan"
+      }
+    },
+    {
+      "_createdAt": "2026-09-07T18:32:11Z",
+      "_id": "athlete-paul-odipo",
+      "_rev": "7ROVCEO16GacwiuJkjPQi7",
+      "_type": "athlete",
+      "_updatedAt": "2026-09-08T18:18:44Z",
+      "name": "Paul Odipo",
+      "slug": {
+        "_type": "slug",
+        "current": "paul-odipo"
+      }
+    }
+  ]
+}

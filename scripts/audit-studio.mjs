@@ -441,7 +441,9 @@ problems += blanks;
 
 section('7. Transcribed records that duplicate a result (a hand copy that drifts)');
 // WHY THIS CHECK EXISTS. A recordEntry is for a record the results archive
-// CANNOT produce, which today means the 27K before 2015. Created for a record
+// CANNOT produce, and since 2026-09-17 there are none: the 27K marks dated
+// before 2015 were for a race that began in 2015, and were retired (see
+// scripts/retire-27k-records.mjs). Created for a record
 // that does have a result behind it, it becomes a hand copy of that row: the
 // board derives the record from the result anyway, so the copy adds nothing and
 // can only drift away from what it was copied from. That is what happened to

@@ -10,6 +10,10 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-17 — The records board shows only what a finish can prove._
+
+The five transcribed 27K records dated 2010 to 2014 came off the board. Dave wrote that the 27K began in 2015, and none of the five (Brian List, Paul Odipo, Daniel Campbell, Daniel Heffernan, Charles Lowery) matched any result on file by name or by time, in any year or either distance (PENDING 1j had the full test). `scripts/retire-27k-records.mjs` backed them up to `scripts/data/retired-27k-records.json` and deleted them, along with the four athlete documents that existed only to be referenced by them; Charles Lowery stays because he has a 50K finish. The `recordEntry` collection is now empty, so every row on /records and every holder in the home page's records band derives from a result. The men's 27K record is David Riddle, 1:59:32, 2017. The merge logic that carries a transcribed record is unchanged and documented as dormant: the type remains for a record with evidence and no result, which none of these were. The seed no longer creates transcribed records at all.
+
 _2026-09-13 — A Studio publish reaches the live site._
 
 The publish webhook had been configured since 2026-09-08 and had never delivered once. The cause was one missing word: the `Authorization` header carried the GitHub token on its own, with no `Bearer ` in front of it, so GitHub answered 401 every time. Everything else about the hook was already right. Fixed in the Sanity manage UI and proven with a forced revision, which produced `repository_dispatch` runs in seconds and deployed.

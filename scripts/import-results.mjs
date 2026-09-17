@@ -23,9 +23,10 @@
 //
 //   - Results exist for 2017 through 2025 only. 2020, 2016 and 2015 have no
 //     result set at all, and neither does the 2021 27K.
-//   - The all-time records go back to 2007, so the outright course records
-//     PREDATE anything importable. Those live as `recordEntry` documents,
-//     transcribed from the race's own published tables. See recordEntry.ts.
+//   - The years before 2017 come from scripts/import-archive.mjs instead (the
+//     2003 to 2016 tables), which is what put a result behind every record on
+//     the board. The `recordEntry` type that once bridged the gap is empty now;
+//     recordEntry.ts says why, and what would justify creating one.
 //   - chip_time is only populated from 2024. Every earlier year carries gun
 //     time in clock_time. Each result records which it got in `timeSource`,
 //     so the site never implies a precision it does not have.

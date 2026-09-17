@@ -189,10 +189,15 @@ export type FastestRow = {
  * the fastest ten starting at 1:59:32 with Brian List nowhere on it. Nathan
  * read that as an error, which is the only sensible way to read it.
  *
- * The cause is the archive's remaining gap: the 27K only has results from 2015,
- * and five of its bracket records predate that, so those five runners have a
- * record and no finish on file. The 50K has a result behind every one of its
- * records, which is why this never showed there.
+ * AND WHY THERE ARE CURRENTLY NONE TO MERGE (2026-09-17). Those five 27K rows
+ * were the whole transcribed set by then, and they turned out not to be a gap
+ * in the archive but marks for a race that did not exist: Dave says the 27K
+ * began in 2015, and none of the five matches any result on file by name or by
+ * time. They were retired (scripts/retire-27k-records.mjs, backed up in
+ * scripts/data/retired-27k-records.json), so every record on the board now has
+ * a finish behind it. The merge stays because the schema stays: a transcribed
+ * row is still the right vehicle for a record the archive genuinely cannot
+ * produce, should one ever turn up with evidence.
  *
  * DEDUPED BY TIME, not by name or year, and the reason is in the source notes
  * on the record documents: where a record and its result both exist they
