@@ -23,6 +23,31 @@
 // Usage:
 //   npm run build && npm run map-poster
 // It drives the BUILT site, because that is what readers get.
+//
+// A SECOND CALLER, AND WHY IT TAKES ENV RATHER THAN A SECOND SCRIPT. /course
+// needs its own still of this map for the "What you are running on" band, and
+// a copy of this file would be a copy of the whole waiting-for-tiles argument
+// above, which is the part that is easy to get subtly wrong. So the camera,
+// the frame and the destination are inputs:
+//
+//   POSTER_OUT=<absolute path prefix>  write <prefix>.png and nothing else.
+//                                      public/course-poster* is untouched, and
+//                                      so is the home band's JSON.
+//   POSTER_SIZE=WxH                    the capture frame, in CSS pixels.
+//   POSTER_CAMERA=z=..&p=..&b=..       the poster camera, passed through to
+//                                      CourseMapLibre's poster mode.
+//   POSTER_ASPECT=<w/h>                centre-crop the capture to this ratio.
+//                                      The map frame picks its OWN aspect from
+//                                      its breakpoints (16/9 on a wide
+//                                      viewport), so a square picture has to be
+//                                      cut out of a wide one rather than asked
+//                                      for; the camera's zoom and dy place the
+//                                      course inside the cut.
+//
+// With none of them set this behaves exactly as it did: the home page's band.
+// POSTER_OUT writes a LOSSLESS png on purpose. Its destination is Sanity,
+// which re-encodes to AVIF and WebP at half a dozen widths, and handing a
+// lossy file to a lossy pipeline compounds the artefacts for no saving.
 // =============================================================================
 
 import { chromium } from '@playwright/test';
@@ -41,9 +66,11 @@ const PORT = Number(process.env.POSTER_PORT ?? 4477);
 // the phones that matter actually have, then written at 1x and 2x so the page
 // can pick. 1200x750 is the band's widest rendered size, 8:5 because the course
 // is wider than it is tall once the camera is pitched into it.
-const W = 1200;
-const H = 750;
+const [W, H] = (process.env.POSTER_SIZE ?? '1200x750').split('x').map(Number);
 const SCALE = 2;
+// An absolute path prefix, no extension. Set, it takes over the whole output
+// half of this script; unset, everything below writes the home band as before.
+const OUT_PREFIX = process.env.POSTER_OUT ?? '';
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -104,7 +131,10 @@ async function main() {
     // forest course" at a glance, which is the whole reason the band is there.
     // `POSTER_BASEMAP=satellite` captures the imagery instead, for comparison.
     const basemap = process.env.POSTER_BASEMAP === 'satellite' ? '' : '&basemap=topo';
-    await page.goto(`http://localhost:${PORT}/course/?poster=1${basemap}`, { waitUntil: 'load' });
+    const camera = process.env.POSTER_CAMERA ? `&${process.env.POSTER_CAMERA}` : '';
+    await page.goto(`http://localhost:${PORT}/course/?poster=1${basemap}${camera}`, {
+      waitUntil: 'load',
+    });
 
     // The map is a client:visible island, so it does not exist until the
     // reader (here, the script) reaches it.
@@ -136,6 +166,35 @@ async function main() {
     const projected = await page.evaluate(() => ({ size: window.__poster.size() }));
 
     const [cssW, cssH] = projected.size;
+
+    // THE SECOND CALLER STOPS HERE. One lossless file, no resizing, no JSON:
+    // everything below this point is the home band's own ladder of widths and
+    // its reserved-box measurement, and neither means anything to an image
+    // that is about to be uploaded to a CDN that builds its own.
+    if (OUT_PREFIX) {
+      await mkdir(dirname(OUT_PREFIX), { recursive: true });
+      const aspect = Number(process.env.POSTER_ASPECT ?? 0);
+      let out = sharp(shot);
+      if (aspect > 0) {
+        const m = await sharp(shot).metadata();
+        const w = Math.min(m.width, Math.round(m.height * aspect));
+        const h = Math.min(m.height, Math.round(w / aspect));
+        out = out.extract({
+          left: Math.round((m.width - w) / 2),
+          top: Math.round((m.height - h) / 2),
+          width: w,
+          height: h,
+        });
+      }
+      await out.png().toFile(`${OUT_PREFIX}.png`);
+      const meta2 = await sharp(`${OUT_PREFIX}.png`).metadata();
+      const { size } = await stat(`${OUT_PREFIX}.png`);
+      console.log(
+        `${OUT_PREFIX}.png  ${meta2.width}x${meta2.height}  ${(size / 1024).toFixed(0)} KB`,
+      );
+      return;
+    }
+
     const outDir = join(ROOT, 'public');
     await mkdir(outDir, { recursive: true });
 
