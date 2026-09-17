@@ -16,21 +16,43 @@ sequence).
 
 ## Waiting on a human
 
-### 1j. Five transcribed 27K records predate the year the race director says the 27K began
+### 1j. Twelve 27K marks on the old records page predate 2015, and they are not typos
 
-**Blocker: only Dave can say what those five results were.**
+**Blocker: only Dave can say what event those were.**
 
 2026-09-17. Dave wrote that "the 27k came about in 2015, so you won't find a history for
-that". The transcribed records (`recordEntry` documents, taken from the old site's records
-page) carry five 27K marks BEFORE 2015: Charles Lowery and Brian List in 2010, Daniel
-Campbell 2011, Paul Odipo 2013, Daniel Heffernan 2014. Brian List's 1:58:36 is shown on the
-home page as the men's 27K course record. The results archive has 27K fields only from 2015,
-which matches Dave. So either the old site's records page labelled an earlier shorter event
-as the 27K, or Dave's date is off by a few years. Nothing has been changed: deleting a
-record on a guess is worse than showing one that needs a question. Ask Dave what distance
-those five ran, and re-label or remove the entries in the Studio accordingly. The
-"pre-2015 27K results are lost" line in the open items above should be re-read in this
-light: they may not be lost so much as never 27K.
+that". The old site's own records page (stonesteps50k.com/all-time-records/, still live,
+and the source of the transcribed `recordEntry` documents) lists 27K marks from 2010 to
+2014: Brian List, Paul Odipo, Daniel Campbell, Daniel Heffernan, Charles Lowery, Jonna
+Siferd (twice), Justin McIntyre, Dan Hollingshead, Graham Niemer, Ruth Kohstall and Angela
+Memory. Brian List's 1:58:36 is on the home page as the men's 27K course record.
+
+Nathan asked whether the years were typos. Tested against every result we hold (2,188
+rows, 2003 to 2025, both distances), by name and by exact time:
+
+- **Every 27K entry on that page dated 2015 or later matches our results exactly** on name,
+  time and year: Gleason 2015, Weiter 2015, Riddle 2017, Beeman 2019, Casaletto 2020, Kash
+  2021, Ruhlman 2021.
+- **Every entry dated before 2015 matches nothing.** Not the name in any year, not the time
+  in any year, 27K or 50K. A typo in the year would leave the name and time findable under
+  another year; these twelve are absent altogether.
+- The page is unreliable about years even so: Brian List's identical 1:58:36 is dated 2011
+  in the course-record row and 2010 in the under-30 row, and Katie Ruhlman's 2:28:40 is
+  dated 2021 in one row and 2010 in another (2021 is right; our results have it).
+- Two of the twelve ran the 50K in other years, and their "27K" times are 0.51 of their own
+  50K times: Ruth Kohstall 3:00:20 (2012) against 6:00:21 (2010, 50K); Charles Lowery
+  3:04:15 (2010) against 6:01:31 (2009, 50K). Half the 50K on this course is four loops,
+  which is what the 27K is. So the pre-2015 marks look like a real event of about the 27K's
+  length, run on this course, whose results were never posted, under a name that was not
+  "27K" or a start year Dave is misremembering. His "you won't find a history" is literally
+  true of the results; the records page kept the marks anyway.
+
+Nothing has been changed on the site. The question for Dave is now precise: was there a
+shorter race on the course before 2015, four loops or close to it, and were these its
+records? If yes and it was the same course, the marks stand and the board could say
+"27K (and its predecessor)". If it was a different route, they come off the 27K board and
+go into the archive with their own label. Either way the year column on that page cannot be
+trusted for the pre-2015 rows, so the years should come from him too.
 
 ### 1i. DONE 2026-09-16. The course-map poster is on the home page
 
