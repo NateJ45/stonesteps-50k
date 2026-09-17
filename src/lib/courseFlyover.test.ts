@@ -17,6 +17,8 @@ import {
   flightProgress,
   GRADE_STOPS,
   gradeExpressionStops,
+  gradeRampStops,
+  gradeRampCss,
   MILE,
   ELE,
   LOOP,
@@ -115,6 +117,37 @@ describe('GRADE_STOPS', () => {
     for (let i = 1; i < gs.length; i += 1) {
       assert.ok(gs[i] > gs[i - 1], `stop ${gs[i]} does not exceed ${gs[i - 1]}`);
     }
+  });
+
+  it('builds a legend ramp that spans the bar and ascends across it', () => {
+    const ramp = gradeRampStops();
+    assert.equal(ramp.length, GRADE_STOPS.length);
+    assert.equal(ramp[0].pct, 0);
+    assert.equal(ramp[ramp.length - 1].pct, 100);
+    for (let i = 1; i < ramp.length; i += 1) {
+      assert.ok(ramp[i].pct > ramp[i - 1].pct, `stop ${i} does not advance along the bar`);
+    }
+  });
+
+  // The whole reason the key is derived: it is positioned by GRADE, so the
+  // stops sit where their gradient is rather than evenly. Flat is the middle of
+  // a symmetric ramp, and -3% is a hair to its left, not a seventh of the bar.
+  it('positions each stop by its own gradient, not evenly', () => {
+    const ramp = gradeRampStops();
+    const flat = ramp[GRADE_STOPS.findIndex(([g]) => g === 0)];
+    assert.equal(flat.pct, 50);
+    const minusThree = ramp[GRADE_STOPS.findIndex(([g]) => g === -3)];
+    assert.ok(
+      Math.abs(minusThree.pct - 42.5) < 0.01,
+      `-3% sits at ${minusThree.pct}% of the bar, not where its gradient is`,
+    );
+  });
+
+  it('writes a CSS gradient carrying every stop and its colour', () => {
+    const css = gradeRampCss();
+    assert.ok(css.startsWith('linear-gradient(to right,'));
+    for (const [, color] of GRADE_STOPS) assert.ok(css.includes(color), `${color} missing`);
+    assert.ok(css.includes('0.0%') && css.includes('100.0%'));
   });
 
   it('flattens to alternating number, colour pairs', () => {

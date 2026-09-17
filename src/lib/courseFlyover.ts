@@ -244,3 +244,29 @@ export const GRADE_STOPS: [number, string][] = [
 export function gradeExpressionStops(): (number | string)[] {
   return GRADE_STOPS.flat();
 }
+
+/**
+ * The same ramp, positioned along a 0 to 100% bar for the legend under the map.
+ *
+ * DERIVED, NOT TYPED OUT AGAIN. The key used to be a seven-colour
+ * linear-gradient written into the stylesheet by hand, which is a second copy of
+ * the ramp that nothing checks: move a stop on the map and the key goes on
+ * describing the old one, silently and in the one place a reader goes to find
+ * out what the colours mean. Each stop's position is its own grade, so a stop
+ * moved from -10 to -8 moves in the key too, and evenly spacing them (which is
+ * what a hand-written gradient does) would have put -3% and 0% a sixth of the
+ * bar apart when they are a seventh of a percent of its range.
+ */
+export function gradeRampStops(): { color: string; pct: number }[] {
+  const lo = GRADE_STOPS[0][0];
+  const hi = GRADE_STOPS[GRADE_STOPS.length - 1][0];
+  const span = hi - lo || 1;
+  return GRADE_STOPS.map(([grade, color]) => ({ color, pct: ((grade - lo) / span) * 100 }));
+}
+
+/** Those stops as a CSS gradient, left to right. */
+export function gradeRampCss(): string {
+  return `linear-gradient(to right, ${gradeRampStops()
+    .map((s) => `${s.color} ${s.pct.toFixed(1)}%`)
+    .join(', ')})`;
+}

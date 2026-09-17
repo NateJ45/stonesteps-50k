@@ -54,6 +54,7 @@ import {
   pacedMileAtElapsed,
   flightProgress,
   gradeExpressionStops,
+  gradeRampCss,
   LON,
   LAT,
   ELE,
@@ -1488,9 +1489,28 @@ export default function CourseMapLibre() {
 
       <div className="cmap__cap">
         {gradeOn ? (
-          <span className="cmap__key">
-            <span className="cmapgrade" aria-hidden="true" /> Downhill to uphill, clamped at
-            &plusmn;20%
+          /* THE GRADIENT KEY. "Gradient" repaints the whole course by
+             steepness, and until now the page said which direction was which
+             in words and never said which colour was which at all: a reader
+             looking at a blue stretch had no way to find out it meant a
+             descent. The ramp is drawn from GRADE_STOPS itself, through
+             gradeRampCss, so it cannot describe colours the map has stopped
+             painting with, and the three labels are the only numbers the ramp
+             needs: its two ends and the flat in the middle. */
+          <span className="cmap__key cmapgrade">
+            <span className="cmapgrade__bar">
+              <span
+                className="cmapgrade__ramp"
+                aria-hidden="true"
+                style={{ backgroundImage: gradeRampCss() }}
+              />
+              <span className="cmapgrade__scale">
+                <span>-20%</span>
+                <span>0</span>
+                <span>+20%</span>
+              </span>
+            </span>
+            <span>Gradient, clamped at &plusmn;20%</span>
           </span>
         ) : (
           <>
