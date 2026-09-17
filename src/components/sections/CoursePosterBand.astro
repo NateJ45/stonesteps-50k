@@ -61,7 +61,13 @@ const H = poster.height;
       {intro && <p class="cposter__intro">{intro}</p>}
     </div>
 
-    <a class="cposter__link" href="/course" data-reveal>
+    <a
+      class="cposter__link"
+      href="/course"
+      data-reveal
+      data-poster-tilt
+      style={`--poster-band-bg: var(${surface === 'muted' ? '--color-muted' : '--color-background'})`}
+    >
       <figure class="cposter__figure" style={`--poster-ratio:${W} / ${H}`}>
         <picture>
           <source
@@ -84,6 +90,19 @@ const H = poster.height;
           <span class="cposter__cta">Explore the course map</span>
           <span class="cposter__note">3D terrain, mile by mile</span>
         </figcaption>
+
+        {
+          /* THE SAME CUT THE REAL MAP HAS. Two band-coloured strips masked with
+          --ridge-mask, exactly as `.cmap__ridge` does it on /course, so the
+          still and the map it is a still OF are bounded by the same contour
+          instead of one being a rounded rectangle and the other a torn band.
+          Decoration with nothing to announce, so they are aria-hidden and sit
+          outside the figure's flow. Above the caption's scrim on purpose: the
+          cut has to read as the band closing over the picture, and the caption
+          clears it with padding rather than being painted over. */
+        }
+        <span class="cposter__ridge cposter__ridge--top" aria-hidden="true"></span>
+        <span class="cposter__ridge cposter__ridge--bottom" aria-hidden="true"></span>
       </figure>
     </a>
   </div>
@@ -128,6 +147,12 @@ const H = poster.height;
     text-decoration: none;
     color: inherit;
     border-radius: 0.5rem;
+    /* The vanishing point for the tilt below. On the LINK rather than on the
+       figure, because an element cannot supply its own perspective: a
+       `perspective()` function inside the figure's own transform is measured
+       from the figure's centre and gives a flat, hinge-like rotation instead of
+       a plate lifting off the page. */
+    perspective: 1100px;
   }
 
   .cposter__link:focus-visible {
@@ -139,11 +164,71 @@ const H = poster.height;
     position: relative;
     margin: 0;
     overflow: hidden;
-    border-radius: 0.5rem;
+    /* NO RADIUS. The rounded rectangle was the last thing making this read as
+       an embedded thumbnail rather than as the map. The edge is the ridge
+       below, which is the same argument `.cmap__frame` makes on /course. */
     background: var(--color-muted);
     /* The picture's own proportions, so the box exists before the image lands
        and the page below it never jumps. */
     aspect-ratio: var(--poster-ratio);
+    /* Set by the pointer script, read here. Two degrees is the whole range: it
+       is meant to be felt rather than watched, and this plate is 1100px wide on
+       a desktop, where a few degrees is already tens of pixels of travel at the
+       corners. */
+    --poster-rx: 0deg;
+    --poster-ry: 0deg;
+    /* The cut's depth, shared by the two ridges and by the caption's padding,
+       so the text can never end up under the contour. */
+    --poster-ridge-h: 34px;
+    transform: rotateX(var(--poster-rx)) rotateY(var(--poster-ry));
+    /* Slower coming back than going out, because the return is the gesture
+       ending rather than the gesture. */
+    transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  /* While the pointer is over it the transform follows the pointer directly,
+     so the easing above would lag every move by half a second. */
+  .cposter__figure[data-tilting] {
+    transition: transform 90ms linear;
+  }
+
+  /* The band closing over the picture, top and bottom. Painted in the band's
+     own colour (passed down as --poster-band-bg by the section, the same way
+     CourseMapBand hands --cmap-band-bg to the real map), so the cut is the page
+     rather than a line drawn on the image. */
+  .cposter__ridge {
+    position: absolute;
+    inset-inline: 0;
+    height: var(--poster-ridge-h);
+    z-index: 2;
+    pointer-events: none;
+    background-color: var(--poster-band-bg, var(--color-background));
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: var(--ridge-mask);
+    mask-image: var(--ridge-mask);
+  }
+
+  .cposter__ridge--top {
+    top: 0;
+    /* The mask draws its solid half BELOW the contour, so the top edge uses it
+       flipped. Same trick as `.cmap__ridge.is-top`. */
+    transform: scaleY(-1);
+  }
+
+  .cposter__ridge--bottom {
+    bottom: 0;
+  }
+
+  /* Shallower on a phone, where the figure is a third of the height and a 34px
+     cut would eat the picture. Matches `.cmap__ridge` and `.band-torn`. */
+  @media (width < 48rem) {
+    .cposter__figure {
+      --poster-ridge-h: 22px;
+    }
   }
 
   .cposter__img {
@@ -169,8 +254,12 @@ const H = poster.height;
     flex-wrap: wrap;
     align-items: baseline;
     gap: 0.25rem 0.75rem;
-    padding: 3.5rem 1rem 1rem;
+    /* The bottom pad clears the ridge, which is painted OVER this scrim: the
+       cut belongs to the band, and type sitting in it would be type sitting in
+       the page's own colour. */
+    padding: 3.5rem 1rem calc(1rem + var(--poster-ridge-h, 34px));
     color: #fff;
+    z-index: 1;
     /* Bottom-up scrim rather than a flat panel: the text has to be legible over
        whatever the picture happens to be doing under it.
 
@@ -214,7 +303,11 @@ const H = poster.height;
   }
 
   /* A line that draws itself is decoration, and decoration is what this setting
-     refuses. The route is simply there. */
+     refuses. The route is simply there.
+
+     THE TILT IS OFF HERE TWICE OVER: the script never binds under this setting,
+     and the rule below means a stale inline value from a session that started
+     before the setting changed still cannot move the plate. */
   @media (prefers-reduced-motion: reduce) {
     .cposter__img {
       transition: none;
@@ -223,5 +316,104 @@ const H = poster.height;
     .cposter__link:hover .cposter__img {
       transform: none;
     }
+
+    .cposter__figure {
+      transform: none;
+      transition: none;
+      will-change: auto;
+    }
   }
 </style>
+
+<script>
+  // THE PLATE FOLLOWS THE POINTER, a couple of degrees, and nothing else.
+  //
+  // WHY BY HAND AND NOT IN CSS. A tilt that reads as an object needs the
+  // pointer's position inside the box, and CSS has no way to ask for it. It is
+  // about thirty lines, it touches two custom properties, and it is the whole
+  // reason this band has no framework on it.
+  //
+  // THREE THINGS IT WILL NOT DO.
+  //   1. Bind under prefers-reduced-motion. A plate that moves when the reader
+  //      did not ask anything to move is exactly what that setting is about.
+  //   2. Bind on a coarse pointer. On a touch screen the "pointer" arrives with
+  //      the tap that is already following the link, so the tilt would be a
+  //      flicker on the way out of the page, and hover state on touch is the
+  //      oldest bad idea on the web.
+  //   3. Write anything but a transform. Two custom properties feed one
+  //      `rotateX/rotateY`, so this cannot reflow the page and cannot move the
+  //      countdown, the header or anything else a layout shift would catch.
+  //      Home page CLS is 0 and the point is that it stays 0.
+  //
+  // It re-binds on every client-side navigation for the same reason the
+  // countdown does: a module runs once per full load, and the ClientRouter
+  // swaps the document without re-running it.
+  const MAX_DEG = 2.4;
+  const bound: Array<() => void> = [];
+
+  const bind = (link: HTMLElement) => {
+    if (link.dataset.tiltBound === '1') return;
+    const figure = link.querySelector<HTMLElement>('.cposter__figure');
+    if (!figure) return;
+    link.dataset.tiltBound = '1';
+
+    // One read per frame. A pointermove can fire far more often than the
+    // compositor paints, and the value from the last event in a frame is the
+    // only one that was ever going to be seen.
+    let frame = 0;
+    let pending: { x: number; y: number } | null = null;
+
+    const apply = () => {
+      frame = 0;
+      if (!pending) return;
+      const rect = figure.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      // -1 .. 1 from the centre of the plate.
+      const px = (pending.x - rect.left) / rect.width - 0.5;
+      const py = (pending.y - rect.top) / rect.height - 0.5;
+      // Pointer above centre tips the TOP away, which is the direction a hand
+      // pressing there would push it.
+      figure.style.setProperty('--poster-rx', `${(-py * 2 * MAX_DEG).toFixed(2)}deg`);
+      figure.style.setProperty('--poster-ry', `${(px * 2 * MAX_DEG).toFixed(2)}deg`);
+    };
+
+    const onMove = (e: PointerEvent) => {
+      pending = { x: e.clientX, y: e.clientY };
+      figure.setAttribute('data-tilting', '');
+      if (!frame) frame = requestAnimationFrame(apply);
+    };
+
+    const onLeave = () => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      pending = null;
+      figure.removeAttribute('data-tilting');
+      figure.style.setProperty('--poster-rx', '0deg');
+      figure.style.setProperty('--poster-ry', '0deg');
+    };
+
+    link.addEventListener('pointermove', onMove);
+    link.addEventListener('pointerleave', onLeave);
+    // A keyboard visit gets the plate square, not wherever the mouse was left.
+    link.addEventListener('focus', onLeave);
+
+    bound.push(() => {
+      if (frame) cancelAnimationFrame(frame);
+      link.removeEventListener('pointermove', onMove);
+      link.removeEventListener('pointerleave', onLeave);
+      link.removeEventListener('focus', onLeave);
+    });
+  };
+
+  const setup = () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    document.querySelectorAll<HTMLElement>('[data-poster-tilt]').forEach(bind);
+  };
+
+  setup();
+  document.addEventListener('astro:page-load', setup);
+  document.addEventListener('astro:before-swap', () => {
+    for (const stop of bound.splice(0)) stop();
+  });
+</script>
