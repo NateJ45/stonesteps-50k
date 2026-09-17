@@ -18,6 +18,15 @@ import type { ProjectedPageHeaderSection } from '@/lib/pageBuilder.types';
 
 type Props = {
   eyebrow?: string;
+  /**
+   * Optional href for the eyebrow (2026-09-17). The archive's year pages use
+   * the eyebrow as the way back up to /results, which is the one place on the
+   * site where the blaze's words are also a destination. A string-or-nothing
+   * prop rather than a slot, for the same reason the headline takes a second
+   * LINE field instead of allowing HTML: two fields cost nothing and cannot be
+   * abused by a value that one day comes from the CMS.
+   */
+  eyebrowHref?: string;
   headline?: string;
   headlineSecondLine?: string;
   lede?: string;
@@ -30,6 +39,7 @@ type Props = {
 
 const {
   eyebrow,
+  eyebrowHref,
   headline = '',
   headlineSecondLine,
   lede,
@@ -73,7 +83,13 @@ const hasImage = Boolean(image?.asset);
         {
           eyebrow && (
             <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-              {eyebrow}
+              {eyebrowHref ? (
+                <a class="hover:underline" href={eyebrowHref}>
+                  {eyebrow}
+                </a>
+              ) : (
+                eyebrow
+              )}
             </p>
           )
         }

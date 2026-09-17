@@ -52,13 +52,19 @@ const dateLabel =
     <div class="grid gap-12 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-start">
       <div>
         {
-          eyebrow && (
-            <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-              {eyebrow}
-            </p>
-          )
+          /* THE LABEL, NOT THE BLAZE (2026-09-17). This band wore the trail
+            blaze, which is the marker for a SELF_CONTAINED object: a ticket
+            rail, a schedule clipboard, the sign at the finish. This is a
+            CONTENT block. It receives its surface from the cadence and is a
+            stretch of the page rather than a thing sitting on it, so it takes
+            the outlined display label the other content bands take.
+            The headline comes up from text-h3 to text-h2 with it: the label is
+            set at display scale, and under it a 32px line read as a caption to
+            its own eyebrow. text-h2 is what every other content band pairs
+            with the label. */
+          eyebrow && <p class="section-label text-foreground/80">{eyebrow}</p>
         }
-        <h2 id={headingId} class="display mb-8 text-h3">{headline}</h2>
+        <h2 id={headingId} class="display mb-8 text-h2">{headline}</h2>
         <RaceContactForm client:load subjects={subjects} fallbackUrl={race?.facebookUrl} />
       </div>
 

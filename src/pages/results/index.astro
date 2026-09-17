@@ -21,6 +21,7 @@
 // row until its results were found; the rule stays for whatever is next.)
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/sections/PageHeader.astro';
 import { getAllResults, getDistanceRefs, getSiteSettings } from '@/lib/queries';
 import { summariseEditions, type ResultRow, type DistanceRef } from '@/lib/editions';
 import { formatRaceTime } from '@/lib/race-time';
@@ -48,30 +49,48 @@ const winnerOf = (d: { winners: { gender: string }[] }, gender: 'M' | 'F') =>
 
 const title = 'Results archive | Stone Steps 50K';
 const description = `Every Stone Steps 50K and 27K result on file, ${span}.`;
+
+// THE LEDE IS BUILT HERE rather than in the markup, because PageHeader takes a
+// string. Nothing is said when there is nothing on file: a header that counted
+// zero finishes would be stating the empty state twice, and the list below
+// already explains how to fill it.
+const lede =
+  ran.length > 0
+    ? `${totalFinishers.toLocaleString()} finishes across ${ran.length} runnings, ${span}. Pick a year to see the full field.`
+    : undefined;
 ---
 
 <BaseLayout {title} {description} {siteSettings}>
+  {
+    /* THE SAME HEADER BAND EVERY OTHER INNER PAGE GETS (2026-09-17). The
+      archive used to open with a bare eyebrow and a title on flat background:
+      no walk of prints, no rule under the band, a smaller headline than
+      /course or /records. It was the one stretch of the site that could have
+      belonged to somebody else's build. PageHeader is the object the rest of
+      the site opens with, so the archive opens with it too, and the two pages
+      cannot drift apart because there is now only one of them.
+
+      NOTHING IS ADDED BELOW THE BAND, deliberately. The ground the builder
+      pages stand on is the walk in the header and the page's own paper grain;
+      the records boards on /records sit on plain surface for the same reason
+      this list does. Forty rows of times have to stay scannable, and
+      decorating the page whose entire job is data would wreck it. */
+  }
+  <PageHeader eyebrow="Results" headline="Every running" {lede} headingId="results-heading" />
+
+  {
+    /* NO aria-labelledby ON THIS SECTION. The header band above is already a
+      region labelled by the page's h1, and repeating the same label here gives
+      two landmarks the same accessible name, which axe fails as
+      `landmark-unique` and a screen-reader user hears as the same place twice.
+      A section with no accessible name is not a landmark at all, which is what
+      this one wants to be: the page has one region, at the top. */
+  }
   <section class="bg-background py-section-lg">
     <div class="mx-auto w-full max-w-content px-6">
-      <p
-        class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase"
-      >
-        Results
-      </p>
-      <h1 class="display text-[clamp(2.5rem,7vw,4.5rem)]">Every running</h1>
-
-      {
-        ran.length > 0 && (
-          <p class="mt-6 max-w-[60ch] text-muted-foreground">
-            {totalFinishers.toLocaleString()} finishes across {ran.length} runnings, {span}. Pick a
-            year to see the full field.
-          </p>
-        )
-      }
-
       {
         editions.length === 0 && (
-          <p class="mt-6 max-w-[60ch] text-muted-foreground">
+          <p class="mb-6 max-w-[60ch] text-muted-foreground">
             No results are on file yet. Run <code>node scripts/import-results.mjs</code> to pull
             them from RunSignUp.
           </p>
@@ -87,7 +106,7 @@ const description = `Every Stone Steps 50K and 27K result on file, ${span}.`;
           over the explaining. */
       }
       <div
-        class="arch-head arch-tracks mt-12 border-b border-border pb-2 font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase"
+        class="arch-head arch-tracks border-b border-border pb-2 font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase"
         aria-hidden="true"
       >
         <span>Year</span>

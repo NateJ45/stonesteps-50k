@@ -127,9 +127,14 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
 
     <div class:list={[imageFirst ? 'md:order-2' : 'md:order-1']}>
       {
-        eyebrow && (
-          <p class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">{eyebrow}</p>
-        )
+        /* THE OUTLINED LABEL, NOT SMALL CAPS (2026-09-17). This band drew the
+          generic starter's eyebrow: 12px tracked caps, its own copy of the
+          markup, sitting two sections away from bands that announced
+          themselves with an outlined display word. Three eyebrow systems on
+          one page is not a hierarchy, it is an accident of where the code came
+          from. This is a CONTENT block, so it takes the label the other
+          content bands take, from the same `.section-label` rule. */
+        eyebrow && <p class="section-label text-foreground/80">{eyebrow}</p>
       }
       {
         heading && (

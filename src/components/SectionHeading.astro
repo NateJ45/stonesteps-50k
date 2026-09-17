@@ -8,6 +8,28 @@
 //   - level: which heading tag (h1 for hero, h2 for sections, h3 for sub-sections). Default h2.
 //   - align: "left" (default) or "center" for centered section heads
 //   - tone: "default" (foreground on light surfaces) or "inverse" (bg/light on dark CTA banners)
+//   - eyebrowStyle: which of the site's TWO eyebrow objects this band wears.
+//
+// ONE GRAMMAR, TWO EYEBROWS (2026-09-17).
+//   This component used to ship a third one: small tracked caps over a short
+//   rust hairline, inherited from the generic starter this repo was forked
+//   from. It was the DEFAULT, so it leaked onto every band that did not
+//   explicitly opt out, and an audit of the live site found three heading
+//   systems competing on the same page. The starter's is now gone from the
+//   component rather than left behind a flag, because a retired idiom that is
+//   still one prop away comes back.
+//
+//   What is left maps onto the two objects the rest of the site is built from:
+//     - "label" (the default): the outlined display word. Content bands wear
+//       it - the ones that receive a surface from the cadence and are a stretch
+//       of the page rather than a thing sitting on it.
+//     - "blaze": the painted rectangle plus its hairline rule. Self-contained
+//       bands wear it: a ticket rail, a schedule clipboard, a page header, the
+//       sign at the finish. They paint their own ground, so their heading is
+//       the top of an OBJECT, and a blaze is what marks an object on a trail.
+//   Bands that draw their own heading markup (PageHeader, DistanceTickets,
+//   ContactBand and the rest) use the same two classes directly, `.blaze` and
+//   `.section-label`; the CSS is the single source, this is the convenience.
 //
 // Script accent:
 //   - scriptAccent?: optional single word/phrase from the headline to render
@@ -53,20 +75,21 @@ interface Props {
   align?: 'left' | 'center';
   tone?: 'default' | 'inverse';
   /**
-   * Set the eyebrow in the display face at headline scale, OUTLINED.
+   * Which eyebrow object this band wears. See the note at the top of the file.
    *
-   * The reference for this is the way the best sport sites announce a section
-   * with one confident word instead of a 12px label. Set solid it would simply
-   * be a second headline, and this site's eyebrows are sentence-case phrases
-   * ("What to expect"), not single nouns, so two solid lines would compete.
-   * Outlined they do not: an outline is large without being heavy, which gives
-   * a clear hierarchy at any size, and it is already this site's idiom, because
-   * the logo's lowercase k is drawn the same way.
+   * "label" sets the eyebrow in the display face at headline scale, OUTLINED.
+   * The reference is the way the best sport sites announce a section with one
+   * confident word instead of a 12px tag. Set solid it would simply be a second
+   * headline, and this site's eyebrows are sentence-case phrases ("What to
+   * expect"), not single nouns, so two solid lines would compete. Outlined they
+   * do not: an outline is large without being heavy, which gives a clear
+   * hierarchy at any size, and it is already this site's idiom, because the
+   * logo's lowercase k is drawn the same way.
    *
-   * Opt-in per band rather than global, because it needs vertical room and a
-   * short enough eyebrow to hold one line.
+   * "blaze" is the trail marker: a painted rust rectangle, a hairline rule
+   * running off to the right, and tracked mono caps between them.
    */
-  labelDisplay?: boolean;
+  eyebrowStyle?: 'label' | 'blaze';
   /**
    * Optional single word/phrase from the headline to render in handwritten
    * the script accent font. Must match the headline text exactly (case-sensitive).
@@ -91,7 +114,7 @@ const {
   level = 'h2',
   align = 'left',
   tone = 'default',
-  labelDisplay = false,
+  eyebrowStyle = 'label',
   scriptAccent,
   headingAccent,
   class: extraClass = '',
@@ -127,35 +150,24 @@ const toneHeadline = tone === 'inverse' ? 'text-bg' : 'text-foreground';
 // dark Charcoal panel) keeps cream-on-dark.
 const toneEyebrow = tone === 'inverse' ? 'text-bg/75' : 'text-foreground/80';
 const toneSub = tone === 'inverse' ? 'text-bg/80' : 'text-foreground/80';
-
-// Bronze hairline accent beneath the eyebrow. Matches the brand-stripe
-// signature now repeating on every marketing card so section headings read
-// with the same editorial vocabulary. On inverse tone (dark FinalCta panel)
-// the hairline switches to lifted cream so it stays visible.
-const accentColor = tone === 'inverse' ? 'bg-bg/40' : 'bg-primary/60';
-const accentAlign = align === 'center' ? 'mx-auto' : '';
 ---
 
 <div class:list={[wrapperAlign, 'max-w-3xl', extraClass]}>
   {
-    eyebrow && (
-      <>
-        {labelDisplay ? (
-          /* The big version REPLACES the small one rather than joining it: the
-            same words twice is not a hierarchy, it is a stutter. The hairline
-            rule goes too, because an outlined word already reads as a label. */
-          <p class:list={['section-label', toneEyebrow]}>{eyebrow}</p>
-        ) : (
-          <>
-            <p class:list={['text-xs tracking-eyebrow uppercase', toneEyebrow]}>{eyebrow}</p>
-            <div
-              class:list={['mt-s mb-m h-px w-12', accentAlign, accentColor]}
-              aria-hidden="true"
-            />
-          </>
-        )}
-      </>
-    )
+    eyebrow &&
+      (eyebrowStyle === 'blaze' ? (
+        /* The blaze carries its own rule, so there is no separate hairline
+          element here. `text-heading-accent` colours the lettering; the painted
+          rectangle and the rule are drawn by `.blaze` from the same token. */
+        <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+          {eyebrow}
+        </p>
+      ) : (
+        /* The outlined word carries no hairline either: it is already large
+          enough to read as a label, and a rule under it would be a second
+          marker for the same job. */
+        <p class:list={['section-label', toneEyebrow]}>{eyebrow}</p>
+      ))
   }
   {
     headline &&
