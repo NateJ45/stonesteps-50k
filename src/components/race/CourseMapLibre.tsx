@@ -55,6 +55,9 @@ import {
   flightProgress,
   gradeExpressionStops,
   gradeRampCss,
+  parseCoursePosition,
+  writeCoursePosition,
+  isPosterSearch,
   LON,
   LAT,
   ELE,
@@ -1286,6 +1289,77 @@ export default function CourseMapLibre() {
     },
     [onPin, onSeek, restView],
   );
+
+  /**
+   * A POSITION ON THIS COURSE IS SHAREABLE.
+   *
+   * /course?loop=4 and /course?mile=12.3 open the map where the link's author
+   * left it, and pinning a mile or isolating a lap writes the same parameters
+   * back. The reason is the thing this page is for: somebody asking "which bit
+   * is the Stone Steps climb" or "where does lap four start" wants to send an
+   * answer, and until now the only answer they could send was the page plus a
+   * sentence of instructions.
+   *
+   * THE PARSING IS NOT HERE. parseCoursePosition owns every judgement about
+   * what a bad value is, and it is tested against thirteen shapes of rubbish,
+   * because this reads a string a stranger typed inside an effect that would
+   * take the whole island down with it if it threw.
+   */
+  const urlAppliedRef = useRef(false);
+
+  useEffect(() => {
+    // ONCE, AND ONLY ONCE THE MAP EXISTS. Applying a position needs the profile
+    // loaded (to know how long the course is) and the camera alive.
+    if (status !== 'ready' || urlAppliedRef.current) return;
+    // Set BEFORE the work, not after: it is also the flag that lets the
+    // write-back below start running, and everything from here on is a no-op on
+    // a URL that carries no position.
+    urlAppliedRef.current = true;
+
+    const pts = profileRef.current;
+    if (!pts.length) return;
+    const pos = parseCoursePosition(
+      window.location.search,
+      pts[pts.length - 1][MILE],
+      meta.loops.length,
+    );
+    if (pos.loop != null) focusLoop(pos.loop);
+    // A mile after a loop on purpose: ?loop=4&mile=15 means "lap four, and here
+    // in it", and focusLoop has just pinned that lap's start line.
+    if (pos.mile != null) {
+      onPin(pos.mile);
+      onSeek(pos.mile);
+    }
+  }, [status, focusLoop, onPin, onSeek]);
+
+  useEffect(() => {
+    if (!urlAppliedRef.current) return;
+    // NEVER IN POSTER MODE. The capture script drives this page through its own
+    // parameters and reads the canvas; rewriting the address it is working
+    // against mid-capture is the kind of bug that shows up as one bad poster
+    // months later. isPosterSearch holds for the whole session, because the
+    // parameters it looks for are never removed.
+    const search = window.location.search;
+    if (isPosterSearch(search)) return;
+
+    // A lap's own start line is what the chip pins, so writing it as well would
+    // be the same fact twice in a link people have to read.
+    const start = activeLoop == null ? null : loopStartMile(activeLoop);
+    const mile =
+      pinnedMile != null && start != null && Math.abs(pinnedMile - start) < 0.01
+        ? null
+        : pinnedMile;
+
+    const next = writeCoursePosition(search, { loop: activeLoop, mile });
+    if (next === search) return;
+    // replaceState, not pushState: a marker moved is not a page the Back button
+    // should have to walk through, and it leaves the scroll position alone.
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${next}${window.location.hash}`,
+    );
+  }, [activeLoop, pinnedMile]);
 
   const toggleGrade = () => {
     const map = getMap();

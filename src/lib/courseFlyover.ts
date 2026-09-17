@@ -270,3 +270,97 @@ export function gradeRampCss(): string {
     .map((s) => `${s.color} ${s.pct.toFixed(1)}%`)
     .join(', ')})`;
 }
+
+// =============================================================================
+// Sharing a position on the course
+// =============================================================================
+// /course?loop=4 and /course?mile=12.3 open the map where the link's author
+// left it, and pinning or isolating writes the same parameters back. Both live
+// here rather than in the component because the interesting part is entirely
+// about strings and bounds, which is testable, and the part that is not is one
+// history.replaceState call.
+// =============================================================================
+
+/**
+ * The parameters scripts/capture-map-poster.mjs drives the map with.
+ *
+ * SEEING ANY OF THESE MEANS THE PAGE IS BEING PHOTOGRAPHED, NOT READ. The
+ * capture opens /course?poster=1 in a headless browser and reads the canvas;
+ * a position written into that URL mid-capture would change the address the
+ * script is working against, and `b` (bearing) would sit next to a `mile` that
+ * means nothing to it. So the whole sharing feature switches off when one is
+ * present, in both directions: nothing is read, and nothing is written.
+ */
+export const POSTER_PARAMS = ['poster', 'basemap', 'z', 'p', 'b', 'dx', 'dy'] as const;
+
+/** A place on the course a link can point at. Both null means "no opinion". */
+export interface CoursePosition {
+  loop: number | null;
+  mile: number | null;
+}
+
+export const NO_POSITION: CoursePosition = { loop: null, mile: null };
+
+/** Is this query string one of the poster capture's own? */
+export function isPosterSearch(search: string): boolean {
+  const q = new URLSearchParams(search);
+  return POSTER_PARAMS.some((k) => q.has(k));
+}
+
+/**
+ * Read ?loop= and ?mile= out of a query string.
+ *
+ * EVERY BAD VALUE IS SIMPLY NOT A POSITION. This parses a string a stranger
+ * typed, or a link that was truncated by a chat client, or a crawler's guess:
+ * ?loop=99, ?mile=NaN, ?mile= and ?loop=two all have to leave the map exactly
+ * as it opens rather than throw inside a React effect, which on this page would
+ * take the whole island down and leave a blank frame.
+ *
+ * A mile outside the course is CLAMPED rather than rejected, because ?mile=31
+ * on a 29.6 mile course is somebody rounding, not somebody wrong.
+ */
+export function parseCoursePosition(
+  search: string,
+  totalMiles: number,
+  loopCount: number,
+): CoursePosition {
+  if (isPosterSearch(search)) return NO_POSITION;
+  const q = new URLSearchParams(search);
+
+  const rawLoop = q.get('loop');
+  const loopNum = rawLoop == null ? NaN : Number(rawLoop.trim());
+  const loop =
+    rawLoop != null &&
+    rawLoop.trim() !== '' &&
+    Number.isInteger(loopNum) &&
+    loopNum >= 1 &&
+    loopNum <= loopCount
+      ? loopNum
+      : null;
+
+  const rawMile = q.get('mile');
+  const mileNum = rawMile == null ? NaN : Number(rawMile.trim());
+  const mile =
+    rawMile != null && rawMile.trim() !== '' && Number.isFinite(mileNum)
+      ? Math.max(0, Math.min(totalMiles, mileNum))
+      : null;
+
+  return { loop, mile };
+}
+
+/**
+ * The query string to put in the address bar for a position, preserving any
+ * other parameter the URL already carried.
+ *
+ * Two decimal places, which is about 50 feet on this course: enough to name a
+ * switchback, short enough that the link is still readable in a message.
+ */
+export function writeCoursePosition(search: string, pos: CoursePosition): string {
+  const q = new URLSearchParams(search);
+  if (pos.loop == null) q.delete('loop');
+  else q.set('loop', String(pos.loop));
+  if (pos.mile == null) q.delete('mile');
+  else q.set('mile', pos.mile.toFixed(2));
+  const s = q.toString();
+  return s ? `?${s}` : '';
+}
