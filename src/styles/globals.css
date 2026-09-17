@@ -52,6 +52,14 @@
    which is the whole site's rendered HTML agreeing that nothing was lost. */
 @source not '../../docs';
 
+/* THE OWNER'S SCRATCH FOLDER IS NOT SOURCE. `design/` sits in the repo root,
+   untracked, holding mockups and a flier. Tailwind scans it anyway and found
+   63,729 bytes of utilities in it, so a local build shipped more CSS than CI's
+   and `npm run parity` could never agree with itself on this machine. The
+   folder is also gitignored now, so it can neither be committed by accident
+   nor change what a build emits. */
+@source not '../../design';
+
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource/staatliches/400.css';
