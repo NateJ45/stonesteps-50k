@@ -52,10 +52,13 @@ import {
   sampleAt,
   buildPacing,
   pacedMileAtElapsed,
+  flightProgress,
   gradeExpressionStops,
   LON,
   LAT,
+  ELE,
   MILE,
+  GRADE,
   LOOP,
   type ProfilePoint,
 } from '@/lib/courseFlyover';
@@ -1239,6 +1242,23 @@ export default function CourseMapLibre() {
     map.easeTo({ pitch: next ? REST_PITCH : 0, duration: 600 });
   };
 
+  /**
+   * THE HUD IS DERIVED, NOT STORED. The flight already pushes a new cursorMile
+   * through state on every frame, so the component re-renders sixty times a
+   * second whether or not anything else changes; adding a second piece of state
+   * for the readout would double the work to show a number that is a pure
+   * function of the first. The two refs read here are the flight's own start
+   * mile and its pacing table, both of which are set before the first frame of
+   * a flight and cannot change during one.
+   */
+  const hudMile = playing ? cursorMile : null;
+  const hudPoint =
+    hudMile == null || !profile.length ? null : sampleAt(profile, indexAtMile(profile, hudMile));
+  const hudProgress =
+    hudMile == null || !pacingRef.current
+      ? 0
+      : flightProgress(profile, pacingRef.current, flyFromMileRef.current, hudMile);
+
   return (
     <div className="cmapwrap">
       <div className="cmap__frame">
@@ -1248,6 +1268,48 @@ export default function CourseMapLibre() {
             a compositing layer and this only has to cover it. */}
         <span className="cmap__ridge is-top" aria-hidden="true" />
         <span className="cmap__ridge is-bottom" aria-hidden="true" />
+
+        {/* THE FLIGHT HUD. For the ninety seconds the camera is moving, the eye
+            is on the terrain and the readout that answers "where is this" is in
+            the profile strip below the map, outside the frame entirely. So the
+            numbers come onto the map for the duration of the flight and leave
+            with it.
+
+            aria-hidden, because it is the same four facts the profile readout
+            carries and that one is the accessible copy: announcing a mile
+            number sixty times a second is not a readout, it is noise. Under
+            reduced motion this never appears at all, because the flyover jumps
+            to the finish instead of playing and `playing` is never true. */}
+        {hudPoint && (
+          <div className="cmaphud" aria-hidden="true">
+            <b className="cmaphud__mile">Mile {hudPoint[MILE].toFixed(1)}</b>
+            <span className="cmaphud__row">
+              <span>{Math.round(hudPoint[ELE])} ft</span>
+              <span>
+                {hudPoint[GRADE] > 0 ? '+' : ''}
+                {hudPoint[GRADE].toFixed(1)}%
+              </span>
+              <span>Loop {hudPoint[LOOP]}</span>
+            </span>
+          </div>
+        )}
+        {/* A VIGNETTE, ONLY WHILE FLYING. At a 74 degree pitch the frame is
+            mostly sky and far ground, and the four hard corners of a rectangle
+            fight the horizon. Darkening the edges settles them, and it is a
+            static gradient over the canvas: no filter, no compositing of the
+            live WebGL layer. */}
+        {hudPoint && <span className="cmap__vignette" aria-hidden="true" />}
+        {/* HOW FAR THROUGH THE FLIGHT. One line at the foot of the frame,
+            scaled on the x axis, so the only thing animating is a transform.
+            See flightProgress: it is measured in effort, which is time. */}
+        {hudPoint && (
+          <span className="cmap__flightbar" aria-hidden="true">
+            <span
+              className="cmap__flightbar-fill"
+              style={{ transform: `scaleX(${hudProgress.toFixed(4)})` }}
+            />
+          </span>
+        )}
         {/* ON THE MAP, NOT UNDER IT. A row of rectangles beneath a rectangle is
           three boxes; a single translucent bar sitting on the terrain is one
           object, and it is what every mapping product does with its controls.

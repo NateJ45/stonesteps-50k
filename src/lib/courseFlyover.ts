@@ -198,6 +198,31 @@ export function effortAtMile(pts: ProfilePoint[], cum: number[], mile: number): 
 }
 
 /**
+ * How far through a flight the camera is: 0 at the mile it started from, 1 at
+ * the finish.
+ *
+ * MEASURED IN EFFORT, NOT IN MILES. pacedMileAtElapsed maps elapsed time
+ * linearly onto cumulative effort, so effort IS elapsed time and a bar drawn
+ * from it answers "how much of the ninety seconds is left", which is the
+ * question a progress line is asked. A bar drawn from miles would sprint down
+ * the descents and stall on the climbs, which is the exact behaviour the
+ * gradient pacing was added to get rid of.
+ */
+export function flightProgress(
+  pts: ProfilePoint[],
+  cum: number[],
+  fromMile: number,
+  mile: number,
+): number {
+  if (pts.length === 0 || cum.length !== pts.length) return 0;
+  const start = effortAtMile(pts, cum, fromMile);
+  const span = cum[cum.length - 1] - start;
+  // Starting at the finish line is a flight with nothing left in it.
+  if (span <= 0) return 1;
+  return Math.max(0, Math.min(1, (effortAtMile(pts, cum, mile) - start) / span));
+}
+
+/**
  * The colour ramp for gradient shading, as MapLibre `interpolate` stops.
  *
  * Centred on zero and symmetric, so flat ground is neutral and the eye reads

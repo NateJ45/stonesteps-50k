@@ -14,6 +14,7 @@ import {
   gradeSpeedFactor,
   buildPacing,
   pacedMileAtElapsed,
+  flightProgress,
   GRADE_STOPS,
   gradeExpressionStops,
   MILE,
@@ -198,5 +199,58 @@ describe('buildPacing and pacedMileAtElapsed', () => {
 
   it('survives a degenerate duration rather than dividing by zero', () => {
     assert.equal(pacedMileAtElapsed(pts, cum, 0, 5, 0), pts[pts.length - 1][MILE]);
+  });
+});
+
+describe('flightProgress', () => {
+  /** The same half flat, half 20% climb the pacing tests use. */
+  const pts: ProfilePoint[] = [];
+  for (let i = 0; i <= 20; i += 1) {
+    const mile = i / 20;
+    const grade = mile <= 0.5 ? 0 : 20;
+    pts.push([-84.6 + mile * 0.01, 39.17, 800, mile, grade, 1] as ProfilePoint);
+  }
+  const cum = buildPacing(pts);
+  const total = pts[pts.length - 1][MILE];
+
+  it('runs 0 to 1 across the whole flight', () => {
+    assert.equal(flightProgress(pts, cum, 0, 0), 0);
+    assert.equal(flightProgress(pts, cum, 0, total), 1);
+  });
+
+  it('starts at zero for a flight begun part way along', () => {
+    assert.equal(flightProgress(pts, cum, 0.6, 0.6), 0);
+    assert.equal(flightProgress(pts, cum, 0.6, total), 1);
+  });
+
+  // THE POINT OF MEASURING IT IN EFFORT. The bar is a clock, so at the halfway
+  // mark in TIME it must read half, even though the camera is nowhere near the
+  // halfway mile: the climbing half of this route costs more per mile.
+  it('agrees with the clock, not with the distance', () => {
+    const half = pacedMileAtElapsed(pts, cum, 0, 30, 60);
+    assert.ok(half > 0.5, `setup wrong: expected to be past the flat, got ${half}`);
+    assert.ok(
+      Math.abs(flightProgress(pts, cum, 0, half) - 0.5) < 0.01,
+      `bar read ${flightProgress(pts, cum, 0, half)} at the halfway second`,
+    );
+  });
+
+  it('never runs backwards as the flight advances', () => {
+    let last = -1;
+    for (let t = 0; t <= 60; t += 1) {
+      const p = flightProgress(pts, cum, 0, pacedMileAtElapsed(pts, cum, 0, t, 60));
+      assert.ok(p >= last, `went backwards at ${t}s`);
+      last = p;
+    }
+  });
+
+  it('clamps rather than reporting a bar past its own end', () => {
+    assert.equal(flightProgress(pts, cum, 0, -5), 0);
+    assert.equal(flightProgress(pts, cum, 0, 99), 1);
+  });
+
+  it('survives an empty route and a flight from the finish line', () => {
+    assert.equal(flightProgress([], [], 0, 1), 0);
+    assert.equal(flightProgress(pts, cum, total, total), 1);
   });
 });
