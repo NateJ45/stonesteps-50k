@@ -14,8 +14,14 @@ import {
   gradeSpeedFactor,
   buildPacing,
   pacedMileAtElapsed,
+  flightProgress,
   GRADE_STOPS,
   gradeExpressionStops,
+  gradeRampStops,
+  gradeRampCss,
+  parseCoursePosition,
+  writeCoursePosition,
+  isPosterSearch,
   MILE,
   ELE,
   LOOP,
@@ -116,6 +122,37 @@ describe('GRADE_STOPS', () => {
     }
   });
 
+  it('builds a legend ramp that spans the bar and ascends across it', () => {
+    const ramp = gradeRampStops();
+    assert.equal(ramp.length, GRADE_STOPS.length);
+    assert.equal(ramp[0].pct, 0);
+    assert.equal(ramp[ramp.length - 1].pct, 100);
+    for (let i = 1; i < ramp.length; i += 1) {
+      assert.ok(ramp[i].pct > ramp[i - 1].pct, `stop ${i} does not advance along the bar`);
+    }
+  });
+
+  // The whole reason the key is derived: it is positioned by GRADE, so the
+  // stops sit where their gradient is rather than evenly. Flat is the middle of
+  // a symmetric ramp, and -3% is a hair to its left, not a seventh of the bar.
+  it('positions each stop by its own gradient, not evenly', () => {
+    const ramp = gradeRampStops();
+    const flat = ramp[GRADE_STOPS.findIndex(([g]) => g === 0)];
+    assert.equal(flat.pct, 50);
+    const minusThree = ramp[GRADE_STOPS.findIndex(([g]) => g === -3)];
+    assert.ok(
+      Math.abs(minusThree.pct - 42.5) < 0.01,
+      `-3% sits at ${minusThree.pct}% of the bar, not where its gradient is`,
+    );
+  });
+
+  it('writes a CSS gradient carrying every stop and its colour', () => {
+    const css = gradeRampCss();
+    assert.ok(css.startsWith('linear-gradient(to right,'));
+    for (const [, color] of GRADE_STOPS) assert.ok(css.includes(color), `${color} missing`);
+    assert.ok(css.includes('0.0%') && css.includes('100.0%'));
+  });
+
   it('flattens to alternating number, colour pairs', () => {
     const flat = gradeExpressionStops();
     assert.equal(flat.length, GRADE_STOPS.length * 2);
@@ -198,5 +235,138 @@ describe('buildPacing and pacedMileAtElapsed', () => {
 
   it('survives a degenerate duration rather than dividing by zero', () => {
     assert.equal(pacedMileAtElapsed(pts, cum, 0, 5, 0), pts[pts.length - 1][MILE]);
+  });
+});
+
+describe('flightProgress', () => {
+  /** The same half flat, half 20% climb the pacing tests use. */
+  const pts: ProfilePoint[] = [];
+  for (let i = 0; i <= 20; i += 1) {
+    const mile = i / 20;
+    const grade = mile <= 0.5 ? 0 : 20;
+    pts.push([-84.6 + mile * 0.01, 39.17, 800, mile, grade, 1] as ProfilePoint);
+  }
+  const cum = buildPacing(pts);
+  const total = pts[pts.length - 1][MILE];
+
+  it('runs 0 to 1 across the whole flight', () => {
+    assert.equal(flightProgress(pts, cum, 0, 0), 0);
+    assert.equal(flightProgress(pts, cum, 0, total), 1);
+  });
+
+  it('starts at zero for a flight begun part way along', () => {
+    assert.equal(flightProgress(pts, cum, 0.6, 0.6), 0);
+    assert.equal(flightProgress(pts, cum, 0.6, total), 1);
+  });
+
+  // THE POINT OF MEASURING IT IN EFFORT. The bar is a clock, so at the halfway
+  // mark in TIME it must read half, even though the camera is nowhere near the
+  // halfway mile: the climbing half of this route costs more per mile.
+  it('agrees with the clock, not with the distance', () => {
+    const half = pacedMileAtElapsed(pts, cum, 0, 30, 60);
+    assert.ok(half > 0.5, `setup wrong: expected to be past the flat, got ${half}`);
+    assert.ok(
+      Math.abs(flightProgress(pts, cum, 0, half) - 0.5) < 0.01,
+      `bar read ${flightProgress(pts, cum, 0, half)} at the halfway second`,
+    );
+  });
+
+  it('never runs backwards as the flight advances', () => {
+    let last = -1;
+    for (let t = 0; t <= 60; t += 1) {
+      const p = flightProgress(pts, cum, 0, pacedMileAtElapsed(pts, cum, 0, t, 60));
+      assert.ok(p >= last, `went backwards at ${t}s`);
+      last = p;
+    }
+  });
+
+  it('clamps rather than reporting a bar past its own end', () => {
+    assert.equal(flightProgress(pts, cum, 0, -5), 0);
+    assert.equal(flightProgress(pts, cum, 0, 99), 1);
+  });
+
+  it('survives an empty route and a flight from the finish line', () => {
+    assert.equal(flightProgress([], [], 0, 1), 0);
+    assert.equal(flightProgress(pts, cum, total, total), 1);
+  });
+});
+
+describe('parseCoursePosition', () => {
+  const TOTAL = 29.63;
+
+  it('reads a loop and a mile', () => {
+    assert.deepEqual(parseCoursePosition('?loop=4', TOTAL, 7), { loop: 4, mile: null });
+    assert.deepEqual(parseCoursePosition('?mile=12.3', TOTAL, 7), { loop: null, mile: 12.3 });
+  });
+
+  it('works with or without the leading question mark', () => {
+    assert.equal(parseCoursePosition('loop=2', TOTAL, 7).loop, 2);
+  });
+
+  it('leaves other parameters alone', () => {
+    assert.equal(parseCoursePosition('?utm_source=fb&mile=3', TOTAL, 7).mile, 3);
+  });
+
+  // THE POINT OF THE WHOLE FUNCTION. This parses a string a stranger typed or a
+  // chat client truncated, inside an effect that would take the island down
+  // with it. Every one of these has to come back as "no opinion".
+  it('refuses every shape of bad value rather than throwing', () => {
+    for (const bad of [
+      '?loop=0',
+      '?loop=8',
+      '?loop=-1',
+      '?loop=two',
+      '?loop=',
+      '?loop=3.5',
+      '?loop=NaN',
+      '?mile=',
+      '?mile=NaN',
+      '?mile=abc',
+      '?mile=Infinity',
+      '',
+      '?',
+    ]) {
+      const pos = parseCoursePosition(bad, TOTAL, 7);
+      assert.ok(
+        pos.loop == null && pos.mile == null,
+        `${bad} produced ${JSON.stringify(pos)} instead of nothing`,
+      );
+    }
+  });
+
+  it('clamps a mile into the course rather than rejecting it', () => {
+    assert.equal(parseCoursePosition('?mile=31', TOTAL, 7).mile, TOTAL);
+    assert.equal(parseCoursePosition('?mile=-4', TOTAL, 7).mile, 0);
+  });
+
+  // The capture script opens /course?poster=1 in a headless browser. Reading a
+  // position out of that URL, or writing one into it, would change the address
+  // the script is working against mid-capture.
+  it('says nothing at all in poster mode', () => {
+    for (const q of ['?poster=1&mile=4', '?basemap=topo&loop=2', '?z=14.6&mile=9', '?b=-22']) {
+      assert.ok(isPosterSearch(q), `${q} not recognised as a capture URL`);
+      assert.deepEqual(parseCoursePosition(q, TOTAL, 7), { loop: null, mile: null });
+    }
+    assert.equal(isPosterSearch('?mile=4&loop=2'), false);
+  });
+});
+
+describe('writeCoursePosition', () => {
+  it('writes each parameter and removes it again', () => {
+    assert.equal(writeCoursePosition('', { loop: 3, mile: null }), '?loop=3');
+    assert.equal(writeCoursePosition('', { loop: null, mile: 12.345 }), '?mile=12.35');
+    assert.equal(writeCoursePosition('?loop=3&mile=8.00', { loop: null, mile: null }), '');
+  });
+
+  it('keeps parameters that are not ours', () => {
+    const out = writeCoursePosition('?utm_source=fb&loop=1', { loop: null, mile: 2 });
+    assert.ok(out.includes('utm_source=fb'));
+    assert.ok(out.includes('mile=2.00'));
+    assert.ok(!out.includes('loop='));
+  });
+
+  it('round trips through the parser', () => {
+    const written = writeCoursePosition('', { loop: null, mile: 21.5 });
+    assert.equal(parseCoursePosition(written, 29.63, 7).mile, 21.5);
   });
 });

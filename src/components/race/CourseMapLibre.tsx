@@ -52,10 +52,17 @@ import {
   sampleAt,
   buildPacing,
   pacedMileAtElapsed,
+  flightProgress,
   gradeExpressionStops,
+  gradeRampCss,
+  parseCoursePosition,
+  writeCoursePosition,
+  isPosterSearch,
   LON,
   LAT,
+  ELE,
   MILE,
+  GRADE,
   LOOP,
   type ProfilePoint,
 } from '@/lib/courseFlyover';
@@ -118,6 +125,19 @@ const FLY_ZOOM = 15.2;
 const REST_PITCH = 66;
 
 /**
+ * The resting shot's heading, off north just enough to read as a photograph of
+ * a place rather than as a plan of one.
+ *
+ * NAMED RATHER THAN TYPED TWICE. This is both the camera the map opens with and
+ * the camera a finished flight returns to, and the two have to be the same
+ * picture or the flight ends somewhere the reader has never seen.
+ */
+const REST_BEARING = -18;
+
+/** How long the return to the resting view takes when a flight finishes. */
+const REST_SECONDS = 2.4;
+
+/**
  * How long the route takes to draw itself in, once, on arrival.
  *
  * Long enough to read as the course being traced and short enough that nobody
@@ -155,6 +175,15 @@ export default function CourseMapLibre() {
   const clickRef = useRef<((lngLat: [number, number], px: [number, number]) => void) | null>(null);
   const activeLoopRef = useRef<number | null>(null);
   const [playing, setPlaying] = useState(false);
+  /**
+   * Whether the last flight ran all the way to The Oval.
+   *
+   * Only so the button can say "Fly again". Without it the label falls through
+   * to "Fly from here", because the flight leaves the cursor sitting on the
+   * finish line, and a button offering to fly from the end of the course is an
+   * offer to do nothing.
+   */
+  const [finished, setFinished] = useState(false);
   const [cursorMile, setCursorMile] = useState<number | null>(null);
   /**
    * The mile the reader PLACED, as opposed to the one they are hovering.
@@ -581,7 +610,7 @@ export default function CourseMapLibre() {
           ],
           fitBoundsOptions: { padding: 40 },
           pitch: REST_PITCH,
-          bearing: -18,
+          bearing: REST_BEARING,
           maxZoom: 18,
           // Past the default 60 the horizon appears. See FLY_PITCH.
           maxPitch: 85,
@@ -818,6 +847,29 @@ export default function CourseMapLibre() {
   }, []);
 
   /**
+   * Back to the shot the map opened with: the whole course in frame, from the
+   * resting pitch and heading.
+   *
+   * FLAT STAYS FLAT, for the same reason seeking and flying do. A reader who
+   * pressed Flatten has said what they want the map to be, and returning from a
+   * flight is not a good enough reason to overrule them.
+   */
+  const restView = useCallback((m: import('maplibre-gl').Map, seconds = REST_SECONDS) => {
+    m.fitBounds(
+      [
+        [meta.bounds.west, meta.bounds.south],
+        [meta.bounds.east, meta.bounds.north],
+      ],
+      {
+        padding: 40,
+        pitch: terrainRef.current ? REST_PITCH : 0,
+        bearing: REST_BEARING,
+        duration: prefersReducedMotion() ? 0 : seconds * 1000,
+      },
+    );
+  }, []);
+
+  /**
    * Trace the course once, on arrival.
    *
    * THE GRADIENT IS THE ANIMATION. Four stops walk along ['line-progress']: solid
@@ -924,6 +976,12 @@ export default function CourseMapLibre() {
   const onScrub = useCallback(
     (mile: number | null) => {
       setCursorMile(mile);
+      // Touching the course at all ends the "that flight is over" state, so the
+      // button goes back to offering a flight from wherever the reader now is.
+      // Every other gesture that moves the marker (pinning on the map, dragging
+      // the slider, clicking the profile) passes through here first, so this is
+      // the one place it has to be cleared.
+      if (mile != null) setFinished(false);
       // Leaving the profile does not clear the marker, it falls back to the
       // pinned one. Passing `mile` straight through here is what made the
       // marker vanish the moment the pointer left.
@@ -1109,6 +1167,7 @@ export default function CourseMapLibre() {
       }
 
       const total = pts[pts.length - 1][MILE];
+      setFinished(false);
       flyFromMileRef.current = fromMile >= total - 0.05 ? 0 : fromMile;
       flyStartRef.current = performance.now();
       playingRef.current = true;
@@ -1151,58 +1210,168 @@ export default function CourseMapLibre() {
 
         if (mile >= total - 1e-4) {
           stopFly();
+          // A PROPER ENDING. The flight used to stop dead at The Oval, at the
+          // flying pitch and zoom, pointed north at a patch of grass: the last
+          // thing a reader saw of a ninety second flight was a frame that did
+          // not say the course was finished, only that the camera had stopped.
+          // Easing back to the shot the map opened with reads as landing, and
+          // it leaves the map in the state anyone arriving at it would find.
+          setFinished(true);
+          restView(m);
           return;
         }
         rafRef.current = requestAnimationFrame(step);
       };
       rafRef.current = requestAnimationFrame(step);
     },
-    [onSeek, showCursorAt],
+    [onSeek, showCursorAt, restView],
   );
 
-  /** Frame a single loop, or the whole course when cleared. */
-  const focusLoop = useCallback((loop: number | null) => {
-    const map = getMap();
-    const pts = profileRef.current;
-    setActiveLoop(loop);
-    activeLoopRef.current = loop;
-    if (!map) return;
-    stopFly();
+  /**
+   * Where a lap begins, in miles into the race.
+   *
+   * FROM THE BUILD SCRIPT'S FIGURE, not from a scan of the profile, because
+   * course-map.json is what the chips already print their distances from and
+   * two sources for the same number is one source too many. The scan is the
+   * fallback for a lap the metadata somehow does not carry.
+   */
+  const loopStartMile = (loop: number): number | null => {
+    const known = meta.loops.find((l) => l.index === loop);
+    if (known && Number.isFinite(known.startMile)) return known.startMile;
+    const first = profileRef.current.find((q) => q[LOOP] === loop);
+    return first ? first[MILE] : null;
+  };
 
-    // Dim the rest rather than hiding it: the point of isolating a loop is to
-    // see where it sits in the others.
-    for (const id of ['course-long', 'course-short']) {
-      if (!map.getLayer(id)) continue;
-      map.setPaintProperty(
-        id,
-        'line-opacity',
-        loop == null ? 1 : ['case', ['==', ['get', 'index'], loop], 1, 0.18],
-      );
-    }
+  /** Isolate a single lap and go to its start, or return to the whole course. */
+  const focusLoop = useCallback(
+    (loop: number | null) => {
+      const map = getMap();
+      setActiveLoop(loop);
+      activeLoopRef.current = loop;
+      if (!map) return;
+      stopFly();
+      setFinished(false);
 
-    if (loop == null) {
+      // Dim the rest rather than hiding it: the point of isolating a loop is to
+      // see where it sits in the others.
+      for (const id of ['course-long', 'course-short']) {
+        if (!map.getLayer(id)) continue;
+        map.setPaintProperty(
+          id,
+          'line-opacity',
+          loop == null ? 1 : ['case', ['==', ['get', 'index'], loop], 1, 0.18],
+        );
+      }
+
+      if (loop == null) {
+        onPin(null);
+        restView(map, 0.9);
+        return;
+      }
+
+      // FRAME THE LAP, AND PIN ITS START LINE. A first version flew the camera
+      // down to the lap's start mile instead, on the argument that every other
+      // way into the course puts the camera on the ground. On THIS course that
+      // argument fails: every lap starts at The Oval, so seven chips that fly
+      // to the start line all fly to the same spot, and the chip loses the one
+      // thing it can tell you, which is the shape of that lap. So the camera
+      // frames the whole lap from above, as it always did, and the marker goes
+      // on the start line so the profile below lands on that lap too.
+      const start = loopStartMile(loop);
+      if (start != null) onPin(start);
+      settleRoute(map);
+      const pts = profileRef.current;
+      const own = pts.filter((q) => q[LOOP] === loop);
+      if (!own.length) return;
+      const lons = own.map((q) => q[LON]);
+      const lats = own.map((q) => q[LAT]);
       map.fitBounds(
         [
-          [meta.bounds.west, meta.bounds.south],
-          [meta.bounds.east, meta.bounds.north],
+          [Math.min(...lons), Math.min(...lats)],
+          [Math.max(...lons), Math.max(...lats)],
         ],
-        { padding: 40, pitch: 55, duration: prefersReducedMotion() ? 0 : 900 },
+        {
+          padding: 60,
+          // Flat stays flat, exactly as seeking does. See terrainRef.
+          pitch: terrainRef.current ? 60 : 0,
+          bearing: FLY_BEARING,
+          duration: prefersReducedMotion() ? 0 : 900,
+        },
       );
-      return;
-    }
+    },
+    [onPin, restView, settleRoute],
+  );
 
-    const own = pts.filter((q) => q[5] === loop);
-    if (!own.length) return;
-    const lons = own.map((q) => q[LON]);
-    const lats = own.map((q) => q[LAT]);
-    map.fitBounds(
-      [
-        [Math.min(...lons), Math.min(...lats)],
-        [Math.max(...lons), Math.max(...lats)],
-      ],
-      { padding: 60, pitch: 60, duration: prefersReducedMotion() ? 0 : 900 },
+  /**
+   * A POSITION ON THIS COURSE IS SHAREABLE.
+   *
+   * /course?loop=4 and /course?mile=12.3 open the map where the link's author
+   * left it, and pinning a mile or isolating a lap writes the same parameters
+   * back. The reason is the thing this page is for: somebody asking "which bit
+   * is the Stone Steps climb" or "where does lap four start" wants to send an
+   * answer, and until now the only answer they could send was the page plus a
+   * sentence of instructions.
+   *
+   * THE PARSING IS NOT HERE. parseCoursePosition owns every judgement about
+   * what a bad value is, and it is tested against thirteen shapes of rubbish,
+   * because this reads a string a stranger typed inside an effect that would
+   * take the whole island down with it if it threw.
+   */
+  const urlAppliedRef = useRef(false);
+
+  useEffect(() => {
+    // ONCE, AND ONLY ONCE THE MAP EXISTS. Applying a position needs the profile
+    // loaded (to know how long the course is) and the camera alive.
+    if (status !== 'ready' || urlAppliedRef.current) return;
+    // Set BEFORE the work, not after: it is also the flag that lets the
+    // write-back below start running, and everything from here on is a no-op on
+    // a URL that carries no position.
+    urlAppliedRef.current = true;
+
+    const pts = profileRef.current;
+    if (!pts.length) return;
+    const pos = parseCoursePosition(
+      window.location.search,
+      pts[pts.length - 1][MILE],
+      meta.loops.length,
     );
-  }, []);
+    if (pos.loop != null) focusLoop(pos.loop);
+    // A mile after a loop on purpose: ?loop=4&mile=15 means "lap four, and here
+    // in it", and focusLoop has just pinned that lap's start line.
+    if (pos.mile != null) {
+      onPin(pos.mile);
+      onSeek(pos.mile);
+    }
+  }, [status, focusLoop, onPin, onSeek]);
+
+  useEffect(() => {
+    if (!urlAppliedRef.current) return;
+    // NEVER IN POSTER MODE. The capture script drives this page through its own
+    // parameters and reads the canvas; rewriting the address it is working
+    // against mid-capture is the kind of bug that shows up as one bad poster
+    // months later. isPosterSearch holds for the whole session, because the
+    // parameters it looks for are never removed.
+    const search = window.location.search;
+    if (isPosterSearch(search)) return;
+
+    // A lap's own start line is what the chip pins, so writing it as well would
+    // be the same fact twice in a link people have to read.
+    const start = activeLoop == null ? null : loopStartMile(activeLoop);
+    const mile =
+      pinnedMile != null && start != null && Math.abs(pinnedMile - start) < 0.01
+        ? null
+        : pinnedMile;
+
+    const next = writeCoursePosition(search, { loop: activeLoop, mile });
+    if (next === search) return;
+    // replaceState, not pushState: a marker moved is not a page the Back button
+    // should have to walk through, and it leaves the scroll position alone.
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${next}${window.location.hash}`,
+    );
+  }, [activeLoop, pinnedMile]);
 
   const toggleGrade = () => {
     const map = getMap();
@@ -1239,6 +1408,23 @@ export default function CourseMapLibre() {
     map.easeTo({ pitch: next ? REST_PITCH : 0, duration: 600 });
   };
 
+  /**
+   * THE HUD IS DERIVED, NOT STORED. The flight already pushes a new cursorMile
+   * through state on every frame, so the component re-renders sixty times a
+   * second whether or not anything else changes; adding a second piece of state
+   * for the readout would double the work to show a number that is a pure
+   * function of the first. The two refs read here are the flight's own start
+   * mile and its pacing table, both of which are set before the first frame of
+   * a flight and cannot change during one.
+   */
+  const hudMile = playing ? cursorMile : null;
+  const hudPoint =
+    hudMile == null || !profile.length ? null : sampleAt(profile, indexAtMile(profile, hudMile));
+  const hudProgress =
+    hudMile == null || !pacingRef.current
+      ? 0
+      : flightProgress(profile, pacingRef.current, flyFromMileRef.current, hudMile);
+
   return (
     <div className="cmapwrap">
       <div className="cmap__frame">
@@ -1248,23 +1434,85 @@ export default function CourseMapLibre() {
             a compositing layer and this only has to cover it. */}
         <span className="cmap__ridge is-top" aria-hidden="true" />
         <span className="cmap__ridge is-bottom" aria-hidden="true" />
+
+        {/* THE FLIGHT HUD. For the ninety seconds the camera is moving, the eye
+            is on the terrain and the readout that answers "where is this" is in
+            the profile strip below the map, outside the frame entirely. So the
+            numbers come onto the map for the duration of the flight and leave
+            with it.
+
+            aria-hidden, because it is the same four facts the profile readout
+            carries and that one is the accessible copy: announcing a mile
+            number sixty times a second is not a readout, it is noise. Under
+            reduced motion this never appears at all, because the flyover jumps
+            to the finish instead of playing and `playing` is never true. */}
+        {hudPoint && (
+          <div className="cmaphud" aria-hidden="true">
+            <b className="cmaphud__mile">Mile {hudPoint[MILE].toFixed(1)}</b>
+            <span className="cmaphud__row">
+              <span>{Math.round(hudPoint[ELE])} ft</span>
+              <span>
+                {hudPoint[GRADE] > 0 ? '+' : ''}
+                {hudPoint[GRADE].toFixed(1)}%
+              </span>
+              <span>Loop {hudPoint[LOOP]}</span>
+            </span>
+          </div>
+        )}
+        {/* A VIGNETTE, ONLY WHILE FLYING. At a 74 degree pitch the frame is
+            mostly sky and far ground, and the four hard corners of a rectangle
+            fight the horizon. Darkening the edges settles them, and it is a
+            static gradient over the canvas: no filter, no compositing of the
+            live WebGL layer. */}
+        {hudPoint && <span className="cmap__vignette" aria-hidden="true" />}
+        {/* HOW FAR THROUGH THE FLIGHT. One line at the foot of the frame,
+            scaled on the x axis, so the only thing animating is a transform.
+            See flightProgress: it is measured in effort, which is time. */}
+        {hudPoint && (
+          <span className="cmap__flightbar" aria-hidden="true">
+            <span
+              className="cmap__flightbar-fill"
+              style={{ transform: `scaleX(${hudProgress.toFixed(4)})` }}
+            />
+          </span>
+        )}
         {/* ON THE MAP, NOT UNDER IT. A row of rectangles beneath a rectangle is
           three boxes; a single translucent bar sitting on the terrain is one
           object, and it is what every mapping product does with its controls.
           Placed bottom-left, clear of MapLibre's own zoom and compass stack in
           the top right and of the attribution bottom right. */}
         <div className="cmapbar">
+          {/* IT READS AS A PLAY CONTROL, because that is what it is. A bar of
+              four identical word buttons gives no clue which one starts the
+              thing; a triangle in front of the label is the one shape every
+              reader already knows. Drawn inline rather than pulled from an icon
+              font: two <path>s cost nothing and cannot arrive late, be
+              substituted, or fail to load and leave a box behind. */}
           <button
             type="button"
             className="cmapbar__btn is-primary"
             onClick={() => (playing ? stopFly() : startFly(cursorMile ?? pinnedMile ?? 0))}
             disabled={status !== 'ready'}
           >
+            <svg
+              className="cmapbar__glyph"
+              viewBox="0 0 12 12"
+              aria-hidden="true"
+              focusable="false"
+            >
+              {playing ? (
+                <rect x="2" y="2" width="8" height="8" rx="1" />
+              ) : (
+                <path d="M3 1.5 10.5 6 3 10.5Z" />
+              )}
+            </svg>
             {playing
               ? 'Stop'
-              : (cursorMile ?? pinnedMile) != null
-                ? 'Fly from here'
-                : 'Fly the course'}
+              : finished
+                ? 'Fly again'
+                : (cursorMile ?? pinnedMile) != null
+                  ? 'Fly from here'
+                  : 'Fly the course'}
           </button>
           <button type="button" className="cmapbar__btn" onClick={toggleTerrain}>
             {terrainOn ? 'Flatten' : '3D'}
@@ -1346,9 +1594,28 @@ export default function CourseMapLibre() {
 
       <div className="cmap__cap">
         {gradeOn ? (
-          <span className="cmap__key">
-            <span className="cmapgrade" aria-hidden="true" /> Downhill to uphill, clamped at
-            &plusmn;20%
+          /* THE GRADIENT KEY. "Gradient" repaints the whole course by
+             steepness, and until now the page said which direction was which
+             in words and never said which colour was which at all: a reader
+             looking at a blue stretch had no way to find out it meant a
+             descent. The ramp is drawn from GRADE_STOPS itself, through
+             gradeRampCss, so it cannot describe colours the map has stopped
+             painting with, and the three labels are the only numbers the ramp
+             needs: its two ends and the flat in the middle. */
+          <span className="cmap__key cmapgrade">
+            <span className="cmapgrade__bar">
+              <span
+                className="cmapgrade__ramp"
+                aria-hidden="true"
+                style={{ backgroundImage: gradeRampCss() }}
+              />
+              <span className="cmapgrade__scale">
+                <span>-20%</span>
+                <span>0</span>
+                <span>+20%</span>
+              </span>
+            </span>
+            <span>Gradient, clamped at &plusmn;20%</span>
           </span>
         ) : (
           <>
