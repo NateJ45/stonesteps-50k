@@ -152,6 +152,7 @@ export default function CourseMapLibre() {
    * always calls the current one rather than the one that existed at mount.
    */
   const hoverRef = useRef<((lngLat: [number, number], px: [number, number]) => void) | null>(null);
+  const clickRef = useRef<((lngLat: [number, number], px: [number, number]) => void) | null>(null);
   const activeLoopRef = useRef<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [cursorMile, setCursorMile] = useState<number | null>(null);
@@ -776,6 +777,10 @@ export default function CourseMapLibre() {
             hoverRef.current?.([e.lngLat.lng, e.lngLat.lat], [e.point.x, e.point.y]);
           });
         });
+        m.on('click', (e) => {
+          clickRef.current?.([e.lngLat.lng, e.lngLat.lat], [e.point.x, e.point.y]);
+        });
+
         // Leaving the canvas clears the hover, exactly as leaving the profile
         // does. The pin, if there is one, stays.
         m.on('mouseout', () => {
@@ -967,16 +972,15 @@ export default function CourseMapLibre() {
    * not.
    */
   useEffect(() => {
-    hoverRef.current = (lngLat, px) => {
+    /**
+     * The mile under a point on the map, or null if the pointer is not on the
+     * route. Shared by hover and click so the two can never disagree about
+     * which lap a piece of ground belongs to.
+     */
+    const mileUnder = (lngLat: [number, number], px: [number, number]): number | null => {
       const map = getMap();
       const pts = profileRef.current;
-      // The flyover owns the marker while it is playing; a stray mousemove must
-      // not yank the camera's own readout sideways.
-      if (!map || !pts.length || playingRef.current) return;
-      if (!Number.isFinite(lngLat[0])) {
-        onScrub(null);
-        return;
-      }
+      if (!map || !pts.length || !Number.isFinite(lngLat[0])) return null;
 
       const loop = activeLoopRef.current;
       let best = -1;
@@ -994,17 +998,55 @@ export default function CourseMapLibre() {
           best = i;
         }
       }
-      if (best < 0) {
-        onScrub(null);
-        return;
-      }
+      if (best < 0) return null;
 
       const p = pts[best];
       const at = map.project([p[LON], p[LAT]]);
-      const away = Math.hypot(at.x - px[0], at.y - px[1]);
-      onScrub(away <= 25 ? p[MILE] : null);
+      return Math.hypot(at.x - px[0], at.y - px[1]) <= 25 ? p[MILE] : null;
     };
-  }, [onScrub]);
+
+    hoverRef.current = (lngLat, px) => {
+      const map = getMap();
+      // The flyover owns the marker while it is playing; a stray mousemove must
+      // not yank the camera's own readout sideways.
+      if (!map || playingRef.current) return;
+      const mile = mileUnder(lngLat, px);
+      onScrub(mile);
+      // A pointer cursor is the only thing that says the line can be clicked.
+      map.getCanvas().style.cursor = mile == null ? '' : 'pointer';
+    };
+
+    /**
+     * CLICKING THE ROUTE LEAVES THE MARKER THERE, which is what the profile has
+     * always done and what the map did not: hover set the live position and
+     * nothing set the pinned one, so the moment the pointer moved away the
+     * marker snapped back to whatever the profile had pinned, or vanished.
+     *
+     * Clicking the marker again clears it, same as on the profile, and the
+     * tolerance is the same 25 pixels used to decide the line was hit at all.
+     */
+    clickRef.current = (lngLat, px) => {
+      const map = getMap();
+      if (!map || playingRef.current) return;
+      const mile = mileUnder(lngLat, px);
+      if (mile == null) return;
+
+      const pinned = pinnedRef.current;
+      if (pinned != null) {
+        const pts = profileRef.current;
+        const p = sampleAt(pts, indexAtMile(pts, pinned));
+        const at = map.project([p[LON], p[LAT]]);
+        if (Math.hypot(at.x - px[0], at.y - px[1]) <= 25) {
+          onPin(null);
+          return;
+        }
+      }
+      onPin(mile);
+      // The camera stays put on purpose. The reader is pointing at something
+      // they can already see, and recentring the map under their own cursor is
+      // disorienting in a way that recentring from the profile is not.
+    };
+  }, [onScrub, onPin]);
 
   // ESCAPE CLEARS IT. Anything a reader can place has to come off without
   // hunting for the exact pixel they placed it on, and Escape is what every
