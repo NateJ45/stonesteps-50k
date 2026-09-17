@@ -56,7 +56,14 @@ const H = poster.height;
 <section class={`cposter relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
   <div class="cposter__inner">
     <div class="cposter__copy">
-      {eyebrow && <p class="cposter__eyebrow">{eyebrow}</p>}
+      {
+        /* THE OUTLINED LABEL, NOT A FOURTH EYEBROW (2026-09-17). This band had
+          its own: 13px display caps in muted, scoped to the component, which is
+          how a fourth heading system gets onto a page without anybody deciding
+          to add one. It is a content band, so it takes the same
+          `.section-label` the bands above and below it take. */
+      }
+      {eyebrow && <p class="section-label text-foreground/80">{eyebrow}</p>}
       <h2 class="cposter__headline" id={headingId}>{headline}</h2>
       {intro && <p class="cposter__intro">{intro}</p>}
     </div>
@@ -118,15 +125,6 @@ const H = poster.height;
   .cposter__copy {
     max-width: 44rem;
     margin-bottom: 1.5rem;
-  }
-
-  .cposter__eyebrow {
-    margin: 0 0 0.35rem;
-    font-family: var(--font-display);
-    font-size: 0.8125rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-muted-foreground);
   }
 
   .cposter__headline {

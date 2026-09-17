@@ -17,6 +17,7 @@
 // and time are the result. See public-data-policy.json.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/sections/PageHeader.astro';
 import { getAllResults, getDistanceRefs, getSiteSettings } from '@/lib/queries';
 import { editionFor, summariseEditions, type ResultRow, type DistanceRef } from '@/lib/editions';
 import { formatRaceTime } from '@/lib/race-time';
@@ -56,30 +57,42 @@ const anyTrekker = edition.distances.some((d) => d.rows.some((r) => r.trekker));
 
 const title = `${edition.year} results | Stone Steps 50K`;
 const description = `Every finisher of the ${edition.year} Stone Steps 50K and 27K, with times.`;
+
+// Built here because PageHeader takes a plain string. Same sentence the page
+// has always opened with, assembled instead of interleaved with markup.
+const lede =
+  `${edition.total} ${edition.total === 1 ? 'finisher' : 'finishers'}` +
+  (edition.distances.length > 1
+    ? `, across the ${edition.distances.map((d) => d.name).join(' and the ')}`
+    : '') +
+  '.';
 ---
 
 <BaseLayout {title} {description} {siteSettings}>
+  {
+    /* THE SAME HEADER BAND EVERY OTHER INNER PAGE GETS (2026-09-17). See the
+      note on /results: a year page used to open on flat background with a
+      smaller headline than the rest of the site, which made the whole archive
+      read as a bolt-on. The eyebrow keeps its link back up to the archive,
+      which is what `eyebrowHref` on PageHeader exists for.
+
+      The tables below are left exactly as they were. This page is a thousand
+      rows of times and nothing decorative belongs behind them. */
+  }
+  <PageHeader
+    eyebrow="Results"
+    eyebrowHref="/results"
+    headline={String(edition.year)}
+    {lede}
+    headingId="year-heading"
+  />
+
+  {/* No aria-labelledby here: see the note on /results. One region per page. */}
   <section class="bg-background py-section-lg">
     <div class="mx-auto w-full max-w-content px-6">
-      <p
-        class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase"
-      >
-        <a class="hover:underline" href="/results">Results</a>
-      </p>
-      <h1 class="display text-[clamp(2.5rem,7vw,4.5rem)]">{edition.year}</h1>
-
-      <p class="mt-4 text-muted-foreground">
-        {edition.total}{' '}
-        {edition.total === 1 ? 'finisher' : 'finishers'}{
-          edition.distances.length > 1 && (
-            <>, across the {edition.distances.map((d) => d.name).join(' and the ')}</>
-          )
-        }.
-      </p>
-
       {
         edition.distances.map((d, di) => (
-          <div class="mt-16 first:mt-12">
+          <div class="mt-16 first:mt-0">
             {/* A REAL BREAK BETWEEN THE TWO RACES. This was a `text-h3` heading
               43px wide with two and a half thousand pixels of unbroken table
               between it and the next one, so the page read as one endless list

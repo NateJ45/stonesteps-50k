@@ -10,6 +10,55 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-17 — One grammar: one heading system, one button family, one ground._
+
+An audit of the live site found three heading systems running at once and one button style
+left over from the generic starter this repo was forked from. All three came from the same
+place: a starter default that nothing had to opt into, so it leaked onto every band that
+did not explicitly opt out.
+
+**Headings.** `SectionHeading.astro` shipped small tracked caps over a short rust hairline
+as its DEFAULT, with the outlined display label behind a `labelDisplay` flag. The flag is
+gone and the label is the default; the starter's branch is removed from the component
+rather than left dormant. The rule now is the one the rest of the site is built on:
+a SELF_CONTAINED band is an object and wears the trail blaze (a ticket rail, a schedule
+clipboard, a page header, the sign at the finish); a CONTENT band is a stretch of the page
+and wears the outlined label. `ImageText`, `ContactBand` and `CoursePosterBand` each drew
+their own eyebrow, which is how a page ends up with four of them without anyone deciding
+to add one; all three now draw `.section-label`, the same rule the others use.
+`ContactBand`'s headline came up from text-h3 to text-h2 with it, because under a label set
+at display scale a 32px line read as a caption to its own eyebrow. Editors' eyebrow text is
+untouched everywhere.
+
+`CommunityBand` keeps its own label on purpose. That eyebrow sits INSIDE the pinned notice
+card rather than at the top of the band, so it belongs to the object, like the "Race
+director" label inside the parks band.
+
+**Buttons.** `CtaLink.astro` resolved a Sanity link to a bronze pill or an outlined bronze
+link. Every button this site draws is a sign plate, and most callers had already worked
+around the mismatch by passing `class="btn-plate"`, which won because `.btn-plate` is
+unlayered and Tailwind's utilities are not. The two callers that had not — the "Ask a
+question" buttons on /course and /contact — were the only outlined buttons left anywhere.
+The variants now map onto the plates: primary is the rust plate, secondary the cream one.
+There is no third, un-plated variant, so an outlined button cannot render. The base class
+list lost the padding, radius, size and weight utilities it was carrying, because the plate
+overrode every one of them; what is left is the 44px tap target, the focus ring and the
+press easing.
+
+**Ground.** The results archive, the year pages and the runner pages were the only stretch
+of the site that could have belonged to someone else's build: a bare eyebrow and a title on
+flat background, a smaller headline than /course or /records, no walk of prints, no rule
+under the band. All three now open with `PageHeader`, the same object every other inner
+page opens with, so they cannot drift from it again. `PageHeader` gained one prop,
+`eyebrowHref`, because a year page's eyebrow is also the way back up to the archive.
+Nothing was added below the band: the tables are the job of those pages and they stay
+plain, the same reason the records boards sit on plain surface.
+
+Verified in both themes at 1280 and on a Pixel 7 profile, on /, /course, /records, /results,
+/results/2025, /contact, /404, /styleguide and a runner page through `wrangler dev`. Every
+parity baseline was re-captured: the inlined stylesheet changed on all 31 routes because
+four utilities are no longer generated, so no page could have passed unchanged.
+
 _2026-09-17 — The records board shows only what a finish can prove._
 
 The five transcribed 27K records dated 2010 to 2014 came off the board. Dave wrote that the 27K began in 2015, and none of the five (Brian List, Paul Odipo, Daniel Campbell, Daniel Heffernan, Charles Lowery) matched any result on file by name or by time, in any year or either distance (PENDING 1j had the full test). `scripts/retire-27k-records.mjs` backed them up to `scripts/data/retired-27k-records.json` and deleted them, along with the four athlete documents that existed only to be referenced by them; Charles Lowery stays because he has a 50K finish. The `recordEntry` collection is now empty, so every row on /records and every holder in the home page's records band derives from a result. The men's 27K record is David Riddle, 1:59:32, 2017. The merge logic that carries a transcribed record is unchanged and documented as dormant: the type remains for a record with evidence and no result, which none of these were. The seed no longer creates transcribed records at all.

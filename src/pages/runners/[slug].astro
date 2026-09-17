@@ -23,6 +23,7 @@
 // including what to do if someone asks to be removed.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/sections/PageHeader.astro';
 import { getRunner, getSiteSettings } from '@/lib/queries';
 import { formatRaceTime } from '@/lib/race-time';
 import { BRACKET_BY_ID } from '@/lib/age-brackets';
@@ -84,33 +85,39 @@ const where = [runner.city, runner.region].filter(Boolean).join(', ');
 
 const title = `${runner.name} | Stone Steps 50K results`;
 const description = `Every Stone Steps 50K and 27K finish on file for ${runner.name}.`;
+
+// Built here because PageHeader takes a plain string. Same two sentences the
+// page has always opened with; a runner with a home city on file gets it, a
+// runner with no finishes on file gets neither half rather than an empty
+// "0 finishes" line.
+const lede =
+  [
+    where ? `${where}.` : null,
+    results.length > 0
+      ? `${results.length} ${results.length === 1 ? 'finish' : 'finishes'} on file${span ? `, ${span}` : ''}.`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(' ') || undefined;
 ---
 
 <BaseLayout {title} {description} {siteSettings} noindex>
+  {
+    /* THE SAME HEADER BAND EVERY OTHER INNER PAGE GETS (2026-09-17). A runner
+      page is reached from a results table, which is exactly why it should not
+      look like a different site when you land on it. PageHeader brings the
+      walk of prints, the rule under the band and the headline size the rest of
+      the site opens with. Everything below is left alone: this page is a
+      person's record and it stays plain. */
+  }
+  <PageHeader eyebrow="Runner" headline={runner.name} {lede} headingId="runner-heading" />
+
+  {/* No aria-labelledby here: see the note on /results. One region per page. */}
   <section class="bg-background py-section-lg">
     <div class="mx-auto w-full max-w-content px-6">
-      <p
-        class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase"
-      >
-        Runner
-      </p>
-      <h1 class="display text-[clamp(2.5rem,7vw,4.5rem)]">{runner.name}</h1>
-
-      <p class="mt-4 text-muted-foreground">
-        {where && <>{where}. </>}
-        {
-          results.length > 0 && (
-            <>
-              {results.length} {results.length === 1 ? 'finish' : 'finishes'} on file
-              {span && <>, {span}</>}.
-            </>
-          )
-        }
-      </p>
-
       {
         bests.size > 0 && (
-          <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[...bests.values()].map((b) => (
               <li class="border-l-[3px] border-[color:var(--heading-accent)] pl-5">
                 <p class="font-mono text-[0.6875rem] tracking-[0.2em] text-muted-foreground uppercase">
