@@ -1,17 +1,26 @@
 // A historical record the results archive cannot reach.
 //
 // WHY THIS EXISTS ALONGSIDE raceResult. The derived-records system is honest
-// only as far back as the results go. RunSignUp's public API carries this race
-// from 2017, and not every year even then: 2020, 2016 and 2015 have no result
-// set, nor does the 2021 27K. But the all-time records run back to 2007, so the
-// outright course records (David Riddle 2011, Kim Martin 2007, Ruth Kohstall
-// 2008) predate anything that can be computed.
+// only as far back as the results go. When this type was created, RunSignUp's
+// public API reached back to 2017 while the all-time records ran back to 2007,
+// so the outright course records predated anything that could be computed.
+// Those rows were carried as TRANSCRIBED history from the live site's own
+// tables. The records page merges them with the derived ones and takes
+// whichever is faster, so a future finisher can beat an old mark and the table
+// updates itself, while the old mark stays visible until someone does.
 //
-// Those rows are therefore carried as TRANSCRIBED history, sourced from the
-// live site's own tables and marked as such. The records page merges them with
-// the derived ones and takes whichever is faster, so a future finisher can beat
-// a 2007 record and the table updates itself, while the 2007 mark stays visible
-// until someone does.
+// CURRENTLY EMPTY, AND THAT IS THE CORRECT STATE (2026-09-17). The 2003 to
+// 2016 archive import put a result behind every 50K record, so those
+// transcriptions became hand copies and were removed (audit-studio.mjs check 7
+// keeps them out). The five that remained were 27K marks dated 2010 to 2014,
+// and the 27K began in 2015: Dave said so, and none of the five matches any
+// result on file. They were retired by scripts/retire-27k-records.mjs, with a
+// verbatim copy in scripts/data/retired-27k-records.json.
+//
+// So a document of this type should only ever be created for a record with
+// evidence behind it and no result the archive can hold. If Dave ever confirms
+// a pre-2015 predecessor event and supplies its results, they belong in the
+// archive as results, not here.
 //
 // Registered in index.ts, listed under "The Race" in structure.ts.
 

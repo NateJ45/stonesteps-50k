@@ -1,8 +1,8 @@
 // scripts/seed-race.mjs
 //
 // Seeds the race's own content: the race singleton, the two distances, the
-// race-day schedule, the course features, the sponsors, and the transcribed
-// historical records that predate the importable results archive.
+// race-day schedule, the course features and the sponsors. It no longer seeds
+// any transcribed records; the note at the end of the file says why.
 //
 // Prerequisites: PUBLIC_SANITY_PROJECT_ID and SANITY_API_WRITE_TOKEN in .env.
 // Idempotent: deterministic _id values with createOrReplace.
@@ -400,89 +400,26 @@ sponsors.forEach((s, i) => {
 //
 // The two genuine conflicts in the published source are carried as sourceNote
 // data rather than silently resolved.
-const hhmmss = (t) => {
-  const [h, m, s] = t.split(':').map(Number);
-  return h * 3600 + m * 60 + s;
-};
-
-const historical = [
-  // 50K men
-  ['50k', 'M', 'u30', 'David Riddle', 2010, '3:44:39'],
-  ['50k', 'M', '30s', 'David Riddle', 2011, '3:40:56'],
-  ['50k', 'M', '40s', 'Jay Smithberger', 2009, '4:16:17'],
-  ['50k', 'M', '50s', 'Craig Wheeler', 2011, '4:48:35'],
-  ['50k', 'M', '60s', 'Mark Calcatera', 2011, '6:19:49'],
-  ['50k', 'M', '70plus', 'Richard Barton', 2023, '7:52:30'],
-  // 50K women
-  ['50k', 'F', 'u30', 'Katie Ruhlman', 2018, '4:41:09'],
-  ['50k', 'F', '30s', 'Katie Ruhlman', 2020, '4:27:23'],
-  ['50k', 'F', '40s', 'Kim Martin', 2007, '5:12:48'],
-  ['50k', 'F', '50s', 'Ruth Kohstall', 2008, '5:51:28'],
-  ['50k', 'F', '60s', 'Ruth Kohstall', 2018, '7:06:30'],
-  // 50K women 70+ is Unclaimed on the live site, so no document exists for it.
-  // The records table renders every bracket and shows an empty one as
-  // "Unclaimed", so absence here is the correct representation.
-
-  // 27K men
-  [
-    '27k',
-    'M',
-    'u30',
-    'Brian List',
-    2010,
-    '1:58:36',
-    'The live site publishes this time as 2010 in the age row and 2011 in the course row. ' +
-      'It also spells the name "Brain List" in one of its two tables.',
-  ],
-  ['27k', 'M', '30s', 'Paul Odipo', 2013, '2:08:14'],
-  ['27k', 'M', '40s', 'Daniel Campbell', 2011, '2:17:27'],
-  ['27k', 'M', '50s', 'Daniel Heffernan', 2014, '2:34:36'],
-  ['27k', 'M', '60s', 'Charles Lowery', 2010, '3:04:15'],
-  // 27K women
-  [
-    '27k',
-    'F',
-    '30s',
-    'Katie Ruhlman',
-    2010,
-    '2:28:40',
-    'The live site publishes this time as 2010 in the age row and 2021 in the course row.',
-  ],
-  ['27k', 'F', 'u30', 'Lizzie Gleason', 2015, '2:44:12'],
-];
-
-const athleteIds = new Map();
-function athleteRef(name) {
-  const slug = name
-    .toLocaleLowerCase()
-    .replace(/['’.]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  const id = `athlete-${slug}`;
-  if (!athleteIds.has(id)) {
-    athleteIds.set(id, { _id: id, _type: 'athlete', name, slug: { _type: 'slug', current: slug } });
-  }
-  return { _type: 'reference', _ref: id };
-}
-
-historical.forEach(([dist, gender, bracket, name, year, time, note]) => {
-  docs.push({
-    _id: `record-${dist}-${gender}-${bracket}`,
-    _type: 'recordEntry',
-    athlete: athleteRef(name),
-    distance: { _type: 'reference', _ref: `distance-${dist}` },
-    gender,
-    bracket,
-    timeSeconds: hhmmss(time),
-    year,
-    ...(note ? { sourceNote: note } : {}),
-  });
-});
-
-// Athletes referenced by the historical records must exist. The results import
-// will createOrReplace the same ids later, which is fine: same identity, and
-// the importer carries city and state the records tables do not have.
-for (const a of athleteIds.values()) docs.unshift(a);
+// ── Transcribed records: none, on purpose ─────────────────────────────────
+//
+// This block used to seed eighteen `recordEntry` documents transcribed from the
+// old site's All Time Records page. Every one of them is gone, for two reasons
+// that arrived a week apart:
+//
+//   - Thirteen duplicated a result the archive already holds (the 2003 to 2016
+//     archive import closed the gap this type was created for), so the board
+//     derived the same record from the result and the copy could only drift.
+//     Removed 2026-09-12; scripts/audit-studio.mjs check 7 stops them returning.
+//   - The other five were 27K marks dated 2010 to 2014. Dave wrote on
+//     2026-09-17 that the 27K began in 2015, and none of the five matches any
+//     result on file by name or by time, in any year or either distance
+//     (docs/PENDING.md, item 1j). Retired by scripts/retire-27k-records.mjs,
+//     which kept a verbatim copy in scripts/data/retired-27k-records.json.
+//
+// The `recordEntry` type stays for the case it was designed for: a record the
+// results archive genuinely cannot produce. If Dave confirms a predecessor
+// event and supplies its results, they belong in the archive as results, not
+// here as hand-copied marks.
 
 // ── Write ────────────────────────────────────────────────────────────────
 async function seed() {

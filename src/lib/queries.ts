@@ -409,9 +409,11 @@ export const SITE_SETTINGS_PROJECTION = `{
 /**
  * Every athlete slug, for getStaticPaths.
  *
- * Only athletes who actually have a result: the historical record entries
- * reference a few athletes with no imported finish, and a page showing one
- * transcribed row and nothing else is not worth a URL.
+ * Only athletes who actually have a result. The transcribed record entries
+ * used to reference a few athletes with no imported finish, and a page showing
+ * one transcribed row and nothing else is not worth a URL. Those entries are
+ * gone (2026-09-17, see recordEntry.ts), but the guard costs nothing and keeps
+ * a future one from minting a page.
  */
 export async function getAllRunners() {
   return sanityFetch(
@@ -443,11 +445,12 @@ export async function getRunner(slug: string) {
         "distance": distance->name,
         "distanceSlug": distance->slug.current
       },
-      // Transcribed records this runner holds. Without these a page can
-      // UNDERSTATE someone: Katie Ruhlman holds the 50K course record from
-      // 2020, and 2020 has no importable results, so her page would otherwise
-      // show only her slower 2017 and 2018 finishes and look authoritative
-      // while doing it.
+      // Transcribed records this runner holds. The list is empty for everyone
+      // since 2026-09-17 (every record on file now has a result behind it, see
+      // recordEntry.ts), but it stays projected because the reason it existed
+      // still holds: a record the archive cannot produce would otherwise
+      // UNDERSTATE the runner, showing their slower finishes and looking
+      // authoritative while doing it.
       "records": *[_type == "recordEntry" && references(^._id)]{
         bracket, gender, year, timeSeconds, sourceNote,
         "distance": distance->name,

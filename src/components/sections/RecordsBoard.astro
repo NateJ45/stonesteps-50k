@@ -72,8 +72,14 @@ function boardFor(slug: string) {
     // archive alone, on the argument that a transcribed record is one best mark
     // rather than a ranked field. The page that produced was wrong: the 27K
     // board named a course record of 1:58:36 by Brian List in 2010 and then
-    // listed the fastest ten starting at 1:59:32 with him nowhere on it,
-    // because the 27K archive only reaches back to 2015. See fastestOnFile.
+    // listed the fastest ten starting at 1:59:32 with him nowhere on it.
+    //
+    // Since 2026-09-17 there are no transcribed records at all: the 27K began
+    // in 2015 (Dave), so the pre-2015 marks were for a race that did not
+    // exist and were retired. Every row on this board now has a finish behind
+    // it, and `hist` is an empty list until a record with evidence and no
+    // result ever appears. See fastestOnFile for the merge that would handle
+    // it.
     const topTen = fastestOnFile(set, hist, 10);
 
     // Which bracket row holds the outright record. The mockup highlighted a

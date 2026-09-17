@@ -16,16 +16,29 @@ sequence).
 
 ## Waiting on a human
 
-### 1j. Twelve 27K marks on the old records page predate 2015, and they are not typos
+### 1j. DONE 2026-09-17. The pre-2015 27K marks are off the board
 
-**Blocker: only Dave can say what event those were.**
+Nathan's call, same day: the records show only 27K data we have evidence of, and the
+older marks come off since Dave says the 27K did not exist yet. The five transcribed
+`recordEntry` documents (List, Odipo, Campbell, Heffernan, Lowery) and the four athlete
+documents that existed only to be referenced by them were retired by
+`scripts/retire-27k-records.mjs`, with a verbatim copy in
+`scripts/data/retired-27k-records.json` so the drop is reversible. The `recordEntry`
+collection is now empty, so every record on /records and in the home page's record
+holders band derives from a finish on file. The men's 27K record is David Riddle, 1:59:32,
+2017, which is also what the old site's fastest-ten list starts with. Nothing in the seed
+recreates the five: `scripts/seed-race.mjs` no longer seeds transcribed records at all.
+
+Still open for Dave, but no longer blocking anything: if the twelve pre-2015 marks were a
+predecessor event on this course, its results belong in the archive as results, under its
+own label. The finding that produced the decision is kept below.
 
 2026-09-17. Dave wrote that "the 27k came about in 2015, so you won't find a history for
 that". The old site's own records page (stonesteps50k.com/all-time-records/, still live,
 and the source of the transcribed `recordEntry` documents) lists 27K marks from 2010 to
 2014: Brian List, Paul Odipo, Daniel Campbell, Daniel Heffernan, Charles Lowery, Jonna
 Siferd (twice), Justin McIntyre, Dan Hollingshead, Graham Niemer, Ruth Kohstall and Angela
-Memory. Brian List's 1:58:36 is on the home page as the men's 27K course record.
+Memory. Brian List's 1:58:36 was on the home page as the men's 27K course record.
 
 Nathan asked whether the years were typos. Tested against every result we hold (2,188
 rows, 2003 to 2025, both distances), by name and by exact time:
@@ -47,12 +60,10 @@ rows, 2003 to 2025, both distances), by name and by exact time:
   "27K" or a start year Dave is misremembering. His "you won't find a history" is literally
   true of the results; the records page kept the marks anyway.
 
-Nothing has been changed on the site. The question for Dave is now precise: was there a
-shorter race on the course before 2015, four loops or close to it, and were these its
-records? If yes and it was the same course, the marks stand and the board could say
-"27K (and its predecessor)". If it was a different route, they come off the 27K board and
-go into the archive with their own label. Either way the year column on that page cannot be
-trusted for the pre-2015 rows, so the years should come from him too.
+The question for Dave stays precise: was there a shorter race on the course before 2015,
+four loops or close to it, and were these its records? If yes, the marks can come back as
+results under that event's own label, with years from him, because the year column on that
+page cannot be trusted for the pre-2015 rows.
 
 ### 1i. DONE 2026-09-16. The course-map poster is on the home page
 
