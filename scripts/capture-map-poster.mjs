@@ -96,7 +96,14 @@ async function main() {
   });
 
   try {
-    const basemap = process.env.POSTER_BASEMAP === 'topo' ? '&basemap=topo' : '';
+    // TOPO IS THE DEFAULT, AND THE OWNER CHOSE IT. The satellite capture is a
+    // photograph of a canopy: at the size this band renders, a continuous green
+    // mass with a route over it, and the terrain it exists to show is invisible
+    // under the leaves. The USGS topographic quad draws the contours, the
+    // watercourses and the trail names, so the still says "this is a hilly
+    // forest course" at a glance, which is the whole reason the band is there.
+    // `POSTER_BASEMAP=satellite` captures the imagery instead, for comparison.
+    const basemap = process.env.POSTER_BASEMAP === 'satellite' ? '' : '&basemap=topo';
     await page.goto(`http://localhost:${PORT}/course/?poster=1${basemap}`, { waitUntil: 'load' });
 
     // The map is a client:visible island, so it does not exist until the

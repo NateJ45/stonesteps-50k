@@ -113,6 +113,12 @@ const NON_STEGA_FIELDS = new Set([
   'navGroup',
   'platform',
   'size',
+  // Two fields go by this name, and both drive logic. faqKioskSection's cards
+  // use it, and since 2026-09-16 so does `statItem`: 'manual' keeps the typed
+  // number, anything else derives the figure from the race document or the
+  // course file (src/lib/stat-sources.ts). Encoded, a derived item would never
+  // match its own source name, so the preview would quietly fall back to the
+  // stale hand-typed number the field exists to stop showing. CLAUDE.md 8b.
   'source',
   'sourceType',
   'style',

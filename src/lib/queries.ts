@@ -151,6 +151,16 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       ...,
       logos[]${IMAGE_PROJECTION}
     },
+    // A stat item can name a SOURCE instead of a number (src/lib/stat-sources.ts),
+    // so the band needs the two documents those figures live in. Cheap: one
+    // singleton, three fields. The course distance and the loop count come from
+    // scripts/data/course-map.json, which is derived from the GPS track and is
+    // read by StatsRow.astro rather than by a query, because it is a file in the
+    // repo and not content.
+    _type == "statSection" => {
+      ...,
+      "race": *[_type == "race"][0]{ editionNumber, elevationProfile{ gainFt } }
+    },
     // ---- Stone Steps race blocks ----------------------------------------
     // Most of these are SELF-FILLING: the editor places the section and names
     // it, and the contents come from the collections. That is deliberate. A

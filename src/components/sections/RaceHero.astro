@@ -26,6 +26,11 @@ import Topo from '@/components/race/Topo.astro';
 import Countdown from '@/components/race/Countdown.astro';
 import type { ProjectedRaceHeroSection } from '@/lib/pageBuilder.types';
 import { displayWords } from '@/lib/display-words';
+// 24 -> "24th". SHARED with the numbers row's derived edition figure: this used
+// to be a local helper here, and the moment a second place on the page needed
+// the same answer, two copies of it was how a hero saying "24th year" ends up
+// over a band saying "24nd".
+import { ordinal } from '@/lib/stat-sources';
 
 type Props = {
   eyebrow?: string;
@@ -71,14 +76,6 @@ const slides = (images?.length ? images : image ? [image] : []).filter((i) => i?
    the timing from the number of pictures. */
 const SLIDE_SECONDS = 7;
 const cycleSeconds = SLIDE_SECONDS * slides.length;
-
-/** 1 -> "1st", 23 -> "23rd". Two rules: the teens are all "th", then the last
- *  digit decides. */
-const ordinal = (n: number) => {
-  const teen = n % 100 >= 11 && n % 100 <= 13;
-  const last = n % 10;
-  return `${n}${teen ? 'th' : last === 1 ? 'st' : last === 2 ? 'nd' : last === 3 ? 'rd' : 'th'}`;
-};
 
 // Split into words, then characters, so a word never breaks mid-rotation
 // across a line end. `displayWords` removes the preview's invisible stega run
