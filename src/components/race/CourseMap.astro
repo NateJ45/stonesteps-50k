@@ -205,9 +205,20 @@ const shortMiles = meta.loops.find((l) => l.kind === 'short')?.publishedMiles ??
     box-shadow: var(--lift-sm);
   }
 
+  /* 82%, NOT 62%, AND THE GLASS IS STILL GLASS. Measured on a phone at 390px
+     against the live aerial photograph, sampling the button faces across
+     sixteen moments of a real flight with the labels made transparent so the
+     pixels are the background and nothing else: at 62% the worst frame put
+     cream labels on rgb(110,111,87) at 4.38:1, under AA's 4.5, and the bright
+     horizon at the top of a 74 degree pitch computes worse still. It is the
+     same failure the hero's subhead and the countdown's label each had, and it
+     has the same cause: ink whose contrast depends on where the terrain happens
+     to fall is not ink with contrast. At 82% the same measurement gives 10.71
+     in dark and 12.21 in light, and the blur and the saturate are untouched, so
+     the bar still reads as glass over the map rather than as a panel. */
   @supports (backdrop-filter: blur(8px)) {
     :global(.cmapbar) {
-      background: color-mix(in srgb, var(--color-background) 62%, transparent);
+      background: color-mix(in srgb, var(--color-background) 82%, transparent);
       backdrop-filter: blur(10px) saturate(1.15);
     }
   }
@@ -294,9 +305,15 @@ const shortMiles = meta.loops.find((l) => l.kind === 'short')?.publishedMiles ??
     pointer-events: none;
   }
 
+  /* 82%, for the reason written over the control bar's own @supports block,
+     and measured the same way: the HUD's second line is 13px muted ink and at
+     62% it measured 4.40 in dark and 4.28 in light across twenty-four moments
+     of a real flight, both under 4.5; at 82% the same line reads 6.77 and 5.69,
+     and the big mile figure 9.88 and 13.68. The two panels share the number
+     because they are meant to read as one family. */
   @supports (backdrop-filter: blur(8px)) {
     :global(.cmaphud) {
-      background: color-mix(in srgb, var(--color-background) 62%, transparent);
+      background: color-mix(in srgb, var(--color-background) 82%, transparent);
       backdrop-filter: blur(10px) saturate(1.15);
     }
   }
