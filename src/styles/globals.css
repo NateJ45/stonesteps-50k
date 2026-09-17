@@ -38,6 +38,20 @@
    `bg-foreground` without conjuring them. */
 @source not '../../scripts/.parity';
 
+/* AND THE PROSE IS NOT SOURCE EITHER. Markdown IS scanned, and `docs/` is where
+   this repo explains its own CSS, so writing a class name into a doc creates
+   that class in the shipped stylesheet. Not hypothetical: the PENDING entry for
+   the rule above named two of the harvested utilities as examples, and the very
+   next build emitted both of them and broke parity on all 31 pages again. A
+   registry that cannot describe a CSS bug without reproducing it is a trap, and
+   the trap is laid for whoever documents the next one.
+
+   Nothing under `docs/` is markup that ships, so excluding it can only remove
+   utilities no page asked for. Checked rather than assumed: with `docs/` out of
+   scope the build still reproduces the committed baselines exactly, 31/31,
+   which is the whole site's rendered HTML agreeing that nothing was lost. */
+@source not '../../docs';
+
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource/staatliches/400.css';

@@ -728,3 +728,14 @@ capture changed the next build's CSS and the CSS is in all 31 pages.
 
 Closed with `@source not '../../scripts/.parity'` in `globals.css`, which
 carries the full argument. Capture, rebuild, compare is a fixed point now.
+
+`docs/` IS EXCLUDED TOO, AND THIS ENTRY IS WHY. Markdown is scanned, so the
+first draft of these two paragraphs named two of the harvested utilities as
+examples and the next build emitted both of them and broke parity on all 31
+pages again. A registry that cannot describe a CSS bug without reproducing it is
+a trap laid for whoever documents the next one. Excluding `docs/` also dropped
+45 rules that were only ever prose in the first place, the starter's generic
+`bg-gray-50` and `bg-indigo-600` examples among them, for another 4,350 bytes a
+page. Verified by rendered HTML rather than by reasoning: markup byte-identical
+on every page, and none of the 45 appears in a class attribute anywhere in the
+build.
