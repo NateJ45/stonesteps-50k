@@ -1269,25 +1269,37 @@ export default function CourseMapLibre() {
         return;
       }
 
-      // THE CHIP TAKES YOU THERE. Isolating a lap used to dim the other six and
-      // frame the whole loop from above, which answers "where does lap four go"
-      // and leaves the reader no closer to running it. Every other way into the
-      // course on this page (clicking the route, clicking the profile, dragging
-      // the slider) puts the camera on the ground at a mile and leaves a marker
-      // behind, and the chips were the one control that did something else.
-      // They now start you at the lap's own start line, which on this course is
-      // The Oval every time, with the marker on it.
-      //
-      // onSeek rather than a fitBounds of our own, because onSeek is where the
-      // rules already live: it stops any flight, settles the route, holds the
-      // flyover's bearing, and keeps the pitch flat for a reader who pressed
-      // Flatten.
+      // FRAME THE LAP, AND PIN ITS START LINE. A first version flew the camera
+      // down to the lap's start mile instead, on the argument that every other
+      // way into the course puts the camera on the ground. On THIS course that
+      // argument fails: every lap starts at The Oval, so seven chips that fly
+      // to the start line all fly to the same spot, and the chip loses the one
+      // thing it can tell you, which is the shape of that lap. So the camera
+      // frames the whole lap from above, as it always did, and the marker goes
+      // on the start line so the profile below lands on that lap too.
       const start = loopStartMile(loop);
-      if (start == null) return;
-      onPin(start);
-      onSeek(start);
+      if (start != null) onPin(start);
+      settleRoute(map);
+      const pts = profileRef.current;
+      const own = pts.filter((q) => q[LOOP] === loop);
+      if (!own.length) return;
+      const lons = own.map((q) => q[LON]);
+      const lats = own.map((q) => q[LAT]);
+      map.fitBounds(
+        [
+          [Math.min(...lons), Math.min(...lats)],
+          [Math.max(...lons), Math.max(...lats)],
+        ],
+        {
+          padding: 60,
+          // Flat stays flat, exactly as seeking does. See terrainRef.
+          pitch: terrainRef.current ? 60 : 0,
+          bearing: FLY_BEARING,
+          duration: prefersReducedMotion() ? 0 : 900,
+        },
+      );
     },
-    [onPin, onSeek, restView],
+    [onPin, restView, settleRoute],
   );
 
   /**
