@@ -372,13 +372,20 @@ const wrapAttrs = (key: string | undefined) =>
             headingId={headingId}
             race={s.race}
           />
-        ) : s._type === 'courseFeaturesSection' ? (
+        ) : /* THE STUDIO'S CAPTION FIELD LIVES ON THE IMAGE, not on the block.
+             courseFeaturesSection declares `caption` inside its image object,
+             the way every other image field on this site does, and this read
+             `s.caption`, which no schema anywhere writes. So an editor could
+             fill in "Photo caption", publish, and watch nothing appear. The
+             block-level fallback stays because the projected type has carried
+             it since the section was written. */
+        s._type === 'courseFeaturesSection' ? (
           <CourseFeatures
             eyebrow={s.eyebrow}
             headline={s.headline}
             cta={s.cta}
             image={s.image}
-            caption={s.caption}
+            caption={s.image?.caption ?? s.caption}
             features={s.features ?? []}
             surface={surface ?? 'background'}
             headingId={headingId}

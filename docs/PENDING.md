@@ -463,6 +463,75 @@ trades, not optimisations.
 
 The CI gate asserts performance at 0.85 as a warning and passes.
 
+**2026-09-16, the stylesheet lever was pulled, and it was worth 11 points.**
+The two entries above named cutting the stylesheet or art-directing the hero as
+the only levers left. There was a third and it was free: stop making the
+stylesheet a REQUEST. `build.inlineStylesheets: 'always'` in `astro.config.mjs`.
+
+Measured on a harness built for this and not on `npm run serve:dist`, because
+`http-server` does not compress and the entry above records what that costs.
+The harness gzips text, sets immutable cache headers on `/_astro/*` and delays
+every response by 50ms, so it models a network rather than a memory bus. Three
+Lighthouse mobile runs per variant, medians:
+
+| Home page     | before   | after |
+| ------------- | -------- | ----- |
+| Performance   | 88       | 99    |
+| First paint   | 2.00s    | 1.56s |
+| Largest paint | 2.47s    | 1.56s |
+| Speed index   | 2.65s    | 2.12s |
+| Blocking time | 332ms    | 55ms  |
+| Layout shift  | 0.000004 | 0.053 |
+
+Per-run performance went 85 / 88 / 89 to 98 / 99 / 99, so the flap is gone too.
+The other five gated pages: /course 90 to 99, /contact 95 to 98, /records 96 to
+95 (one run, noise), /results and /results/2025 at 100.
+
+IT IS NOT ONLY THE MODEL. Driven in a real Chrome at 4x CPU, 1.6Mbps and 150ms
+RTT with a PerformanceObserver: FCP 856ms to 640ms, LCP 944ms to 844ms. The
+waterfall says why. Before, the stylesheets were requested at 191ms and the
+242KB one landed at 776ms, and first paint followed it at 856ms; 585ms of an
+856ms first paint was one file downloading.
+
+THE LCP ELEMENT'S FONT WAS ALREADY HANDLED, and this is worth writing down so
+nobody spends a morning on it: `span.stamp-word` is set in Staatliches, and
+BaseLayout.astro already preloads the exact hashed woff2 with `crossorigin`.
+The probe shows it requested at 190ms and complete at 619ms, in the first wave,
+before first paint. The font was never the delay.
+
+WHAT IT COSTS. The home page's HTML goes 35KB to 94KB gzipped and the CSS is no
+longer shared between pages, so a three-page visit moves from about 155KB to
+about 275KB. The parity baselines in `scripts/.parity/` grow with it, from
+2.1MB to 9.6MB, because they are the rendered HTML and the rendered HTML now
+contains the stylesheet.
+
+THE ONE REGRESSION, stated plainly. Home CLS goes from 0.000004 to 0.053
+against a hard CI gate of 0.1, and only the home page moves; every other gated
+page stays under 0.007. Half of it was a real bug and is fixed: `size-adjust`
+matched the fallback's WIDTH and left its line box 27% short (Staatliches has
+an ascent of 95 and a descent of 30 at 100px, Arial Narrow under `size-adjust:
+80.8%` had 74 and 17), so the headline's line box grew when the webfont landed.
+`ascent-override`, `descent-override` and `line-gap-override` now pin it, and
+the trap there is that the spec scales the overrides by `size-adjust` too, so
+the numbers written are 95 / 0.808 and 30 / 0.808.
+
+The other half cannot be fixed with metrics: matching a total width does not
+match each glyph's advance, so the letters of a 160px wordmark re-space when
+the face swaps. It measures ZERO on any throttled connection, because there the
+remaining 90KB of HTML outlasts the 16KB font; it appears on a zero-latency
+static server, which is exactly how Lighthouse CI collects. Two cures exist and
+both are trades somebody should choose rather than an agent:
+
+- Inline the display woff2 as a data URI. Costs 16KB gzipped on EVERY page and
+  gives up the font's immutable cross-page cache, but the swap stops existing.
+- `font-display: optional` on Staatliches. Costs nothing and guarantees zero
+  shift, but a first-time visitor whose font misses the ~100ms block window
+  reads the whole page in Arial Narrow. That is the brand's face, so it is
+  Nathan's call and not a performance decision.
+
+The hero phone crop from the entry above was NOT taken. It is still a design
+decision Dave and Nathan have not made, and the numbers no longer need it.
+
 ### 11. The modern trail map: what is possible, and the one input missing
 
 2026-09-12. Nathan asked whether the Stone Steps course could be printed onto
