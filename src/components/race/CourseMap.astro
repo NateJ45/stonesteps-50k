@@ -37,8 +37,12 @@ interface Props {
 
 const { id = 'course-map' } = Astro.props as Props;
 
-const longMiles = meta.loops.find((l) => l.kind === 'long')?.miles ?? 0;
-const shortMiles = meta.loops.find((l) => l.kind === 'short')?.miles ?? 0;
+// THE PUBLISHED LENGTHS. The recorded track reads 5.04 and 3.21, and its own
+// laps disagree with each other over ground that cannot change length, so the
+// shortfall is GPS under a canopy rather than the course. Distances shown to a
+// reader are the race's own; the track is what says where things are.
+const longMiles = meta.loops.find((l) => l.kind === 'long')?.publishedMiles ?? 0;
+const shortMiles = meta.loops.find((l) => l.kind === 'short')?.publishedMiles ?? 0;
 ---
 
 <figure class="cmap" id={id} data-course-map>

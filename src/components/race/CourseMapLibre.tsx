@@ -165,16 +165,17 @@ export default function CourseMapLibre() {
         // NAMESPACE IMPORT, not a default one: maplibre-gl v6 ships named
         // exports and no default, so `{ default: maplibregl }` is undefined at
         // runtime and only fails when you try to construct a Map.
-        const [maplibregl, courseMod, gradeMod, milesMod, profileMod, poiMod, landmarkMod] =
-          await Promise.all([
-            import('maplibre-gl'),
-            import('../../../scripts/data/course-geo.json'),
-            import('../../../scripts/data/course-grade.json'),
-            import('../../../scripts/data/course-miles.json'),
-            import('../../../scripts/data/course-profile.json'),
-            import('../../../scripts/data/course-poi.json'),
-            import('../../../scripts/data/course-landmarks.json'),
-          ]);
+        // The facilities and landmark files are NOT loaded any more: they are
+        // still built (they are true, and the audit that found them is worth
+        // keeping) but nothing on this map draws them, so shipping them to the
+        // browser would be bytes for a layer that does not exist.
+        const [maplibregl, courseMod, gradeMod, milesMod, profileMod] = await Promise.all([
+          import('maplibre-gl'),
+          import('../../../scripts/data/course-geo.json'),
+          import('../../../scripts/data/course-grade.json'),
+          import('../../../scripts/data/course-miles.json'),
+          import('../../../scripts/data/course-profile.json'),
+        ]);
         if (cancelled || !hostRef.current) return;
         maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
@@ -184,8 +185,6 @@ export default function CourseMapLibre() {
         const course = (courseMod.default ?? courseMod) as unknown as GeoData;
         const gradeData = (gradeMod.default ?? gradeMod) as unknown as GeoData;
         const milesData = (milesMod.default ?? milesMod) as unknown as GeoData;
-        const poiData = (poiMod.default ?? poiMod) as unknown as GeoData;
-        const landmarkData = (landmarkMod.default ?? landmarkMod) as unknown as GeoData;
         const pts = ((profileMod.default ?? profileMod) as unknown as { points: ProfilePoint[] })
           .points;
         profileRef.current = pts;
@@ -252,8 +251,28 @@ export default function CourseMapLibre() {
               whole: { type: 'geojson', data: wholeRoute, lineMetrics: true },
               grade: { type: 'geojson', data: gradeData },
               miles: { type: 'geojson', data: milesData },
-              poi: { type: 'geojson', data: poiData },
-              landmarks: { type: 'geojson', data: landmarkData },
+              // ONE NAMED PLACE, AND IT IS THE ONE THE RACE IS NAMED AFTER.
+              // The facility dots and the park's building labels came off on
+              // 2026-09-16: on a map whose subject is a route, a scatter of
+              // shelters, toilets and taps reads as clutter around the thing
+              // you came to look at. What is left answers "where am I round the
+              // loop" and "where are the Stone Steps", which are the two
+              // questions this map exists for.
+              steps: {
+                type: 'geojson',
+                data: {
+                  type: 'FeatureCollection',
+                  features: meta.stoneSteps
+                    ? [
+                        {
+                          type: 'Feature',
+                          properties: { name: 'Stone Steps' },
+                          geometry: { type: 'Point', coordinates: meta.stoneSteps },
+                        },
+                      ]
+                    : [],
+                } as unknown as GeoData,
+              },
               // The scrub marker. Starts empty and is fed a single point as the
               // reader moves along the profile.
               cursor: {
@@ -426,75 +445,31 @@ export default function CourseMapLibre() {
                 // into a dotted mess.
                 minzoom: 13.5,
               },
-              // FACILITIES. Toilets and water are the two things a runner plans
-              // around, so they get colour; shelters and picnic areas are
-              // context and stay quiet.
+              // THE STONE STEPS THEMSELVES. The race is named after them, they
+              // are 2.7% of it, and until now the map did not say which 2.7%.
+              // Placed by the build script from the middle of the sampled track
+              // points whose nearest named way is the Stone Steps, so the
+              // marker sits on the course rather than at the end of the way.
               {
-                id: 'poi',
+                id: 'steps',
                 type: 'circle',
-                source: 'poi',
-                filter: ['in', ['get', 'kind'], ['literal', ['toilets', 'water', 'shelter']]],
-                minzoom: 13,
+                source: 'steps',
                 paint: {
-                  'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 4, 17, 9],
-                  'circle-color': [
-                    'match',
-                    ['get', 'kind'],
-                    'toilets',
-                    '#3b7dd8',
-                    'water',
-                    '#2fa3a3',
-                    '#8a7f66',
-                  ],
+                  'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 4, 16, 8],
+                  'circle-color': '#1a1712',
                   'circle-stroke-color': '#ffffff',
-                  'circle-stroke-width': 1.5,
+                  'circle-stroke-width': 2,
                 },
               },
               {
-                id: 'poi-labels',
+                id: 'steps-label',
                 type: 'symbol',
-                source: 'poi',
-                filter: ['in', ['get', 'kind'], ['literal', ['toilets', 'water']]],
-                minzoom: 14.2,
-                layout: {
-                  // WHAT THE LABEL SAYS DEPENDS ON WHETHER YOU COME BACK. On a
-                  // seven-loop course most of these are passed several times,
-                  // and printing one mile implies it is the only one: the water
-                  // by The Oval is reachable from mile 0 and passed eight
-                  // times, and an earlier version labelled it "Water 24.7".
-                  // Passed once, the mile is the useful fact. Passed more, the
-                  // COUNT is, and the miles are in the list below the map.
-                  'text-field': [
-                    'concat',
-                    ['case', ['==', ['get', 'kind'], 'toilets'], 'WC ', 'Water '],
-                    [
-                      'case',
-                      ['>', ['get', 'passes'], 1],
-                      ['concat', '×', ['to-string', ['get', 'passes']]],
-                      ['to-string', ['get', 'mile']],
-                    ],
-                  ],
-                  'text-size': 11,
-                  'text-offset': [0, 1.3],
-                  'text-optional': true,
-                },
-                paint: {
-                  'text-color': '#ffffff',
-                  'text-halo-color': '#1a1712',
-                  'text-halo-width': 1.4,
-                },
-              },
-              {
-                id: 'landmark-labels',
-                type: 'symbol',
-                source: 'landmarks',
-                minzoom: 14,
+                source: 'steps',
                 layout: {
                   'text-field': ['get', 'name'],
                   'text-size': 12,
-                  'text-offset': [0, 0.9],
+                  'text-offset': [0, 1.1],
                   'text-optional': true,
-                  'text-max-width': 9,
                 },
                 paint: {
                   'text-color': '#ffe9c4',
@@ -713,9 +688,8 @@ export default function CourseMapLibre() {
               'miles',
               'mile-labels',
               'course-start',
-              'poi',
-              'poi-labels',
-              'landmark-labels',
+              'steps',
+              'steps-label',
               'cursor',
               'cursor-halo',
             ]) {
@@ -1181,7 +1155,11 @@ export default function CourseMapLibre() {
             aria-pressed={activeLoop === l.index}
           >
             {l.index}
-            <span className="cmaploops__miles">{l.miles} mi</span>
+            {/* THE PUBLISHED LENGTH, NOT THE WATCH'S. The track reads 5.04,
+                5.00 and 4.96 for the same ground across three laps, which is
+                GPS under a canopy rather than three different loops. Every
+                distance a reader sees is the race's own. */}
+            <span className="cmaploops__miles">{l.publishedMiles} mi</span>
           </button>
         ))}
       </div>
