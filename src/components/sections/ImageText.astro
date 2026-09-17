@@ -6,6 +6,8 @@ import MudField from '@/components/race/MudField.astro';
 import Topo from '@/components/race/Topo.astro';
 import PortableText from '@/components/PortableText';
 import CtaLink from '@/components/CtaLink.astro';
+import RegionPoster from '@/components/race/RegionPoster.astro';
+import { localPosterFor } from '@/lib/local-poster';
 
 interface Props {
   image?: any;
@@ -37,6 +39,19 @@ const {
 // horizontal line left on the home page.
 const bg = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 const imageFirst = imageSide === 'left';
+
+// THIS SITE DRAWS ITS OWN MAPS (2026-09-17). A block whose call to action sends
+// the reader to Google Maps is a block about where things are, and the picture
+// beside it should be our map rather than a screenshot of the one it links to.
+// The rule, the three options it was chosen from and the day it can be deleted
+// are all written out in src/lib/local-poster.ts; it is tested there too,
+// against the live href. Nothing about the CTA changes: a hotel search still
+// belongs on Google.
+// `externalUrl` is where a ctaBlock keeps an outside link; `href` is what
+// CtaLink RESOLVES it to, and this runs before that. Reading the wrong one is
+// silent: the rule simply never fires and the block keeps its CMS image, which
+// is exactly what the first cut of this did.
+const localPoster = localPosterFor(cta?.externalUrl);
 const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebrow ? 'mt-m' : ''}`;
 ---
 
@@ -76,7 +91,9 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
   >
     <div class:list={[imageFirst ? 'md:order-1' : 'md:order-2']}>
       {
-        image?.asset ? (
+        localPoster === 'region' ? (
+          <RegionPoster bandBg={surface} />
+        ) : image?.asset ? (
           cutout ? (
             // A CUT-OUT GETS NO FRAME, but it does get GROUND. A rounded box
             // and a colour wash would draw the rectangle back and undo the only
@@ -125,7 +142,7 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
       }
     </div>
 
-    <div class:list={[imageFirst ? 'md:order-2' : 'md:order-1']}>
+    <div class:list={['label-column', imageFirst ? 'md:order-2' : 'md:order-1']}>
       {
         /* THE OUTLINED LABEL, NOT SMALL CAPS (2026-09-17). This band drew the
           generic starter's eyebrow: 12px tracked caps, its own copy of the
@@ -134,7 +151,13 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
           one page is not a hierarchy, it is an accident of where the code came
           from. This is a CONTENT block, so it takes the label the other
           content bands take, from the same `.section-label` rule. */
-        eyebrow && <p class="section-label text-foreground/80">{eyebrow}</p>
+        /* `--fit` sizes the outlined word off THIS COLUMN rather than off the
+          window (2026-09-17). At 1280 the contact page's "Coming from out of
+          town" broke over two lines in a 570px column, and an outlined word on
+          two lines reads as a fault rather than as a heading. The container
+          query and why it is scoped to this band are on `.section-label--fit`
+          in globals.css. */
+        eyebrow && <p class="section-label section-label--fit text-foreground/80">{eyebrow}</p>
       }
       {
         heading && (

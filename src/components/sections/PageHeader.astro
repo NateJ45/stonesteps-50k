@@ -29,6 +29,23 @@ type Props = {
   eyebrowHref?: string;
   headline?: string;
   headlineSecondLine?: string;
+  /**
+   * Strike the headline onto the page at poster size (2026-09-17).
+   *
+   * FOR A NUMERAL, AND ONLY FOR A NUMERAL. A year page's whole title is
+   * "2025", and set at the band's ordinary clamp it was a heading the size of
+   * "Ask the race director" with three quarters of the line empty beside it.
+   * Four digits can carry the hero's own treatment: the press coming down, the
+   * second pass of rust ink behind it, the size the wordmark is set at. A
+   * sentence cannot, which is why this is a flag a page opts into rather than
+   * the band's new default.
+   *
+   * NOT A NEW OBJECT. It is `.stamp-word` and `.display-echo`, the two the
+   * hero already uses, on one span. Reduced motion switches the press off
+   * through the shared rule, and the word is painted from its first frame, so
+   * this cannot become a page whose largest element arrives late.
+   */
+  headlineStamp?: boolean;
   lede?: string;
   image?: ProjectedPageHeaderSection['image'];
   /** Stand the photograph as a cut-out on a pool of ground. See ImageText. */
@@ -42,6 +59,7 @@ const {
   eyebrowHref,
   headline = '',
   headlineSecondLine,
+  headlineStamp = false,
   lede,
   image,
   cutout = false,
@@ -99,8 +117,31 @@ const hasImage = Boolean(image?.asset);
             Blocks break the line visually and keep the words separate for a
             screen reader. */
         }
-        <h1 id={headingId} class="display text-[clamp(2.5rem,7vw,5.5rem)]">
-          <span class="block">{headline}</span>
+        <h1
+          id={headingId}
+          class:list={[
+            'display',
+            headlineStamp
+              ? 'display-echo text-[clamp(5rem,22vw,7rem)] lg:text-[clamp(5rem,11vw,8.5rem)]'
+              : 'text-[clamp(2.5rem,7vw,5.5rem)]',
+          ]}
+        >
+          {
+            /* The stamped variant wraps the SAME string in one `.stamp-word`
+              rather than splitting it per word the way the hero does. The hero
+              splits because its mark is three words landing in sequence; a
+              year is one press. No sr-only twin either, for the same reason:
+              nothing here is drawn per character, so the text in the heading
+              is the text a screen reader gets. */
+          }
+          {
+            /* `inline-block`, not `block`, when it is stamped. The press opens
+              at 2.4x about the element's own centre, and a full-width block
+              would swing a numeral halfway across the band (and out through
+              the section's clip) on the way in. An inline-block box is the
+              width of the digits, so the press opens around them. */
+          }
+          <span class:list={[headlineStamp ? 'stamp-word inline-block' : 'block']}>{headline}</span>
           {
             /* The explicit space is load-bearing: Astro strips the whitespace
               between adjacent expressions, so without it the two lines

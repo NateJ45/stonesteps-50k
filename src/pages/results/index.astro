@@ -42,10 +42,22 @@ const span = editions.length ? `${editions.at(-1)!.year} to ${editions[0].year}`
 // every year has exactly two and the men's is first, and silently puts a
 // woman's name in the men's column the first time it is not. Now each column
 // asks for the one it wants and renders nothing when that year has none.
-const winnerOf = (d: { winners: { gender: string }[] }, gender: 'M' | 'F') =>
-  (d.winners as { gender: string; row: { name: string; timeSeconds: number } }[]).find(
-    (w) => w.gender === gender,
-  ) ?? null;
+//
+// THE SLUG COMES WITH IT (2026-09-17). The winner's name was plain text here
+// and a link on every other page that prints it: the year page, the records
+// board, the runner pages themselves. A visitor scanning 23 runnings for a
+// name they know is exactly the person who wants to click it, and this was the
+// one place on the site that would not let them.
+const winnerOf = (
+  d: { winners: { gender: string }[] },
+  gender: 'M' | 'F',
+): { gender: string; row: { name: string; slug?: string | null; timeSeconds: number } } | null =>
+  (
+    d.winners as {
+      gender: string;
+      row: { name: string; slug?: string | null; timeSeconds: number };
+    }[]
+  ).find((w) => w.gender === gender) ?? null;
 
 const title = 'Results archive | Stone Steps 50K';
 const description = `Every Stone Steps 50K and 27K result on file, ${span}.`;
@@ -133,9 +145,24 @@ const lede =
                   <span class="text-sm text-muted-foreground">Run, but no results on file.</span>
                 </div>
               ) : (
-                <a class="arch-row arch-tracks group" href={`/results/${e.year}`}>
-                  <span class="arch-row__year display tabular text-heading-accent text-h3 group-hover:underline">
-                    {e.year}
+                /* THE ROW IS NO LONGER ONE BIG LINK (2026-09-17), and it had to
+                  stop being one. A link cannot contain another link, so while
+                  the whole row went to /results/<year> the two winners' names
+                  on it could not go anywhere, which made this the only page on
+                  the site that prints a finisher's name and will not let you
+                  click it. The year keeps the job: it is the loudest thing on
+                  the row, it is set in the accent, and it is what a reader
+                  reaches for anyway. */
+                <div class="arch-row arch-tracks">
+                  <span class="arch-row__year display tabular text-heading-accent text-h3">
+                    {/* The numeral keeps the display face and the accent it
+                      always had; what is new is that it is the link. Its
+                      offset echo is left to `.display`, which switches it on
+                      only in the theme where an offset is a shadow rather than
+                      a smear. See `.arch-row__link` in globals.css. */}
+                    <a class="arch-row__link" href={`/results/${e.year}`}>
+                      {e.year}
+                    </a>
                   </span>
 
                   {e.distances.map((d, di) => (
@@ -161,7 +188,18 @@ const lede =
                               <span class="arch-win__label font-mono text-[0.6875rem] tracking-[0.16em] text-muted-foreground uppercase">
                                 {g === 'F' ? 'Women' : 'Men'}
                               </span>
-                              <span class="text-foreground">{w ? w.row.name : '—'}</span>
+                              <span class="text-foreground">
+                                {w?.row.slug ? (
+                                  <a
+                                    class="underline-offset-2 hover:text-link hover:underline"
+                                    href={`/runners/${w.row.slug}`}
+                                  >
+                                    {w.row.name}
+                                  </a>
+                                ) : (
+                                  (w?.row.name ?? '—')
+                                )}
+                              </span>
                             </span>
                             <span class="arch-time tabular text-sm text-muted-foreground">
                               {w ? formatRaceTime(w.row.timeSeconds) : ''}
@@ -171,7 +209,7 @@ const lede =
                       })}
                     </span>
                   ))}
-                </a>
+                </div>
               )}
             </li>
           ))

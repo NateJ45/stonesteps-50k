@@ -1,0 +1,132 @@
+---
+// Foundation, edit with care
+/**
+ * The still of the wider area: the park, downtown and the airport, on this
+ * site's own map.
+ *
+ * WHY IT EXISTS (2026-09-17). The band it sits in used to carry a screenshot of
+ * Google Maps uploaded to the CMS. A site that draws its own terrain map of the
+ * course, bakes a still of it for the home page and animates the route over it
+ * cannot then show a visitor somebody else's picture of the same city two pages
+ * later. It is the same map, pulled back, with three pins on it.
+ *
+ * WHY A PICTURE AND NOT THE MAP. Exactly the home band's argument, which is
+ * written out in CoursePosterBand.astro: MapLibre is about 250KB before a
+ * single tile, this is below the fold on a page somebody is reading on a phone,
+ * and there is nothing to explore here anyway. This one is not even a link,
+ * because there is no map of the region to go to. It is a picture, and it says
+ * what it is in its alt text.
+ *
+ * WHY IT IS HONEST. `npm run map-region` drives the BUILT site's own map
+ * through Playwright and photographs it. The camera lives in the map's poster
+ * block, the pins are the map's own marker layers, and The Oval's pin is the
+ * first point of the recorded course rather than a coordinate typed in here.
+ * Re-run the command after any change to the map and commit the output.
+ *
+ * THE RIDGE CUT. Top and bottom, the same `--ridge-mask` the real map, the home
+ * poster and every band boundary on the site are cut with. It carries its own
+ * copy of the two spans rather than sharing the home band's, because that one
+ * is welded to a caption scrim, a hover push and a pointer tilt that a picture
+ * in half a column has no business doing. The mask itself, which is the part
+ * that has to agree, is the one shared token.
+ */
+import poster from '../../../scripts/data/region-poster.json';
+
+interface Props {
+  /** The band's own ground, so the cut reads as the page closing over it. */
+  bandBg?: 'background' | 'muted';
+  class?: string;
+}
+
+const { bandBg = 'background', class: extraClass = '' } = Astro.props as Props;
+
+const W = poster.width;
+const H = poster.height;
+---
+
+<figure
+  class={`rposter ${extraClass}`}
+  style={`--poster-ratio:${W} / ${H}; --poster-band-bg: var(${
+    bandBg === 'muted' ? '--color-muted' : '--color-background'
+  })`}
+>
+  <picture>
+    <source type="image/avif" srcset="/region-poster.avif 1x, /region-poster@1_5x.avif 1.5x" />
+    {
+      /* Sized exactly the way the home poster is: the intrinsic width and
+        height are on the tag, so the box exists before the picture lands and
+        nothing below it moves, and it is lazy because it is never the first
+        thing on the page it appears on. */
+    }
+    <img
+      class="rposter__img"
+      src="/region-poster.webp"
+      srcset="/region-poster.webp 1x, /region-poster@1_5x.webp 1.5x"
+      width={W}
+      height={H}
+      loading="lazy"
+      decoding="async"
+      alt="A topographic map of the Cincinnati area with three places marked: The Oval in Mt. Airy Forest where the race starts, downtown Cincinnati to the south east, and the CVG airport to the south west."
+    />
+  </picture>
+  <span class="rposter__ridge rposter__ridge--top" aria-hidden="true"></span>
+  <span class="rposter__ridge rposter__ridge--bottom" aria-hidden="true"></span>
+</figure>
+
+<style>
+  .rposter {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    /* NO RADIUS, same as the home poster: a rounded rectangle is what makes a
+       map read as an embedded thumbnail. The edge is the cut. */
+    background: var(--color-muted);
+    aspect-ratio: var(--poster-ratio);
+    --poster-ridge-h: 28px;
+  }
+
+  .rposter__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* The band closing over the picture. Painted in the band's own colour, passed
+     down by the section, so the cut is the page rather than a line drawn on the
+     image. */
+  .rposter__ridge {
+    position: absolute;
+    inset-inline: 0;
+    height: var(--poster-ridge-h);
+    z-index: 2;
+    pointer-events: none;
+    background-color: var(--poster-band-bg, var(--color-background));
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: var(--ridge-mask);
+    mask-image: var(--ridge-mask);
+  }
+
+  .rposter__ridge--top {
+    top: 0;
+    /* The mask draws its solid half BELOW the contour, so the top edge wears it
+       flipped. Same trick as `.cmap__ridge.is-top` and the home poster's. */
+    transform: scaleY(-1);
+  }
+
+  .rposter__ridge--bottom {
+    bottom: 0;
+  }
+
+  /* Shallower where the picture is short, for the reason `.band-torn` and the
+     home poster both give: a 28px cut top and bottom of a 200px picture is a
+     quarter of the picture. */
+  @media (width < 48rem) {
+    .rposter {
+      --poster-ridge-h: 18px;
+    }
+  }
+</style>

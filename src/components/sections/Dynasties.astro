@@ -10,9 +10,17 @@
 // somebody breaks one of these, the band goes quietly wrong while still looking
 // authoritative. These come from the same merged set the records tables use, so
 // this band and the page it links to cannot disagree.
+//
+// THE HEADLINE PROMISED A BOARD AND NOW THERE IS ONE (2026-09-17). The four
+// holders were four text callouts with a rust rule down the left, under a
+// headline reading "The names on the board". Nothing on the band was a board.
+// They sit on the real object now: RecordBoard.astro, the painted trailhead
+// sign, with each name struck on as the band comes into view. The data is
+// untouched; only the thing it is printed on changed.
 
 import SectionHeading from '@/components/SectionHeading.astro';
 import CtaLink from '@/components/CtaLink.astro';
+import RecordBoard from '@/components/race/RecordBoard.astro';
 import { bracketRecords, courseRecord } from '@/lib/age-brackets';
 import { formatRaceTime } from '@/lib/race-time';
 import type { ProjectedDynastiesSection } from '@/lib/pageBuilder.types';
@@ -68,24 +76,25 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
       <div class="mob-center mx-auto w-full max-w-content px-6">
         <SectionHeading {eyebrow} {headline} {headingId} />
 
-        {/* TWO ACROSS FROM THE NARROWEST PHONE. Stacked, four callouts of
-            three short lines each ran the height of a screen and a half for
-            four numbers; a time is seven monospace characters and fits a
-            half-column with room to spare. */}
-        <ul class="mob-left mt-10 grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-6 lg:grid-cols-4">
-          {holders.map((h) => (
-            <li class="border-l-[3px] border-[color:var(--heading-accent)] pl-4 sm:pl-5">
-              <p class="font-mono text-[0.6875rem] tracking-[0.2em] text-muted-foreground uppercase">
-                {h.gender} <span class="lc">{h.distance}</span>
-              </p>
-              <p class="tabular text-heading-accent mt-2 text-[1.35rem] font-bold sm:text-2xl">
-                {formatRaceTime(h.timeSeconds)}
-              </p>
-              <p class="display mt-1 text-h5">{h.athlete}</p>
-              {h.year && <p class="mt-1 text-sm text-muted-foreground">{h.year}</p>}
-            </li>
-          ))}
-        </ul>
+        {/* ONE BOARD, FOUR ROWS, NOT A GRID OF FOUR. The callouts were two
+            across from the narrowest phone, which was the right answer for
+            four stacks of small type and the wrong one for an object: a sign
+            with four rows on it is read straight down, and the four times line
+            up in a rail at the right the way they do on a real one. Capped
+            short of the content column: past about 54rem the rail pulls so far
+            from the names that a row stops reading as one line, which is the
+            same failure the results tables were rebuilt to fix. */}
+        <RecordBoard
+          class="mob-left mt-10 max-w-[54rem]"
+          label="Course record holders"
+          rows={holders.map((h) => ({
+            label: `${h.gender} ${h.distance}`,
+            name: h.athlete as string,
+            slug: h.athleteSlug,
+            time: formatRaceTime(h.timeSeconds),
+            year: h.year,
+          }))}
+        />
 
         {cta && (
           <div class="mt-10">
