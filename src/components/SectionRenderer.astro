@@ -137,15 +137,10 @@ const wrapAttrs = (key: string | undefined) =>
             headingId={headingId}
           />
         ) : s._type === 'statSection' ? (
-          <StatsRow
-            stats={
-              (s.stats ?? []).filter((x) => typeof x?.number === 'number') as {
-                number: number;
-                suffix?: string;
-                label: string;
-              }[]
-            }
-          />
+          /* No filtering here any more: an item can now name a source instead
+             of a number, so deciding which items have a usable figure is the
+             job of src/lib/stat-sources.ts, which StatsRow calls. */
+          <StatsRow stats={s.stats ?? []} race={s.race} />
         ) : s._type === 'spacerSection' ? (
           s.variant === 'space' ? (
             <div class="py-section-md" aria-hidden="true" />

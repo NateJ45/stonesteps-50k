@@ -1,24 +1,54 @@
 ---
+// Foundation, edit with care
+//
+// The numbers row. Four figures about the race, set as a table rather than a
+// row of badges (the reasoning is in StatsCounter.tsx).
+//
+// WHERE THE FIGURES COME FROM. An item may be typed by hand, or it may name a
+// SOURCE and be derived here at render time. This file is the only place that
+// gathers the facts; the arithmetic and the rules live in src/lib/stat-sources.ts,
+// which is pure and unit tested. The two halves of the gathering are different
+// in kind on purpose:
+//
+//   - The race document's measured climb and edition number arrive through the
+//     section's own projection, because they are CONTENT and an editor can
+//     change them.
+//   - The course distance and the loop count are read straight out of
+//     scripts/data/course-map.json, because they are DERIVED FROM THE GPS TRACK
+//     by scripts/build-course-map.mjs and there is nothing for an editor to
+//     change. The race components do the same (see CourseMap.astro).
+//
+// A derived item whose fact is missing is DROPPED rather than falling back to
+// its stored number: that stored number is exactly the thing that could not be
+// trusted.
 import StatsCounter from './StatsCounter';
-
-interface StatItem {
-  number: number;
-  suffix?: string;
-  label: string;
-}
+import courseMap from '../../scripts/data/course-map.json';
+import { resolveStats, type RawStat } from '@/lib/stat-sources';
+import type { ProjectedStatSection } from '@/lib/pageBuilder.types';
 
 interface Props {
-  stats: StatItem[];
+  stats: RawStat[];
+  race?: ProjectedStatSection['race'];
 }
 
-const { stats } = Astro.props as Props;
+const { stats = [], race } = Astro.props as Props;
+
+const resolved = resolveStats(stats, {
+  gainFt: race?.elevationProfile?.gainFt ?? null,
+  editionNumber: race?.editionNumber ?? null,
+  // The race's own published length, not the track's raw 30.11 miles: the
+  // track is what says where things are, the published figure is what the
+  // race calls the course. Same call the map's caption makes.
+  courseMiles: courseMap.publishedTotalMiles ?? null,
+  loopCount: courseMap.loops?.length ?? null,
+});
 ---
 
 {
-  stats.length > 0 && (
-    <section class="bg-background" aria-label="Studio stats">
+  resolved.length > 0 && (
+    <section class="bg-background" aria-label="Race numbers">
       <div class="mx-auto max-w-content px-6 py-section-md">
-        <StatsCounter stats={stats} client:visible />
+        <StatsCounter stats={resolved} client:visible />
       </div>
     </section>
   )

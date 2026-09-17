@@ -144,7 +144,18 @@ export type ProjectedGallerySection = { _key: string } & Omit<_GallerySection, '
 
 export type ProjectedQuoteSection = { _key: string } & _QuoteSection;
 
-export type ProjectedStatSection = { _key: string } & _StatSection;
+/**
+ * The stat band carries the two documents its derived figures come from (see
+ * the `statSection` branch of sectionsProjection and src/lib/stat-sources.ts).
+ * The course distance and loop count are NOT here: they live in
+ * scripts/data/course-map.json, which the component imports directly.
+ */
+export type ProjectedStatSection = { _key: string } & _StatSection & {
+    race?: {
+      editionNumber?: number | null;
+      elevationProfile?: { gainFt?: number | null } | null;
+    } | null;
+  };
 
 export type ProjectedCtaBandSection = { _key: string } & Omit<
   _CtaBandSection,

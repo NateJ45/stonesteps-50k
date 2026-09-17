@@ -321,11 +321,53 @@ export const statSection = defineType({
           type: 'object',
           name: 'statItem',
           fields: [
+            // A NUMBER ABOUT THE RACE SHOULD COME FROM THE RACE. Typed figures
+            // on this site have drifted from the data six times; the sixth was
+            // this very band saying 6,500 ft and a 23rd edition under a hero
+            // saying about 4,700 feet and a 24th year. Pick a source and the
+            // figure is derived at render time from the measured elevation
+            // profile or the course file, and cannot disagree with the rest of
+            // the site. The label stays yours either way.
+            //
+            // THIS LIST IS MIRRORED in STAT_SOURCES in src/lib/stat-sources.ts,
+            // and src/lib/stat-sources.test.ts parses this file and fails if the
+            // two ever disagree. It is a logic-driving dropdown, so `source` is
+            // in NON_STEGA_FIELDS in src/lib/cms-preview.ts (CLAUDE.md 8b).
+            defineField({
+              name: 'source',
+              title: 'Where the number comes from',
+              type: 'string',
+              initialValue: 'manual',
+              options: {
+                list: [
+                  { value: 'manual', title: 'Typed by hand' },
+                  { value: 'elevationGain', title: 'Elevation gain (from the measured profile)' },
+                  { value: 'courseDistance', title: '50K course distance (from the course file)' },
+                  { value: 'loops', title: 'Number of loops (from the course file)' },
+                  { value: 'edition', title: 'Edition number (from The Race)' },
+                ],
+                layout: 'dropdown',
+              },
+            }),
             defineField({
               name: 'number',
               title: 'Number',
               type: 'number',
-              validation: (R) => R.required(),
+              description: 'Only used when the source above is "Typed by hand".',
+              // Hidden, not removed, when the figure is derived: the stored
+              // value is the last hand-typed one and deleting it on every save
+              // would make switching back to manual a retype.
+              hidden: ({ parent }) => Boolean(parent?.source) && parent.source !== 'manual',
+              // Required only where it is the figure. A required-and-hidden
+              // field is a document that cannot be published and an editor who
+              // cannot see why.
+              validation: (R) =>
+                R.custom((value, context) => {
+                  const parent = context.parent as { source?: string } | undefined;
+                  const derived = Boolean(parent?.source) && parent?.source !== 'manual';
+                  if (derived) return true;
+                  return typeof value === 'number' ? true : 'Required';
+                }),
             }),
             defineField({
               name: 'suffix',
@@ -349,14 +391,21 @@ export const statSection = defineType({
           // can show the suffix too, so the row reads "10,726 ft" rather than
           // "10726".
           preview: {
-            select: { number: 'number', suffix: 'suffix', label: 'label' },
-            prepare: ({ number, suffix, label }) => ({
-              title:
-                typeof number === 'number'
-                  ? `${number.toLocaleString('en-US')}${suffix ?? ''}`
-                  : 'No number yet',
-              subtitle: label,
-            }),
+            select: { number: 'number', suffix: 'suffix', label: 'label', source: 'source' },
+            prepare: ({ number, suffix, label, source }) => {
+              // A derived item's stored number is stale by design, so the list
+              // must not print it as though it were the figure. It says where
+              // the figure comes from instead.
+              const derived = source && source !== 'manual';
+              return {
+                title: derived
+                  ? 'From the data'
+                  : typeof number === 'number'
+                    ? `${number.toLocaleString('en-US')}${suffix ?? ''}`
+                    : 'No number yet',
+                subtitle: label,
+              };
+            },
           },
         }),
       ],

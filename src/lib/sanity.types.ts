@@ -1158,6 +1158,7 @@ export type StatSection = {
   _type: 'statSection';
   heading?: string;
   stats?: Array<{
+    source?: 'manual' | 'elevationGain' | 'courseDistance' | 'loops' | 'edition';
     number?: number;
     suffix?: string;
     label?: string;
