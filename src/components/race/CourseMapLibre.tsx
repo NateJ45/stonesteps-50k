@@ -68,6 +68,15 @@ const EXAGGERATION = 1.5;
 const USGS_IMAGERY =
   'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}';
 
+/**
+ * The same National Map service, drawn as a topographic quad instead of a
+ * photograph. Public domain, no key, and it answers a different question:
+ * the photograph shows what the ground looks like, the topo shows the contours,
+ * the creeks and the names the park itself uses.
+ */
+const USGS_TOPO =
+  'https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}';
+
 /** Terrarium-encoded DEM. NOT mapbox encoding: the two are not interchangeable. */
 const TERRAIN_DEM = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
 
@@ -135,6 +144,15 @@ export default function CourseMapLibre() {
   const [terrainOn, setTerrainOn] = useState(true);
   const [gradeOn, setGradeOn] = useState(false);
   const [activeLoop, setActiveLoop] = useState<number | null>(null);
+  const [basemap, setBasemap] = useState<'satellite' | 'topo'>('satellite');
+  /**
+   * Hover handling lives behind a ref because the map's listeners are attached
+   * once, inside the mount effect, while the callbacks they need are defined
+   * further down the component. Attaching through a ref means the listener
+   * always calls the current one rather than the one that existed at mount.
+   */
+  const hoverRef = useRef<((lngLat: [number, number], px: [number, number]) => void) | null>(null);
+  const activeLoopRef = useRef<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [cursorMile, setCursorMile] = useState<number | null>(null);
   /**
@@ -162,6 +180,16 @@ export default function CourseMapLibre() {
   const rafRef = useRef(0);
   const flyStartRef = useRef(0);
   const flyFromMileRef = useRef(0);
+  /**
+   * Whether the map is in 3D, mirrored into a ref.
+   *
+   * FLATTEN HAS TO SURVIVE THE NEXT CLICK. Seeking and flying both set the
+   * camera, and both used to set the pitch unconditionally, so a reader who had
+   * deliberately flattened the map got 3D back the moment they touched the
+   * profile. A view the reader chose outranks the view the feature prefers.
+   */
+  const terrainRef = useRef(true);
+
   /** Cumulative gradient-weighted effort, built once the profile lands. */
   const pacingRef = useRef<number[] | null>(null);
   const playingRef = useRef(false);
@@ -246,8 +274,11 @@ export default function CourseMapLibre() {
                 tiles: [USGS_IMAGERY],
                 tileSize: 256,
                 maxzoom: 16,
+                // "Basemap", not "Imagery": this source serves the photograph
+                // OR the topographic quad depending on which the reader has
+                // chosen, and the credit has to be true of both.
                 attribution:
-                  'Imagery &copy; <a href="https://www.usgs.gov/">USGS</a> The National Map',
+                  'Basemap &copy; <a href="https://www.usgs.gov/">USGS</a> The National Map',
               },
               terrain: {
                 type: 'raster-dem',
@@ -639,6 +670,7 @@ export default function CourseMapLibre() {
           } catch (err) {
             console.error('Terrain failed; the map stays flat', err);
             setTerrainOn(false);
+            terrainRef.current = false;
           }
 
           drawRoute(m);
@@ -732,6 +764,24 @@ export default function CourseMapLibre() {
 
         // A tile service failing is not a broken page: the course is its own
         // source and still draws. Only a hard style error is worth reporting.
+        // HOVERING THE ROUTE ON THE MAP PLACES THE SAME MARKER the profile
+        // does. Throttled to one lookup per frame: a mousemove can fire far
+        // more often than the map can paint.
+        let hoverPending = false;
+        m.on('mousemove', (e) => {
+          if (hoverPending) return;
+          hoverPending = true;
+          requestAnimationFrame(() => {
+            hoverPending = false;
+            hoverRef.current?.([e.lngLat.lng, e.lngLat.lat], [e.point.x, e.point.y]);
+          });
+        });
+        // Leaving the canvas clears the hover, exactly as leaving the profile
+        // does. The pin, if there is one, stays.
+        m.on('mouseout', () => {
+          hoverRef.current?.([NaN, NaN], [NaN, NaN]);
+        });
+
         m.on('error', (e) => {
           // A tile 404 arrives here, not as a thrown error. Warn rather than
           // fail: a missing tile is a gap in the photograph, not a broken page.
@@ -898,6 +948,64 @@ export default function CourseMapLibre() {
     [showCursorAt],
   );
 
+  /**
+   * Turn a point on the map into a mile on the course.
+   *
+   * THE LOOPS ARE THE PROBLEM, and they are not solvable by geometry: a tree on
+   * the Furnas Trail is mile 2.1, 8.6, 15.1 and 21.6 of the same race, and no
+   * amount of hovering it will say which one the reader means. So the answer is
+   * chosen rather than computed.
+   *
+   * With a loop isolated by the chips, the question has one answer and that lap
+   * is used. With all seven showing, the FIRST lap to cover that ground is used
+   * (loop 1 or 2), which is the same geometry the draw-on animation treats as
+   * the whole course, and the readout names the loop so nothing is implied that
+   * is not true.
+   *
+   * Nearest point is found in lng/lat and then checked in PIXELS, because 25
+   * pixels means the same thing to a reader at every zoom and 200 feet does
+   * not.
+   */
+  useEffect(() => {
+    hoverRef.current = (lngLat, px) => {
+      const map = getMap();
+      const pts = profileRef.current;
+      // The flyover owns the marker while it is playing; a stray mousemove must
+      // not yank the camera's own readout sideways.
+      if (!map || !pts.length || playingRef.current) return;
+      if (!Number.isFinite(lngLat[0])) {
+        onScrub(null);
+        return;
+      }
+
+      const loop = activeLoopRef.current;
+      let best = -1;
+      let bestD = Infinity;
+      for (let i = 0; i < pts.length; i += 1) {
+        const p = pts[i];
+        if (loop == null ? p[LOOP] > 2 : p[LOOP] !== loop) continue;
+        // Squared degrees, with longitude scaled for latitude. Comparing only,
+        // so no square root and no haversine.
+        const dx = (p[LON] - lngLat[0]) * 0.77;
+        const dy = p[LAT] - lngLat[1];
+        const d = dx * dx + dy * dy;
+        if (d < bestD) {
+          bestD = d;
+          best = i;
+        }
+      }
+      if (best < 0) {
+        onScrub(null);
+        return;
+      }
+
+      const p = pts[best];
+      const at = map.project([p[LON], p[LAT]]);
+      const away = Math.hypot(at.x - px[0], at.y - px[1]);
+      onScrub(away <= 25 ? p[MILE] : null);
+    };
+  }, [onScrub]);
+
   // ESCAPE CLEARS IT. Anything a reader can place has to come off without
   // hunting for the exact pixel they placed it on, and Escape is what every
   // other dismissable thing on this page already answers to.
@@ -923,7 +1031,8 @@ export default function CourseMapLibre() {
       map.easeTo({
         center: [p[LON], p[LAT]],
         bearing: FLY_BEARING,
-        pitch: FLY_PITCH,
+        // Flat stays flat. See terrainRef.
+        pitch: terrainRef.current ? FLY_PITCH : 0,
         zoom: FLY_ZOOM,
         duration: prefersReducedMotion() ? 0 : 900,
       });
@@ -1003,7 +1112,7 @@ export default function CourseMapLibre() {
         m.jumpTo({
           center: [p[LON], p[LAT]],
           bearing: FLY_BEARING,
-          pitch: FLY_PITCH,
+          pitch: terrainRef.current ? FLY_PITCH : 0,
           zoom: FLY_ZOOM,
         });
         setCursorMile(mile);
@@ -1025,6 +1134,7 @@ export default function CourseMapLibre() {
     const map = getMap();
     const pts = profileRef.current;
     setActiveLoop(loop);
+    activeLoopRef.current = loop;
     if (!map) return;
     stopFly();
 
@@ -1076,11 +1186,24 @@ export default function CourseMapLibre() {
     }
   };
 
+  /** Swap the photograph for the topographic quad, or back. */
+  const toggleBasemap = () => {
+    const map = mapRef.current as import('maplibre-gl').Map | null;
+    if (!map) return;
+    const next = basemap === 'satellite' ? 'topo' : 'satellite';
+    setBasemap(next);
+    const src = map.getSource('imagery') as import('maplibre-gl').RasterTileSource | undefined;
+    // setTiles rather than a new style: reloading the style would drop every
+    // GeoJSON source, the terrain and the route's draw state with it.
+    src?.setTiles([next === 'topo' ? USGS_TOPO : USGS_IMAGERY]);
+  };
+
   const toggleTerrain = () => {
     const map = mapRef.current as import('maplibre-gl').Map | null;
     if (!map) return;
     const next = !terrainOn;
     setTerrainOn(next);
+    terrainRef.current = next;
     map.setTerrain(next ? { source: 'terrain', exaggeration: EXAGGERATION } : null);
     map.easeTo({ pitch: next ? REST_PITCH : 0, duration: 600 });
   };
@@ -1114,6 +1237,14 @@ export default function CourseMapLibre() {
           </button>
           <button type="button" className="cmapbar__btn" onClick={toggleTerrain}>
             {terrainOn ? 'Flatten' : '3D'}
+          </button>
+          <button
+            type="button"
+            className="cmapbar__btn"
+            onClick={toggleBasemap}
+            aria-pressed={basemap === 'topo'}
+          >
+            {basemap === 'topo' ? 'Satellite' : 'Topo'}
           </button>
           <button
             type="button"
