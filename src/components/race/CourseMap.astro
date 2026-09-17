@@ -189,10 +189,30 @@ const shortMiles = meta.loops.find((l) => l.kind === 'short')?.publishedMiles ??
   :global(.cmapbar) {
     position: absolute;
     left: calc(var(--cmap-bleed) + 0.9rem);
-    /* CLEAR OF MAPLIBRE'S OWN BOTTOM ROW. The scale bar and the attribution sit
-       at 1.4rem; measured, a 3.4rem bar overlapped the scale by 7px, which is
-       the sort of thing that reads as sloppy rather than as a bug. */
-    bottom: 3.9rem;
+    /* CLEAR OF MAPLIBRE'S OWN BOTTOM ROW, AND OF A CREDIT THAT WRAPS. The scale
+       bar and the attribution sit at 1.4rem; measured, a 3.4rem bar overlapped
+       the scale by 7px, which is the sort of thing that reads as sloppy rather
+       than as a bug.
+
+       3.9rem WAS ENOUGH FOR A ONE-LINE CREDIT ONLY. The expanded attribution
+       grows UPWARDS, and at 720px, the exact width at which CourseMapLibre
+       stops collapsing it, the credit needs about 711px of frame and has 681,
+       so it wraps to two lines. The bar's foot was at 62.4px off the frame and
+       the wrapped credit's head at 76.4px, so the first line ran UNDER the bar
+       and the words "Elevation: AWS Terrain Tiles | Map data (c) OpenStreetMap"
+       were hidden behind it. A licence credit is the one thing on this map that
+       may not be covered. Swept 390 to 1600: 720 is the only width that does it
+       today, which is exactly why this is worth clearing rather than nudging,
+       because one more character in the credit moves that window rather than
+       closing it.
+
+       THE NUMBER IS DERIVED, NOT TRIED. MapLibre's own control carries a 10px
+       margin inside the 1.4rem corner inset, so the credit's foot is at 32.4px
+       and two lines of it are 44px, putting its head at 76.4px. 5.25rem is 84px,
+       which clears that by 7.6px, and it also opens the gap to the scale bar
+       from the 2px the old value left to 19.6px. The phone rule below keeps its
+       own value: there the credit is collapsed to its button and cannot wrap. */
+    bottom: 5.25rem;
     z-index: 2;
     display: flex;
     flex-wrap: wrap;
