@@ -1224,49 +1224,68 @@ export default function CourseMapLibre() {
     [onSeek, showCursorAt, restView],
   );
 
-  /** Frame a single loop, or the whole course when cleared. */
-  const focusLoop = useCallback((loop: number | null) => {
-    const map = getMap();
-    const pts = profileRef.current;
-    setActiveLoop(loop);
-    activeLoopRef.current = loop;
-    if (!map) return;
-    stopFly();
+  /**
+   * Where a lap begins, in miles into the race.
+   *
+   * FROM THE BUILD SCRIPT'S FIGURE, not from a scan of the profile, because
+   * course-map.json is what the chips already print their distances from and
+   * two sources for the same number is one source too many. The scan is the
+   * fallback for a lap the metadata somehow does not carry.
+   */
+  const loopStartMile = (loop: number): number | null => {
+    const known = meta.loops.find((l) => l.index === loop);
+    if (known && Number.isFinite(known.startMile)) return known.startMile;
+    const first = profileRef.current.find((q) => q[LOOP] === loop);
+    return first ? first[MILE] : null;
+  };
 
-    // Dim the rest rather than hiding it: the point of isolating a loop is to
-    // see where it sits in the others.
-    for (const id of ['course-long', 'course-short']) {
-      if (!map.getLayer(id)) continue;
-      map.setPaintProperty(
-        id,
-        'line-opacity',
-        loop == null ? 1 : ['case', ['==', ['get', 'index'], loop], 1, 0.18],
-      );
-    }
+  /** Isolate a single lap and go to its start, or return to the whole course. */
+  const focusLoop = useCallback(
+    (loop: number | null) => {
+      const map = getMap();
+      setActiveLoop(loop);
+      activeLoopRef.current = loop;
+      if (!map) return;
+      stopFly();
+      setFinished(false);
 
-    if (loop == null) {
-      map.fitBounds(
-        [
-          [meta.bounds.west, meta.bounds.south],
-          [meta.bounds.east, meta.bounds.north],
-        ],
-        { padding: 40, pitch: 55, duration: prefersReducedMotion() ? 0 : 900 },
-      );
-      return;
-    }
+      // Dim the rest rather than hiding it: the point of isolating a loop is to
+      // see where it sits in the others.
+      for (const id of ['course-long', 'course-short']) {
+        if (!map.getLayer(id)) continue;
+        map.setPaintProperty(
+          id,
+          'line-opacity',
+          loop == null ? 1 : ['case', ['==', ['get', 'index'], loop], 1, 0.18],
+        );
+      }
 
-    const own = pts.filter((q) => q[5] === loop);
-    if (!own.length) return;
-    const lons = own.map((q) => q[LON]);
-    const lats = own.map((q) => q[LAT]);
-    map.fitBounds(
-      [
-        [Math.min(...lons), Math.min(...lats)],
-        [Math.max(...lons), Math.max(...lats)],
-      ],
-      { padding: 60, pitch: 60, duration: prefersReducedMotion() ? 0 : 900 },
-    );
-  }, []);
+      if (loop == null) {
+        onPin(null);
+        restView(map, 0.9);
+        return;
+      }
+
+      // THE CHIP TAKES YOU THERE. Isolating a lap used to dim the other six and
+      // frame the whole loop from above, which answers "where does lap four go"
+      // and leaves the reader no closer to running it. Every other way into the
+      // course on this page (clicking the route, clicking the profile, dragging
+      // the slider) puts the camera on the ground at a mile and leaves a marker
+      // behind, and the chips were the one control that did something else.
+      // They now start you at the lap's own start line, which on this course is
+      // The Oval every time, with the marker on it.
+      //
+      // onSeek rather than a fitBounds of our own, because onSeek is where the
+      // rules already live: it stops any flight, settles the route, holds the
+      // flyover's bearing, and keeps the pitch flat for a reader who pressed
+      // Flatten.
+      const start = loopStartMile(loop);
+      if (start == null) return;
+      onPin(start);
+      onSeek(start);
+    },
+    [onPin, onSeek, restView],
+  );
 
   const toggleGrade = () => {
     const map = getMap();
