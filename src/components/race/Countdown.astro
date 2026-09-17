@@ -306,25 +306,37 @@ const srText = !valid
     }
 
     /* A roll-over re-strikes the segments.
-       The design review asked for digits that FLIP. They should not: a flip is
-       a split-flap, a mechanical object, and this one is explicitly an LED race
-       clock drawn to rhyme with the clock in the photograph beside it. What an
-       LED display does when a digit changes is light new segments, so that is
-       what this does, brief and bright.
+       The design review asked for digits that FLIP. They still should not: a
+       flip is a split-flap, a mechanical object, and this one is explicitly an
+       LED race clock drawn to rhyme with the clock in the photograph beside it.
+       What it does instead is the smallest thing that says a digit CHANGED: the
+       new figure arrives a fraction of its own height high and drops into the
+       segment, in 200ms.
 
-       Seconds are excluded on purpose. They already blink, a flare every second
+       TRANSFORM AND OPACITY ONLY, 2026-09-16. This was a filter:
+       brightness(1.85) ramp, which is neither: an animated filter repaints
+       glowing text on the main thread every frame, and this clock ticks once a
+       second on every page of the site. A translate and a fade are handed to
+       the compositor. Measured in em so it scales with the clamped digit size,
+       and it cannot shift the layout: the digits sit in a grid cell over their
+       own ghost, and a transform has no say in where that cell is. Home page
+       CLS is 0 and this keeps it there.
+
+       Seconds are excluded on purpose. They already blink, a move every second
        would be noise, and the moment worth marking is a minute rolling over. */
     .clock__val:not([data-unit='seconds']).is-lit {
-      animation: led-strike 420ms ease-out;
+      animation: led-strike 200ms cubic-bezier(0.22, 1, 0.36, 1);
     }
   }
 
   @keyframes led-strike {
     0% {
-      filter: brightness(1.85);
+      transform: translateY(-0.26em);
+      opacity: 0.25;
     }
     100% {
-      filter: none;
+      transform: translateY(0);
+      opacity: 1;
     }
   }
   @keyframes led {
