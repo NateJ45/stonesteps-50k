@@ -121,6 +121,19 @@ const FLY_ZOOM = 15.2;
 const REST_PITCH = 66;
 
 /**
+ * The resting shot's heading, off north just enough to read as a photograph of
+ * a place rather than as a plan of one.
+ *
+ * NAMED RATHER THAN TYPED TWICE. This is both the camera the map opens with and
+ * the camera a finished flight returns to, and the two have to be the same
+ * picture or the flight ends somewhere the reader has never seen.
+ */
+const REST_BEARING = -18;
+
+/** How long the return to the resting view takes when a flight finishes. */
+const REST_SECONDS = 2.4;
+
+/**
  * How long the route takes to draw itself in, once, on arrival.
  *
  * Long enough to read as the course being traced and short enough that nobody
@@ -158,6 +171,15 @@ export default function CourseMapLibre() {
   const clickRef = useRef<((lngLat: [number, number], px: [number, number]) => void) | null>(null);
   const activeLoopRef = useRef<number | null>(null);
   const [playing, setPlaying] = useState(false);
+  /**
+   * Whether the last flight ran all the way to The Oval.
+   *
+   * Only so the button can say "Fly again". Without it the label falls through
+   * to "Fly from here", because the flight leaves the cursor sitting on the
+   * finish line, and a button offering to fly from the end of the course is an
+   * offer to do nothing.
+   */
+  const [finished, setFinished] = useState(false);
   const [cursorMile, setCursorMile] = useState<number | null>(null);
   /**
    * The mile the reader PLACED, as opposed to the one they are hovering.
@@ -584,7 +606,7 @@ export default function CourseMapLibre() {
           ],
           fitBoundsOptions: { padding: 40 },
           pitch: REST_PITCH,
-          bearing: -18,
+          bearing: REST_BEARING,
           maxZoom: 18,
           // Past the default 60 the horizon appears. See FLY_PITCH.
           maxPitch: 85,
@@ -821,6 +843,29 @@ export default function CourseMapLibre() {
   }, []);
 
   /**
+   * Back to the shot the map opened with: the whole course in frame, from the
+   * resting pitch and heading.
+   *
+   * FLAT STAYS FLAT, for the same reason seeking and flying do. A reader who
+   * pressed Flatten has said what they want the map to be, and returning from a
+   * flight is not a good enough reason to overrule them.
+   */
+  const restView = useCallback((m: import('maplibre-gl').Map, seconds = REST_SECONDS) => {
+    m.fitBounds(
+      [
+        [meta.bounds.west, meta.bounds.south],
+        [meta.bounds.east, meta.bounds.north],
+      ],
+      {
+        padding: 40,
+        pitch: terrainRef.current ? REST_PITCH : 0,
+        bearing: REST_BEARING,
+        duration: prefersReducedMotion() ? 0 : seconds * 1000,
+      },
+    );
+  }, []);
+
+  /**
    * Trace the course once, on arrival.
    *
    * THE GRADIENT IS THE ANIMATION. Four stops walk along ['line-progress']: solid
@@ -927,6 +972,12 @@ export default function CourseMapLibre() {
   const onScrub = useCallback(
     (mile: number | null) => {
       setCursorMile(mile);
+      // Touching the course at all ends the "that flight is over" state, so the
+      // button goes back to offering a flight from wherever the reader now is.
+      // Every other gesture that moves the marker (pinning on the map, dragging
+      // the slider, clicking the profile) passes through here first, so this is
+      // the one place it has to be cleared.
+      if (mile != null) setFinished(false);
       // Leaving the profile does not clear the marker, it falls back to the
       // pinned one. Passing `mile` straight through here is what made the
       // marker vanish the moment the pointer left.
@@ -1112,6 +1163,7 @@ export default function CourseMapLibre() {
       }
 
       const total = pts[pts.length - 1][MILE];
+      setFinished(false);
       flyFromMileRef.current = fromMile >= total - 0.05 ? 0 : fromMile;
       flyStartRef.current = performance.now();
       playingRef.current = true;
@@ -1154,13 +1206,21 @@ export default function CourseMapLibre() {
 
         if (mile >= total - 1e-4) {
           stopFly();
+          // A PROPER ENDING. The flight used to stop dead at The Oval, at the
+          // flying pitch and zoom, pointed north at a patch of grass: the last
+          // thing a reader saw of a ninety second flight was a frame that did
+          // not say the course was finished, only that the camera had stopped.
+          // Easing back to the shot the map opened with reads as landing, and
+          // it leaves the map in the state anyone arriving at it would find.
+          setFinished(true);
+          restView(m);
           return;
         }
         rafRef.current = requestAnimationFrame(step);
       };
       rafRef.current = requestAnimationFrame(step);
     },
-    [onSeek, showCursorAt],
+    [onSeek, showCursorAt, restView],
   );
 
   /** Frame a single loop, or the whole course when cleared. */
@@ -1316,17 +1376,37 @@ export default function CourseMapLibre() {
           Placed bottom-left, clear of MapLibre's own zoom and compass stack in
           the top right and of the attribution bottom right. */}
         <div className="cmapbar">
+          {/* IT READS AS A PLAY CONTROL, because that is what it is. A bar of
+              four identical word buttons gives no clue which one starts the
+              thing; a triangle in front of the label is the one shape every
+              reader already knows. Drawn inline rather than pulled from an icon
+              font: two <path>s cost nothing and cannot arrive late, be
+              substituted, or fail to load and leave a box behind. */}
           <button
             type="button"
             className="cmapbar__btn is-primary"
             onClick={() => (playing ? stopFly() : startFly(cursorMile ?? pinnedMile ?? 0))}
             disabled={status !== 'ready'}
           >
+            <svg
+              className="cmapbar__glyph"
+              viewBox="0 0 12 12"
+              aria-hidden="true"
+              focusable="false"
+            >
+              {playing ? (
+                <rect x="2" y="2" width="8" height="8" rx="1" />
+              ) : (
+                <path d="M3 1.5 10.5 6 3 10.5Z" />
+              )}
+            </svg>
             {playing
               ? 'Stop'
-              : (cursorMile ?? pinnedMile) != null
-                ? 'Fly from here'
-                : 'Fly the course'}
+              : finished
+                ? 'Fly again'
+                : (cursorMile ?? pinnedMile) != null
+                  ? 'Fly from here'
+                  : 'Fly the course'}
           </button>
           <button type="button" className="cmapbar__btn" onClick={toggleTerrain}>
             {terrainOn ? 'Flatten' : '3D'}

@@ -225,6 +225,24 @@ const shortMiles = meta.loops.find((l) => l.kind === 'short')?.publishedMiles ??
     cursor: pointer;
   }
 
+  /* The glyph sits ON the baseline of the label rather than centred on the
+     button, because a triangle centred against uppercase text reads as sitting
+     slightly low. inline-flex on the button and a fixed box here keeps the
+     label in exactly the same place whether the glyph is a triangle or a
+     square, so the bar does not twitch when the flight starts. */
+  :global(.cmapbar__btn) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  :global(.cmapbar__glyph) {
+    width: 0.7em;
+    height: 0.7em;
+    flex: none;
+    fill: currentcolor;
+  }
+
   :global(.cmapbar__btn:hover:not(:disabled)) {
     background: color-mix(in srgb, var(--color-foreground) 12%, transparent);
   }
