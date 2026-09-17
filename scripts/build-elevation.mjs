@@ -33,6 +33,13 @@
 // counting the same hills are not a contradiction, and the race's number is the
 // one runners have compared notes about for twenty years.
 //
+// WHERE 10,726 COMES FROM, since "the race publishes" is not a source: the
+// race's own WordPress site, stonesteps50k.com, home page, in the sentence
+// "The total elevation change is 10,726 feet." (checked live 2026-09-17). Not
+// RunSignUp, whose page gives no elevation figure at all. The old site is
+// explicit that it is total change, up plus down, which is why the seed's
+// "10,726 feet of climbing" was a mislabel and has been corrected.
+//
 // WHY THIS EXISTS
 //
 // The elevation profile on the site is currently SYNTHETIC: it illustrates the
