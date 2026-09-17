@@ -50,9 +50,8 @@ import CourseProfileStrip from './CourseProfileStrip';
 import {
   indexAtMile,
   sampleAt,
-  bearingAt,
-  easeBearing,
-  mileAtElapsed,
+  buildPacing,
+  pacedMileAtElapsed,
   gradeExpressionStops,
   LON,
   LAT,
@@ -92,6 +91,18 @@ const FLYOVER_SECONDS = 90;
  * raised on the map below, and past about 70 the horizon comes into frame.
  */
 const FLY_PITCH = 74;
+
+/**
+ * NORTH, AND IT STAYS THERE.
+ *
+ * The flyover used to swing the camera round to face the direction of travel.
+ * On a course of switchbacks that is a camera turning almost continuously, and
+ * on a seven-lap course it turns the same corners four times: it reads as being
+ * thrown around rather than as following a trail, and a reader loses track of
+ * which way the park is pointing. Fixed north means every frame can be compared
+ * with every other one, and with the resting map.
+ */
+const FLY_BEARING = 0;
 const FLY_ZOOM = 15.2;
 
 /** The resting shot. High enough to put sky in the frame rather than only dirt. */
@@ -151,7 +162,8 @@ export default function CourseMapLibre() {
   const rafRef = useRef(0);
   const flyStartRef = useRef(0);
   const flyFromMileRef = useRef(0);
-  const bearingRef = useRef(0);
+  /** Cumulative gradient-weighted effort, built once the profile lands. */
+  const pacingRef = useRef<number[] | null>(null);
   const playingRef = useRef(false);
   const drawRafRef = useRef(0);
   const drawDoneRef = useRef(false);
@@ -908,11 +920,9 @@ export default function CourseMapLibre() {
       settleRoute(map);
       const i = indexAtMile(pts, mile);
       const p = sampleAt(pts, i);
-      const bearing = bearingAt(pts, i);
-      bearingRef.current = bearing;
       map.easeTo({
         center: [p[LON], p[LAT]],
-        bearing,
+        bearing: FLY_BEARING,
         pitch: FLY_PITCH,
         zoom: FLY_ZOOM,
         duration: prefersReducedMotion() ? 0 : 900,
@@ -961,9 +971,14 @@ export default function CourseMapLibre() {
       const total = pts[pts.length - 1][MILE];
       flyFromMileRef.current = fromMile >= total - 0.05 ? 0 : fromMile;
       flyStartRef.current = performance.now();
-      bearingRef.current = bearingAt(pts, indexAtMile(pts, flyFromMileRef.current));
       playingRef.current = true;
       setPlaying(true);
+
+      // Built once per flight rather than per frame: it is one pass over 972
+      // points, and doing it inside the rAF loop would be 60 of those a second
+      // for a number that cannot change.
+      if (!pacingRef.current) pacingRef.current = buildPacing(pts);
+      const pacing = pacingRef.current;
 
       const step = () => {
         if (!playingRef.current) return;
@@ -971,20 +986,23 @@ export default function CourseMapLibre() {
         if (!m) return;
         const elapsed = (performance.now() - flyStartRef.current) / 1000;
         const remaining = total - flyFromMileRef.current;
-        const mile =
-          flyFromMileRef.current +
-          mileAtElapsed(remaining, elapsed, (remaining / total) * FLYOVER_SECONDS);
+        // PACED BY THE GRADIENT, not by distance. The camera used to cross the
+        // steepest climb on the course at the same rate as the road round The
+        // Oval. The flight still takes the same total time; only how it spends
+        // it has changed.
+        const mile = pacedMileAtElapsed(
+          pts,
+          pacing,
+          flyFromMileRef.current,
+          elapsed,
+          (remaining / total) * FLYOVER_SECONDS,
+        );
         const i = indexAtMile(pts, mile);
         const p = sampleAt(pts, i);
 
-        // The bearing is eased towards the trail's heading rather than set to
-        // it, and easeBearing takes the short way round the compass. Without
-        // that, every time the route crosses north the camera spins 340 degrees.
-        bearingRef.current = easeBearing(bearingRef.current, bearingAt(pts, i), 0.06);
-
         m.jumpTo({
           center: [p[LON], p[LAT]],
-          bearing: bearingRef.current,
+          bearing: FLY_BEARING,
           pitch: FLY_PITCH,
           zoom: FLY_ZOOM,
         });
