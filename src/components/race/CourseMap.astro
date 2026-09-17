@@ -299,6 +299,16 @@ const shortMiles = meta.loops.find((l) => l.kind === 'short')?.miles ?? 0;
     border-color: #ffd9a0;
   }
 
+  /* Half rust, half cream, because the markers come in both: one swatch that
+     says "these dots" without claiming either loop. */
+  :global(.cmap__swatch.is-mile) {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-foreground);
+    background: linear-gradient(90deg, #e2593c 0 50%, #f6d9b0 50% 100%);
+  }
+
   :global(.cmap__swatch.is-oval) {
     width: 0.7rem;
     height: 0.7rem;

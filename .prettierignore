@@ -18,6 +18,8 @@ src/lib/sanity.types.ts
 scripts/data/course-map.json
 scripts/data/course-geo.json
 scripts/data/course-grade.json
+# ... and this one by `npm run map-poster`, same reasoning.
+scripts/data/course-poster.json
 scripts/data/course-miles.json
 scripts/data/course-profile.json
 scripts/data/course-poi.json

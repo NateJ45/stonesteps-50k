@@ -1,0 +1,331 @@
+---
+// Foundation, edit with care
+/**
+ * The home page's way in to the course map: a still of the real map, with the
+ * course drawing itself over it.
+ *
+ * WHY A PICTURE AND NOT THE MAP. MapLibre is about 250KB before a single tile,
+ * and the home page is the one most likely to be opened on a phone on bad
+ * signal in a car park. It would also spend the reward: the terrain map is what
+ * makes clicking through to /course worth doing. The site's design record
+ * already declined WebGL on the home page for both reasons.
+ *
+ * WHY IT IS STILL HONEST. The photograph is THIS SITE'S map, captured from the
+ * built page by `npm run map-poster`, and the route over it was projected by
+ * that same map at the same instant, so the line cannot drift off the picture.
+ * Re-run the command after any change to the map's camera or terrain.
+ *
+ * THE WHOLE THING IS A LINK. Nothing here is interactive on its own: a still
+ * that behaves like a map invites people to drag it and conclude the site is
+ * broken, so it says what it is and goes to the page that does.
+ */
+import poster from '../../../scripts/data/course-poster.json';
+
+interface Props {
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+  surface?: string;
+  headingId?: string;
+}
+
+const {
+  eyebrow = 'The map',
+  headline = 'See where it actually goes',
+  intro = 'Seven loops out of The Oval, drawn from a recorded run of the course. The full map is yours to move around, tilt and fly.',
+  surface = 'background',
+  headingId,
+} = Astro.props as Props;
+
+// The band matches the cadence the way every other section does; the torn top
+// edge is the site's own band treatment.
+const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
+
+const W = poster.width;
+const H = poster.height;
+
+// COLOUR TELLS THE TWO LOOPS APART, not a dash pattern. The map dashes its
+// short loop and this cannot: the draw-on IS a dash pattern (the whole line as
+// one dash, its offset walking to zero), so a second pattern has nowhere to
+// live. Colour is the stronger signal at this size anyway, and the legend that
+// names them is on the page this picture leads to.
+const LONG = new Set([1, 3, 5, 7]);
+const runs = poster.runs as { loop: number; pts: [number, number][] }[];
+
+const toPath = (pts: [number, number][]) => `M${pts.map((p) => p.join(',')).join('L')}`;
+
+/**
+ * Each lap gets its own path AND its own length, because the draw-on is a
+ * dash offset and a dash offset is measured in user units. Summing the segments
+ * here means the animation needs no JavaScript to ask the DOM how long a path
+ * is, which is what would otherwise force a layout on first paint.
+ */
+const laps = runs.map((r) => {
+  let len = 0;
+  for (let i = 1; i < r.pts.length; i += 1) {
+    len += Math.hypot(r.pts[i][0] - r.pts[i - 1][0], r.pts[i][1] - r.pts[i - 1][1]);
+  }
+  return { loop: r.loop, long: LONG.has(r.loop), d: toPath(r.pts), len: Math.ceil(len) };
+});
+
+// ONLY LAPS 1 AND 2 EXIST HERE AT ALL. Laps 3, 5 and 7 retrace lap 1 and laps
+// 4 and 6 retrace lap 2, so on a flat picture they are the same pixels drawn
+// again. The first version painted laps 3 to 7 underneath as a static base and
+// animated the other two on top, which meant the finished course was already
+// on the photograph before the animation started and the draw-on was
+// invisible. Two laps is the whole course, spatially, and it is also five
+// fewer paths in the HTML.
+const drawn = laps.filter((l) => l.loop <= 2);
+const totalLen = drawn.reduce((n, l) => n + l.len, 0);
+---
+
+<section class={`cposter relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+  <div class="cposter__inner">
+    <div class="cposter__copy">
+      {eyebrow && <p class="cposter__eyebrow">{eyebrow}</p>}
+      <h2 class="cposter__headline" id={headingId}>{headline}</h2>
+      {intro && <p class="cposter__intro">{intro}</p>}
+    </div>
+
+    <a class="cposter__link" href="/course" data-reveal>
+      <figure class="cposter__figure" style={`--poster-ratio:${W} / ${H}`}>
+        <picture>
+          <source
+            type="image/avif"
+            srcset={`/course-poster.avif 1x, /course-poster@1_5x.avif 1.5x`}
+          />
+          <img
+            class="cposter__img"
+            src="/course-poster.webp"
+            srcset={`/course-poster.webp 1x, /course-poster@1_5x.webp 1.5x`}
+            width={W}
+            height={H}
+            loading="lazy"
+            decoding="async"
+            alt="Mt. Airy Forest seen from the air, with the Stone Steps 50K course marked on the ridges it runs."
+          />
+        </picture>
+
+        {
+          /* aria-hidden: the alt text above already describes the course on the
+            terrain, and a second description of the same line would just be
+            read twice. */
+        }
+        <svg class="cposter__route" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+          {
+            drawn.map((l) => (
+              <path
+                class={l.long ? 'cposter__lap is-long is-drawn' : 'cposter__lap is-short is-drawn'}
+                d={l.d}
+                style={`--len:${l.len}; --dur:${((l.len / totalLen) * 2.4).toFixed(2)}s; --delay:${(
+                  (drawn.slice(0, drawn.indexOf(l)).reduce((n, p) => n + p.len, 0) / totalLen) *
+                  2.4
+                ).toFixed(2)}s`}
+              />
+            ))
+          }
+        </svg>
+
+        <figcaption class="cposter__cap">
+          <span class="cposter__cta">Explore the course map</span>
+          <span class="cposter__note">3D terrain, mile by mile</span>
+        </figcaption>
+      </figure>
+    </a>
+  </div>
+</section>
+
+<style>
+  .cposter__inner {
+    max-width: 72rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  .cposter__copy {
+    max-width: 44rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .cposter__eyebrow {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-muted-foreground);
+  }
+
+  .cposter__headline {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    line-height: 1.05;
+  }
+
+  .cposter__intro {
+    margin: 0.75rem 0 0;
+    color: var(--color-muted-foreground);
+    max-width: 38rem;
+  }
+
+  .cposter__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 0.5rem;
+  }
+
+  .cposter__link:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 4px;
+  }
+
+  .cposter__figure {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background: var(--color-muted);
+    /* The picture's own proportions, so the box exists before the image lands
+       and the page below it never jumps. */
+    aspect-ratio: var(--poster-ratio);
+  }
+
+  .cposter__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* The photograph carries the whole band, so it gets a slow push in on
+       hover. Transform only: it cannot reflow anything. */
+    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .cposter__link:hover .cposter__img {
+    transform: scale(1.03);
+  }
+
+  .cposter__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .cposter__lap {
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    /* SCREEN PIXELS, NOT USER UNITS. The viewBox is 933 wide and the band is
+       330 on a phone, so a 3.5 unit stroke arrives as about one pixel and the
+       course reads as a scratch. non-scaling-stroke keeps the line the same
+       weight at every width, which is the whole point of a route drawn over a
+       photograph. Measured at 390px before and after. */
+    vector-effect: non-scaling-stroke;
+    /* A dark stroke under the line is what keeps it readable over a canopy,
+       the same reason the real map carries a casing. Done with a filter rather
+       than a second path so the markup stays half the size. */
+    filter: drop-shadow(0 0 2px rgba(26, 23, 18, 0.85));
+  }
+
+  .cposter__lap.is-long {
+    stroke: #e2593c;
+    stroke-width: 3;
+  }
+
+  .cposter__lap.is-short {
+    stroke: #f6d9b0;
+    stroke-width: 2.5;
+  }
+
+  /* Room for a heavier line once there is room for the picture. */
+  @media (min-width: 48rem) {
+    .cposter__lap.is-long {
+      stroke-width: 4;
+    }
+
+    .cposter__lap.is-short {
+      stroke-width: 3.25;
+    }
+  }
+
+  /* THE DRAW-ON. The dash pattern is the whole line, so moving the offset from
+     its length to zero walks the line onto the picture. It runs once, on the
+     first time the band is seen, and the laps that are not drawn sit
+     underneath at full strength the whole time. */
+  .cposter__lap.is-drawn {
+    stroke-dasharray: var(--len);
+    stroke-dashoffset: var(--len);
+  }
+
+  /* `is-visible`, which is the class BaseLayout's reveal observer sets. It was
+     `is-revealed` here first, which matches nothing in this codebase, and the
+     route would simply have sat un-drawn forever with no error anywhere. */
+  :global([data-reveal].is-visible) .cposter__lap.is-drawn {
+    animation: cposter-draw var(--dur) linear var(--delay) forwards;
+  }
+
+  @keyframes cposter-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .cposter__cap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+    padding: 2.5rem 1rem 1rem;
+    color: #fff;
+    /* Bottom-up scrim rather than a flat panel: the text has to be legible over
+       whatever the photograph happens to be doing under it. */
+    background: linear-gradient(to top, rgba(26, 23, 18, 0.85), rgba(26, 23, 18, 0));
+  }
+
+  .cposter__cta {
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .cposter__cta::after {
+    content: ' \2192';
+    display: inline-block;
+    transition: transform 240ms ease;
+  }
+
+  .cposter__link:hover .cposter__cta::after {
+    transform: translateX(0.25rem);
+  }
+
+  .cposter__note {
+    font-size: 0.8125rem;
+    opacity: 0.85;
+  }
+
+  /* A line that draws itself is decoration, and decoration is what this setting
+     refuses. The route is simply there. */
+  @media (prefers-reduced-motion: reduce) {
+    .cposter__lap.is-drawn {
+      stroke-dasharray: none;
+      stroke-dashoffset: 0;
+      animation: none !important;
+    }
+
+    .cposter__img {
+      transition: none;
+    }
+
+    .cposter__link:hover .cposter__img {
+      transform: none;
+    }
+  }
+</style>

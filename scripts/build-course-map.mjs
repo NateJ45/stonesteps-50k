@@ -661,24 +661,49 @@ async function main() {
     }
   }
 
-  // A marker at every whole mile. Runners plan in miles, and on a seven-loop
-  // course "where is mile 20" is genuinely hard to see otherwise.
+  /*
+   * MILES WITHIN THE LOOP, NOT MILES INTO THE RACE, which is how the 1998 race
+   * map numbered them and how a marker on the ground has to behave.
+   *
+   * The first version placed a marker at every whole CUMULATIVE mile, 1 to 29.
+   * On a course that runs the same trails seven times that puts several
+   * different numbers on one piece of ground: the same tree is mile 4 on the
+   * first lap and mile 19 on the fourth, and the map ended up showing "15" and
+   * "25" a few hundred feet apart with no way to tell what either meant. A
+   * runner cannot use that, and nobody could paint it on a post.
+   *
+   * So each KIND of loop gets one set: 1 to 5 round the long loop, 1 to 3 round
+   * the short one. Later laps retrace the same ground, so one set per kind
+   * covers all seven, and eight markers replace twenty-nine.
+   */
+  // The race's own length, still counted end to end: the markers changed, the
+  // course did not.
+  const lastLoop = loops[loops.length - 1];
+  const totalMiles = lastLoop.mile[lastLoop.mile.length - 1];
+
   const mileMarkers = [];
-  const totalMiles = loops[loops.length - 1].mile[loops[loops.length - 1].mile.length - 1];
-  for (let m = 1; m <= Math.floor(totalMiles); m += 1) {
-    let best = null;
-    for (const loop of loops) {
+  for (const kind of ['long', 'short']) {
+    // The FIRST lap of each kind. Any lap would do, since they are the same
+    // ground; the first is the one whose mile column starts at zero.
+    const loop = loops.find((l) => l.kind === kind);
+    if (!loop) continue;
+    const start = loop.mile[0];
+    const loopMiles = loop.mile[loop.mile.length - 1] - start;
+    for (let m = 1; m <= Math.floor(loopMiles); m += 1) {
+      let best = null;
       for (let i = 0; i < loop.mile.length; i += 1) {
-        const diff = Math.abs(loop.mile[i] - m);
+        const diff = Math.abs(loop.mile[i] - start - m);
         if (!best || diff < best.diff) best = { diff, coord: loop.coords[i], ele: loop.ele[i] };
       }
-    }
-    if (best && best.diff < 0.05) {
-      mileMarkers.push({
-        type: 'Feature',
-        properties: { mile: m, ele: best.ele },
-        geometry: { type: 'Point', coordinates: best.coord },
-      });
+      // 0.05 miles is 264 ft: past that the track has no sample near the mile
+      // and a marker would be a guess rather than a measurement.
+      if (best && best.diff < 0.05) {
+        mileMarkers.push({
+          type: 'Feature',
+          properties: { mile: m, kind, ele: best.ele },
+          geometry: { type: 'Point', coordinates: best.coord },
+        });
+      }
     }
   }
 
@@ -784,7 +809,7 @@ async function main() {
   writeFileSync(join(DATA, 'course-map.json'), `${JSON.stringify(meta)}\n`);
   console.log(
     `\nWrote course-geo.json, course-grade.json (${gradeSegments.length} segments), ` +
-      `course-miles.json (${mileMarkers.length} markers), ` +
+      `course-miles.json (${mileMarkers.length} markers, per loop), ` +
       `course-poi.json (${facilities.length}), course-landmarks.json (${landmarks.length}), ` +
       `course-profile.json ` +
       `(${profile.length} points) and course-map.json`,

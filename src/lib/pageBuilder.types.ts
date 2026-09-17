@@ -546,6 +546,15 @@ export interface ProjectedCourseMapSection {
   intro?: string;
 }
 
+/** The home page's still of the course map. The picture is baked, not edited. */
+export interface ProjectedCoursePosterSection {
+  _type: 'coursePosterSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+}
+
 export interface ProjectedElevationSection {
   _type: 'elevationSection';
   _key: string;
@@ -719,6 +728,7 @@ export type PageBuilderBlock =
   | ProjectedLoopCardSection
   | ProjectedElevationSection
   | ProjectedCourseMapSection
+  | ProjectedCoursePosterSection
   | ProjectedSponsorPatchesSection
   | ProjectedPageHeaderSection
   | ProjectedContactSection
