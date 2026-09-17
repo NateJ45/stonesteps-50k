@@ -94,6 +94,30 @@ export default defineConfig({
   // binding with no namespace id fails the deploy. A fork that adds a login
   // turns this back on and creates the namespace deliberately.
   session: false,
+  // THE TWO RENDER-BLOCKING STYLESHEETS WERE THE WHOLE REMAINING GAP, and
+  // inlining them is worth 11 Lighthouse points (docs/PENDING.md entry 10).
+  // Measured on a local harness that GZIPS, because an uncompressed one makes
+  // the 242KB raw stylesheet the gate in every variant and that is the trap
+  // entry 10 warns about. Mobile preset, median of three, gzip plus 50ms per
+  // response: performance 88 -> 99, FCP 2.00s -> 1.56s, LCP 2.47s -> 1.56s,
+  // TBT 332ms -> 55ms. In a real throttled browser (4x CPU, 1.6Mbps, 150ms
+  // RTT) FCP goes 856ms -> 640ms and LCP 944ms -> 844ms, so this is a reader's
+  // win and not only the model's.
+  //
+  // IT COSTS BYTES, AND THE TRADE IS DELIBERATE. The home page's HTML goes
+  // from 35KB to 94KB gzipped and the CSS is no longer cached across pages, so
+  // a three-page visit downloads about 275KB instead of about 155KB. The site
+  // is six templates a visitor reads once, on a phone, and the first paint is
+  // the thing worth buying; a documentation site with deep browsing sessions
+  // should make the opposite call.
+  //
+  // ONE REGRESSION CAME WITH IT, and it is recorded rather than hidden: the
+  // home page's CLS goes from 0.000004 to 0.053 (hard gate 0.1) because the
+  // page now paints BEFORE the display webfont can land, so the wordmark
+  // reflows per glyph. It measures ZERO on any throttled connection, where the
+  // remaining 90KB of HTML takes longer than the 16KB font. See the metric
+  // overrides in globals.css for the half of it that was a real bug.
+  build: { inlineStylesheets: 'always' },
   // `imageService: 'compile'` tells @astrojs/cloudflare to process images
   // with Sharp at build time and ship plain static files — no Cloudflare
   // Images runtime, no per-transform fees, no Workers binding required.

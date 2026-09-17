@@ -27,11 +27,31 @@
    staatlichesWidth / fallbackWidth, verified afterwards at a ratio of 1.000.
    The other two are derived from known metric compatibility, because a
    local() name the system cannot resolve measures as the DEFAULT face rather
-   than failing, which quietly produces a confident wrong number. */
+   than failing, which quietly produces a confident wrong number.
+
+   SIZE-ADJUST MATCHED THE WIDTH AND LEFT THE HEIGHT 27% SHORT (2026-09-16).
+   Measured on canvas with the real wordmark at 100px: Staatliches has an
+   ascent of 95 and a descent of 30, and Arial Narrow under size-adjust: 80.8%
+   has 74 and 17. The line box therefore GREW by a quarter when the webfont
+   landed and everything below the headline moved down. It never showed up
+   because the preloaded font had always won the race against a render blocked
+   on a 242KB stylesheet; the moment that stylesheet was inlined and the page
+   painted 200ms sooner, Lighthouse measured CLS 0.056 against a page that had
+   been reporting 0.000004.
+     The overrides pin the fallback's line box to Staatliches' own metrics, so
+   the swap is now a change of SHAPE only, whatever order the two arrive in.
+   THE PERCENTAGES ARE PRE-SIZE-ADJUST, and that is the trap: the spec scales
+   the overrides by size-adjust along with everything else, so an
+   `ascent-override: 95%` under `size-adjust: 80.8%` renders as 77, not 95.
+   Verified in the browser before these numbers were written: 95 / 0.808 =
+   117.6 and 30 / 0.808 = 37.1. Fallback 3 divides by its own 0.662 instead. */
 @font-face {
   font-family: 'Staatliches Fallback';
   src: local('Arial Narrow');
   size-adjust: 80.8%;
+  ascent-override: 117.6%;
+  descent-override: 37.1%;
+  line-gap-override: 0%;
   font-display: swap;
 }
 @font-face {
@@ -44,6 +64,9 @@
      72% from exactly that mistake. */
   src: local('Liberation Sans Narrow');
   size-adjust: 80.8%;
+  ascent-override: 117.6%;
+  descent-override: 37.1%;
+  line-gap-override: 0%;
   font-display: swap;
 }
 @font-face {
@@ -52,6 +75,9 @@
      ratio than the two above: 598.9 / 904.05. Derived for the same reason. */
   src: local('Helvetica Neue'), local('Helvetica');
   size-adjust: 66.2%;
+  ascent-override: 143.5%;
+  descent-override: 45.3%;
+  line-gap-override: 0%;
   font-display: swap;
 }
 
