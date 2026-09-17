@@ -96,7 +96,8 @@ async function main() {
   });
 
   try {
-    await page.goto(`http://localhost:${PORT}/course/?poster=1`, { waitUntil: 'load' });
+    const basemap = process.env.POSTER_BASEMAP === 'topo' ? '&basemap=topo' : '';
+    await page.goto(`http://localhost:${PORT}/course/?poster=1${basemap}`, { waitUntil: 'load' });
 
     // The map is a client:visible island, so it does not exist until the
     // reader (here, the script) reaches it.
@@ -118,67 +119,14 @@ async function main() {
 
     // The chrome belongs to the interactive map, not to a photograph of it.
     await page.addStyleTag({
-      content: `.maplibregl-control-container, .cmapbar, .cmap__ridge { display: none !important; }`,
+      content: `.maplibregl-control-container, .cmapbar, .cmap__ridge, .cmap__status { display: none !important; }`,
     });
     await page.waitForTimeout(400);
 
     const frame = page.locator('.cmap__canvas');
     const shot = await frame.screenshot({ type: 'png' });
 
-    // Projected in the same frame, at the same instant, by the map itself.
-    const projected = await page.evaluate(() => ({
-      points: window.__poster.project(),
-      size: window.__poster.size(),
-    }));
-
-    // SIMPLIFY IN SCREEN SPACE, because that is where it will be looked at.
-    // 972 points is what the map needs to drape a line over terrain; the poster
-    // is a flat picture at one size, and points closer together than a pixel
-    // are bytes on the home page that nobody can see. Douglas-Peucker at 1.2px
-    // keeps every bend the eye can resolve.
-    const simplify = (pts, tol) => {
-      if (pts.length < 3) return pts;
-      const keep = new Uint8Array(pts.length);
-      keep[0] = 1;
-      keep[pts.length - 1] = 1;
-      const stack = [[0, pts.length - 1]];
-      while (stack.length) {
-        const [a, b] = stack.pop();
-        let far = -1;
-        let best = tol;
-        const [ax, ay] = pts[a];
-        const [bx, by] = pts[b];
-        const dx = bx - ax;
-        const dy = by - ay;
-        const len = Math.hypot(dx, dy) || 1;
-        for (let i = a + 1; i < b; i += 1) {
-          const [px, py] = pts[i];
-          const d = Math.abs(dy * px - dx * py + bx * ay - by * ax) / len;
-          if (d > best) {
-            best = d;
-            far = i;
-          }
-        }
-        if (far > 0) {
-          keep[far] = 1;
-          stack.push([a, far]);
-          stack.push([far, b]);
-        }
-      }
-      return pts.filter((_, i) => keep[i] === 1);
-    };
-
-    // Split by lap first: simplifying across a loop boundary would cut the
-    // corner between the end of one lap and the start of the next.
-    const runs = [];
-    for (const q of projected.points) {
-      const last = runs[runs.length - 1];
-      if (!last || last.loop !== q[2]) runs.push({ loop: q[2], pts: [[q[0], q[1]]] });
-      else last.pts.push([q[0], q[1]]);
-    }
-    const beforeN = projected.points.length;
-    const simplified = runs.map((r) => ({ loop: r.loop, pts: simplify(r.pts, 1.2) }));
-    const afterN = simplified.reduce((n, r) => n + r.pts.length, 0);
+    const projected = await page.evaluate(() => ({ size: window.__poster.size() }));
 
     const [cssW, cssH] = projected.size;
     const outDir = join(ROOT, 'public');
@@ -219,24 +167,21 @@ async function main() {
       written.push(`${name}.avif`, `${name}.webp`);
     }
 
-    // The overlay is stored in the picture's own coordinate space, so the SVG
-    // can use it as a viewBox and scale with the image at any width.
+    // Only the picture's own size, so the band can reserve the right box
+    // before the image lands and the page below it never jumps. The route used
+    // to be written here too, as coordinates for an SVG overlay; it is now in
+    // the picture itself.
     await writeFile(
       join(ROOT, 'scripts', 'data', 'course-poster.json'),
-      `${JSON.stringify({
-        width: cssW,
-        height: cssH,
-        // One run per lap, so the band draws the long loops solid and the
-        // short ones dashed exactly as the map does.
-        runs: simplified,
-      })}\n`,
+      `${JSON.stringify({ width: cssW, height: cssH })}
+`,
     );
 
     for (const name of written) {
       const { size } = await stat(join(outDir, name));
       console.log(`${name.padEnd(22)} ${(size / 1024).toFixed(0)} KB`);
     }
-    console.log(`course-poster.json      ${afterN} points (from ${beforeN}) over ${cssW}x${cssH}`);
+    console.log(`course-poster.json      ${cssW}x${cssH}`);
   } finally {
     await browser.close();
     server.close();

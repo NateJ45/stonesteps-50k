@@ -722,39 +722,28 @@ export default function CourseMapLibre() {
               pitch: num('p', 63),
               bearing: num('b', -22),
             });
-            for (const id of [
-              'course-glow',
-              'course-casing',
-              'course-draw',
-              'course-long',
-              'course-short',
-              'course-grade',
-              'course-arrows',
-              'miles',
-              'mile-labels',
-              'course-start',
-              'steps',
-              'steps-label',
-              'cursor',
-              'cursor-halo',
-            ]) {
+            /*
+             * THE POSTER IS THE MAP, NOT A TRACING OF IT.
+             *
+             * This used to hide every route layer so the home page could draw
+             * the course back on in SVG and animate it. Side by side the SVG
+             * lost: the map puts a dark casing under the line, a warm glow
+             * around it and a width that grows with zoom, and a flat stroke
+             * over a canopy reads as unfinished next to that. So the still is
+             * now the map exactly as a reader sees it, and only two things come
+             * off: the chrome, which belongs to an interactive map, and the
+             * scrub marker, which is a thing a reader placed.
+             */
+            if (posterParams.get('basemap') === 'topo') {
+              const src = m.getSource('imagery') as
+                import('maplibre-gl').RasterTileSource | undefined;
+              src?.setTiles([USGS_TOPO]);
+            }
+            for (const id of ['cursor', 'cursor-halo']) {
               if (m.getLayer(id)) m.setLayoutProperty(id, 'visibility', 'none');
             }
             (window as any).__poster = {
-              /** Route points projected to CSS pixels in the map's own frame. */
-              project: () =>
-                profileRef.current.map((q) => {
-                  // locationPoint3D, not project: project() ignores the terrain
-                  // and at 66 degrees of pitch a point on a hillside lands tens
-                  // of pixels from where it is drawn.
-                  const t = (m as any).transform;
-                  const ll = { lng: q[LON], lat: q[LAT] };
-                  const pt =
-                    typeof t?.locationPoint3D === 'function'
-                      ? t.locationPoint3D(ll)
-                      : m.project([q[LON], q[LAT]]);
-                  return [Math.round(pt.x * 10) / 10, Math.round(pt.y * 10) / 10, q[LOOP]];
-                }),
+              /** The canvas the screenshot is cropped to, in CSS pixels. */
               size: () => {
                 const c = m.getCanvas();
                 return [c.clientWidth, c.clientHeight];
@@ -1385,6 +1374,15 @@ export default function CourseMapLibre() {
             unless it admits otherwise. */}
         <span className="cmap3d__hint">
           Vertical scale exaggerated {EXAGGERATION}x. Light set to 8am on race day.
+        </span>
+        {/* SAY WHICH YEAR THE TRACK IS FROM. The recording Dave sent is from a
+            COVID year, when the short loop ran a reroute, and he flagged it
+            when he sent it. A map drawn from one runner's watch that does not
+            say which running it was is a map quietly claiming to be the course
+            as it stands. The difference is small and the sentence is cheap. */}
+        <span className="cmap3d__hint">
+          Recorded in a COVID year, when the short loop ran a reroute, so that loop is close to but
+          not exactly the one you will run. The rest is the course as it stands.
         </span>
       </div>
     </div>
