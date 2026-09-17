@@ -468,8 +468,9 @@ The two entries above named cutting the stylesheet or art-directing the hero as
 the only levers left. There was a third and it was free: stop making the
 stylesheet a REQUEST. `build.inlineStylesheets: 'always'` in `astro.config.mjs`.
 
-Measured on a harness built for this and not on `npm run serve:dist`, because
-`http-server` does not compress and the entry above records what that costs.
+Measured on a harness built for this and not on `npm run serve:dist` as it
+then was, because `http-server` does not compress and the entry above records
+what that costs. (`serve:dist` now runs `scripts/serve-dist.mjs`, which does.)
 The harness gzips text, sets immutable cache headers on `/_astro/*` and delays
 every response by 50ms, so it models a network rather than a memory bus. Three
 Lighthouse mobile runs per variant, medians:
@@ -531,6 +532,22 @@ both are trades somebody should choose rather than an agent:
 
 The hero phone crop from the entry above was NOT taken. It is still a design
 decision Dave and Nathan have not made, and the numbers no longer need it.
+
+**2026-09-17, later: CI was measuring an uncompressed site, and had been all
+along.** After the inlining landed, the Lighthouse job's home LCP did not move:
+4.2 to 4.9s before and after, on the same 4.5s gate, still flapping. The reason
+is in `lighthouserc.json`: `staticDistDir` uses lhci's own static server, which
+sends every byte raw. The home HTML is 435KB raw and 84KB gzipped, and at the
+mobile throttle the raw file alone is about two seconds of download before any
+CSS can run. Production is Cloudflare and compresses everything, so CI was
+penalising the exact change that helped every reader. Measured on one machine,
+Lighthouse mobile, three runs each: through `http-server`, LCP 10,447 /
+10,476 / 10,435ms and performance 59; through `scripts/serve-dist.mjs`
+(brotli/gzip, the deploy's cache headers), LCP 3,829 / 3,827 / 3,826ms and
+performance 87. lhci now starts that server (`startServerCommand`) and audits
+through it. Two consequences: the LCP gate now describes delivery rather than
+the runner's disk, and every earlier CI Lighthouse number in this entry was
+taken uncompressed and is not comparable with numbers from here on.
 
 ### 11. The modern trail map: what is possible, and the one input missing
 

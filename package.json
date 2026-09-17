@@ -38,7 +38,7 @@
     "test:ui": "playwright test --ui",
     "audit:studio": "node scripts/audit-studio.mjs",
     "test:unit": "node --experimental-strip-types --test src/lib/*.test.ts",
-    "serve:dist": "http-server dist/client -p 4321 -s -c-1 --silent",
+    "serve:dist": "node scripts/serve-dist.mjs --port 4321",
     "check:links": "linkinator ./dist/client --recurse --skip \"^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])\" --skip \"/studio\" --skip \"/preview\" --skip \"/runners\" --skip \"/api/\"",
     "test:visual": "playwright test -c playwright.visual.config.ts",
     "test:visual:update": "playwright test -c playwright.visual.config.ts --update-snapshots=all",
