@@ -1185,6 +1185,15 @@ footer {
    the Soft Linen surface. Sits below content via pointer-events:none and a
    negative z-index inside the page wrapper. Visible enough to add tactile
    warmth to large flat surfaces, quiet enough not to read as a pattern. */
+/* THE TILE IS A TOKEN (2026-09-17), because a second surface now wants it.
+   The weather strip's bars are stocks, and a stock with no grain in it is a
+   swatch. Naming the tile here rather than pasting the data URI a second time
+   means there is still exactly ONE grain on this site and no new asset: change
+   the noise and everything painted with it changes together. */
+:root {
+  --paper-grain: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3'/><feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
 body::before {
   content: '';
   position: fixed;
@@ -1192,7 +1201,7 @@ body::before {
   z-index: 0;
   pointer-events: none;
   opacity: 0.09;
-  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3'/><feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-image: var(--paper-grain);
   background-size: 300px 300px;
   mix-blend-mode: multiply;
 }
@@ -3646,9 +3655,51 @@ main > .band-torn:first-child::before {
 /* One column per year, one bar per column from the low to the high, a notch
    at the start temperature, a foot that fills when it rained. All percentages
    of a shared scale, computed in RaceWeather.astro; this file only draws. The
-   bar takes the foreground at reduced strength so it sits INTO the band rather
-   than on it; rain takes the primary, because it is the one fact a runner
-   reacts to. */
+   bar sits INTO the band rather than on it; rain takes the rust, because it is
+   the one fact a runner reacts to.
+
+   THE BARS ARE STOCKS NOW (2026-09-17), not tints.
+   A dry year was `--foreground` at 62% over the band, which resolves on the
+   cream page to about rgb(111,105,95): a flat neutral grey, the one colour
+   nowhere else in this palette, on the one band of the site that is otherwise
+   entirely made of paper and bark. Two dozen grey bars is a chart widget. So a
+   dry year is painted in the bark the boards and the signs are cut from, and a
+   wet one in the rust, and both take the paper grain over them, because that
+   is what makes a rectangle read as a piece of stock rather than as a fill.
+
+   AND THE DRY STOCK FLIPS WITH THE THEME, for the reason the --lift-ground
+   block up the file spells out at length: bark on the bark page is a hole, not
+   an object. On the cream page the bar is the dark thing; on the bark page it
+   is the light thing, one step toward the cream stock. The rust is legible
+   against both grounds and does not flip, which is why only one of the two is
+   a pair of values.
+
+   THE GRAIN'S BLEND FOLLOWS THE SAME FORK, and there is one trap in it worth
+   the three lines. The tile is BLACK noise on transparency, so it can only
+   ever darken: multiplied over the dark theme's pale bar it is exactly right,
+   and screened over the cream page's dark bar it does nothing at all, because
+   screening black is a no-op. Measured, not guessed: the first cut of this
+   shipped `screen` over black and the light theme's bars came back perfectly
+   flat. So the light theme INVERTS the tile first, which turns the same one
+   asset into white noise, and screens that. The body's own grain needs neither
+   fork because it only ever lies over the page, and the page is light. */
+:root {
+  /* Bark, one shade off the board's own face, so the strip belongs to the same
+     material family without being mistaken for a board. */
+  --wx-dry: #3b3125;
+  --wx-rain: var(--primary);
+  --wx-grain-blend: screen;
+  /* Measured by eye at 4x on the deployed bars: 0.3 read as static and lifted
+     the rust a whole step paler. This is texture in the stock, not weather. */
+  --wx-grain-strength: 0.16;
+}
+.dark {
+  /* The page ground carried toward the cream stock, exactly the move
+     --lift-ground-ink makes, at the weight a filled rectangle needs. */
+  --wx-dry: #bfae8b;
+  --wx-grain-blend: multiply;
+  --wx-grain-strength: 0.14;
+}
 .wx {
   display: grid;
   grid-template-columns: 2.4rem 1fr;
@@ -3660,6 +3711,23 @@ main > .band-torn:first-child::before {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   color: var(--muted-foreground);
+}
+/* LEGIBLE AT A DESK (2026-09-17). Eleven px of mono is the size this site uses
+   for a LABEL on an object, where there are four of them and each sits beside
+   the thing it names. Here there are thirty-odd and they are the only way to
+   tell which year a bar is, and at 1280 they read as a texture along the bottom
+   of the strip rather than as numbers. Thirteen px from the width where the
+   columns have room for it; the phone keeps eleven, because there the
+   constraint is two dozen labels across 327px and the rule further down already
+   drops every other one. */
+@media (min-width: 48rem) {
+  .wx__axis,
+  .wx__year {
+    font-size: 0.8125rem;
+  }
+  .wx__key {
+    font-size: 0.75rem;
+  }
 }
 .wx__tick {
   position: absolute;
@@ -3690,11 +3758,40 @@ main > .band-torn:first-child::before {
   left: 15%;
   right: 15%;
   border-radius: 3px;
-  background: color-mix(in srgb, var(--foreground) 62%, transparent);
+  background: var(--wx-dry);
   min-height: 3px;
 }
 .wx__col.is-rain .wx__bar {
-  background: var(--primary);
+  background: var(--wx-rain);
+}
+/* The grain, as its own layer rather than a second background on the bar,
+   because a layer can be given an opacity and a blended background cannot, and
+   at full strength this tile turns a 20px bar into static. It inherits the
+   radius so it cannot square off the corners, and it scales with the bar during
+   the reveal, which is invisible at 700ms and not worth a second element to
+   avoid. */
+.wx__bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: var(--paper-grain);
+  /* THE SAME 300px THE BODY TILES IT AT, so the fleck on a bar is the same
+     physical size as the fleck on the paper around it and the strip reads as
+     the same stock. Squeezed to 110px the 200-unit tile resolved to about half
+     a pixel per noise cell, which averages back out to a flat wash: the layer
+     was there and there was nothing to see. */
+  background-size: 300px 300px;
+  /* WRITTEN OUT, NOT `invert(var(--…))`. A var() inside a filter function is
+     legal CSS and this build's pipeline drops the whole declaration for it;
+     computed style came back `none`. Two rules cost less than the hour. */
+  filter: invert(1);
+  mix-blend-mode: var(--wx-grain-blend);
+  opacity: var(--wx-grain-strength);
+}
+.dark .wx__bar::before {
+  filter: none;
 }
 .wx__start {
   position: absolute;
@@ -3702,10 +3799,15 @@ main > .band-torn:first-child::before {
   right: -3px;
   height: 2px;
   background: var(--background);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--foreground) 62%, transparent);
+  /* Outlined in whatever stock it is cut into, so the 8 am tick reads as a
+     notch in the bar and not as a hairline laid across it. Above the grain, or
+     the grain would film over the one mark on the strip that has to stay
+     crisp. */
+  box-shadow: 0 0 0 1px var(--wx-dry);
+  z-index: 1;
 }
 .wx__col.is-rain .wx__start {
-  box-shadow: 0 0 0 1px var(--primary);
+  box-shadow: 0 0 0 1px var(--wx-rain);
 }
 /* The foot sits just under the axis line and says wet or dry. */
 .wx__foot {
@@ -3733,6 +3835,15 @@ main > .band-torn:first-child::before {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   color: var(--muted-foreground);
+}
+/* A WET YEAR NAMES ITSELF. The foot under the column already says so, at 6px,
+   in a mark you have to have read the key to decode. Setting the year itself in
+   the second ink means the answer to "which years did it rain" is legible from
+   the label row alone, which is how anyone actually reads this strip. It is the
+   accent chosen against the PAGE, not against the bar, because the year is
+   printed on the band and not on the stock. */
+.wx__col.is-rain .wx__year {
+  color: var(--heading-accent);
 }
 /* THE STRIP ARRIVES. The figure rides the page's own reveal observer (the
    `data-reveal` / `.is-visible` pair from BaseLayout), and once it is visible
@@ -3793,22 +3904,22 @@ main > .band-torn:first-child::before {
   width: 0.55rem;
   height: 1rem;
   border-radius: 2px;
-  background: color-mix(in srgb, var(--foreground) 62%, transparent);
+  background: var(--wx-dry);
 }
 .wx__k-notch {
   width: 0.9rem;
   height: 2px;
   background: var(--background);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--foreground) 62%, transparent);
+  box-shadow: 0 0 0 1px var(--wx-dry);
 }
 .wx__k-foot {
   width: 0.4rem;
   height: 0.4rem;
   border-radius: 50%;
-  border: 1.5px solid var(--primary);
+  border: 1.5px solid var(--wx-rain);
 }
 .wx__k-foot.is-rain {
-  background: var(--primary);
+  background: var(--wx-rain);
 }
 
 /* Two dozen labels do not fit a phone; every other year is enough to read the
@@ -3820,6 +3931,63 @@ main > .band-torn:first-child::before {
 }
 .wx + figcaption {
   margin-top: 3rem;
+}
+
+/* ---------- The numbers row, as a figure table --------------------------- */
+/* Four measurements of the same race, ranged left under a rule each. The
+   markup and the reasoning for the shape are in StatsCounter.tsx; this draws
+   the rule.
+
+   IT IS THE TICKETS' TEAR LINE. The row used to sit under 2px of
+   `--plate-edge`, the literal black a plate's border is cut in, which is the
+   wrong token for a line drawn on the PAGE rather than around an object: on
+   bark it is black on near-black and the rule simply was not there. A dashed
+   rule is already this site's mark for a line something comes apart along, the
+   tickets two bands up wear it, and it is the cheapest possible way to say
+   these four figures were torn off the same sheet.
+
+   Drawn in the page ink at a fixed strength rather than in `--border`, because
+   --border is a surface token tuned for hairlines between rows of a table and
+   reads as a smudge under something set at 5rem. */
+.stat-figure {
+  border-top: 2px dashed color-mix(in srgb, var(--foreground) 42%, transparent);
+}
+
+/* ---------- The records board's frame ----------------------------------- */
+/* The FAQ's kiosk, holding tables instead of index cards. Everything that
+   makes it a board (the stock, the recess) comes from `.kiosk` itself, so the
+   two are the same object and stay that way; this block is only what a board
+   full of data needs and a board full of cards does not.
+
+   IT HAS TO ESTABLISH A POSITIONING CONTEXT, because the big faint time is
+   printed ON the board now and an absolutely positioned mark with no
+   positioned ancestor would anchor itself to the band and hang off the bottom
+   of the page. `isolation: isolate` alongside it, so the mark's own stacking
+   cannot climb past the rows: the record board up the file takes the same
+   pair for the same reason.
+
+   AND IT CLIPS, because the mark is set at up to 15rem and is deliberately
+   bigger than the space it sits in. `clip` rather than `hidden` so neither
+   axis becomes a scroll container; the tables inside keep their own
+   `overflow-x-auto` wrappers and those are untouched. */
+.kiosk--records {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+}
+/* AND IT HAS TO TAKE ITS HEADINGS BACK OFF THE PLATE RULE, which is the one
+   real trap in reusing this object. `.kiosk :is(h1-h6)` up the file paints
+   every heading inside a kiosk in `--plate-ink`, and it is right to: on the FAQ
+   board every heading sits on an index CARD, the card is a plate, and the rule
+   exists because a cream heading on a cream plate measured 1.15:1 once already.
+   Nothing on this board is a plate. The tables are printed straight onto the
+   stock, so their headings want the page ink, and without this line "Men 50K"
+   came out cream on cream in the light theme and near-black on bark in the
+   dark one: the same failure the original rule was written to stop, arriving
+   from the other direction. Same specificity, later in the file, so it wins on
+   order; scoped to this modifier, so the FAQ is untouched. */
+.kiosk--records :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--foreground);
 }
 
 /* ======================================================================== */

@@ -16,6 +16,21 @@ sequence).
 
 ## Waiting on a human
 
+### 1l. The numbers row can wear a label, and nobody has typed one
+
+2026-09-17 (Tier 3). `statSection` has always had an optional `heading` field and
+`SectionRenderer` threw it away, so an editor could type one and watch nothing happen.
+StatsRow renders it now, as `.section-label`, the outlined display word the other content
+bands wear. Nothing in the dataset sets it, so the home page's numbers row still arrives
+with no label, exactly as before.
+
+This is a content decision rather than a bug: the band sits directly under the ticker and
+may well be better without one. If it wants a label, open the home page in the Studio,
+find the Numbers row block and fill in its Heading. Two or three words, phrased like the
+other eyebrows on the site ("The measurements", "By the numbers"), because the outlined
+face is large and a sentence in it competes with the headline rather than ranking under
+it. Nothing in the code has to change either way, and there is no deadline on it.
+
 ### 1k. The Google Maps screenshot is still in the contact page's block
 
 2026-09-17. `/contact`'s "Stay downtown or near CVG" band is an `imageTextSection` whose

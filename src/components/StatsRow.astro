@@ -21,6 +21,15 @@
 // A derived item whose fact is missing is DROPPED rather than falling back to
 // its stored number: that stored number is exactly the thing that could not be
 // trusted.
+//
+// THE BAND CAN WEAR A LABEL NOW (2026-09-17). `statSection` has carried an
+// optional `heading` field since it was written and SectionRenderer threw it
+// away, so an editor could type one and watch nothing happen. It is rendered as
+// `.section-label`, the outlined display word every other content band wears,
+// because this band IS a content band: it takes a surface from the cadence and
+// it is a stretch of the page rather than an object sitting on it. Nothing is
+// added to the schema to get this, and a band with no heading typed renders
+// exactly as it did.
 import StatsCounter from './StatsCounter';
 import courseMap from '../../scripts/data/course-map.json';
 import { resolveStats, type RawStat } from '@/lib/stat-sources';
@@ -29,9 +38,11 @@ import type { ProjectedStatSection } from '@/lib/pageBuilder.types';
 interface Props {
   stats: RawStat[];
   race?: ProjectedStatSection['race'];
+  /** Optional band label, set as the outlined display word. */
+  heading?: string;
 }
 
-const { stats = [], race } = Astro.props as Props;
+const { stats = [], race, heading } = Astro.props as Props;
 
 const resolved = resolveStats(stats, {
   gainFt: race?.elevationProfile?.gainFt ?? null,
@@ -47,7 +58,8 @@ const resolved = resolveStats(stats, {
 {
   resolved.length > 0 && (
     <section class="bg-background" aria-label="Race numbers">
-      <div class="mx-auto max-w-content px-6 py-section-md">
+      <div class="mob-center mx-auto max-w-content px-6 py-section-md">
+        {heading && <p class="section-label mb-6 text-foreground/80">{heading}</p>}
         <StatsCounter stats={resolved} client:visible />
       </div>
     </section>

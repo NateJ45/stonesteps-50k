@@ -21,6 +21,27 @@
 // screen-reader caption and uses `scope` on both column and row headers, so the
 // bracket name is announced with each cell rather than leaving a screen reader
 // to guess which row it is in.
+//
+// THE FRAME IS A BOARD NOW (2026-09-17), AND ONLY THE FRAME.
+// The tables above stay exactly as plain as the note above promises: nothing
+// inside a panel changed. What changed is what the panel sits on. The page is
+// called The records, the headline above it says the names are on a board, the
+// tabs are already sign plates, and underneath all of that the rows were
+// floating on the bare band. So each distance's panel goes on the trailhead
+// kiosk the FAQ is built from: the same `.kiosk` stock and the same INSET
+// shadow, which is the whole point of that object. A raised card would have
+// been one more thing sitting on the page; a recess reads as a board set into a
+// post, which is what the page has been claiming to be.
+//
+// AND THE BIG FAINT TIME MOVED ONTO IT, per distance. The mark used to be one
+// per section, printed on the band behind everything and derived from the 50K
+// board only, which meant the 27K tab showed a 50K record behind a table headed
+// Women 27K. Two things made that worth fixing now rather than later: a board
+// with an opaque stock would have hidden the mark outright, and the file's own
+// note on `fastestMark` already argued that a time this size beside the wrong
+// heading is a lie whichever direction it points. Each panel now prints its own
+// distance's record on its own board, behind its own rows. The ghost photograph
+// stays where it was, on the band, so it still bleeds past the board's edge.
 
 import SectionHeading from '@/components/SectionHeading.astro';
 import DataMark from '@/components/race/DataMark.astro';
@@ -90,29 +111,29 @@ function boardFor(slug: string) {
   });
 }
 
+/** The fastest course record on one distance's board, or null. */
+function markFor(genders: ReturnType<typeof boardFor>) {
+  const seconds = genders
+    .map((g) => g.course?.timeSeconds)
+    .filter((t): t is number => typeof t === 'number' && t > 0)
+    .reduce<number | null>((a, t) => (a === null || t < a ? t : a), null);
+  return seconds ? formatRaceTime(seconds) : null;
+}
+
 const boards = distances
   .filter((d) => d.slug)
-  .map((d) => ({ ...d, slug: d.slug as string, genders: boardFor(d.slug as string) }));
+  .map((d) => {
+    const genders = boardFor(d.slug as string);
+    return { ...d, slug: d.slug as string, genders, mark: markFor(genders) };
+  });
 
 const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 
-// THE COURSE RECORD FOR THE LONG DISTANCE, and the distance filter is the
-// whole care in this line. Taking the fastest time across EVERY board gave
-// 1:58:36, which is the 27K record: correct as "fastest on file", and a lie the
-// moment it is set at 15rem beside a table headed Men 50K, because nobody reads
-// a number that size as anything but the course record.
-//
-// Derived from the same rows the boards are built from rather than stored, so
-// it cannot disagree with the table beneath it: import a faster run tomorrow
-// and this moves with it. It is also printed in full a few hundred pixels away,
-// which is the rule for every mark like this - the big version is never the
-// only place a value appears.
-const longBoard = boards.find((b) => /50/.test(b.slug)) ?? boards[0];
-const fastestSeconds = (longBoard?.genders ?? [])
-  .map((g) => g.course?.timeSeconds)
-  .filter((t): t is number => typeof t === 'number' && t > 0)
-  .reduce<number | null>((a, t) => (a === null || t < a ? t : a), null);
-const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
+// THE MARK IS DERIVED, NEVER STORED, and that part has not changed: it comes
+// out of the same rows the board is built from, so it cannot disagree with the
+// table it sits behind, and import a faster run tomorrow and it moves. It is
+// also printed in full a few hundred pixels away, which is the rule for every
+// mark like this - the big version is never the only place a value appears.
 ---
 
 <section class={`relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
@@ -122,7 +143,6 @@ const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
   }
   <div class="pointer-events-none absolute inset-0 overflow-hidden">
     <GhostPhoto image={race?.atmosphere?.[1] ?? race?.atmosphere?.[0]} side="right" />
-    <DataMark text={fastestMark} align="left" />
   </div>
   <div class="mob-center relative z-10 mx-auto w-full max-w-content px-6">
     <SectionHeading {eyebrow} {headline} {headingId} />
@@ -156,104 +176,39 @@ const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
               aria-labelledby={`rtab-${b.slug}`}
               hidden={i !== 0}
             >
-              <div class="grid gap-10 lg:grid-cols-2">
-                {b.genders.map((g) => (
-                  <div>
-                    <h3 class="display mb-3 text-h4">
-                      {g.label} <span class="lc">{b.name}</span>
-                    </h3>
+              {/* The board. Same three classes the FAQ's kiosk wears, so there
+                is one recessed object on this site and not two that happen to
+                look alike; `.kiosk--records` in globals.css only adds what a
+                board holding tables needs that a board holding index cards does
+                not. The mark's wrapper is what clips it, never the board, for
+                the same reason GhostPhoto's caller clips that: a radius on the
+                clipping layer and nothing spilling onto the page. */}
+              <div class="kiosk kiosk--records rounded-2xl border-2 border-black p-5 sm:p-8">
+                <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+                  <DataMark text={b.mark} align="left" />
+                </div>
+                <div class="relative z-10 grid gap-10 lg:grid-cols-2">
+                  {b.genders.map((g) => (
+                    <div>
+                      <h3 class="display mb-3 text-h4">
+                        {g.label} <span class="lc">{b.name}</span>
+                      </h3>
 
-                    {g.course?.timeSeconds && (
-                      <p class="mb-4 text-sm text-muted-foreground">
-                        Course record{' '}
-                        <span class="tabular font-bold text-foreground">
-                          {formatRaceTime(g.course.timeSeconds)}
-                        </span>
-                        {g.course.athlete && <> by {g.course.athlete}</>}
-                        {g.course.year && <>, {g.course.year}</>}.
-                      </p>
-                    )}
+                      {g.course?.timeSeconds && (
+                        <p class="mb-4 text-sm text-muted-foreground">
+                          Course record{' '}
+                          <span class="tabular font-bold text-foreground">
+                            {formatRaceTime(g.course.timeSeconds)}
+                          </span>
+                          {g.course.athlete && <> by {g.course.athlete}</>}
+                          {g.course.year && <>, {g.course.year}</>}.
+                        </p>
+                      )}
 
-                    <div class="overflow-x-auto">
-                      <table class="w-full border-collapse text-sm">
-                        <caption class="sr-only">
-                          {g.label} {b.name} records by age group
-                        </caption>
-                        <thead>
-                          <tr class="border-b border-primary/30">
-                            <th
-                              scope="col"
-                              class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                            >
-                              Bracket
-                            </th>
-                            <th
-                              scope="col"
-                              class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                            >
-                              Holder
-                            </th>
-                            <th
-                              scope="col"
-                              class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                            >
-                              Year
-                            </th>
-                            <th
-                              scope="col"
-                              class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                            >
-                              Time
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {g.brackets.map((row: RecordRow) => (
-                            <tr
-                              class={`border-b border-border/60 ${
-                                row.bracket === g.overall ? 'is-overall' : ''
-                              }`}
-                            >
-                              <th scope="row" class="rec-bracket py-2 pr-3 text-left font-normal">
-                                {row.label}
-                              </th>
-                              <td class="rec-name py-2 pr-3">
-                                {row.athlete ? (
-                                  row.athleteSlug ? (
-                                    <a
-                                      class="underline-offset-2 hover:text-link hover:underline"
-                                      href={`/runners/${row.athleteSlug}`}
-                                    >
-                                      {row.athlete}
-                                    </a>
-                                  ) : (
-                                    row.athlete
-                                  )
-                                ) : row.timeSeconds ? (
-                                  /* A time with no name is a record whose holder is
-                                    not on file, which is a different thing from a
-                                    bracket nobody has run. It used to say
-                                    "Unclaimed" next to a year and a time. */
-                                  <span class="text-muted-foreground">Name not on file</span>
-                                ) : (
-                                  <span class="text-muted-foreground">Unclaimed</span>
-                                )}
-                              </td>
-                              <td class="py-2 text-right whitespace-nowrap">{row.year ?? ''}</td>
-                              <td class="rec-time tabular py-2 text-right font-bold whitespace-nowrap">
-                                {formatRaceTime(row.timeSeconds) || '—'}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {g.topTen.length > 0 && (
-                      <div class="mt-8 overflow-x-auto">
+                      <div class="overflow-x-auto">
                         <table class="w-full border-collapse text-sm">
-                          <caption class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase">
-                            Fastest {g.topTen.length} on file
+                          <caption class="sr-only">
+                            {g.label} {b.name} records by age group
                           </caption>
                           <thead>
                             <tr class="border-b border-primary/30">
@@ -261,13 +216,13 @@ const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
                                 scope="col"
                                 class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
                               >
-                                #
+                                Bracket
                               </th>
                               <th
                                 scope="col"
                                 class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
                               >
-                                {g.label}
+                                Holder
                               </th>
                               <th
                                 scope="col"
@@ -284,40 +239,119 @@ const fastestMark = fastestSeconds ? formatRaceTime(fastestSeconds) : null;
                             </tr>
                           </thead>
                           <tbody>
-                            {g.topTen.map((row, idx) => (
+                            {g.brackets.map((row: RecordRow) => (
                               <tr
-                                class={`border-b border-border/60 ${idx === 0 ? 'is-overall' : ''}`}
+                                class={`border-b border-border/60 ${
+                                  row.bracket === g.overall ? 'is-overall' : ''
+                                }`}
                               >
-                                <th
-                                  scope="row"
-                                  class="rec-bracket tabular py-2 pr-3 text-left font-normal"
-                                >
-                                  {String(idx + 1).padStart(2, '0')}
+                                <th scope="row" class="rec-bracket py-2 pr-3 text-left font-normal">
+                                  {row.label}
                                 </th>
                                 <td class="rec-name py-2 pr-3">
-                                  {row.athlete?.slug ? (
-                                    <a
-                                      class="underline-offset-2 hover:text-link hover:underline"
-                                      href={`/runners/${row.athlete.slug}`}
-                                    >
-                                      {row.athlete.name}
-                                    </a>
+                                  {row.athlete ? (
+                                    row.athleteSlug ? (
+                                      <a
+                                        class="underline-offset-2 hover:text-link hover:underline"
+                                        href={`/runners/${row.athleteSlug}`}
+                                      >
+                                        {row.athlete}
+                                      </a>
+                                    ) : (
+                                      row.athlete
+                                    )
+                                  ) : row.timeSeconds ? (
+                                    /* A time with no name is a record whose holder is
+                                    not on file, which is a different thing from a
+                                    bracket nobody has run. It used to say
+                                    "Unclaimed" next to a year and a time. */
+                                    <span class="text-muted-foreground">Name not on file</span>
                                   ) : (
-                                    (row.athlete?.name ?? '')
+                                    <span class="text-muted-foreground">Unclaimed</span>
                                   )}
                                 </td>
                                 <td class="py-2 text-right whitespace-nowrap">{row.year ?? ''}</td>
                                 <td class="rec-time tabular py-2 text-right font-bold whitespace-nowrap">
-                                  {formatRaceTime(row.timeSeconds)}
+                                  {formatRaceTime(row.timeSeconds) || '—'}
                                 </td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {g.topTen.length > 0 && (
+                        <div class="mt-8 overflow-x-auto">
+                          <table class="w-full border-collapse text-sm">
+                            <caption class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase">
+                              Fastest {g.topTen.length} on file
+                            </caption>
+                            <thead>
+                              <tr class="border-b border-primary/30">
+                                <th
+                                  scope="col"
+                                  class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                                >
+                                  #
+                                </th>
+                                <th
+                                  scope="col"
+                                  class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                                >
+                                  {g.label}
+                                </th>
+                                <th
+                                  scope="col"
+                                  class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                                >
+                                  Year
+                                </th>
+                                <th
+                                  scope="col"
+                                  class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                                >
+                                  Time
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {g.topTen.map((row, idx) => (
+                                <tr
+                                  class={`border-b border-border/60 ${idx === 0 ? 'is-overall' : ''}`}
+                                >
+                                  <th
+                                    scope="row"
+                                    class="rec-bracket tabular py-2 pr-3 text-left font-normal"
+                                  >
+                                    {String(idx + 1).padStart(2, '0')}
+                                  </th>
+                                  <td class="rec-name py-2 pr-3">
+                                    {row.athlete?.slug ? (
+                                      <a
+                                        class="underline-offset-2 hover:text-link hover:underline"
+                                        href={`/runners/${row.athlete.slug}`}
+                                      >
+                                        {row.athlete.name}
+                                      </a>
+                                    ) : (
+                                      (row.athlete?.name ?? '')
+                                    )}
+                                  </td>
+                                  <td class="py-2 text-right whitespace-nowrap">
+                                    {row.year ?? ''}
+                                  </td>
+                                  <td class="rec-time tabular py-2 text-right font-bold whitespace-nowrap">
+                                    {formatRaceTime(row.timeSeconds)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ))}

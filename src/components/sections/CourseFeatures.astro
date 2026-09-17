@@ -12,6 +12,22 @@
 // own column, which needs no JavaScript and degrades to a normal image on a
 // phone, where the layout is one column and sticking would mean covering the
 // text with a photo.
+//
+// TWO MATERIAL CORRECTIONS (2026-09-17), and the list itself is untouched.
+//
+// THE PHOTOGRAPH TAKES THE GROUND LIFT, not the plate lift. It was
+// `--lift-lg`, the black offset, which is right for an object sitting on a
+// PLATE and wrong for one sitting on the page: on the bark page a black offset
+// renders about nineteen values off the ground and the picture lost its shadow
+// entirely, while the plate button six inches below it kept one. The
+// --lift-ground block in globals.css is the long argument; this is one of the
+// usages it says has to choose. The parks band keeps the black offset on
+// purpose, because its ground is forest in both themes.
+//
+// THE NUMERALS ARE A MARKER, NOT A FOOTNOTE. Same face, same ink, three steps
+// larger. At 14px they ranked below the body copy under them, so a numbered
+// list read as an unnumbered one with something small above each title; the
+// number is the only thing saying these four are in an order.
 
 import SectionHeading from '@/components/SectionHeading.astro';
 import SanityImage from '@/components/SanityImage.astro';
@@ -58,7 +74,7 @@ const hasImage = Boolean(image?.asset);
         >
           {hasImage && (
             <figure class="lg:sticky lg:top-28 lg:self-start">
-              <div class="photo-plate overflow-hidden rounded-xl border-2 border-black shadow-[var(--lift-lg)]">
+              <div class="photo-plate overflow-hidden rounded-xl border-2 border-black shadow-[var(--lift-ground-lg)]">
                 <SanityImage
                   source={image}
                   width={1000}
@@ -78,7 +94,9 @@ const hasImage = Boolean(image?.asset);
           <div class={hasImage ? 'mob-left' : 'mob-left grid gap-px sm:grid-cols-2'}>
             {features.map((f, i) => (
               <article class="border-t border-border py-6 first:border-t-0 first:pt-0 sm:pr-8">
-                <p class="tabular text-heading-accent text-sm">{String(i + 1).padStart(2, '0')}</p>
+                <p class="tabular text-heading-accent text-[1.0625rem] tracking-[0.06em]">
+                  {String(i + 1).padStart(2, '0')}
+                </p>
                 <h3 class="display mt-2 text-h4">{f.title}</h3>
                 {f.body && <p class="mt-3 max-w-[46ch] text-muted-foreground">{f.body}</p>}
                 <Provisional
