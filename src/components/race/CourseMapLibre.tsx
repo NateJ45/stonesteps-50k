@@ -1404,7 +1404,28 @@ export default function CourseMapLibre() {
     const next = !terrainOn;
     setTerrainOn(next);
     terrainRef.current = next;
-    map.setTerrain(next ? { source: 'terrain', exaggeration: EXAGGERATION } : null);
+    // FLAT IS TERRAIN AT ZERO HEIGHT, NOT NO TERRAIN. Flatten used to call
+    // setTerrain(null), which also stops the elevation source loading tiles:
+    // pan or zoom while flat and none of the new view has any DEM behind it.
+    // Switching 3D back on then made MapLibre reload the whole elevation
+    // source and build the mesh with every tile at zero height until its DEM
+    // arrived, so on a phone network the map spent a second or two as a flat
+    // sheet with a stretched wall of texture between the rows of tiles that
+    // had healed and the ones that had not (Nathan caught it, 2026-09-17).
+    // Keeping the terrain object alive with exaggeration 0 keeps the DEM
+    // tiles following the view while the map reads as flat, and re-enabling
+    // 3D is then a mesh change on data already in memory: no reload, no
+    // window with a half-built mesh. Exaggeration 0 is a legal value in the
+    // style spec (minimum 0), and the terrain is a no-op at that height.
+    //
+    // The null branch survives only for a map whose terrain never came up
+    // (the try/catch in the load handler), where there is nothing to keep.
+    try {
+      map.setTerrain({ source: 'terrain', exaggeration: next ? EXAGGERATION : 0 });
+    } catch (err) {
+      console.error('Terrain failed; the map stays flat', err);
+      map.setTerrain(null);
+    }
     map.easeTo({ pitch: next ? REST_PITCH : 0, duration: 600 });
   };
 
