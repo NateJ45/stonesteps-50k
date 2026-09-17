@@ -1,5 +1,35 @@
 [
   {
+    "year": 2003,
+    "date": "2003-10-26",
+    "high": 56,
+    "low": 46,
+    "startTemp": 50,
+    "rainIn": 0.63,
+    "prevRainIn": 0.18,
+    "code": 61
+  },
+  {
+    "year": 2004,
+    "date": "2004-10-24",
+    "high": 67,
+    "low": 55,
+    "startTemp": 56,
+    "rainIn": 0.05,
+    "prevRainIn": 0.72,
+    "code": 53
+  },
+  {
+    "year": 2005,
+    "date": "2005-10-23",
+    "high": 48,
+    "low": 41,
+    "startTemp": 45,
+    "rainIn": 0.3,
+    "prevRainIn": 0.12,
+    "code": 55
+  },
+  {
     "year": 2006,
     "date": "2006-10-22",
     "high": 49,
@@ -48,6 +78,26 @@
     "rainIn": 0,
     "prevRainIn": 0,
     "code": 3
+  },
+  {
+    "year": 2011,
+    "date": "2011-10-23",
+    "high": 63,
+    "low": 41,
+    "startTemp": 42,
+    "rainIn": 0,
+    "prevRainIn": 0,
+    "code": 3
+  },
+  {
+    "year": 2012,
+    "date": "2012-10-28",
+    "high": 50,
+    "low": 42,
+    "startTemp": 42,
+    "rainIn": 0.05,
+    "prevRainIn": 0.25,
+    "code": 53
   },
   {
     "year": 2013,

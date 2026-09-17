@@ -1642,15 +1642,11 @@ export default function CourseMapLibre() {
         <span className="cmap3d__hint">
           Vertical scale exaggerated {EXAGGERATION}x. Light set to 8am on race day.
         </span>
-        {/* SAY WHICH YEAR THE TRACK IS FROM. The recording Dave sent is from a
-            COVID year, when the short loop ran a reroute, and he flagged it
-            when he sent it. A map drawn from one runner's watch that does not
-            say which running it was is a map quietly claiming to be the course
-            as it stands. The difference is small and the sentence is cheap. */}
-        <span className="cmap3d__hint">
-          Recorded in a COVID year, when the short loop ran a reroute, so that loop is close to but
-          not exactly the one you will run. The rest is the course as it stands.
-        </span>
+        {/* THE TRACK IS THE PROPER COURSE NOW. The first recording Dave sent was
+            from a COVID year with the short loop rerouted, and this spot
+            carried a sentence saying so. On 2026-09-17 he sent "Stone Steps
+            50k #14", the course as it stands, and the sentence came out with
+            the old track. If a reroute ever comes back, so does the sentence. */}
       </div>
     </div>
   );

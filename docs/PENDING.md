@@ -16,6 +16,22 @@ sequence).
 
 ## Waiting on a human
 
+### 1j. Five transcribed 27K records predate the year the race director says the 27K began
+
+**Blocker: only Dave can say what those five results were.**
+
+2026-09-17. Dave wrote that "the 27k came about in 2015, so you won't find a history for
+that". The transcribed records (`recordEntry` documents, taken from the old site's records
+page) carry five 27K marks BEFORE 2015: Charles Lowery and Brian List in 2010, Daniel
+Campbell 2011, Paul Odipo 2013, Daniel Heffernan 2014. Brian List's 1:58:36 is shown on the
+home page as the men's 27K course record. The results archive has 27K fields only from 2015,
+which matches Dave. So either the old site's records page labelled an earlier shorter event
+as the 27K, or Dave's date is off by a few years. Nothing has been changed: deleting a
+record on a guess is worse than showing one that needs a question. Ask Dave what distance
+those five ran, and re-label or remove the entries in the Studio accordingly. The
+"pre-2015 27K results are lost" line in the open items above should be re-read in this
+light: they may not be lost so much as never 27K.
+
 ### 1i. DONE 2026-09-16. The course-map poster is on the home page
 
 Added to the Home Page document straight after the elevation band, so the page
@@ -274,25 +290,14 @@ which renderer owns it. Renderer detection, not a second React.
 Closed by pre-bundling the two deps; the map, and every other island, now hydrate under
 `npm run dev`. Remove the workaround when the adapter pin moves and re-measure.
 
-### 0a. Five race dates are unknown, so the weather strip starts in 2006 with gaps
+### 0a. DONE 2026-09-17. The five early race dates came from Dave
 
-**Blocker: no captured page from those years names the date.**
-
-The course page's race-day weather strip (`raceWeatherSection`, added 2026-09-11) reads
-`scripts/data/race-days.json`, one `{ year, date }` per edition, and `scripts/build-weather.mjs`
-turns that into `src/data/raceDayWeather.json` from Open-Meteo's ERA5 archive. A year with
-no confirmed date is simply absent from the strip; nothing is guessed.
-
-Confirmed: 2006 (Oct 22), 2007 (Oct 21), 2008 (Oct 19), 2009 (Oct 25), 2010 (Oct 24),
-2013 (Oct 27) and 2014 (Oct 26, from a single capture) from Wayback captures of the old
-site, and 2015 through 2026 from RunSignUp's past events.
-**Unknown: 2003, 2004, 2005, 2011, 2012.** The archived results pages carry no dates, the
-race did not run on a fixed Sunday (2017 was the fifth Sunday of October, 2024 the third),
-and two Wayback sweeps (strict and relaxed date patterns, up to 16 pages per year) found
-nothing for those five; 2003 and 2004 have no autumn captures at all. Likely sources still untried: the race director's own records,
-the 2009 and 2010 entry-form PDFs (Wayback has them; text extraction was not attempted), and
-Ultrarunning Magazine's results archive. Add a date to `race-days.json` with its source,
-re-run `node scripts/build-weather.mjs`, commit the JSON.
+2003-10-26, 2004-10-24, 2005-10-23, 2011-10-23 and 2012-10-28, from the race director
+on 2026-09-17. He looked 2004 up; the other four are his reconstruction from the race's
+fourth-Sunday-of-October formula, and `scripts/data/race-days.json` records each source
+in those words rather than presenting a reconstruction as a record. All five are Sundays
+(checked in the script that added them). `npm run` of `scripts/build-weather.mjs` now
+writes 23 race days and the strip runs from 2003 with no gaps.
 
 ### 0. One archive gap is left, and the results pages say so
 
@@ -548,6 +553,26 @@ performance 87. lhci now starts that server (`startServerCommand`) and audits
 through it. Two consequences: the LCP gate now describes delivery rather than
 the runner's disk, and every earlier CI Lighthouse number in this entry was
 taken uncompressed and is not comparable with numbers from here on.
+
+### 11a. 2026-09-17. The proper course arrived, and the climbing figure is now a decision
+
+Dave sent "Stone Steps 50k #14", the course as it stands, replacing the COVID-year recording
+with the rerouted short loop. It went through both pipelines. The map, the mile markers, the
+Stone Steps marker and both posters are rebuilt from it, and the COVID note on the map is
+gone. It has no timestamps either (20,527 points, zero `<time>` elements), so the flyover's
+pace stays a model.
+
+What it measures off USGS 1 m LiDAR: 29.95 miles, gain 5,167 ft, loss 5,177 ft, total change
+10,344 ft, low 524 ft, high 886 ft. The previous track gave 4,673 / 9,356. The total change
+now sits within 4% of the race's traditional 10,726 ft. But Dave's own file reports about
+4,600 ft of gain, and the site currently says "about 4,700 ft" in the hero, the stat band,
+the elevation caption and the FAQ, all of them derived from `race.elevationProfile.gainFt`.
+Sampling LiDAR along a GPS track counts every lateral wobble across a slope as climb, so it
+runs high on a noisy track; a watch's barometer runs its own way. Which figure the site
+publishes is a call for Nathan and Dave, not a script: the new profile is NOT written to
+Sanity until it is made. Options are the LiDAR figure on the proper course ("about 5,200
+ft"), Dave's watch ("about 4,600 ft"), or leaving 4,700. Whatever is chosen, the FAQ's
+sentence about gain versus change stays true.
 
 ### 11. The modern trail map: what is possible, and the one input missing
 
