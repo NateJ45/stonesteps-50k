@@ -17,6 +17,7 @@
     "og": "node scripts/generate-og-default.mjs",
     "mud": "node scripts/generate-mud.mjs",
     "map-poster": "node scripts/capture-map-poster.mjs",
+    "map-region": "node scripts/capture-region-poster.mjs",
     "contact:migration": "node --experimental-strip-types scripts/gen-contact-migration.mjs",
     "og:pages": "node scripts/generate-og-pages.mjs",
     "apply-brand": "node scripts/apply-brand.mjs",

@@ -44,6 +44,16 @@
 //                                      for; the camera's zoom and dy place the
 //                                      course inside the cut.
 //
+//   POSTER_NAME=<basename>             the public/ file stem and the JSON stem.
+//                                      Defaults to `course-poster`, which is
+//                                      the home band. See
+//                                      scripts/capture-region-poster.mjs, the
+//                                      second caller that uses this half of the
+//                                      script rather than POSTER_OUT: it wants
+//                                      the same ladder of widths and the same
+//                                      reserved-box JSON, just under its own
+//                                      name and at its own camera.
+//
 // With none of them set this behaves exactly as it did: the home page's band.
 // POSTER_OUT writes a LOSSLESS png on purpose. Its destination is Sanity,
 // which re-encodes to AVIF and WebP at half a dozen widths, and handing a
@@ -71,6 +81,8 @@ const SCALE = 2;
 // An absolute path prefix, no extension. Set, it takes over the whole output
 // half of this script; unset, everything below writes the home band as before.
 const OUT_PREFIX = process.env.POSTER_OUT ?? '';
+// The file stem for the public/ ladder and for the size JSON beside it.
+const NAME = process.env.POSTER_NAME ?? 'course-poster';
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -209,9 +221,12 @@ async function main() {
     // full 1868px AVIF is 270KB and the 1400px one is 96KB, and at the size
     // this band renders nobody can tell them apart. A phone at 3x picks the
     // 1400 and pays 96KB for an image it meets below the fold.
+    // The 1.5x rung is capped at the capture, because a poster captured
+    // narrower than 1400 would otherwise be UPSCALED into a second, larger,
+    // blurrier file. Unchanged for the home band, whose capture is 2400 wide.
     for (const [name, width] of [
-      ['course-poster', oneX],
-      ['course-poster@1_5x', 1400],
+      [NAME, oneX],
+      [`${NAME}@1_5x`, Math.min(1400, meta.width)],
     ]) {
       // AVIF FIRST, WEBP AS THE FALLBACK. On this picture AVIF is worth about
       // half the bytes at the same quality, and the browsers that lack it are
@@ -238,7 +253,7 @@ async function main() {
     // to be written here too, as coordinates for an SVG overlay; it is now in
     // the picture itself.
     await writeFile(
-      join(ROOT, 'scripts', 'data', 'course-poster.json'),
+      join(ROOT, 'scripts', 'data', `${NAME}.json`),
       `${JSON.stringify({ width: cssW, height: cssH })}
 `,
     );
@@ -247,7 +262,7 @@ async function main() {
       const { size } = await stat(join(outDir, name));
       console.log(`${name.padEnd(22)} ${(size / 1024).toFixed(0)} KB`);
     }
-    console.log(`course-poster.json      ${cssW}x${cssH}`);
+    console.log(`${`${NAME}.json`.padEnd(22)} ${cssW}x${cssH}`);
   } finally {
     await browser.close();
     server.close();

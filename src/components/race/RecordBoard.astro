@@ -1,0 +1,100 @@
+---
+// Foundation, edit with care
+//
+// The record board: the painted trailhead sign with the names on it.
+//
+// NEW ON 2026-09-17, and it is the only new object in this tier. Everything it
+// is made of is already somewhere else on the site: the bark stock the footer
+// and the phone menu are cut from, the same Topo contours, the same `walk`
+// field of prints, the header sign's nail heads, and the hero wordmark's press
+// re-timed for a line of a name rather than a word of a mark. The full
+// argument, including why this board keeps its own stock in both themes while
+// the footer and the menu follow the page, is in the "The record board"
+// sub-block of globals.css. Read it before changing anything here.
+//
+// WHY A COMPONENT AND NOT A SECTION. Three places need the same board and they
+// are not the same band: the home page's "names on the board" cut, the top of
+// /records, and each distance's two winners on a year page. A section would
+// have carried a heading, a surface and a CTA that two of the three do not
+// want. This takes rows and draws a board.
+//
+// NOT TO BE CONFUSED WITH `src/components/sections/RecordsBoard.astro`, which
+// is the page-builder block holding the age-bracket TABLES on /records. That
+// one is deliberately plain, for the reason its own header gives: decorating
+// forty rows of times is how you make them unreadable. This one holds four.
+//
+// IT NEVER COMPUTES ANYTHING. Every caller derives its rows from the results
+// archive and hands them over finished, so this file cannot become a second
+// opinion about who holds a record. See raceResult.ts for why that matters.
+
+import Topo from '@/components/race/Topo.astro';
+import MudField from '@/components/race/MudField.astro';
+
+export type BoardRow = {
+  /** The tracked mono line above the name: "Men 50K", "Women", a bracket. */
+  label: string;
+  name: string;
+  /** Present when the runner has a page; the name links to it when it is. */
+  slug?: string | null;
+  /** Already formatted. This component does no time arithmetic. */
+  time: string;
+  year?: number | string | null;
+};
+
+type Props = {
+  rows: BoardRow[];
+  /**
+   * The board's accessible name. It is a list of records, so it says what the
+   * list is; without one, a screen reader meets four rows with no idea which
+   * board they belong to on a page carrying two.
+   */
+  label: string;
+  /** Contour seed, so two boards on one page are not the same ridge. */
+  seed?: number;
+  class?: string;
+};
+
+const { rows, label, seed = 11, class: extraClass = '' } = Astro.props as Props;
+---
+
+{
+  rows.length > 0 && (
+    /* `data-reveal` is what the strike hangs off. BaseLayout's observer adds
+      `.is-visible` the moment the board crosses the viewport edge, marks
+      everything visible immediately where there is no IntersectionObserver,
+      and fires on sight for a board that is already on screen at load. See the
+      three-part note in globals.css: no path through this leaves a row
+      blank. */
+    <div class={`board ${extraClass}`} data-reveal>
+      <span class="board__topo" aria-hidden="true">
+        <Topo seed={seed} lines={7} />
+      </span>
+      <MudField field="walk" class="board__mud" />
+
+      {/* Four nails, one per corner. Decoration, so they are spans with no
+        content rather than anything a reader has to step over. */}
+      <span class="board__nail board__nail--tl" aria-hidden="true" />
+      <span class="board__nail board__nail--tr" aria-hidden="true" />
+      <span class="board__nail board__nail--bl" aria-hidden="true" />
+      <span class="board__nail board__nail--br" aria-hidden="true" />
+
+      <ol class="board__rows" aria-label={label}>
+        {rows.map((row, i) => (
+          /* The row index rides on the element as --i, so the strike follows
+            the order the board is read in rather than whatever order the CSS
+            happens to match. Same device the punch card uses for its holes. */
+          <li class="board__row" style={`--i:${i}`}>
+            <p class="board__label">{row.label}</p>
+            <p class="board__name">
+              {row.slug ? <a href={`/runners/${row.slug}`}>{row.name}</a> : row.name}
+            </p>
+            <p class="board__mark">
+              <span class="board__time tabular">{row.time}</span>
+              {row.year && <span class="board__year">{row.year}</span>}
+            </p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}

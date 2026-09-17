@@ -742,15 +742,153 @@ export default function CourseMapLibre() {
               const v = Number(posterParams.get(k));
               return Number.isFinite(v) && posterParams.has(k) ? v : fallback;
             };
-            m.jumpTo({
-              center: [
-                (meta.bounds.west + meta.bounds.east) / 2 + num('dx', 0),
-                (meta.bounds.south + meta.bounds.north) / 2 + num('dy', -0.004),
-              ],
-              zoom: num('z', 14.6),
-              pitch: num('p', 63),
-              bearing: num('b', -22),
-            });
+
+            /*
+             * THE REGION POSTER (2026-09-17), the second composition this mode
+             * produces, for the "coming from out of town" band on /contact.
+             *
+             * WHY IT IS HERE AND NOT A SEPARATE MAP. That band used to show a
+             * screenshot of Google Maps, uploaded to the CMS. A site that
+             * draws its own terrain map of the course cannot then hand a
+             * visitor somebody else's picture of the same city: it is the one
+             * image on the site that was not ours. The answer is the map we
+             * already have, pulled back until the park, downtown and the
+             * airport are all in the frame.
+             *
+             * FLAT, AND THAT IS THE POINT. The course poster is pitched into
+             * the hills because the hills are the story. At this range the
+             * story is distance and direction, so the camera stands straight
+             * up: pitch 0, no bearing, the topographic quad underneath. The
+             * terrain is still loaded (the map does not care) and simply has
+             * nothing to show at a right angle to itself.
+             *
+             * THE COURSE STAYS DRAWN. It is a scribble in the trees at this
+             * zoom, which is exactly the right amount of detail for "the race
+             * is up there": anything that counts miles or names the steps is
+             * noise 20km out, so those layers come off below.
+             */
+            const region = posterParams.get('region') === '1';
+
+            // THE LEASH HAS TO COME OFF FIRST, and this cost an hour the first
+            // time. The map is built with `maxBounds` set to the course plus a
+            // tenth of a degree, so a stray two-finger drag cannot send a
+            // reader to Kansas with no way back. MapLibre enforces that by
+            // CLAMPING the camera, silently: ask for a view wider than the
+            // leash and you get the widest one that fits inside it instead. So
+            // the region capture asked for zoom 10.75 over three cities and was
+            // handed 11.75 over the park, with no error anywhere, and the
+            // picture simply came out of the wrong place.
+            //
+            // Poster mode only, and the capture page is never a page anybody
+            // reads, so nothing a visitor touches loses its leash.
+            if (region) m.setMaxBounds(null);
+
+            m.jumpTo(
+              region
+                ? {
+                    // Centred between the three pins and pulled back far enough
+                    // that the airport's label clears the ridge cut at the
+                    // bottom of the frame. Both numbers were read off a
+                    // capture, not guessed: `window.__poster.cam()` prints
+                    // what the camera actually settled at.
+                    center: [-84.586 + num('dx', 0), 39.11 + num('dy', 0)],
+                    zoom: num('z', 10.62),
+                    pitch: num('p', 0),
+                    bearing: num('b', 0),
+                  }
+                : {
+                    center: [
+                      (meta.bounds.west + meta.bounds.east) / 2 + num('dx', 0),
+                      (meta.bounds.south + meta.bounds.north) / 2 + num('dy', -0.004),
+                    ],
+                    zoom: num('z', 14.6),
+                    pitch: num('p', 63),
+                    bearing: num('b', -22),
+                  },
+            );
+
+            if (region) {
+              // Everything that counts a race rather than placing it.
+              for (const id of [
+                'miles',
+                'mile-labels',
+                'course-arrows',
+                'steps',
+                'steps-label',
+                'course-start',
+              ]) {
+                if (m.getLayer(id)) m.setLayoutProperty(id, 'visibility', 'none');
+              }
+
+              /*
+               * THE THREE PINS, IN THE MAP'S OWN MARKER STYLE rather than in a
+               * pin drawn for this one picture. They are the same two circle
+               * treatments the map already uses: the race point takes the
+               * course colour with a dark keyline, the way a mile marker does,
+               * and the two places you might sleep take the dark-with-cream
+               * treatment the Stone Steps marker has, because they are
+               * reference rather than race.
+               *
+               * The Oval's coordinate is NOT typed in: it is the first point
+               * of the recorded course, which is where the race actually
+               * starts, so this pin cannot drift away from the line on the
+               * other poster.
+               */
+              const start = pts[0] ?? [-84.568564, 39.172935];
+              m.addSource('region-pins', {
+                type: 'geojson',
+                data: {
+                  type: 'FeatureCollection',
+                  features: [
+                    {
+                      type: 'Feature',
+                      properties: { name: 'The Oval', race: 1 },
+                      geometry: { type: 'Point', coordinates: [start[0], start[1]] },
+                    },
+                    {
+                      type: 'Feature',
+                      properties: { name: 'Downtown', race: 0 },
+                      geometry: { type: 'Point', coordinates: [-84.512, 39.1031] },
+                    },
+                    {
+                      type: 'Feature',
+                      properties: { name: 'CVG airport', race: 0 },
+                      geometry: { type: 'Point', coordinates: [-84.6678, 39.0489] },
+                    },
+                  ],
+                },
+              });
+              m.addLayer({
+                id: 'region-pins',
+                type: 'circle',
+                source: 'region-pins',
+                paint: {
+                  'circle-radius': ['case', ['==', ['get', 'race'], 1], 9, 7],
+                  'circle-color': ['case', ['==', ['get', 'race'], 1], '#e2593c', '#1a1712'],
+                  'circle-stroke-color': ['case', ['==', ['get', 'race'], 1], '#1a1712', '#ffffff'],
+                  'circle-stroke-width': 2,
+                },
+              });
+              m.addLayer({
+                id: 'region-pin-labels',
+                type: 'symbol',
+                source: 'region-pins',
+                layout: {
+                  'text-field': ['get', 'name'],
+                  'text-size': 15,
+                  'text-offset': [0, 1.15],
+                  // Three labels 20km apart cannot collide, and a label that
+                  // silently dropped out of a BAKED picture would be a missing
+                  // word nobody could reproduce.
+                  'text-allow-overlap': true,
+                },
+                paint: {
+                  'text-color': '#ffe9c4',
+                  'text-halo-color': '#1a1712',
+                  'text-halo-width': 1.8,
+                },
+              });
+            }
             /*
              * THE POSTER IS THE MAP, NOT A TRACING OF IT.
              *
@@ -777,6 +915,21 @@ export default function CourseMapLibre() {
                 const c = m.getCanvas();
                 return [c.clientWidth, c.clientHeight];
               },
+              /**
+               * What the camera actually ended up at, for auditioning it
+               * (2026-09-17). The region poster's first capture came out at the
+               * wrong zoom and the wrong centre, and reading it back off the
+               * picture by eye cost an hour: the committed numbers said one
+               * thing, the canvas said another, and nothing printed either.
+               * This prints them.
+               */
+              cam: () => ({
+                center: m.getCenter().toArray(),
+                zoom: m.getZoom(),
+                pitch: m.getPitch(),
+                bearing: m.getBearing(),
+                bounds: m.getBounds().toArray(),
+              }),
             };
           }
         });

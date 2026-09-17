@@ -1787,6 +1787,37 @@ body::before {
   }
 }
 
+/* THE LABEL IN A HALF-WIDTH COLUMN (2026-09-17).
+   The clamp above is measured in `vw`, which is the right unit for a label
+   running across a full content band and the wrong one for a label in half of
+   it. On /contact at 1280 the eyebrow "Coming from out of town" sat in a 570px
+   column at the clamped 4.25rem and broke over two lines, which for an
+   outlined word reads as a mistake rather than as a heading: the second line
+   has no stroke weight of its own to justify it.
+
+   So it is sized by its CONTAINER instead of by the window, which is what it
+   always wanted. `cqi` is the inline size of the nearest container, and the
+   only thing needed to make that the column is `container-type: inline-size`
+   on the wrapper, which costs one line and changes no layout. At 1280 the
+   column is about 570px, 8.5cqi is 48px, and the same string holds one line;
+   at 390px, where the column IS the page, it resolves to 33px, which is where
+   the vw clamp already put it. Nothing outside a half column takes this
+   modifier, so every other label on the site renders exactly as it did.
+
+   The floor and ceiling are the same two the base rule uses minus one step:
+   this is a column, so it should never grow to the full band's 4.25rem. */
+.label-column {
+  /* What makes `cqi` below mean "this column" and not "this window". Without a
+     container somewhere above it, `cqi` falls back to the small viewport and
+     the modifier would make the label BIGGER than the rule it modifies. It has
+     to go on the element that owns the width, so it lives here rather than
+     inside `.section-label--fit` itself. */
+  container-type: inline-size;
+}
+.section-label--fit {
+  font-size: clamp(1.9rem, 8.5cqi, 3.4rem);
+}
+
 /* ---------- The trail blaze --------------------------------------------- */
 /* A section label leads with the painted rectangle that marks a route on a
    tree. Off-square corners and a three-degree rotation, because a blaze is
@@ -4529,6 +4560,376 @@ main > .band-torn:first-child::before {
   border-top: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
 }
 
+/* ---------- The record board -------------------------------------------- */
+/* WHY THIS EXISTS (2026-09-17). The four course-record holders were four text
+   callouts with a rust rule down the left, under a headline that said "The
+   names on the board". The headline was promising an object the page did not
+   have. A record board is a real artefact and the most familiar one in the
+   sport: the painted sign at a trailhead with the fastest times on it, names
+   struck on by hand, a new one going up the year somebody takes it.
+
+   THIS IS THE ONE NEW OBJECT IN THIS TIER, and everything it is made of
+   already exists. The stock is the footer's and the menu's; the contours are
+   the same Topo; the prints are the same `walk` field; the nail heads are the
+   header sign's, four instead of two; the strike is the hero wordmark's press,
+   re-timed. See GearBand.astro's note on why the count matters.
+
+   THE BOARD KEEPS ITS OWN STOCK IN BOTH THEMES, and that is the deliberate
+   difference from the two boards it is made from.
+     The menu and the footer FOLLOW the theme, and both say why in their own
+     comments: they are chrome, they run the full width of the window, and a
+     slab of bark pinned across the top or bottom of the cream page reads as
+     the dark site's furniture dropped on top.
+     This is not chrome. It is an object sitting inside a band, the way a
+     ticket, a punch card and a clipboard are, and DistanceTickets has already
+     settled what those do: a ticket is cream on both themes because a ticket
+     is a thing you hold, and things you hold do not repaint themselves when
+     the room changes. A trailhead sign is painted bark with cream lettering.
+     So it is bark on the cream page and bark on the bark page.
+
+   WHICH LEAVES THE DARK PAGE NEEDING A DECISION, because a bark board on a
+   bark page is a hole rather than an object. It takes the same stock one value
+   LIGHTER there (#2f281d, the dark theme's own popover step) rather than
+   darker, for the reason the --lift-ground block up the file spells out: a
+   hard offset shadow only reads when the object is lighter than the shadow. A
+   darker board would have had to give up its shadow, and the shadow is what
+   nails it to the page. Measured on the two faces: cream ink 14.9:1 on the
+   light page's #241f17 and 12.6:1 on the dark page's #2f281d, gold 12.8:1 and
+   10.8:1, the quiet cream 7.2:1 and 6.1:1. */
+.board {
+  --board-face: #241f17;
+  --board-ink: #ffebbb;
+  /* Quiet enough to rank under the name, still clear of AA on both faces. A
+     literal rather than --muted-foreground, because that token is near black
+     on the light theme and this stock is bark in both. */
+  --board-ink-soft: #c9b98f;
+  /* THE ACCENT ON THIS BOARD IS THE GOLD, IN BOTH THEMES, and forgetting it is
+     the failure mode the stock's own note predicts. `--heading-accent` is the
+     rust on the cream page and the gold on the bark one, because it is chosen
+     against the PAGE. This board is bark whatever the page is doing, and the
+     rust measured 2.0:1 on it: the times, which are the reason anybody is
+     reading a record board, came out as dark red on dark brown. The gold is
+     12.8:1 on the light theme's face and 10.8:1 on the dark theme's. Re-point
+     the token rather than colouring the times by hand, so the contours and the
+     hover state that also read it follow along. */
+  --heading-accent: #fed89b;
+  position: relative;
+  isolation: isolate;
+  background: var(--board-face);
+  color: var(--board-ink);
+  border: 2px solid var(--plate-edge);
+  border-radius: 10px;
+  box-shadow: var(--lift-ground-lg);
+  padding: 1.5rem 1.25rem 1.25rem;
+  /* The lettering is the lighter of the two on this stock in BOTH themes, so
+     the offset echo is always correct here and never flips. See the
+     --display-shadow rule up the file: any surface painting its own face
+     belongs on a list like this one. */
+  --display-shadow: var(--lift-sm);
+  /* THE STRIKE IS WIDER THAN THE BOARD WHILE IT LANDS, exactly as the menu
+     board's is: a name comes down at 1.35 and a long one already fills its
+     row. `clip` rather than `hidden` so the vertical axis never becomes a
+     scroll container; nothing here is meant to be scrolled sideways to. */
+  overflow-x: clip;
+}
+.dark .board {
+  --board-face: #2f281d;
+}
+/* A plate landing on the board is not on the page ground, so its shadow stays
+   black however dark the page behind the board happens to be. Same rule the
+   ticket, the punch card and the clipboard take. */
+.board :is(.btn-plate, .menu-trigger) {
+  box-shadow: var(--lift);
+}
+
+/* The contours and the walk of prints, the same two the menu board wears, at
+   the weight a small object can carry: a full screen can take a field of
+   hairlines, a board 600px wide cannot. Both sit behind the rows and neither
+   is announced. */
+.board__topo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.board__topo .topo {
+  --topo-opacity: 1;
+}
+.board__topo .topo path {
+  stroke: color-mix(in srgb, var(--board-ink) 12%, transparent);
+}
+.board__topo .topo path:nth-child(3n) {
+  stroke: color-mix(in srgb, var(--heading-accent) 24%, transparent);
+}
+/* ONE LAYER, MARKED AS MEDIA. Same argument the footer's field makes: axe
+   cannot see a mask, so it reads a layer's background colour and blends it,
+   and a translucent sheet over the rows would model as a veil over every line
+   of type on the board. MudField already carries `data-contrast-media`, so the
+   contrast gate measures the type here from rendered pixels instead. */
+.board__mud {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+  color: color-mix(in srgb, var(--board-ink) 10%, transparent);
+}
+
+/* The nail heads. Four, one per corner, drawn rather than marked up because
+   they are decoration. The header's sign has two; a board this size reads as
+   loose with only two. */
+.board__nail {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  z-index: 2;
+  background: color-mix(in srgb, var(--board-ink) 42%, transparent);
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.65);
+}
+.board__nail--tl {
+  top: 9px;
+  left: 10px;
+}
+.board__nail--tr {
+  top: 9px;
+  right: 10px;
+}
+.board__nail--bl {
+  bottom: 9px;
+  left: 10px;
+}
+.board__nail--br {
+  bottom: 9px;
+  right: 10px;
+}
+
+.board__rows {
+  position: relative;
+  z-index: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.board__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 2px dashed color-mix(in srgb, var(--board-ink) 20%, transparent);
+}
+.board__row:first-child {
+  padding-top: 0.2rem;
+}
+.board__row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0.2rem;
+}
+/* THE LABEL MOVES INTO ITS OWN COLUMN WHERE THERE IS ROOM. Stacked above the
+   name it is the only shape that works on a phone, and on a desktop board it
+   left every row two lines tall with a rail of tracked caps running down the
+   middle of the type. Beside the name, the row reads the way a painted board
+   reads: what the record is, who holds it, what they ran. The track is wide
+   enough for "WOMEN 50K" and fixed, so the names start on one line down the
+   whole board. */
+.board__label {
+  grid-column: 1 / -1;
+  margin: 0 0 0.15rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--board-ink-soft);
+}
+.board__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 5.2vw, 2.6rem);
+  line-height: 0.95;
+  letter-spacing: 0.005em;
+  /* A name longer than its column wraps rather than shoving the time out of
+     the rail it shares with every other time on the board. */
+  overflow-wrap: anywhere;
+}
+.board__name a {
+  color: inherit;
+  text-decoration: none;
+}
+.board__name a:hover,
+.board__name a:focus-visible {
+  color: var(--heading-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+.board__mark {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+/* The time is the reason anybody is reading the board, so it is set at display
+   scale in the mono face rather than as a caption beside the name. */
+.board__time {
+  color: var(--heading-accent);
+  font-size: clamp(1.1rem, 3.6vw, 1.7rem);
+  font-weight: 700;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+.board__year {
+  margin-top: 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--board-ink-soft);
+}
+
+/* THE WIDE BOARD, and it has to come AFTER the row rules above rather than
+   beside the padding it also sets: a media query carries no extra specificity,
+   so the base `grid-column: 1 / -1` on the label would simply win on source
+   order and the label would stay stacked at every width. It did, for one
+   build. */
+@media (min-width: 48rem) {
+  .board {
+    padding: 2rem 2rem 1.75rem;
+  }
+  .board__row {
+    grid-template-columns: 8.5rem minmax(0, 1fr) auto;
+    column-gap: 1.5rem;
+  }
+  .board__label {
+    grid-column: auto;
+    /* On the name's own line rather than above it. `baseline` would sit an
+       11px tracked line on the baseline of 2.6rem display type, which reads as
+       having fallen off it, so it aligns to the top of the row's content
+       instead. */
+    align-self: start;
+    /* The display face sits low in its box; this drops the label to meet the
+       cap height of the name beside it. */
+    margin: 0.55rem 0 0;
+  }
+}
+
+/* THE NAMES ARE STRUCK ON, ONE ROW AFTER ANOTHER, the way the phone menu
+   strikes its five destinations. The press is the hero's, with its own
+   keyframe rather than `.stamp-word`'s: that one drops a word in at 2.4x, and
+   a twenty-character name at 2.4x is several times the width of the board it
+   is landing on. 1.35 is as far as this can open and stay inside the board's
+   own `overflow-x: clip`.
+
+   IT CANNOT LEAVE A ROW INVISIBLE, and three things make sure of it.
+     1. The resting state, with no animation at all, is the finished row. Only
+        the no-preference query below hides anything, and only while the board
+        carries `[data-reveal]` and has not yet been marked visible.
+     2. The BaseLayout observer marks every `[data-reveal]` visible on sight,
+        falls back to marking them all immediately where there is no
+        IntersectionObserver, and an element already on screen at load
+        intersects the moment it is observed. A board above the fold strikes
+        straight away rather than waiting for a scroll that never comes.
+     3. The first frame is not blank. The name is already on the board at 0.32
+        opacity, soft and oversized, and comes down into focus, which is the
+        same choice the hero's wordmark made for its LCP. A row stuck at frame
+        zero is a ghost of the name, never an empty rail.
+
+   OPACITY, SCALE AND FILTER ONLY. Nothing here takes space, so the rows hold
+   their height from first paint and the board cannot shift the page under
+   it. */
+@media (prefers-reduced-motion: no-preference) {
+  .board[data-reveal] .board__name {
+    opacity: 0.32;
+    scale: 1.35;
+    filter: blur(5px);
+  }
+  .board[data-reveal].is-visible .board__name {
+    animation: name-strike 420ms linear both;
+    /* 130ms apart: slower than the wordmark's 100, because these are lines to
+       read rather than three words of one mark, and the board has only just
+       faded up. The 180ms head start is that fade. */
+    animation-delay: calc(var(--i, 0) * 130ms + 180ms);
+  }
+}
+
+@keyframes name-strike {
+  0% {
+    opacity: 0.32;
+    scale: 1.35;
+    filter: blur(5px);
+    /* Gravity: still gathering speed the whole way down. */
+    animation-timing-function: cubic-bezier(0.8, 0, 0.9, 0.25);
+  }
+  44% {
+    opacity: 1;
+    filter: blur(1.5px);
+    /* No deceleration into the board. It is travelling when it lands. */
+    animation-timing-function: linear;
+  }
+  /* Contact: the ink spreads wider and shorter under the press. */
+  60% {
+    opacity: 1;
+    scale: 1.06 0.9;
+    filter: blur(0);
+    animation-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+  }
+  74% {
+    scale: 0.98 1.03;
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    filter: blur(0);
+  }
+}
+
+/* ---------- The clipboard, holding a page of results -------------------- */
+/* The race-day schedule is a clipboard because several of its times are not
+   final. A year's finishers are as final as anything on the site, and the
+   clipboard is still the right object: this is the timing sheet, the thing the
+   people at the table were writing on while the field came in.
+
+   THE SHEET IS THE PAGE'S OWN PAPER HERE, NOT THE PLATE STOCK, and that is the
+   whole of this rule. `.clip__sheet` paints --plate-face, which inverts with
+   the theme (charcoal on the cream page, cream on the bark page) so that a
+   plate always keeps a figure/ground against the page it sits on. That is
+   right for the six lines of a schedule and wrong for a thousand rows of
+   times: on the light page it would set the entire archive in cream on
+   charcoal, and every link, every muted age and every quiet place number on it
+   is coloured with a token measured against the page, not against a plate.
+   Rather than re-colour the archive to sit on a plate, the sheet takes --card,
+   which is the page's own paper one step up from the band: #ffebbb on the
+   cream page, #241f17 on the bark one. Measured on the light sheet, which is
+   the tighter of the two: the page ink 15.1:1, the muted ink 6.3:1, the link
+   8.3:1. The table below it is the same table it always was. */
+.clip__sheet--paper {
+  background: var(--card);
+  color: var(--card-foreground);
+}
+/* Which means the shadow rule flips back to the PAGE's, because the lettering
+   here is the darker of the two on the cream sheet and the lighter on the bark
+   one, exactly as it is on the page itself. Spelled out rather than left to
+   inherit, because `.clip__sheet` is on the plate list above and would
+   otherwise hand this sheet a hard black echo behind near-black type. */
+.clip__sheet--paper {
+  --display-shadow: none;
+}
+.dark .clip__sheet--paper {
+  --display-shadow: var(--lift-sm);
+}
+/* And a plate sitting on it is back on the page ground, so it takes the ground
+   lift rather than the flat black one the plate stocks hand out. */
+.clip__sheet--paper :is(.btn-plate, .menu-trigger) {
+  box-shadow: var(--lift-ground);
+}
+.clip__sheet--paper :is(.btn-plate, .menu-trigger):hover {
+  box-shadow: var(--lift-ground-hover);
+}
+
 /* ---------- Results: the two races, and rows you can count -------------- */
 /* WHY (2026-09-12). Both results pages read as "a long line of letters and
    numbers". Two separate causes, one per page.
@@ -4608,6 +5009,35 @@ main > .band-torn:first-child::before {
 .arch-row {
   display: grid;
   gap: 0.5rem 1.25rem;
+}
+/* THE YEAR IS THE LINK NOW (2026-09-17), because the row cannot be. The whole
+   row was an <a>, which meant the two winners printed on it could not be links
+   themselves: this was the only page on the site that names a finisher and
+   refuses to take you to them. The year carries the destination instead, set
+   in the accent with the wordmark's offset behind it so it reads as the
+   poster line it is rather than as the first cell of a table.
+
+   NO ECHO OF ITS OWN, AND THAT IS THE SECOND HALF OF THE DECISION. The first
+   cut gave this numeral a hard offset, because the footer's date has one and a
+   year on this page is the same kind of line. Rendered, it was wrong twice
+   over, and the file already says why a hundred lines up on --display-shadow:
+   an offset is only ever a shadow when the lettering is LIGHTER than what is
+   behind it. This numeral is rust on cream paper, which is the other case, and
+   at h3 the offset did not read as a second pass of ink, it read as a black
+   numeral with a rust edge. The `.display` class it already carries hands it
+   `--display-shadow`, which is exactly this rule expressed as a token: nothing
+   on the cream page, the hard offset on bark where the year is gold. So the
+   year gets its echo in the theme where an echo is correct, from the rule that
+   decides that everywhere else, and this selector only has to make it look
+   like a link. */
+.arch-row__link {
+  color: inherit;
+  text-decoration: none;
+}
+.arch-row__link:hover,
+.arch-row__link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
 }
 .arch-head {
   display: none;

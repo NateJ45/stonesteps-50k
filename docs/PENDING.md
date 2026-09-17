@@ -16,6 +16,26 @@ sequence).
 
 ## Waiting on a human
 
+### 1k. The Google Maps screenshot is still in the contact page's block
+
+2026-09-17. `/contact`'s "Stay downtown or near CVG" band is an `imageTextSection` whose
+image in Sanity is a screenshot of Google Maps (the 1742x757 PNG). The page no longer
+SHOWS it: `src/lib/local-poster.ts` swaps in `public/region-poster.*`, the still this site
+bakes from its own map with The Oval, downtown and CVG pinned. That is a code rule, chosen
+over a schema field precisely so the fix did not have to wait on anybody.
+
+What is left is a content edit only Dave or Nathan can make, and it is tidiness rather
+than a bug: open the block in the Studio and CLEAR its image. The uploaded screenshot is
+then gone from the dataset as well as from the page, and the branch in `ImageText.astro`
+plus `src/lib/local-poster.ts` and its test can all be deleted, because the block will
+have no image for the rule to override. Until then the rule is doing the work and the
+asset is simply unused.
+
+Do NOT change that block's call to action while the rule is in place: "Find a hotel on
+Google Maps" pointing at a Google Maps URL is what the rule matches on. Its test
+(`src/lib/local-poster.test.ts`) asserts the live href, so a change there fails the unit
+suite rather than silently putting the screenshot back.
+
 ### 1j. DONE 2026-09-17. The pre-2015 27K marks are off the board
 
 Nathan's call, same day: the records show only 27K data we have evidence of, and the

@@ -10,6 +10,80 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-17 — The names go on a board, results become the timing sheet, and the
+contact page stops showing somebody else's map._
+
+Tier 2 of the design pass. Three places on the site were doing a job an object would do
+better, and one image on the site was not ours.
+
+**The record board.** `src/components/race/RecordBoard.astro` is the one new object in
+this tier, and everything it is made of already existed: the bark stock the footer and the
+phone menu are cut from, the same Topo contours, the same `walk` field of prints, the
+header sign's nail heads, and the hero wordmark's press re-timed. It is rows of
+`{label, name, slug, time, year}` and nothing else; every caller derives its own rows from
+the results archive, so the board cannot become a second opinion about who holds a record.
+`Dynasties.astro` (the home page and the top of /records) was four text callouts under a
+headline promising a board; it is the board now. A year page's winners were the same
+information in a different costume, and they are on the same board.
+
+It KEEPS ITS OWN STOCK IN BOTH THEMES, which is the one place it parts company with the
+two boards it is made from. The menu and the footer follow the theme because they are
+chrome and run the full width of the window; this sits inside a band, the way a ticket, a
+punch card and a clipboard do, and DistanceTickets already settled what those do. On the
+dark page the stock steps one value lighter rather than darker, because a hard offset
+shadow only reads when the object is lighter than the shadow. The accent is re-pointed to
+the gold on the board in both themes: `--heading-accent` is chosen against the PAGE, and
+the rust measured 2.0:1 on bark, which would have set the times, the one thing anybody
+reads a record board for, as dark red on dark brown.
+
+The names are struck on one row after another as the board enters the viewport, on the
+mobile menu's stagger. It cannot leave a row invisible: the resting state with no
+animation is the finished row, the BaseLayout observer fires on sight and falls back to
+showing everything where there is no IntersectionObserver, and the first frame of the
+press is the name itself, ghosted and oversized, rather than nothing.
+
+**The results pages.** A year page's title is a numeral, so it is struck on at poster size
+(`headlineStamp` on PageHeader, the hero's press and its second pass of rust ink). The two
+winners of each race went on the board. The age-group leaders and the full field went onto
+the race-day clipboard, which is what a timing sheet was written on. The clipboard's sheet
+is the page's own paper rather than the plate stock, deliberately: `.clip__sheet` inverts
+with the theme, and inverting it here would have set the entire archive in cream on
+charcoal and forced every link, age and place number on it to be re-coloured. Below the
+small breakpoint the clipboard reaches into the page's gutter, because the board, the clip
+and the sheet each take padding and stacked they cost the Name column 75px and started
+wrapping names.
+
+On the archive index the row stopped being one big link. A link cannot contain a link, so
+while the whole row went to `/results/<year>` the two winners printed on it could not go
+anywhere: it was the only page on the site that names a finisher and will not take you to
+them. The year carries the destination now, and the names are links.
+
+**The contact page's map.** The "coming from out of town" band showed a screenshot of
+Google Maps uploaded to the CMS. `npm run map-region` bakes the same view from this site's
+own map instead: `scripts/capture-region-poster.mjs` is a thin wrapper round the existing
+poster pipeline, and the composition lives in CourseMapLibre's poster block beside the
+course poster's. Flat, topographic, with The Oval, downtown and CVG pinned in the map's own
+marker style; The Oval's pin is the first point of the recorded course rather than a
+coordinate typed in. It renders in the home poster's ridge-cut frame.
+
+Getting the page to USE it without a Sanity write is `src/lib/local-poster.ts`: a block
+whose call to action sends the reader to Google Maps is a block about where things are, so
+it shows this site's map. A rule about what the block says, not about which block it is,
+so it survives a re-seed and stops applying by itself the day the CTA changes. A schema
+field would have been cleaner in the abstract and would have shipped dark until somebody
+ticked it. See PENDING for the content edit that retires the rule.
+
+One wrinkle Tier 1 accepted came off with it: the outlined label in a half-width column is
+now sized by its container rather than by the window, so a long eyebrow holds one line.
+
+Two things cost time and are written down where they will be found again. The map is built
+with `maxBounds` as a leash, and MapLibre enforces that by silently CLAMPING a camera
+wider than the leash, so the first region capture asked for zoom 10.75 over three cities
+and was handed 11.75 over the park with no error anywhere; `window.__poster.cam()` now
+prints what the camera actually settled at. And a media query carries no extra
+specificity, so the board's wide-screen row rules had to move BELOW the base rules they
+override.
+
 _2026-09-17 — One grammar: one heading system, one button family, one ground._
 
 An audit of the live site found three heading systems running at once and one button style
