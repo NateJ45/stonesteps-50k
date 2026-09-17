@@ -690,3 +690,41 @@ ONE THING TO SETTLE BEFORE PUBLISHING EITHER WAY: the base map is Cincinnati
 Parks' copyrighted artwork. Ask them before republishing a modified version.
 The race already partners with them and gives them $2,000 a year, so this is a
 conversation rather than an obstacle, but it should happen first.
+
+### 12. An untracked `design/` folder is in Tailwind's scan path
+
+**Nathan's call: one line in `.gitignore` closes it.**
+
+2026-09-17. Found while fixing the parity feedback loop (entry 13). Tailwind 4
+scans the whole project for candidate class names and skips only what git
+ignores, so the untracked `design/` folder in the repo root is read as source.
+Measured on the home page, same commit, same lockfile: 287,773 bytes of inline
+stylesheet with it moved out of the tree, 351,502 with it back. That is **63,729
+bytes added to every page**, and because the stylesheet is inlined it is 62KB of
+HTML per page rather than 62KB of one shared file. `text-tertiary` alone appears
+75 times in `design/` and nowhere in `src/`.
+
+IT NEVER REACHES ANYBODY. `design/` is not committed, so CI checks out a tree
+without it and what deploys is the 287KB build. This is a local-build effect
+only, which is exactly why it is easy to leave in place for months.
+
+It does have one real consequence today: `npm run parity` is unstable on a
+machine where `design/` exists, because the stylesheet it inlines into all 31
+baselines differs from the one CI would produce. The baselines committed on
+2026-09-17 were captured from a build with `design/` held out. Anyone
+recapturing should do the same, or gitignore the folder and stop thinking about
+it.
+
+### 13. DONE 2026-09-17. The parity baselines are out of Tailwind's scan path
+
+`scripts/.parity/*.html` is committed on purpose and was therefore being read as
+Tailwind source. Harmless while a baseline was markup; not harmless once
+`build.inlineStylesheets: 'always'` (entry 10) put the compiled stylesheet
+inside every baseline and took the directory from 2.1MB to 9.6MB. The scanner
+then harvested candidates out of Tailwind's own selectors: `.top-5\.5` yields
+`top-5`, `.bg-foreground\/30` yields `bg-foreground`. Worth 26,455 bytes of dead
+utilities on every page, and it made the parity gate unwinnable, because each
+capture changed the next build's CSS and the CSS is in all 31 pages.
+
+Closed with `@source not '../../scripts/.parity'` in `globals.css`, which
+carries the full argument. Capture, rebuild, compare is a fixed point now.
