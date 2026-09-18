@@ -1,8 +1,8 @@
 /* ============================================================================
    Visual regression — the styleguide wall
    ============================================================================
-   See playwright.visual.config.ts for why this is a separate suite and why
-   baselines are generated in CI rather than on a laptop.
+   See playwright.visual.config.ts for why this is a separate suite, why the
+   baselines are generated in CI, and why this file refuses to run on Windows.
 
    One full-page shot per theme. Two shots, because the bug that prompted this
    suite was theme-specific: every heading on the site was cream on cream in
@@ -10,6 +10,26 @@
    sailed past it.
    ============================================================================ */
 import { test, expect, type Page } from '@playwright/test';
+
+// THE BASELINES ARE LINUX PIXELS (ported from the starter, 2026-09-18). Font
+// rasterisation on Windows differs enough that the dark shot fails every local
+// run, which is how a gate gets ignored: four separate agents hit this failure
+// this week, each spent time confirming it was not their change, and each was
+// right. Skip with a reason rather than fail with one; CI is the arbiter. Set
+// VISUAL_FORCE=1 to compare anyway when debugging the harness itself.
+const WINDOWS_SKIP =
+  process.platform === 'win32' && !process.env.VISUAL_FORCE
+    ? 'Baselines are Linux-rendered; Windows font rasterisation differs. Run this in CI ' +
+      '(.github/workflows/visual.yml), or set VISUAL_FORCE=1 to compare anyway.'
+    : null;
+
+if (WINDOWS_SKIP) {
+  // The annotation carries the reason into the report; this line carries it
+  // into the terminal, where the person who typed the command is looking.
+  console.log(`\n[visual] Skipped on win32. ${WINDOWS_SKIP}\n`);
+}
+
+test.skip(() => WINDOWS_SKIP !== null, WINDOWS_SKIP ?? '');
 
 // The site keys its theme off localStorage under a slug-derived name, applied
 // by the BaseLayout head script BEFORE first paint. emulateMedia does nothing
