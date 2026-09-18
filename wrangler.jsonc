@@ -26,10 +26,20 @@
   // endpoint stores the submission in D1 and notifies through Web3Forms, with
   // the key out of the client bundle.
   //
-  // "d1_databases": [
-  //   { "binding": "CONTACT_DB", "database_name": "stonesteps-contact", "database_id": "<id>" }
-  // ],
-  // "send_email": [{ "name": "EMAIL", "destination_address": "<owner>@example.com" }],
+  // WIRED ON 2026-09-18, the day the domain moved to Cloudflare DNS; the note
+  // above is kept as the record of why it waited. The database holds every
+  // submission before any email is attempted, and the binding sends from an
+  // address on this domain, which `wrangler email sending enable
+  // stonesteps50k.com` onboarded (its SPF and DKIM records live in the zone
+  // under cf-bounce). CONTACT_TO and CONTACT_FROM are Worker secrets.
+  "d1_databases": [
+    {
+      "binding": "CONTACT_DB",
+      "database_name": "stonesteps-contact",
+      "database_id": "ce9ce357-9904-46a9-b7e8-8cc97f9ac72f",
+    },
+  ],
+  "send_email": [{ "name": "EMAIL" }],
 
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
