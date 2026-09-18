@@ -36,8 +36,8 @@
     {
       "binding": "CONTACT_DB",
       "database_name": "stonesteps-contact",
-      "database_id": "ce9ce357-9904-46a9-b7e8-8cc97f9ac72f"
-    }
+      "database_id": "ce9ce357-9904-46a9-b7e8-8cc97f9ac72f",
+    },
   ],
   "send_email": [{ "name": "EMAIL" }],
 
