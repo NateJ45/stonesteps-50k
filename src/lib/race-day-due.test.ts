@@ -3,9 +3,6 @@
 // kind of rule nobody notices is wrong, so it is pinned here.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-// @ts-ignore plain JS shared with the scripts, no types on purpose. ts-ignore
-// rather than ts-expect-error because the Linux check resolves this import
-// cleanly and the Windows one does not; the directive must be harmless on both.
 import { raceDayDue, localDate, addDays, ARCHIVE_LAG_DAYS } from '../../scripts/lib/weather.mjs';
 
 const known = [2023, 2024, 2025];
