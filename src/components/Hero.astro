@@ -124,10 +124,16 @@ const hasImage = effectiveImages.length > 0;
 // The exact fill height comes from the .hero-fill class plus the measured
 // --header-h variable (see the inline script and scoped <style> below).
 // "short" stays a generous editorial band for interior pages.
+//
+// AN IMAGE-LESS HERO GETS NO MINIMUM HEIGHT (2026-09-18). That 42svh/52svh band
+// exists to give a PHOTOGRAPH room to be a photograph. Every hero on this site
+// had one, so nothing exposed what the band does without one: on /privacy, the
+// first page here with a text-only hero, it produced a 500px block with 312px
+// of empty background above the heading. The padding below still applies, so an
+// image-less hero is a generous editorial band rather than a cramped one; it
+// simply stops reserving room for a picture that is not coming.
 const wrapperHeight =
-  size === 'tall'
-    ? 'hero-fill'
-    : 'min-h-[42svh] md:min-h-[52svh]';
+  size === 'tall' ? 'hero-fill' : hasImage ? 'min-h-[42svh] md:min-h-[52svh]' : '';
 ---
 
 {/* Full-viewport home hero plumbing (size="tall" only): measure the sticky
