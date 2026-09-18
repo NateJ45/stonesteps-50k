@@ -26,9 +26,15 @@ const {
 ---
 
 <section class="bg-background" aria-labelledby={headingId}>
+  {
+    /* THE SHARED SPLIT (2026-09-18). Same change as ImageText, for the same
+    reason: this band cut the column into equal halves at `md` while the rest of
+    the site used an uneven split at `lg`. The portrait leads, so it takes the
+    mirrored variant. See `.split` in globals.css. */
+  }
   <div
     data-reveal
-    class="mx-auto grid max-w-content grid-cols-1 items-center gap-l px-6 py-section-lg md:grid-cols-2 md:gap-section-md"
+    class="split split--media-first mx-auto max-w-content items-center px-6 py-section-lg"
   >
     {
       portrait?.asset ? (

@@ -59,7 +59,14 @@ const {
   </div>
 
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
-    <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
+    {
+      /* THE SHARED SPLIT (2026-09-18). Two equal halves put this band's
+        photograph at x=660 while the one two sections above it started at 720.
+        `.split` gives the words the wide track and the picture the narrow one,
+        which is what every text-and-picture band on the site does now. See
+        globals.css for the ratio and why it is that one. */
+    }
+    <div class="split lg:items-center">
       <div>
         {
           eyebrow && (

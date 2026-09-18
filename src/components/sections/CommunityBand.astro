@@ -127,6 +127,8 @@ const button: ProjectedCommunitySection['cta'] =
   .community__card {
     position: relative;
     max-width: 44rem;
+    /* Centred on a phone, where the card IS the column. See the rule below for
+       why it stops being centred above `lg`. */
     margin-inline: auto;
     padding: clamp(1.75rem, 1.2rem + 2.5vw, 3rem);
     background: var(--plate-face);
@@ -141,6 +143,29 @@ const button: ProjectedCommunitySection['cta'] =
     /* A static shape, not an animation, so reduced motion leaves it alone: the
        same reasoning as the plate button's skew. */
     rotate: -0.7deg;
+  }
+
+  /* THE NOTICE HANGS ON THE COLUMN'S LEFT EDGE (2026-09-18).
+     It used to be centred, which put a 710px card at x=285 under a heading the
+     page had already established at x=24, with the card's own heading landing
+     at 336. Nothing else on the home page does that: the record board is 864
+     wide and starts at 24, the punch card is 616 and starts at 24. A notice
+     pinned to the board is still pinned somewhere, and the somewhere every
+     other object on this page uses is the left edge.
+
+     It keeps its width cap and it keeps its tilt, which is the whole reason it
+     reads as a pinned notice rather than as a web panel. One consequence worth
+     knowing before anyone re-measures it: the 0.7 degree rotation makes the
+     BOUNDING BOX about 3px wider than the card on each side, so a measuring
+     script reads its left edge at about 21 rather than 24. The corner a reader
+     sees is on the line.
+
+     Below `lg` it stays centred, because down there the card is the column and
+     there is nothing to align it against. */
+  @media (width >= 64rem) {
+    .community__card {
+      margin-inline: 0 auto;
+    }
   }
 
   /* The watermark. Sized off the CARD, not the viewport, so it keeps its

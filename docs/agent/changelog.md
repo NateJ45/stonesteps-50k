@@ -10,6 +10,52 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-18 — One column, and one split, on every band._
+
+The complaint was that section titles and the objects under them do not start at the same
+place, and that it reads as unfinished. Measured at 1280 it was true in three different
+ways, so the fix is three rules rather than one.
+
+**Every two-column band now declares the same grid.** Seven components carried five
+splits:
+1.1fr/0.9fr with a 40px gutter on the page header, two equal halves with a 76.8px gutter on
+ImageText and FounderSection (and at `md`, not `lg`), plain halves with 40 on the parks
+band, 1.35fr/1fr with 48 on the contact band, 1.15fr/0.85fr with 40 on the punch card. The
+seam between the words and the picture therefore landed at 720, 678, 660, 752 and 749 on
+five consecutive scrolls. `.split` and `.split--media-first` in globals.css are the one
+definition now, and the ratio chosen is the page header's and the course features' own
+1.1 : 0.9 with a 2.5rem gutter, because those two already agreed with each other, they
+appear on the most pages, and the split gives prose about a 65-character measure at 1280
+while leaving a picture 536px. The picture column is always the narrow one, whichever side
+it is on, so the seam is now 720 with the picture on the right and 600 with it on the left,
+and a band that flips sides is recognisably the same band flipped.
+
+**Three objects that were centred now sit on the column's left edge.** The race-day
+clipboard on the home page was `mx-auto` at every width, so a 736px board floated at x=272
+under a heading at 24 while the identical clipboard on /results/2025 sat at 24. The
+community notice was centred at x=285, with its own heading at 336. And the cut-out race
+director was centred inside his column, at 815 on the home page and 748 on /contact, while
+every framed photograph on the site started at the seam. All three are left-anchored from
+`lg` up and left centred below it, where the card is the column and there is nothing to
+align against. The notice keeps its width cap and its tilt; the cut-out keeps its size, and
+the pool of ground it stands on travels with it through two custom properties rather than
+staying behind in the middle of a column the photograph no longer fills.
+
+**The home page's map still joins the content column.** `CoursePosterBand` set its own
+72rem box inside the page's 82.5rem one, so its heading began at 88 and its picture ran 88
+to 1192 between an elevation chart and a ticket board that both ran 24 to 1256. It takes
+`max-w-content px-6` like everything else, and the still is a full-column object the way
+the live map is on /course. One consequence is recorded in `docs/PENDING.md`: the band
+renders 1232px wide now and the poster's 1x rung is still baked at the 933px the capture
+used, so it wants a re-run of `npm run map-poster` at some point.
+
+After the change every section heading on /, /course, /records, /contact, /results,
+/results/2025, /runners/* and /404 starts at x=24 at 1280, every full-width object spans
+24 to 1256, every narrower object starts at 24, and every two-column seam is one of two
+numbers instead of six. Parity was recaptured for all 30 pages that inline the stylesheet
+(studio does not), and the layout-variants gate was untouched: it watches the gallery,
+values and dynamic-list grids, none of which are two-column bands.
+
 _2026-09-17 — Material and typography on the five bands that were still template._
 
 Tier 3 of the design pass, and the brief for it was light touches: **no new objects**.

@@ -52,6 +52,11 @@ worker-configuration.d.ts
 playwright-report/
 test-results/
 
+# Lighthouse CI output (`npx lhci autorun`). Machine-written run artifacts, and
+# unformatted JSON, so leaving it untracked also kept `npm run format:check`
+# failing on any machine that had ever run the audit locally.
+.lighthouseci/
+
 # Local scratch space for one-off calculations.
 .scratch/
 .tmp-shots/
