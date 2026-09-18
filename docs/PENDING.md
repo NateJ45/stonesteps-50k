@@ -498,6 +498,21 @@ than Lighthouse's simulation) the home page paints at **FCP 0.93s and LCP
 1.06s**. Lighthouse's Lantern engine reports 2.1s and 3.6s for the same page
 because it charges the two render-blocking stylesheets 763ms and 463ms.
 
+2026-09-18: FOUND, AND MOSTLY FIXED. Blocking one resource class at a time in Lighthouse
+showed what the model was actually charging against the wordmark on the phone profile,
+and it was not the stylesheet. Removing the mud masks took the modelled LCP from 3.99s
+to 3.08s; removing the React islands took it to 3.24s and FCP to 1.88s; the hero photo
+was worth 0.3s and the fonts 0.2s. The mechanism: Lantern's pessimistic LCP graph
+holds every request that STARTS before the observed paint, and on a fast local trace
+that is everything, including the two later hero slides (lazy did nothing, a stacked
+slide is in the viewport), the below-fold mud masks and the React runtime, which
+client:only pulled in at 135ms. PR #32 acts on all of it: the masks are 64-entry
+palettes and the phone hero mask is written at 560px (138KB to 48KB), the hero photo
+is AVIF q45 (164KB to 99KB), the later slides arrive a second after load, and the menu
+hydrates on idle. Three local runs: FCP 1.88s, LCP 3.22 to 3.25s, performance 0.91 to
+0.92, against 2.2s / 3.98s / 0.85 before. The CI runner sits about 0.65s behind this
+machine, so the 4.5s gate now has roughly a second of margin instead of none.
+
 2026-09-17 addendum. The gate flapped again on PR #29 (Tier 3 of the identity pass): home
 LCP median 4632ms from runs of 4097, 4632 and 4705 against the 4500 budget, performance
 0.81. Nothing in that PR touches the home page above the fold, and three local runs of the

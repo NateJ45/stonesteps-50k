@@ -46,6 +46,16 @@ interface Props {
    * its own heuristics for everything else.
    */
   fetchpriority?: 'high' | 'low' | 'auto';
+  /**
+   * Render with NO src, the URLs parked in data-src / data-srcset for a
+   * script to move across later (2026-09-18). For a picture the page keeps in
+   * the document from first paint but does not show for seconds: the home
+   * hero's second and third slides. loading="lazy" does not help there, because
+   * a stacked slide is inside the viewport and the browser fetches it at once,
+   * and Lighthouse's model then charges its bytes against the LCP element. The
+   * caller owns the swap; RaceHero.astro has the reference implementation.
+   */
+  defer?: boolean;
 }
 
 const {
@@ -59,6 +69,7 @@ const {
   quality = 75,
   format = 'auto',
   fetchpriority,
+  defer = false,
 } = Astro.props;
 
 // Build the URL. If source is null/undefined we render nothing — pages should handle absence explicitly.
@@ -107,8 +118,10 @@ const resolvedAlt = alt !== undefined ? alt : (source.alt ?? '');
 ---
 
 <img
-  src={src}
-  srcset={srcset}
+  src={defer ? undefined : src}
+  srcset={defer ? undefined : srcset}
+  data-src={defer ? src : undefined}
+  data-srcset={defer ? srcset : undefined}
   width={width}
   height={derivedHeight}
   alt={resolvedAlt}

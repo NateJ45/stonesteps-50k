@@ -130,17 +130,33 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
       Priority is explicit for the same reason, and ONLY THE FIRST SLIDE IS
       EAGER. All of them used to be, which put three full-size photographs on
       the wire at once: measured under Lighthouse's throttling they finished at
-      6.6s, 6.9s and 7.4s and held up the first paint behind them. The rest are
-      lazy now. They are in the viewport, so they still start immediately after
-      load, and the cross-fade does not reach the second slide for seven
-      seconds.
+      6.6s, 6.9s and 7.4s and held up the first paint behind them.
 
-      QUALITY 62, against the component's default of 75. This photograph sits
+      THE REST DO NOT EXIST ON THE WIRE UNTIL A SECOND AFTER LOAD (2026-09-18).
+      They were lazy, and lazy did nothing: a stacked slide is inside the
+      viewport, so the browser fetched all three at 135ms whatever the
+      attribute said, and Lighthouse's model charges every request that starts
+      before the wordmark paints against the wordmark. On the phone profile
+      those two slides were 120 to 320KB of that bill, the largest item in it,
+      for pictures the cross-fade does not reach for seven seconds. So they
+      render with their URLs parked in data attributes (SanityImage's defer
+      prop) and the script at the bottom of this file moves them into place a
+      second after the load event, which is after the paint the model cares
+      about and six seconds before anyone can see them.
+
+      QUALITY 45, against the component's default of 75. This photograph sits
       behind a gradient scrim and the page's paper grain, which is exactly the
-      case where the last fifth of JPEG quality is invisible and expensive: it
-      is the LCP element and it was 218kB. (The note lives up here because a
-      C-style comment inside an element's attribute list is not a comment in
-      Astro's template syntax at all: every word of it is parsed as a prop.) */
+      case where the last third of encoder quality is invisible and expensive.
+      It was 62 from 2026-09-12 (down from 218kB as a JPEG); on 2026-09-18 it
+      went to 45 because the CDN answers modern browsers with AVIF, and at
+      800px wide AVIF q62 was 164kB against 99kB at q45, compared side by side
+      at 2x with no difference a person could point at. It is not the LCP
+      element any more (the wordmark is) but Lighthouse's model still charges
+      its bytes against the wordmark on the phone profile, where the two
+      together decide whether the home page clears the 4.5s gate. (The note
+      lives up here because a C-style comment inside an element's attribute
+      list is not a comment in Astro's template syntax at all: every word of
+      it is parsed as a prop.) */
     slides.length > 0 && (
       <figure
         class:list={[
@@ -155,10 +171,11 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
             source={img}
             width={1400}
             sizes="(min-width: 1024px) 48vw, 100vw"
-            quality={62}
+            quality={45}
             alt={i === 0 ? (img.alt ?? '') : ''}
             loading={i === 0 ? 'eager' : 'lazy'}
             fetchpriority={i === 0 ? 'high' : 'low'}
+            defer={i > 0}
           />
         ))}
       </figure>
@@ -280,3 +297,42 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
     </div>
   </div>
 </section>
+
+<script>
+  // THE LATER SLIDES ARRIVE A SECOND AFTER LOAD. See the note above the
+  // figure: the second and third photographs render without a src so they are
+  // not on the wire before the wordmark paints, and this moves their URLs into
+  // place once the page has loaded and settled. A second's grace after load
+  // keeps the requests clear of the last paint Lighthouse records, and the
+  // cross-fade does not reach the second slide until seven seconds in, so the
+  // picture is there long before it is wanted. The four-second fallback covers
+  // a load event that never fires (a stalled third-party request, say): the
+  // slides must not be the thing that stays blank.
+  //
+  // RE-BOUND ON EVERY NAVIGATION, like the countdown and the records tabs: a
+  // module runs once per full page load and the ClientRouter swaps the
+  // document without re-executing it. Running it twice is harmless, because
+  // the second pass finds no data-src left to move.
+  const revealSlides = () => {
+    const imgs = document.querySelectorAll<HTMLImageElement>('.hero-photo img[data-src]');
+    if (imgs.length === 0) return;
+    let done = false;
+    const swap = () => {
+      if (done) return;
+      done = true;
+      for (const img of imgs) {
+        const { src, srcset } = img.dataset;
+        if (srcset) img.srcset = srcset;
+        if (src) img.src = src;
+        delete img.dataset.src;
+        delete img.dataset.srcset;
+      }
+    };
+    const afterLoad = () => window.setTimeout(swap, 1000);
+    if (document.readyState === 'complete') afterLoad();
+    else window.addEventListener('load', afterLoad, { once: true });
+    window.setTimeout(swap, 4000);
+  };
+  revealSlides();
+  document.addEventListener('astro:page-load', revealSlides);
+</script>

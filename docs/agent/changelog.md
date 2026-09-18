@@ -10,6 +10,10 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-18 — The home page's LCP has a second of margin, and the reason it did not was never the stylesheet._
+
+For two PRs running, the Lighthouse LCP gate on the home page flapped at 4.6 to 4.7s in CI against a 4.5s budget, on changes that never touched the hero. Blocking one resource class at a time showed what the model was charging against the wordmark on the phone profile: the mud masks (0.9s), the React islands (0.75s), the hero photo (0.3s) and the fonts (0.2s), because Lantern's pessimistic graph holds every request that starts before the observed paint. Four changes: the masks are written as 64-entry palettes with the phone hero mask at 560px wide (138KB to 48KB, no visible difference under the grain), the hero photo is AVIF at quality 45 (164KB to 99KB, compared at 2x), the second and third hero slides render without a src and get it a second after load (lazy did nothing, a stacked slide is in the viewport), and the phone menu hydrates on idle instead of client:only, which the file had said was impossible and is not with the pinned React and Radix set. Locally: FCP 2.2s to 1.88s, LCP 3.98s to 3.23s, performance 0.85 to 0.92, CLS 0.
+
 _2026-09-18 — One column, and one split, on every band._
 
 The complaint was that section titles and the objects under them do not start at the same
