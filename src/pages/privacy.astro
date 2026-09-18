@@ -1,0 +1,247 @@
+---
+// Safe to edit by hand (the copy). Foundation for the derived bits.
+//
+// The race's privacy policy.
+//
+// WHY THIS IS A CODE PAGE AND NOT A SANITY DOCUMENT, unlike almost every other
+// page on this site. A privacy policy is a statement about what the software
+// actually does, so it has to change in the same commit the software does. Put
+// it in the Studio and it becomes a document nobody edits when the code
+// changes, which is exactly how it ends up lying. The starter's own privacy
+// page spent months telling visitors that traffic was counted "without setting
+// cookies" after GA4 became available; see PORTS.md card 54 in the starter.
+//
+// So the factual sections below are DERIVED where they can be:
+//   - the analytics paragraph branches on src/lib/analytics-config.ts, the same
+//     module BaseLayout uses to decide whether to render the tag at all
+//   - the contact-form list is written from what src/pages/api/contact.ts
+//     actually inserts into D1, column for column
+// If you change either of those files, change the matching words here.
+//
+// The route is deliberately NOT in RESERVED_SLUGS as a page anyone can shadow:
+// it is added there so a custom Sanity page called "privacy" cannot take over
+// the URL and replace the policy with marketing copy.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import { getSiteSettings } from '@/lib/queries';
+import { hasCfAnalytics, hasGa } from '@/lib/analytics-config';
+
+const siteSettings = await getSiteSettings().catch(() => null);
+
+// The address for questions and removals. Site settings owns it so it can be
+// changed without a deploy; the fallback is the address the contact form
+// already delivers to, so this line can never point nowhere.
+const contactEmail = siteSettings?.email?.trim() || 'rd@stonesteps50k.com';
+
+// Reviewed date. Update this whenever the substance changes, not on every
+// deploy: a policy that claims to have been reviewed today, every day, tells a
+// reader nothing.
+const lastReviewed = 'September 2026';
+---
+
+<BaseLayout
+  title="Privacy"
+  description="What the Stone Steps 50K website collects, why, and how to have your name taken off the results pages."
+  noindex={false}
+>
+  {
+    /*
+    NO EYEBROW ON PURPOSE. The hero eyebrow renders as .section-label, a display
+    word drawn as a 1.5px outline at 42% of the foreground. Every other hero on
+    this site sits on a photograph, so that outline has a dark image behind it.
+    This page has no hero image, which puts the outline on the pale paper
+    surface at 2.65:1 where AA wants 3:1, and the axe suite fails the page.
+    Darkening the token would change every other page, so the right fix on a
+    legal page is to drop a purely decorative word. If this page ever gains a
+    hero image, an eyebrow can come back with it.
+
+    size="short" because this is an interior page, matching every non-home hero.
+  */
+  }
+  <Hero
+    headline="Privacy"
+    subhead="What this site collects, why it collects it, and how to get your name off it."
+    size="short"
+    headingId="privacy-heading"
+  />
+
+  <section class="bg-paper py-xl">
+    {
+      /*
+      Container copied from Hero.astro deliberately: mx-auto max-w-content px-m
+      on the outside, a left-aligned max-w-3xl column inside. The starter's
+      privacy page centred a narrower max-w-prose column, which put this page's
+      body 211px to the right of its own hero. That is CLAUDE.md rule 17, one
+      grammar per page, and it is only visible when you scroll past the fold,
+      which is why it needs to be copied rather than re-chosen.
+    */
+    }
+    <div class="mx-auto max-w-content px-m">
+      <div class="max-w-3xl">
+        <div class="space-y-l">
+          <p class="text-foreground/80">
+            This is a trail race, not a data business. The site collects as little as it can get
+            away with, and this page says plainly what that is. If something here bothers you, email{
+              ' '
+            }
+            <a class="underline underline-offset-2 hover:text-link" href={`mailto:${contactEmail}`}>
+              {contactEmail}
+            </a> and it will get sorted out.
+          </p>
+
+          <div>
+            <h2 class="mb-s font-display text-h3 text-foreground">
+              Runner names on the results pages
+            </h2>
+            <p class="text-foreground/80">
+              This is the big one, so it goes first. The results archive publishes finishing data
+              for every Stone Steps race it has records for, going back to 2003. For each finish
+              that means a name, the finish time, the distance, the placing, and where the timing
+              sheet recorded them, an age, a gender category, and a home city and state.
+            </p>
+            <p class="mt-s text-foreground/80">
+              That information comes from the race's own timing results, which have always been
+              published. Race results are public the way a finish-line clock is public. The archive
+              exists because two decades of them had been lost, and runners kept asking for them.
+            </p>
+            <p class="mt-s text-foreground/80">
+              If you would rather not appear, say so and you will be removed. Email{' '}
+              <a
+                class="underline underline-offset-2 hover:text-link"
+                href={`mailto:${contactEmail}`}
+              >
+                {contactEmail}
+              </a> with the name and the year. There is no form to fill in and no reason to give. Your
+              result stays in the race's own records, it just stops being on this website.
+            </p>
+          </div>
+
+          <div>
+            <h2 class="mb-s font-display text-h3 text-foreground">The contact form</h2>
+            <p class="text-foreground/80">
+              When you send a message through the contact page, the site stores it so that it cannot
+              be lost if the email fails. What gets saved is exactly this:
+            </p>
+            <ul class="mt-s list-disc space-y-1 pl-l text-foreground/80">
+              <li>Your name, email address, subject and message, as you typed them.</li>
+              <li>The date and time the message arrived.</li>
+              <li>
+                Your browser's user agent string, which says what browser and device you used.
+              </li>
+              <li>
+                A two letter country code, worked out from your connection. Not a city, not an
+                address.
+              </li>
+            </ul>
+            <p class="mt-s text-foreground/80">
+              It is stored in the race's own database on Cloudflare, and it is used for one thing:
+              replying to you. It is never sold, never shared, and never added to a mailing list.
+            </p>
+            <p class="mt-s text-foreground/80">
+              The form is protected from spam bots by Cloudflare Turnstile. Turnstile is shown your
+              IP address so it can judge whether you are a robot. The site does not store your IP
+              address.
+            </p>
+          </div>
+
+          {
+            (hasGa || hasCfAnalytics) && (
+              <div>
+                <h2 class="mb-s font-display text-h3 text-foreground">How visits are counted</h2>
+                {hasCfAnalytics && (
+                  <p class="text-foreground/80">
+                    Page visits are counted with Cloudflare Web Analytics, which sets no cookies and
+                    does not identify individual visitors.
+                  </p>
+                )}
+                {hasGa && (
+                  <p class="mt-s text-foreground/80">
+                    Page visits are {hasCfAnalytics ? 'also ' : ''}measured with Google Analytics.
+                    It does set cookies on your device, named <code>_ga</code> and <code>_ga_</code>
+                    followed by a stream id, so a return visit is recognised as the same person
+                    rather than a new one. It records which pages get opened, roughly what part of
+                    the world the visit came from, and what kind of device was used. It is used to
+                    see whether people can find the course description and the results, nothing
+                    more.
+                  </p>
+                )}
+                {hasGa && (
+                  <p class="mt-s text-foreground/80">
+                    It is not used for advertising, and the numbers are not sold or handed to anyone
+                    beyond Google's own processing. If you would rather not be counted, block
+                    cookies for this site in your browser settings, or use any tracker-blocking
+                    extension. The site works exactly the same either way.
+                  </p>
+                )}
+              </div>
+            )
+          }
+
+          {
+            !hasGa && !hasCfAnalytics && (
+              <div>
+                <h2 class="mb-s font-display text-h3 text-foreground">How visits are counted</h2>
+                <p class="text-foreground/80">
+                  They are not. This build runs no analytics of any kind, sets no measurement
+                  cookies, and stores nothing on your device for counting visits.
+                </p>
+              </div>
+            )
+          }
+
+          <div>
+            <h2 class="mb-s font-display text-h3 text-foreground">The course map</h2>
+            <p class="text-foreground/80">
+              The 3D course map draws its aerial imagery from the United States Geological Survey
+              and its terrain from a public elevation tile service. Loading those tiles means those
+              servers see your IP address, the same as any image on any website. The race has no
+              account with either and gets nothing back from them.
+            </p>
+          </div>
+
+          <div>
+            <h2 class="mb-s font-display text-h3 text-foreground">Leaving this site</h2>
+            <p class="text-foreground/80">
+              Registration and results are handled by RunSignUp, and the race also has a Facebook
+              group. Those are other companies' websites with their own privacy policies. Once you
+              click through, this policy stops applying and theirs starts.
+            </p>
+          </div>
+
+          <div>
+            <h2 class="mb-s font-display text-h3 text-foreground">What never happens</h2>
+            <ul class="list-disc space-y-1 pl-l text-foreground/80">
+              <li>Nothing is sold to anybody, ever.</li>
+              <li>There is no advertising on this site and no ad-tracking pixels.</li>
+              <li>There is no newsletter, so there is no list to be added to.</li>
+              <li>No account, no login, no password. There is nothing here to sign up for.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 class="mb-s font-display text-h3 text-foreground">
+              Questions, or getting your data removed
+            </h2>
+            <p class="text-foreground/80">
+              Email{' '}
+              <a
+                class="underline underline-offset-2 hover:text-link"
+                href={`mailto:${contactEmail}`}
+              >
+                {contactEmail}
+              </a>. That covers taking your name off the results pages, deleting a message you sent
+              through the contact form, or asking what is held about you. A real person reads it and
+              you will get an answer.
+            </p>
+          </div>
+
+          <p class="text-sm text-foreground/60">
+            Last reviewed {lastReviewed}. This page gets updated whenever something meaningful
+            changes about how the site handles your information.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

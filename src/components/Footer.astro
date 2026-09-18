@@ -443,10 +443,17 @@ const rowClass = (label: string) =>
       <p>© {currentYear} {brandName}</p>
       <div class="flex items-center gap-m">
         {
-          /* The starter's fallback here was a hardcoded "Privacy policy" link.
-            This site has no privacy route, because the race does not have that
-            page, and a footer link to a 404 is worse than no link at all. */
+          /* The privacy policy is always linked, because it is a code page at a
+            fixed route rather than a Sanity document that might not exist. It
+            was absent until 2026-09-18: the race genuinely had no such page and
+            a footer link to a 404 is worse than no link. Adding Google
+            Analytics changed that, since it sets cookies and Google's own terms
+            require a policy disclosing them. Any further legal links still come
+            from Site settings and render after it. */
         }
+        <a href="/privacy" class="underline underline-offset-2 transition-colors hover:text-link"
+          >Privacy</a
+        >
         {
           LEGAL_LINKS.map((l) => (
             <a
