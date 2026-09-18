@@ -40,11 +40,11 @@ bakes from its own map with The Oval, downtown and CVG pinned. That is a code ru
 over a schema field precisely so the fix did not have to wait on anybody.
 
 What is left is a content edit only Dave or Nathan can make, and it is tidiness rather
-than a bug: open the block in the Studio and CLEAR its image. The uploaded screenshot is
-then gone from the dataset as well as from the page, and the branch in `ImageText.astro`
-plus `src/lib/local-poster.ts` and its test can all be deleted, because the block will
-have no image for the rule to override. Until then the rule is doing the work and the
-asset is simply unused.
+than a bug: open the block in the Studio and CLEAR its image, so the uploaded screenshot
+is gone from the dataset as well as from the page. The rule in `src/lib/local-poster.ts`
+STAYS after that: it is what puts the baked region poster on the page, with or without an
+image on the block, so deleting it would leave the band with no map at all. (An earlier
+version of this note said the rule could go once the image was cleared; that was wrong.)
 
 Do NOT change that block's call to action while the rule is in place: "Find a hotel on
 Google Maps" pointing at a Google Maps URL is what the rule matches on. Its test
@@ -477,6 +477,16 @@ profile (4x CPU, 1.6Mbps, 150ms RTT, five loads, PerformanceObserver rather
 than Lighthouse's simulation) the home page paints at **FCP 0.93s and LCP
 1.06s**. Lighthouse's Lantern engine reports 2.1s and 3.6s for the same page
 because it charges the two render-blocking stylesheets 763ms and 463ms.
+
+2026-09-17 addendum. The gate flapped again on PR #29 (Tier 3 of the identity pass): home
+LCP median 4632ms from runs of 4097, 4632 and 4705 against the 4500 budget, performance
+0.81. Nothing in that PR touches the home page above the fold, and three local runs of the
+merged build on the compressed harness gave 3980, 3977 and 4054ms at 0.85, the same as
+before the PR. The LCP element is still the wordmark (span.stamp-word), the display font is
+already preloaded, and the phase breakdown is TTFB 450ms plus 3.5s of render delay, which
+is the Lantern model charging the inlined stylesheet as described below. So: the CI runner
+straddles the budget, the site did not move, and the lever remains the one in this item.
+Merged on that reading.
 
 Things that were measured and are NOT the problem, so nobody repeats them:
 
