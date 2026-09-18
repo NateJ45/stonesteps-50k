@@ -98,8 +98,22 @@ export const race = defineType({
       title: 'Coordinates',
       type: 'geopoint',
       group: 'where',
-      // Verified from RunSignUp: 39.17275, -84.568806. Drives the JSON-LD location.
-      description: 'Drop a pin on the start area. Feeds the map data search engines read.',
+      // 39.172758, -84.568807 from Dave on 2026-09-18, the pin he wants runners
+      // to navigate to (earlier value was RunSignUp's 39.17275, -84.568806).
+      // Drives the JSON-LD location and the "Get directions" links.
+      description:
+        'Drop a pin on the start area. Feeds the directions links and the map data search engines read.',
+    }),
+    defineField({
+      name: 'parkingNote',
+      title: 'Parking',
+      type: 'text',
+      rows: 2,
+      group: 'where',
+      // Dave's wording, 2026-09-18: "While there is enough parking, park close
+      // together and only within The Oval, not before it."
+      description:
+        'One or two sentences on where to park. Shown beside the start line on the contact page and under the race-day schedule.',
     }),
     // ATMOSPHERE PHOTOGRAPHS. Not illustrations of anything: these are laid
     // into the OUTER MARGIN of a band, faint and faded off at the edges, so a
