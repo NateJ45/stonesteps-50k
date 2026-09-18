@@ -96,7 +96,19 @@ const hasImage = Boolean(image?.asset);
   <MudField field="walk" class="header-walk mud-edge-fade" />
 
   <div class="mob-center relative z-10 mx-auto w-full max-w-content px-6">
-    <div class={hasImage ? 'grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center' : ''}>
+    {
+      /* THE SHARED SPLIT (2026-09-18). This band's own 1.1fr/0.9fr grid is the
+        one the whole site now uses, so it declares it through `.split` in
+        globals.css rather than keeping a private copy of the numbers. Nothing
+        here moves: the same two tracks, the same 2.5rem gutter. The one
+        difference is that the shared rule wraps each track in `minmax(0, ...)`,
+        which stops a long unbroken word in either column from widening its
+        track past its share; at this band's sizes nothing reaches that limit,
+        and the measured geometry is identical before and after. The reason for
+        the move is the four other splits the site was carrying, listed on
+        `.split` itself. */
+    }
+    <div class={hasImage ? 'split lg:items-center' : ''}>
       <div>
         {
           eyebrow && (
@@ -171,9 +183,21 @@ const hasImage = Boolean(image?.asset);
           30rem is as large as he goes before the print softens. The pool,
           the echo plate and the mud at his feet all come from the shared
           `.subject-stage` and `.photo-cutout` rules, so the two appearances
-          cannot drift apart. */
+          cannot drift apart.
+
+          THE TWO CUSTOM PROPERTIES (2026-09-18) are what let the stage put him
+          on the column's left edge, like every other object on the page,
+          without the pool of ground staying behind in the middle of the column.
+          `--stage-img-w` is the cap on the picture below (30rem, the same
+          number the class carries) and `--stage-spread` is how much wider the
+          disc is than the picture: 536 over 480, about 1.12, which is the disc
+          this band already drew. The argument is on `.subject-stage` in
+          globals.css. */
         hasImage && cutout ? (
-          <div class="subject-stage subject-stage--soft">
+          <div
+            class="subject-stage subject-stage--soft"
+            style="--stage-img-w: 30rem; --stage-spread: 1.12"
+          >
             <span class="subject-stage__pool" aria-hidden="true">
               <Topo seed={5} lines={9} />
             </span>

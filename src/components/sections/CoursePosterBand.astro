@@ -54,7 +54,17 @@ const H = poster.height;
 ---
 
 <section class={`cposter relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
-  <div class="cposter__inner">
+  {
+    /* THE CONTENT COLUMN, NOT A COLUMN OF ITS OWN (2026-09-18). This band used
+      to set its own 72rem box inside the page's 82.5rem one, so at 1280 its
+      heading started at x=88 and its picture ran 88 to 1192 while the elevation
+      chart above it and the ticket board below it both ran 24 to 1256. One band
+      indented against both its neighbours is the sort of thing a reader does
+      not consciously see and does feel. Same `max-w-content px-6` every other
+      band uses; the map still is now a full-column object like the map itself
+      on /course. */
+  }
+  <div class="cposter__inner mx-auto w-full max-w-content px-6">
     <div class="cposter__copy">
       {
         /* THE OUTLINED LABEL, NOT A FOURTH EYEBROW (2026-09-17). This band had
@@ -116,12 +126,10 @@ const H = poster.height;
 </section>
 
 <style>
-  .cposter__inner {
-    max-width: 72rem;
-    margin-inline: auto;
-    padding-inline: 1.5rem;
-  }
-
+  /* The width and the gutter come from the utilities on the element now (see
+     the note in the markup). What is left here is the one thing that is this
+     band's own: the intro copy holds a reading measure instead of running the
+     full 1232px, the way the lede under every other heading does. */
   .cposter__copy {
     max-width: 44rem;
     margin-bottom: 1.5rem;

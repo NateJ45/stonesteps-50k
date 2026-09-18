@@ -310,6 +310,26 @@ box in the Studio each year.
 
 ## Known gaps, deliberately open
 
+### 0d. The home page's map still is baked narrower than the band now renders it
+
+2026-09-18 (the one-column pass). `CoursePosterBand` used to set its own 72rem box, so
+the picture rendered 1104px wide at 1280; it now sits on the site's content column and
+renders 1232, and above 1320 it renders 1272. The poster's 1x rung is still the 933px
+`npm run map-poster` baked from a capture whose CSS width was the OLD number, so a
+display at DPR 1 now upscales it by about a third instead of a fifth. Compared side by
+side at 1280 the difference is small (the contour labels are still legible and the route
+is unaffected), which is why this is a gap rather than a bug, and a display at 1.5x or
+above already gets the 1400px rung and is unaffected either way.
+
+Two ways to close it, in order of preference. Re-run `npm run map-poster` (build first),
+which re-captures at the band's real width and rewrites `public/course-poster*.{avif,webp}`
+plus `scripts/data/course-poster.json`; the camera is unchanged, so the picture should be
+the same picture, but it goes through live map tiles and the output is committed, so it
+wants a deliberate look rather than a drive-by re-run. Or switch the `<source>` elements
+from `1x`/`1.5x` descriptors to `w` descriptors with a `sizes` attribute, which would make
+a DPR-1 desktop pick the existing 1400px file at a cost of about 43KB on a lazy,
+below-the-fold image. Nothing is broken until somebody does either.
+
 ### 0c. A field-level "Take me there" focuses the field but does not scroll to it
 
 **Cosmetic, Sanity's own behaviour, low priority.**

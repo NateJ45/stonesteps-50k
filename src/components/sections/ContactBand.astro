@@ -49,7 +49,16 @@ const dateLabel =
 
 <section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
   <div class="mx-auto w-full max-w-content px-6">
-    <div class="grid gap-12 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-start">
+    {
+      /* THE SHARED SPLIT (2026-09-18). 1.35fr/1fr with a 48px gutter put the
+        rail beside this form at x=752, which was the furthest right any seam on
+        the site landed and 32px off the picture in the band below it. The rail
+        is not a picture, but it is the same object as far as the reader's eye
+        is concerned: a second column starting somewhere. It starts where all of
+        them start now. The form loses about 24px of width and gains nothing it
+        needed; its fields were never measure-limited. */
+    }
+    <div class="split lg:items-start">
       <div>
         {
           /* THE LABEL, NOT THE BLAZE (2026-09-17). This band wore the trail

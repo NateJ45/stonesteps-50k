@@ -55,7 +55,13 @@ const ghost = race?.atmosphere?.[0];
           {headline}
         </h2>
 
-        <div class="clip mx-auto mt-14 max-w-[46rem] px-[1.1rem] pt-6 pb-[1.1rem]">
+        {/* THE CLIPBOARD SITS UNDER ITS OWN HEADING (2026-09-18). It was
+          `mx-auto` at every width, so on the home page a 736px board floated in
+          the middle of the page at x=272 with its heading at 24, while the same
+          clipboard on /results/2025 sat at 24 like the record board beside it.
+          `lg:mx-0` puts it on the column's left edge from `lg` up and leaves the
+          phone alone, where a 327px column centres everything anyway. */}
+        <div class="clip mx-auto mt-14 max-w-[46rem] px-[1.1rem] pt-6 pb-[1.1rem] lg:mx-0">
           <div class="clip__clamp" aria-hidden="true" />
           <div class="clip__sheet p-6 sm:p-8">
             <ol class="grid gap-1">

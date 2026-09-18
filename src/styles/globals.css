@@ -1765,6 +1765,59 @@ body::before {
   padding-block: 0.75rem;
 }
 
+/* ---------- One split for every two-column band (2026-09-18) ------------- */
+/* THE SEAM BETWEEN TEXT AND PICTURE IS ONE MEASUREMENT, NOT SIX.
+   Every band on this site that puts words beside a picture used to declare its
+   own grid, and seven components carried five different ones: 1.1fr/0.9fr with a
+   40px gutter on the page header and (mirrored) the course features, two equal
+   halves with a 76.8px gutter on the image-and-text block and the founder block,
+   plain halves with 40 on the parks band, 1.35fr/1fr with 48 on the contact
+   band, 1.15fr/0.85fr with 40 on the punch card. Measured at 1280 that put the
+   seam at 720, 678, 660, 752 and 749 -- close enough that no single band looks
+   wrong and far enough apart that scrolling the page feels like the column keeps
+   shifting under you. That is the complaint this rule answers.
+
+   THE RATIO IS THE PAGE HEADER'S AND THE COURSE FEATURES' (1.1 : 0.9, gutter
+   2.5rem), chosen over the others because those two already agreed with each
+   other, they are the bands that appear on the most pages, and the split is the
+   one that gives prose a comfortable measure (about 65 characters at 1280)
+   while still leaving a picture enough width to be a picture. At 1280 that is a
+   656px text column and a 536px picture column inside the 1232px content
+   column.
+
+   THE PICTURE COLUMN IS ALWAYS THE NARROW ONE, whichever side it is on.
+   `.split` puts the text first, `.split--media-first` mirrors the tracks so the
+   picture leads. The seam therefore lands at exactly one of two numbers (720
+   with the picture on the right, 600 with it on the left) instead of at six,
+   and a band that flips sides is recognisably the same band flipped.
+
+   BELOW `lg` IT IS ONE COLUMN, deliberately at the same breakpoint the rest of
+   the phone pass uses (`.mob-center` and friends are all `width < 64rem`).
+   Two of these bands used to split at `md`, which meant a 768px tablet showed a
+   half-width picture beside three words. Stacking order is left to the
+   component: the bands that lead with their picture keep the picture first in
+   the DOM and flip with `lg:order-*`, so nothing about the phone reading order
+   changes.
+
+   ONE THING TO KNOW BEFORE REACHING FOR A UTILITY ON TOP OF IT. This file is
+   unlayered, and unlayered CSS beats everything Tailwind puts in its own
+   layers, so a `lg:gap-12` on an element that also carries `.split` silently
+   loses to the 2.5rem below. That is the same trap `.mob-center` documents. If
+   a band genuinely needs a different gutter, it does not want this class. */
+.split {
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (width >= 64rem) {
+  .split {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  }
+  .split--media-first {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+}
+
 /* ---------- The section label, at display scale ------------------------- */
 /* An outlined word in the display face, standing in for the 12px eyebrow on
    bands that have room for it. See `labelDisplay` on SectionHeading for why
@@ -2230,8 +2283,64 @@ body::before {
    the time it reaches his chest. */
 .subject-stage__mud {
   --mud-z: 2;
+  /* AND IT KEEPS ITS ARRIVAL INSIDE THE PICTURE (2026-09-18). `mud-land` scales
+     each throw about 7% past its resting size, and at rest these layers are
+     exactly this element's box, so the overshoot lives entirely outside it for
+     the first second. Every band-level mud on the site is already clipped by a
+     wrapper for exactly this reason; this one had got away with it because the
+     stage used to be half a column wide. Once the image-and-text band stacked
+     at 768 instead of splitting there, the stage became the full column and the
+     overshoot reached one pixel past the viewport, which is a horizontal
+     scrollbar and a reflow failure. Clipping the element to itself costs
+     nothing visible: the resting field is unchanged, and the mask above already
+     fades the top half of it away.
+
+     ON THE ELEMENT, NOT ON THE STAGE. The stage must stay unclipped, because
+     from `lg` up the pool of ground reaches past its left edge on purpose. */
+  overflow: hidden;
   -webkit-mask-image: linear-gradient(to bottom, transparent 52%, #000 88%);
   mask-image: linear-gradient(to bottom, transparent 52%, #000 88%);
+}
+
+/* THE SUBJECT STANDS ON THE COLUMN'S EDGE, NOT IN THE MIDDLE OF IT (2026-09-18).
+   A cut-out is narrower than the column it sits in (19rem of race director in a
+   536px column on the home page, 30rem in the same column on /contact), and
+   centring it put the two appearances at x=815 and x=748 while every framed
+   photograph on the site started at the seam. Same object, three left edges.
+   So above `lg` the photograph goes to the start of its column, which is the
+   same 720 the framed pictures use, and the rule that governs every other
+   object on the page governs this one too: things either span the column or sit
+   on its left edge.
+
+   THE POOL TRAVELS WITH HIM. It is absolutely positioned against the stage, so
+   left to itself it would stay centred on a column the photograph no longer
+   fills and he would stand at the edge of his own patch of ground. Instead it
+   is sized from the picture: `--stage-spread` is how much wider the disc is
+   than the photograph (1.9 on the home page, where a 304px cut-out wants a
+   generous pool; about 1.1 on the page header, where the picture nearly fills
+   the column), and the offset re-centres that width on the picture. Both values
+   reproduce the disc each band renders today, so nothing about the artwork
+   changes, only where it is standing.
+
+   THE FOREGROUND MUD IS LEFT ALONE, on purpose. Those marks are the band's
+   ground rather than the subject's, they are already masked to a soft bottom
+   third, and `.mud` is an Astro-scoped rule whose `inset: 0` outranks anything
+   a plain class here could say. See the note on MudField. */
+@media (width >= 64rem) {
+  .subject-stage {
+    justify-content: flex-start;
+  }
+  .subject-stage__pool {
+    /* `min(..., 100%)` because the cap is only reached once the column is wide
+       enough for it: at exactly 1024 the picture column is narrower than the
+       30rem the page header asks for, and without the clamp the disc would be
+       offset by a width the photograph never got. */
+    --stage-img: min(var(--stage-img-w, 100%), 100%);
+    --stage-pool: calc(var(--stage-img) * var(--stage-spread, 1));
+    right: auto;
+    left: calc((var(--stage-img) - var(--stage-pool)) / 2);
+    width: var(--stage-pool);
+  }
 }
 
 /* ---------- Photographs, graded into the palette ------------------------ */

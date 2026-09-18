@@ -69,7 +69,12 @@ const hasImage = Boolean(image?.asset);
 
         <div
           class={
-            hasImage ? 'mt-10 grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]' : 'mt-10'
+            // THE SHARED SPLIT (2026-09-18). The 0.9fr/1.1fr this band declared
+            // inline is the ratio the whole site now uses, mirrored because the
+            // picture leads here; it says so through `.split--media-first` in
+            // globals.css instead of keeping a private copy of the numbers.
+            // Nothing moves: the same two tracks, the same 2.5rem gutter.
+            hasImage ? 'split split--media-first mt-10' : 'mt-10'
           }
         >
           {hasImage && (

@@ -85,11 +85,26 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
       </div>
     )
   }
+  {
+    /* THE SHARED SPLIT (2026-09-18). This band used to cut the content column
+      into two equal halves with a 76.8px gutter and to do it at `md`, which is
+      neither of the two things the rest of the site does. It now takes `.split`
+      from globals.css: the picture always gets the narrow track and the words
+      the wide one, so the seam here lands where it lands on the page header and
+      the course features instead of 42px to the left of them.
+
+      THE PICTURE STAYS FIRST IN THE DOM whichever side it is shown on, and the
+      side is chosen with `lg:order-*`, so the stacked reading order on a phone
+      (picture, then words) is exactly what it was. */
+  }
   <div
-    class="mx-auto grid max-w-content grid-cols-1 items-center gap-l px-6 py-section-lg md:grid-cols-2 md:gap-section-md"
+    class:list={[
+      'split mx-auto max-w-content items-center px-6 py-section-lg',
+      imageFirst && 'split--media-first',
+    ]}
     data-reveal
   >
-    <div class:list={[imageFirst ? 'md:order-1' : 'md:order-2']}>
+    <div class:list={[imageFirst ? 'lg:order-1' : 'lg:order-2']}>
       {
         localPoster === 'region' ? (
           <RegionPoster bandBg={surface} />
@@ -110,7 +125,14 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
             // so the band reserved nothing and jumped when the picture arrived.
             // Capping the width instead lets the intrinsic aspect ratio hold
             // the space open. Same rendered size, no shift.
-            <div class="subject-stage">
+            // THE TWO CUSTOM PROPERTIES (2026-09-18) put him on the left edge
+            // of his column, where every other object on the page starts, and
+            // take the pool of ground with him rather than leaving it centred
+            // on a column he no longer fills. `--stage-img-w` repeats the cap
+            // on the picture below and `--stage-spread` is how much wider the
+            // disc is than the picture: 577 over 304, about 1.9, which is the
+            // disc this band already drew. Full argument on `.subject-stage`.
+            <div class="subject-stage" style="--stage-img-w: 19rem; --stage-spread: 1.9">
               <span class="subject-stage__pool" aria-hidden="true">
                 <Topo seed={5} lines={9} />
               </span>
@@ -142,7 +164,7 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
       }
     </div>
 
-    <div class:list={['label-column', imageFirst ? 'md:order-2' : 'md:order-1']}>
+    <div class:list={['label-column', imageFirst ? 'lg:order-2' : 'lg:order-1']}>
       {
         /* THE OUTLINED LABEL, NOT SMALL CAPS (2026-09-17). This band drew the
           generic starter's eyebrow: 12px tracked caps, its own copy of the

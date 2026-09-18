@@ -72,7 +72,14 @@ const {
           {headline}
         </h2>
 
-        <div class="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-start">
+        {/* THE SHARED SPLIT (2026-09-18). 1.15fr/0.85fr is within a few pixels
+          of the site's shared ratio and was still enough to put this band's
+          second column at x=749 while the page header above it started its own
+          at 720. A reader scrolling one page does not measure the difference,
+          they just feel the column moving. `.split` is the one definition now;
+          the punch card itself is capped at 38rem and sits at the column's left
+          edge either way, so only the aside beside it moves. */}
+        <div class="split mt-12 lg:items-start">
           <div class="punch mob-left mx-auto w-full max-w-[38rem] p-5 sm:p-8 lg:mx-0" data-reveal>
             <div
               class="punch__rows"
