@@ -32,9 +32,13 @@ name: Import race results
 #
 # ── THE SCHEDULE ────────────────────────────────────────────────────────────
 # Daily through October and November, which covers the race (late October) and
-# the weeks after it when a timer might correct a row. The rest of the year it
-# runs only when someone asks. GitHub's scheduler is best-effort and can be
-# late by tens of minutes under load; nothing here is time-critical.
+# the weeks after it when a timer might correct a row, and every Monday the
+# rest of the year. The weekly run is the answer to "what if RunSignUp takes a
+# few weeks to post results" (Nathan, 2026-09-18): without it a December
+# posting would sit unimported until the next October. A run that finds
+# nothing costs a minute and deploys nothing. GitHub's scheduler is
+# best-effort and can be late by tens of minutes under load; nothing here is
+# time-critical.
 #
 # ── THE DEPLOY IS CONDITIONAL, AND IMPERFECTLY SO ───────────────────────────
 # The site is statically built, so imported results are invisible until it is
@@ -61,6 +65,7 @@ name: Import race results
 on:
   schedule:
     - cron: '0 9 * 10,11 *' # daily 09:00 UTC, October and November
+    - cron: '0 9 * * 1' # every Monday 09:00 UTC, the rest of the year
   workflow_dispatch:
     inputs:
       year:
