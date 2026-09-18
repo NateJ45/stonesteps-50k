@@ -67,7 +67,17 @@ const lastReviewed = 'September 2026';
     headingId="privacy-heading"
   />
 
-  <section class="bg-paper py-xl">
+  {
+    /*
+    py-section-lg, NOT py-xl. This site renamed its two big spacing tokens
+    (globals.css: "--spacing-section-md: ... was --spacing-xl"), so the starter's
+    py-xl is a class that does not exist here. Tailwind emits nothing for an
+    undefined utility rather than complaining, so the section shipped with
+    literally 0px of padding and the last paragraph sat flush against the
+    footer. py-section-lg is what all 32 of this site's other section bands use.
+  */
+  }
+  <section class="bg-paper py-section-lg">
     {
       /*
       Container copied from Hero.astro deliberately: mx-auto max-w-content px-m
