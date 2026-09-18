@@ -4,12 +4,12 @@
 // Foundation, edit with care. Registered in index.ts, pinned as a singleton in
 // structure.ts and in the SINGLETON_TYPES set in sanity.config.ts.
 //
-// PROVENANCE: every field below that has a verified source names it in its own
-// description, so an editor can see at a glance which values came from the
-// race's RunSignUp listing and which someone typed. Anything the race does not
-// publish anywhere carries the shared `confirmed` flag instead (see
-// _confirmedField.ts) and renders behind a visible "Not confirmed" marker until
-// a human ticks the box.
+// PROVENANCE: where a value has a verified source, the source is recorded in a
+// `//` comment above the field, for maintainers. Field descriptions are for the
+// editor typing into the box, so they stay instructional and carry no dates,
+// names or sourcing. Anything the race does not publish anywhere carries the
+// shared `confirmed` flag instead (see _confirmedField.ts) and renders behind a
+// visible "Not confirmed" marker until a human ticks the box.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
 import { confirmedField } from './_confirmedField';
@@ -44,24 +44,27 @@ export const race = defineType({
         canvasApp: { purpose: 'A short, plain claim about the race. No marketing adjectives.' },
       },
     }),
+    // The 2026 race is the 24th running, confirmed by David Corfman. Count it off
+    // the archive rather than the RunSignUp blurb: /results holds 2003 through 2025
+    // with no year missed, so 2026 is the 24th. The RunSignUp listing still says 23rd.
     defineField({
       name: 'editionNumber',
       title: 'Which edition is this?',
       type: 'number',
       group: 'basics',
       description:
-        'The 2026 race is the 24th running, confirmed by David Corfman. Count it off the ' +
-        'archive rather than the RunSignUp blurb: /results holds 2003 through 2025 with no ' +
-        'year missed, so 2026 is the 24th. The RunSignUp listing still says 23rd.',
+        'Which running of the race this is, as a number. Shown as an ordinal on the site, ' +
+        'for example 24 becomes 24th.',
     }),
+    // Verified from RunSignUp: 25 October 2026, 8:00 am. Also feeds the schema.org
+    // SportsEvent startDate.
     defineField({
       name: 'raceDate',
       title: 'Race day',
       type: 'datetime',
       group: 'basics',
       description:
-        'Start of the first event, in local time. Drives the countdown clock and the ' +
-        'schema.org SportsEvent startDate. Verified from RunSignUp: 25 October 2026, 8:00 am.',
+        'Start of the first event, in local time. Drives the countdown clock on the home page.',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -76,14 +79,16 @@ export const race = defineType({
       title: 'Start and finish area',
       type: 'string',
       group: 'where',
-      description: 'Verified: The Oval, Area 13.',
+      // Verified: The Oval, Area 13.
+      description: 'The spot inside the venue where runners start and finish, named as a place.',
     }),
+    // Verified from RunSignUp: 5083 Colerain Ave.
     defineField({
       name: 'streetAddress',
       title: 'Street address',
       type: 'string',
       group: 'where',
-      description: 'Verified from RunSignUp: 5083 Colerain Ave.',
+      description: 'Street address of the venue, with no city or ZIP.',
     }),
     defineField({ name: 'city', title: 'City', type: 'string', group: 'where' }),
     defineField({ name: 'region', title: 'State', type: 'string', group: 'where' }),
@@ -93,7 +98,8 @@ export const race = defineType({
       title: 'Coordinates',
       type: 'geopoint',
       group: 'where',
-      description: 'Drives the JSON-LD location. Verified from RunSignUp: 39.17275, -84.568806.',
+      // Verified from RunSignUp: 39.17275, -84.568806. Drives the JSON-LD location.
+      description: 'Drop a pin on the start area. Feeds the map data search engines read.',
     }),
     // ATMOSPHERE PHOTOGRAPHS. Not illustrations of anything: these are laid
     // into the OUTER MARGIN of a band, faint and faded off at the edges, so a
@@ -104,9 +110,8 @@ export const race = defineType({
       name: 'atmosphere',
       title: 'Atmosphere photographs',
       description:
-        'Race photographs used very faintly behind the wide margins of some bands. ' +
-        'They are decoration, not content: nothing here is announced to a screen ' +
-        'reader, and nothing about the page depends on them. Two or three is plenty.',
+        'Race photographs shown very faintly behind the wide margins of some bands. ' +
+        'Decoration only, no captions needed. Two or three is plenty.',
       type: 'array',
       group: 'where',
       validation: (Rule) => Rule.max(4),
@@ -139,20 +144,21 @@ export const race = defineType({
       title: 'Course GPX file',
       type: 'url',
       group: 'links',
+      // While this is blank the elevation profile labels its own shape as illustrative.
       description:
-        'A real surveyed GPX track, offered to entrants as a download. Leave blank ' +
-        'until one exists: the elevation profile says out loud that its shape is ' +
-        'illustrative whenever this is empty.',
+        'Link to a surveyed GPX track for entrants to download. Leave blank until one exists.',
     }),
     defineField({
       name: 'elevationProfile',
       title: 'Elevation profile (measured)',
       type: 'object',
       group: 'links',
+      // Written by scripts/build-elevation.mjs from a real GPS track, never typed by
+      // hand. While it is empty the site draws a SYNTHETIC profile that says so in its
+      // own caption. Filling it in is what makes the profile a measurement.
       description:
-        'Written by scripts/build-elevation.mjs from a real GPS track, not typed by hand. ' +
-        'While this is empty the site draws a SYNTHETIC profile that says so in its own ' +
-        'caption. Filling it in is what makes the profile a measurement.',
+        'Filled in by a build script from a GPS track. Leave it alone: nothing here is ' +
+        'meant to be typed by hand.',
       options: { collapsible: true, collapsed: true, canvasApp: { exclude: true } },
       fields: [
         defineField({ name: 'source', title: 'Where the data came from', type: 'string' }),
@@ -165,9 +171,9 @@ export const race = defineType({
           title: 'Aid station mile marks',
           type: 'array',
           of: [defineArrayMember({ type: 'number' })],
+          // Derived from the track by the script, not typed.
           description:
-            'Where the track came back through the start, in miles. Drives the aid verticals ' +
-            'on the chart. Derived from the track by the script, not typed.',
+            'Where the track passes the start, in miles. Draws the aid station lines on the chart.',
         }),
         defineField({ name: 'lowFt', title: 'Lowest point (ft)', type: 'number' }),
         defineField({ name: 'highFt', title: 'Highest point (ft)', type: 'number' }),
@@ -197,9 +203,11 @@ export const race = defineType({
       title: 'Entry fee tiers',
       type: 'array',
       group: 'entry',
+      // Verified from the RunSignUp registration periods: $35 through Jan 31, $50
+      // through Sep 30, $60 to race day. Also feeds the JSON-LD offers.
       description:
-        'In date order. Verified from the RunSignUp registration periods: $35 through ' +
-        'Jan 31, $50 through Sep 30, $60 to race day. Also feeds the JSON-LD offers.',
+        'One entry per price, in date order, cheapest first. Each needs a label, an amount, ' +
+        'and the date it ends.',
       of: [
         defineArrayMember({
           type: 'object',

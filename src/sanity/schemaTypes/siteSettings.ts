@@ -55,11 +55,10 @@ export const siteSettings = defineType({
       name: 'email',
       title: 'Public email (optional)',
       type: 'string',
-      description:
-        'Shown in the footer and the phone menu. Leave it blank and neither shows one: ' +
-        "the contact form and the Facebook group are this race's ways in. It was REQUIRED " +
-        'until 2026-09-12, which put a permanent error on this document for an inbox the ' +
-        'race does not publish.',
+      // Not required: it was, which put a permanent validation error on this document
+      // for an inbox the race does not publish (2026-09-12). The contact form and the
+      // Facebook group are this race's ways in.
+      description: 'Shown in the footer and the phone menu. Leave it blank and neither shows one.',
       validation: (Rule) =>
         Rule.regex(/.+@.+\..+/, { name: 'email', invert: false }).warning(
           'That does not look like an email address.',
@@ -331,7 +330,8 @@ export const siteSettings = defineType({
       title: 'Availability status',
       type: 'string',
       description:
-        'Short status next to the green dot on the Contact page. Examples: "Accepting new clients" / "Booking for Fall 2026" / "Currently booked, accepting waitlist".',
+        'Short status next to the green dot on the Contact page. Examples: "Accepting new ' +
+        'entries" or "Waitlist only".',
       // HIDDEN AND REQUIRED IS A BLOCKER NOBODY CAN CLEAR. Sanity validates the
       // document rather than the form, so each of the starter's hidden identity
       // fields was failing validation invisibly (2026-09-12). The rule goes; the

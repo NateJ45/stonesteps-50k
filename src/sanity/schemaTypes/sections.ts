@@ -210,11 +210,12 @@ export const imageTextSection = defineType({
       title: 'The image is a cut-out',
       type: 'boolean',
       initialValue: false,
+      // It drops the frame, the rounded corners and the colour wash, so the subject
+      // stands on the page instead of sitting in a box with an invisible rectangle
+      // around it.
       description:
         'On for a subject on a transparent background, like a person cut out of their ' +
-        'photo. It drops the frame, the rounded corners and the colour wash, so the ' +
-        'subject stands on the page instead of sitting in a box with an invisible ' +
-        'rectangle around it. Leave off for an ordinary photograph.',
+        'photo. Leave off for an ordinary photograph.',
     }),
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
     defineField({ name: 'heading', title: 'Heading', type: 'string' }),

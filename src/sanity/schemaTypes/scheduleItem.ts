@@ -29,10 +29,10 @@ export const scheduleItem = defineType({
       name: 'time',
       title: 'Time',
       type: 'string',
+      // A blank time with the confirmed box unticked reads as "to be confirmed" on the
+      // page, which is better than inventing a plausible hour.
       description:
-        'As it should read, for example "8:00 am". Leave blank while unknown: a blank ' +
-        'time with the confirmed box unticked reads as "to be confirmed" rather than ' +
-        'inventing a plausible hour.',
+        'As it should read, for example "8:00 am". Leave blank while the time is unknown.',
     }),
     defineField({
       name: 'detail',

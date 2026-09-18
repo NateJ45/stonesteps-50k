@@ -90,6 +90,7 @@ Added 2026-08-28 (PORTS.md cards 10, 11 and 17). Editors see their **unpublished
 10. **The reserved-slug guard lives inside `getStaticPaths` in `[slug].astro`,** not at module scope. This is an Astro isolated-scope requirement; shared list is in `src/lib/reservedSlugs.ts`. If you move the guard outside `getStaticPaths`, it silently stops working.
 11. **`apply-brand` does not install font packages.** Run `npm install @fontsource/...` for the chosen fonts before running `npm run apply-brand`. The script rewrites imports and tokens but cannot install packages itself.
 12. **After `apply-brand`, run `npm run build`** to verify the reskin did not break anything. The brand script does not run the build chain and does not change schemas, so typegen is not needed here unless you also changed a schema in the same session.
+13. **A field `description` is instructions for the editor typing into that box** (what to put, what format, where it shows, what a blank does, in one or two sentences under ~140 characters), never dates, names, provenance, file paths or the argument for why the field exists: that knowledge goes in a `//` comment above the `defineField(`.
 
 ---
 

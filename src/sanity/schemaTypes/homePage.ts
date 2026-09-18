@@ -169,7 +169,8 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'On the first visit per session, the FIRST word of the headline cycles through this list once before locking back to the original. Leave empty (or with fewer than 2 alternates) to skip the effect. Example: ["Lived-in", "Considered", "Quiet"]. Honors prefers-reduced-motion.',
+        'On the first visit, the first word of the headline cycles through this list once, ' +
+        'then settles back. Needs at least two entries. Leave empty to skip the effect.',
       of: [defineArrayMember({ type: 'string' })],
     }),
     defineField({
@@ -180,7 +181,8 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'A single word from the headline to render in the handwritten script accent font for editorial flourish. Must match the word exactly (case-sensitive). The first occurrence wins. Leave blank to skip. Note: when "rotating words" is also set, the rotation wins and this is ignored.',
+        'A single word from the headline, set in the handwritten script font. Must match ' +
+        'the word exactly, including case. Ignored when "rotating words" is set.',
     }),
 
     // Meet the Founder (legacy — hidden for rollback safety)
@@ -276,7 +278,8 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Conversion-oriented paragraph under the headline. Tell visitors what a click reveals — the brief, the design thinking, the result — so the section sells the case-study depth, not just the photos.',
+        'A paragraph under the headline. Tell visitors what a click reveals: the brief, ' +
+        'the design thinking, the result.',
       initialValue:
         'A look at recent projects. Each one starts with a conversation about how the space actually needs to function, then the design follows from there. Open any project to see the brief, the design call, and exactly how the room came together.',
     }),
@@ -317,7 +320,8 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Conversion-oriented paragraph under the headline. Hint at the kinds of posts the founder writes — project walkthroughs, source roundups, design moves — so the section reads as the thinking behind every consultation, not just a blog.',
+        'A paragraph under the headline. Hint at the kinds of posts there are: project ' +
+        'walkthroughs, source roundups, design moves.',
       initialValue:
         'Posts on the design moves that change a room, source roundups behind specific projects, and the occasional honest note about what I would do differently. The thinking that informs every consultation.',
     }),
@@ -356,8 +360,7 @@ export const homePage = defineType({
       group: 'process',
       hidden: true,
       readOnly: true,
-      description:
-        'Reassuring line under the headline. Lower the friction of reaching out — emphasize clarity, no pressure, knowing what comes next.',
+      description: 'Reassuring line under the headline. Aim for clarity and no pressure.',
       initialValue:
         'No guesswork and no pressure. From our first conversation to the day everything comes together, you will always know exactly where things stand and what happens next.',
     }),
@@ -418,7 +421,8 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Warm line under the headline that frames the testimonials below. Focus on what clients value — how it felt to work together, how the space lives day to day.',
+        'Warm line under the headline that frames the testimonials below. Focus on what ' +
+        'clients value.',
       initialValue:
         'The part that matters most: how it felt to work together, and how each space holds up to everyday life long after the last pillow is placed.',
     }),

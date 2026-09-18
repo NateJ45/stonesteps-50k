@@ -131,7 +131,8 @@ export const contactPage = defineType({
       type: 'array',
       group: 'form',
       description:
-        'Budget brackets shown on the form. The wording matters — keep the "Not sure yet" option so the form stays approachable. Leave blank to use the built-in defaults.',
+        'Budget brackets shown on the form. Keep a "Not sure yet" option so the form ' +
+        'stays approachable. Leave blank to use the built-in defaults.',
       of: [defineArrayMember({ type: 'string' })],
     }),
     defineField({
@@ -149,7 +150,8 @@ export const contactPage = defineType({
       type: 'array',
       group: 'form',
       description:
-        'Optional lead-source dropdown options. Useful for understanding where good leads come from over time. Leave blank to use the built-in defaults (Google, Instagram, Facebook, Houzz, referrals, journal, project in person, Other).',
+        'Options for the "How did you hear about us?" dropdown, one per entry. Leave blank ' +
+        'to use the built-in defaults.',
       of: [defineArrayMember({ type: 'string' })],
     }),
     // Editor-defined questions. Leave this empty and the contact form is
@@ -208,7 +210,8 @@ export const contactPage = defineType({
       type: 'array',
       group: 'form',
       description:
-        'Numbered "what happens after you reach out" steps — the scannable version of the What to Expect content. Each step shows as a numbered item on the Contact page.',
+        'Numbered "what happens after you reach out" steps. Each one shows as a numbered ' +
+        'item on the Contact page.',
       of: [
         defineArrayMember({
           type: 'object',

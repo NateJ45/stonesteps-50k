@@ -42,7 +42,7 @@ export const processStep = defineType({
       type: 'array',
       of: [{ type: 'string' }],
       description:
-        'Short bullet points — what the client gets or what happens. Keep to 3 to 5 items.',
+        'Short bullet points: what the client gets, or what happens. Keep to 3 to 5 items.',
     }),
     defineField({
       name: 'tierNote',

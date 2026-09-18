@@ -23,8 +23,7 @@ export const faqCategory = defineType({
       name: 'slug',
       title: 'Slug (optional)',
       type: 'slug',
-      description:
-        'URL-friendly identifier. Optional — used if you ever need to deep-link to a category.',
+      description: 'URL-friendly identifier. Optional, for deep-linking to a category.',
       options: { source: 'title', maxLength: 96 },
     }),
     defineField({
