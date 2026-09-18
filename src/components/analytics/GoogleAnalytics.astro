@@ -1,0 +1,65 @@
+---
+/* ============================================================================
+   Google Analytics 4 (gtag.js), loaded after the page is idle
+   ============================================================================
+   Foundation, edit with care.
+
+   Ported from nixoncreativestudio, which carries the canonical version of this
+   component. Keep the two in step.
+
+   WHY IT IS NOT THE SNIPPET GOOGLE HANDS YOU. Google's copy-paste block is
+   `<script async src=".../gtag/js?id=...">` in the head, which puts ~100KB of
+   third-party JavaScript in front of the render. This repo gates LCP as a HARD
+   error at 4500ms and the home page has already failed that gate for smaller
+   reasons (see lighthouserc.json's notes). So the dataLayer + gtag() stub are
+   defined immediately, and the library itself is fetched AFTER the load event,
+   at idle. Anything that calls gtag() before it arrives is queued, not lost.
+
+   Nothing about page views changes: GA4 records the view when the script
+   arrives, a second or so later.
+
+   Building the <script> element at runtime rather than printing a literal tag
+   also means Cloudflare Zaraz cannot silently swallow the call if a Zaraz tool
+   is ever enabled on this zone. Zaraz rewrites literal googletagmanager tags in
+   the HTML and, when it breaks, drops them with no error anywhere. There is no
+   Zaraz on stonesteps50k.com today; this is the cheap insurance, and it is why
+   two other sites in this family lost weeks of data.
+
+   Rendered by BaseLayout only when PUBLIC_GA_ID looks like a real Measurement
+   ID. Its own component because prettier-plugin-astro cannot parse a <script>
+   nested inside a template expression; BaseLayout keeps the condition and this
+   file keeps the script at the top level.
+   ============================================================================ */
+
+interface Props {
+  /** The GA4 web data stream Measurement ID (G-XXXXXXXXXX). */
+  gaId: string;
+}
+const { gaId } = Astro.props;
+---
+
+<script is:inline define:vars={{ gaId }}>
+  window.dataLayer = window.dataLayer || [];
+  // gtag.js requires a real `arguments` object here (it type-checks it), so
+  // rest parameters would silently break every queued call.
+  function gtag() {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer.push(arguments);
+  }
+  window.gtag = gtag;
+  gtag('js', new Date());
+  gtag('config', gaId);
+
+  function loadGa() {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(gaId);
+    document.head.appendChild(s);
+  }
+  function whenIdle() {
+    if ('requestIdleCallback' in window) requestIdleCallback(loadGa, { timeout: 4000 });
+    else setTimeout(loadGa, 500);
+  }
+  if (document.readyState === 'complete') whenIdle();
+  else window.addEventListener('load', whenIdle, { once: true });
+</script>

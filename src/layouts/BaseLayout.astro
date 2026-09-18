@@ -23,6 +23,7 @@ import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import BackToTop from '@/components/BackToTop';
 import { Toaster } from '@/components/ui/sonner';
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics.astro';
 import '@/styles/globals.css';
 // Starwind UI CSS — accordion keyframes + @theme inline for new semantic tokens.
 // Imported AFTER globals.css so the brand :root declarations in globals.css win
@@ -118,6 +119,25 @@ const allSchemas = siteSettings ? [localBusinessSchema(siteSettings), ...schemas
 
 // Cloudflare Web Analytics token — only render the beacon when present.
 const cfToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
+
+// Google Analytics 4. PUBLIC_GA_ID is the web data stream's Measurement ID
+// (G-XXXXXXXXXX), NOT the numeric property id. Empty means no GA4 at all, the
+// same way an absent token means no Cloudflare beacon.
+//
+// Deliberately supplied only by the PRODUCTION deploy (deploy.yml passes
+// `vars.PUBLIC_GA_ID`; deploy-staging.yml, ci.yml and lighthouse.yml do not),
+// so staging builds and CI runs cannot post hits against the real property.
+// That is also why the Lighthouse gate never measures this tag: an audit that
+// loaded it would file ~18 localhost page views per run into the live data,
+// and the tag is fetched after the load event anyway, outside LCP by
+// construction.
+//
+// The property (552910285) recorded nothing between 2026-09-18, when the
+// domain moved off WordPress to this Worker, and the day this shipped: the
+// gtag snippet lived in the WordPress install and a rebuild does not inherit
+// it. nixoncreativestudio lost six months the same way in 2026-06.
+const gaId = (import.meta.env.PUBLIC_GA_ID ?? '').trim();
+const hasGa = /^G-[A-Z0-9]+$/.test(gaId);
 
 // Optional site-wide announcement banner (Announcement collection in Sanity).
 // Fetched here once so every page gets it without each page running its own
@@ -296,6 +316,9 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
         data-cf-beacon={`{"token": "${cfToken}"}`}
       ></script>
     )}
+
+    {/* Google Analytics 4 — conditional, loaded at idle. See the component. */}
+    {hasGa && <GoogleAnalytics gaId={gaId} />}
 
     <ClientRouter />
 

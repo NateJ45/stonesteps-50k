@@ -122,6 +122,11 @@ jobs:
           # deploy, so treat a missing variable here as a real problem.
           PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
           PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+          # GA4, and ONLY here. deploy-staging.yml, ci.yml and lighthouse.yml
+          # build without it on purpose, so nothing but the real site can post
+          # hits against the live property. An empty value is a no-op, not a
+          # failure: the tag is simply omitted.
+          PUBLIC_GA_ID: ${{ vars.PUBLIC_GA_ID }}
         run: |
           if [ -z "$PUBLIC_SANITY_PROJECT_ID" ]; then
             echo "::error::PUBLIC_SANITY_PROJECT_ID is not set. The build would ship empty pages over the live site."
