@@ -214,7 +214,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       "items": *[_type == "scheduleItem"] | order(orderRank asc){
         _id, label, time, detail, confirmed
       },
-      "race": *[_type == "race"][0]{ atmosphere[]${IMAGE_PROJECTION} }
+      "race": *[_type == "race"][0]{ atmosphere[]${IMAGE_PROJECTION}, geo, parkingNote }
     },
     _type == "courseFeaturesSection" => {
       ...,
@@ -262,7 +262,8 @@ export function sectionsProjection(field = 'pageBuilder'): string {
     _type == "contactSection" => {
       ...,
       "race": *[_type == "race"][0]{
-        directorName, directorNote, facebookUrl, venue, startArea, city, region, raceDate
+        directorName, directorNote, facebookUrl, venue, startArea, city, region, raceDate,
+        geo, parkingNote
       }
     },
     _type == "sponsorPatchesSection" => {

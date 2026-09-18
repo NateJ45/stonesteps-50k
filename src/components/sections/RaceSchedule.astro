@@ -15,6 +15,8 @@
 
 import type { ProjectedRaceScheduleSection } from '@/lib/pageBuilder.types';
 import GhostPhoto from '@/components/race/GhostPhoto.astro';
+import { directionsUrl } from '@/lib/directions';
+import { externalLinkAttrs } from '@/lib/links';
 
 type Props = {
   eyebrow?: string;
@@ -35,6 +37,10 @@ const {
 // Atmosphere sits in the LEFT margin here and in the right margin on the
 // records board, so two bands on one page never mirror each other.
 const ghost = race?.atmosphere?.[0];
+// The parking line and the directions link live under the clipboard: the
+// schedule is where race morning gets planned, and "where do I park" is the
+// question that follows "when do I need to be there". Both come from The Race.
+const directions = directionsUrl(race?.geo);
 ---
 
 {
@@ -83,6 +89,21 @@ const ghost = race?.atmosphere?.[0];
             </ol>
           </div>
         </div>
+        {(race?.parkingNote || directions) && (
+          <p class="mob-center mt-4 max-w-[46rem] text-sm text-muted-foreground lg:text-left">
+            {race?.parkingNote}
+            {race?.parkingNote && directions && ' '}
+            {directions && (
+              <a
+                class="text-link underline underline-offset-2"
+                href={directions}
+                {...externalLinkAttrs(directions)}
+              >
+                Get directions to The Oval
+              </a>
+            )}
+          </p>
+        )}
       </div>
     </section>
   )

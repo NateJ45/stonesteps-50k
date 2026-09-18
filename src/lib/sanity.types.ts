@@ -501,6 +501,7 @@ export type Race = {
   region?: string;
   postalCode?: string;
   geo?: Geopoint;
+  parkingNote?: string;
   atmosphere?: Array<{
     asset?: SanityImageAssetReference;
     media?: unknown;

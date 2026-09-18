@@ -12,6 +12,7 @@
 import RaceContactForm from '@/components/RaceContactForm';
 import type { ProjectedContactSection } from '@/lib/pageBuilder.types';
 import { externalLinkAttrs } from '@/lib/links';
+import { directionsUrl } from '@/lib/directions';
 
 type Props = {
   eyebrow?: string;
@@ -129,6 +130,20 @@ const dateLabel =
                 {[race.city, race.region].filter(Boolean).join(', ')}
               </p>
               {dateLabel && <p class="mt-2 text-sm text-muted-foreground">{dateLabel}</p>}
+              {/* Directions from the pin, and the parking note beneath, because the
+                  person reading the start line is the person about to drive there. */}
+              {directionsUrl(race.geo) && (
+                <a
+                  class="mt-3 inline-block text-sm text-link underline underline-offset-2"
+                  href={directionsUrl(race.geo)!}
+                  {...externalLinkAttrs(directionsUrl(race.geo)!)}
+                >
+                  Get directions
+                </a>
+              )}
+              {race.parkingNote && (
+                <p class="mt-3 text-sm text-muted-foreground">{race.parkingNote}</p>
+              )}
             </div>
           )
         }

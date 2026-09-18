@@ -518,7 +518,11 @@ export interface ProjectedRaceScheduleSection {
     detail?: string;
     confirmed?: boolean;
   }[];
-  race?: { atmosphere?: ProjectedImage[] } | null;
+  race?: {
+    atmosphere?: ProjectedImage[];
+    geo?: { lat?: number; lng?: number } | null;
+    parkingNote?: string;
+  } | null;
 }
 
 export interface ProjectedCourseFeaturesSection {
@@ -623,6 +627,8 @@ export interface ProjectedContactSection {
     city?: string;
     region?: string;
     raceDate?: string;
+    geo?: { lat?: number; lng?: number } | null;
+    parkingNote?: string;
   } | null;
 }
 
