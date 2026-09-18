@@ -16,6 +16,9 @@ export const RESERVED_SLUGS = new Set([
   '_astro',
   'results',
   'runners',
+  // The privacy policy is a code page on purpose (see src/pages/privacy.astro),
+  // so a custom Sanity page called "privacy" must not be able to shadow it.
+  'privacy',
   // The fixed-data wall the visual-regression suite shoots.
   'styleguide',
   // Mounted routes rather than pages, but a custom page at any of these would

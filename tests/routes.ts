@@ -30,6 +30,10 @@ export const routes: string[] = [
   // same thing 22 times.
   '/results',
   '/results/2025',
+  // A code page rather than a Sanity document, because it describes what the
+  // software does and has to change with it. Listed so axe and the reflow
+  // checks cover it like any other page a visitor can reach from the footer.
+  '/privacy',
 ];
 
 /**

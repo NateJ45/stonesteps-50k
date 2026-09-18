@@ -117,12 +117,19 @@ const fullTitle = cleanTitle === site.name || hasBrandInline
 // Pages can still pass their own additional schemas (Service, FAQPage, BreadcrumbList).
 const allSchemas = siteSettings ? [localBusinessSchema(siteSettings), ...schemas] : schemas;
 
-// Cloudflare Web Analytics token — only render the beacon when present.
-const cfToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
+// Which analytics this build ships. The two booleans come from
+// src/lib/analytics-config.ts rather than being read here, so that /privacy can
+// describe exactly what this file renders without restating the conditions.
+// A privacy page that hand-maintains its own copy of these tests will
+// eventually tell visitors the opposite of what the site is doing, which is the
+// near-miss written up in that module and in PORTS.md card 54.
+import { cfAnalyticsToken as cfToken, gaId, hasCfAnalytics, hasGa } from '@/lib/analytics-config';
 
-// Google Analytics 4. PUBLIC_GA_ID is the web data stream's Measurement ID
-// (G-XXXXXXXXXX), NOT the numeric property id. Empty means no GA4 at all, the
-// same way an absent token means no Cloudflare beacon.
+// Notes on the two values, kept here because this is where they are used.
+//
+// PUBLIC_GA_ID is the web data stream's Measurement ID (G-XXXXXXXXXX), NOT the
+// numeric property id. Empty means no GA4 at all, the same way an absent token
+// means no Cloudflare beacon.
 //
 // Deliberately supplied only by the PRODUCTION deploy (deploy.yml passes
 // `vars.PUBLIC_GA_ID`; deploy-staging.yml, ci.yml and lighthouse.yml do not),
@@ -136,8 +143,10 @@ const cfToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 // domain moved off WordPress to this Worker, and the day this shipped: the
 // gtag snippet lived in the WordPress install and a rebuild does not inherit
 // it. nixoncreativestudio lost six months the same way in 2026-06.
-const gaId = (import.meta.env.PUBLIC_GA_ID ?? '').trim();
-const hasGa = /^G-[A-Z0-9]+$/.test(gaId);
+//
+// GA4 sets first-party _ga cookies, unlike the Cloudflare beacon, which is why
+// this site now has a /privacy route. Google's own Analytics terms require a
+// policy disclosing the use of Analytics and of cookies.
 
 // Optional site-wide announcement banner (Announcement collection in Sanity).
 // Fetched here once so every page gets it without each page running its own
@@ -309,7 +318,7 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     </script>
 
     {/* Cloudflare Web Analytics — conditional, no cookie banner needed. */}
-    {cfToken && (
+    {hasCfAnalytics && (
       <script
         defer
         src="https://static.cloudflareinsights.com/beacon.min.js"
