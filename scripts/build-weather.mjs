@@ -20,55 +20,29 @@
 //
 // Re-run when race-days.json changes: `node scripts/build-weather.mjs`. Commit
 // the output. Idempotent for a given input.
+//
+// THIS IS THE FULL RE-BAKE. The yearly addition is automatic and lives in
+// scripts/weather-sync.mjs, which fetches only the year that is missing and
+// runs in the deploy and the results import; see that file and the raceDay
+// document type. The fetch itself is shared in scripts/lib/weather.mjs.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fetchRaceDayWeather, describe } from './lib/weather.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
-
-const LAT = 39.17275;
-const LNG = -84.568806;
-const TZ = 'America/New_York';
 
 const days = JSON.parse(readFileSync(resolve(root, 'scripts/data/race-days.json'), 'utf8'))
   .filter((d) => d && d.year && d.date)
   .sort((a, b) => a.year - b.year);
 
-const prevDay = (iso) => {
-  const d = new Date(iso + 'T12:00:00Z');
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d.toISOString().slice(0, 10);
-};
-
 const out = [];
-for (const { year, date } of days) {
-  const start = prevDay(date);
-  const url =
-    `https://archive-api.open-meteo.com/v1/archive?latitude=${LAT}&longitude=${LNG}` +
-    `&start_date=${start}&end_date=${date}` +
-    `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code` +
-    `&hourly=temperature_2m&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=${encodeURIComponent(TZ)}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${year}: ${res.status} ${await res.text()}`);
-  const j = await res.json();
-  const i = j.daily.time.indexOf(date);
-  if (i < 0) throw new Error(`${year}: no daily row for ${date}`);
-  const h8 = j.hourly.time.indexOf(`${date}T08:00`);
-  out.push({
-    year,
-    date,
-    high: Math.round(j.daily.temperature_2m_max[i]),
-    low: Math.round(j.daily.temperature_2m_min[i]),
-    startTemp: h8 >= 0 ? Math.round(j.hourly.temperature_2m[h8]) : null,
-    rainIn: +j.daily.precipitation_sum[i].toFixed(2),
-    prevRainIn: +j.daily.precipitation_sum[i - 1 >= 0 ? i - 1 : i].toFixed(2),
-    code: j.daily.weather_code[i],
-  });
-  console.log(
-    `${year} ${date}: ${out.at(-1).low}-${out.at(-1).high}F, start ${out.at(-1).startTemp}F, rain ${out.at(-1).rainIn}in (eve ${out.at(-1).prevRainIn}in), code ${out.at(-1).code}`,
-  );
+for (const day of days) {
+  const w = await fetchRaceDayWeather(day);
+  out.push(w);
+  console.log(describe(w));
   await new Promise((r) => setTimeout(r, 250));
 }
 

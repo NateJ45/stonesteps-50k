@@ -27,6 +27,7 @@ import { privacyPage } from './privacyPage';
 import { race } from './race';
 import { raceResult } from './raceResult';
 import { recordEntry } from './recordEntry';
+import { raceDay } from './raceDay';
 import { processPage } from './processPage';
 import { processStep } from './processStep';
 import { redirect } from './redirect';
@@ -73,6 +74,7 @@ export const schemaTypes = [
   athlete,
   raceResult,
   recordEntry,
+  raceDay,
   scheduleItem,
   courseFeature,
   sponsor,

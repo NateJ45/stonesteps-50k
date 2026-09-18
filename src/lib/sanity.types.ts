@@ -395,6 +395,17 @@ export type ScheduleItem = {
   orderRank?: string;
 };
 
+export type RaceDay = {
+  _id: string;
+  _type: 'raceDay';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  year?: number;
+  date?: string;
+  source?: string;
+};
+
 export type AthleteReference = {
   _ref: string;
   _type: 'reference';
@@ -2906,6 +2917,7 @@ export type AllSanitySchemaTypes =
   | Sponsor
   | CourseFeature
   | ScheduleItem
+  | RaceDay
   | AthleteReference
   | DistanceReference
   | RecordEntry

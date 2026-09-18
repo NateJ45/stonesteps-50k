@@ -10,6 +10,10 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-18 — The weather strip stops needing a hand each November._
+
+The one yearly touch left on the site was the race-day weather: a committed list of dates and a committed bake. Nathan asked for it to be automatic, since the race date sits on The Race document months ahead. `scripts/weather-sync.mjs` now does two things. With `--record` it reads The Race's date and, once the day is six days past (ERA5's publication lag) and not on file, writes a `raceDay` document, which is the durable memory for the year after Dave moves the date on. By default it merges the committed dates with those documents, fetches only the years the baked file lacks, and rewrites it, failing soft if the archive is down. The results-import workflow runs both daily through October and November and rebuilds when the bake moved; the deploy bakes before every build so the live site is never behind the data. The decision rule is shared in `scripts/lib/weather.mjs` and pinned by `src/lib/race-day-due.test.ts`. Proven by deleting 2025 from the bake and watching the sync restore it byte for byte.
+
 _2026-09-18 — A field description is for the editor typing into the box, not the maintainer who added the field._
 
 The edition-number field on The Race read "The 2026 race is the 24th running, confirmed by

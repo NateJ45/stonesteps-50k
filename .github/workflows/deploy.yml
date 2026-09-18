@@ -105,6 +105,15 @@ jobs:
           PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
         run: npm run og:check -- --warn
 
+      # The weather strip's newest year is a raceDay document until the
+      # committed file catches up; bake it in so the deploy is never behind
+      # the data. Read-only and fail-soft: see scripts/weather-sync.mjs.
+      - name: Bake race-day weather
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: node scripts/weather-sync.mjs
+
       - name: Build
         env:
           # Without these the build succeeds and ships EMPTY pages, because

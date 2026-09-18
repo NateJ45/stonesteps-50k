@@ -16,6 +16,15 @@ sequence).
 
 ## Waiting on a human
 
+### 1m. DONE 2026-09-18. The weather strip records its own new year
+
+Nathan asked for the yearly weather bake to be automatic. `scripts/weather-sync.mjs`
+records The Race's date as a `raceDay` document six days after the race and bakes that
+year's weather; the results-import workflow runs it daily through October and November
+and the deploy bakes before every build. First live run: the mornings after 2026-10-31.
+If it has not produced a 2026 bar on /course by early November, run the import workflow
+by hand and read its "Bake race-day weather" step.
+
 ### 1l. The numbers row can wear a label, and nobody has typed one
 
 2026-09-17 (Tier 3). `statSection` has always had an optional `heading` field and

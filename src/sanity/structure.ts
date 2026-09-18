@@ -95,6 +95,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'athlete',
   'raceResult',
   'recordEntry',
+  'raceDay',
 ]);
 
 /**
@@ -391,6 +392,9 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               S.documentTypeListItem('recordEntry')
                 .title('Records the results cannot prove')
                 .icon(StarFilledIcon),
+              // Recorded automatically each November by scripts/weather-sync.mjs;
+              // here so a missed year can be typed in.
+              S.documentTypeListItem('raceDay').title('Race days (for the weather strip)'),
             ]),
         ),
 
