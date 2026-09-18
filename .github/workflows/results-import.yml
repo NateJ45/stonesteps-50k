@@ -32,14 +32,19 @@ name: Import race results
 #
 # ── THE SCHEDULE ────────────────────────────────────────────────────────────
 # Daily through October and November, which covers the race (late October) and
-# the weeks after it when a timer might correct a row. The rest of the year it
-# runs only when someone asks. GitHub's scheduler is best-effort and can be
-# late by tens of minutes under load; nothing here is time-critical.
+# the weeks after it when a timer might correct a row, and every Monday the
+# rest of the year. The weekly run is the answer to "what if RunSignUp takes a
+# few weeks to post results" (Nathan, 2026-09-18): without it a December
+# posting would sit unimported until the next October. A run that finds
+# nothing costs a minute and deploys nothing. GitHub's scheduler is
+# best-effort and can be late by tens of minutes under load; nothing here is
+# time-critical.
 #
 # ── THE DEPLOY IS CONDITIONAL, AND IMPERFECTLY SO ───────────────────────────
 # The site is statically built, so imported results are invisible until it is
 # rebuilt. Rebuilding on all 61 scheduled runs would be waste, so the job
-# counts the results before and after and deploys only when the number moved.
+# counts the results before and after and deploys only when the number moved,
+# or when the weather sync baked a new race day.
 #
 # KNOWN LIMIT: a re-import that CORRECTS an existing row (a fixed time, a
 # corrected place) does not change the count, so it will not trigger a deploy.
@@ -60,6 +65,7 @@ name: Import race results
 on:
   schedule:
     - cron: '0 9 * 10,11 *' # daily 09:00 UTC, October and November
+    - cron: '0 9 * * 1' # every Monday 09:00 UTC, the rest of the year
   workflow_dispatch:
     inputs:
       year:
@@ -149,6 +155,25 @@ jobs:
             node scripts/import-results.mjs
           fi
 
+      # THE WEATHER STRIP, WITHOUT A YEARLY TOUCH. The Race's date is on its
+      # document months ahead; once the day has passed and the weather archive
+      # has caught up (about six days), the sync records it as a raceDay
+      # document and bakes that year's weather into the file the strip reads.
+      # Both steps are idempotent and fail soft: see scripts/weather-sync.mjs.
+      - name: Record this year's race day
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+          SANITY_API_WRITE_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+        run: node scripts/weather-sync.mjs --record
+
+      - name: Bake race-day weather
+        id: weather
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: node scripts/weather-sync.mjs
+
       - name: Count results after
         id: after
         env:
@@ -191,13 +216,13 @@ jobs:
       - name: Generate Sanity types
         if: >-
           needs.gate.outputs.can_deploy == 'true' &&
-          (steps.before.outputs.count != steps.after.outputs.count || inputs.deploy_anyway)
+          (steps.before.outputs.count != steps.after.outputs.count || steps.weather.outputs.changed == 'true' || inputs.deploy_anyway)
         run: npm run typegen
 
       - name: Build
         if: >-
           needs.gate.outputs.can_deploy == 'true' &&
-          (steps.before.outputs.count != steps.after.outputs.count || inputs.deploy_anyway)
+          (steps.before.outputs.count != steps.after.outputs.count || steps.weather.outputs.changed == 'true' || inputs.deploy_anyway)
         env:
           PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
           PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
@@ -210,7 +235,7 @@ jobs:
       - name: Deploy
         if: >-
           needs.gate.outputs.can_deploy == 'true' &&
-          (steps.before.outputs.count != steps.after.outputs.count || inputs.deploy_anyway)
+          (steps.before.outputs.count != steps.after.outputs.count || steps.weather.outputs.changed == 'true' || inputs.deploy_anyway)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

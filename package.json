@@ -16,6 +16,7 @@
     "typegen": "sanity schema extract --force && sanity typegen generate",
     "og": "node scripts/generate-og-default.mjs",
     "mud": "node scripts/generate-mud.mjs",
+    "weather:sync": "node scripts/weather-sync.mjs",
     "map-poster": "node scripts/capture-map-poster.mjs",
     "map-region": "node scripts/capture-region-poster.mjs",
     "contact:migration": "node --experimental-strip-types scripts/gen-contact-migration.mjs",
