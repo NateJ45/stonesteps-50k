@@ -46,9 +46,9 @@ export const raceResult = defineType({
       name: 'timeSeconds',
       title: 'Finish time (seconds)',
       type: 'number',
-      description:
-        'Whole seconds. 3:40:56 is 13256. Read the file header before changing this to ' +
-        'a string: every record on the site is derived by ordering on it.',
+      // Read the file header before changing this to a string: every record on the
+      // site is derived by ordering on this number.
+      description: 'Whole seconds, not a clock time. 3:40:56 is 13256.',
       validation: (Rule) => Rule.required().integer().min(1),
     }),
     defineField({
@@ -70,9 +70,9 @@ export const raceResult = defineType({
       name: 'age',
       title: 'Age on race day',
       type: 'number',
-      description:
-        'Drives the age-bracket records. Brackets are defined in code, in ' +
-        'src/lib/age-brackets.ts, so they can be unit tested rather than typed per row.',
+      // Brackets are defined in code, in src/lib/age-brackets.ts, so they can be unit
+      // tested rather than typed per row.
+      description: "The runner's age on race day. Sorts them into a bracket on the records page.",
     }),
     defineField({
       name: 'place',
@@ -83,9 +83,10 @@ export const raceResult = defineType({
       name: 'timeSource',
       title: 'Where the time came from',
       type: 'string',
+      // RunSignUp only populates chip time from 2024 on. Earlier years carry gun time,
+      // and the results table says so rather than implying a precision it does not have.
       description:
-        'RunSignUp only populates chip time from 2024 on. Earlier years carry gun time, ' +
-        'and the results table says so rather than implying a precision it does not have.',
+        'Whether the clock started at the gun or at the chip. Shown on the results table.',
       options: {
         list: [
           { title: 'Chip time', value: 'chip' },
@@ -99,10 +100,11 @@ export const raceResult = defineType({
       name: 'trekker',
       title: 'Ran as a trekker',
       type: 'boolean',
+      // Trekkers are, in the words of the race, ineligible for age group and overall
+      // awards. The exclusion happens in src/lib/age-brackets.ts.
       description:
-        'Trekkers take the optional early start and are, in the words of the race, ' +
-        'ineligible for age group and overall awards. The time is real and is shown; it ' +
-        'is excluded from records. See src/lib/age-brackets.ts.',
+        'Tick if this runner took the optional early start. The time still shows, but it is ' +
+        'left out of the records.',
       options: { canvasApp: { exclude: true } },
     }),
     defineField({
@@ -111,7 +113,7 @@ export const raceResult = defineType({
       type: 'string',
       description:
         'Only for genuine disagreements in the published source. Shown as a footnote ' +
-        'marker rather than silently corrected.',
+        'marker on the results table.',
     }),
   ],
   preview: {

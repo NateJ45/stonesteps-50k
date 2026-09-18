@@ -556,7 +556,8 @@ export const journalEntry = defineType({
       title: 'SEO title',
       type: 'string',
       description:
-        'Browser tab and Google result title. Aim for 50 to 60 characters. Optional — defaults to the post title.',
+        'Browser tab and Google result title. Aim for 50 to 60 characters. Leave blank to ' +
+        'use the post title.',
       group: 'seo',
       options: {
         canvasApp: {
@@ -575,7 +576,8 @@ export const journalEntry = defineType({
       type: 'text',
       rows: 3,
       description:
-        'The sentence under the title in Google results. Aim for 150 to 160 characters. Optional — defaults to the excerpt.',
+        'The sentence under the title in Google results. Aim for 150 to 160 characters. ' +
+        'Leave blank to use the excerpt.',
       group: 'seo',
       options: {
         canvasApp: {

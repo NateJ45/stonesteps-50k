@@ -36,9 +36,9 @@ export const recordEntry = defineType({
       title: 'Athlete',
       type: 'reference',
       to: [{ type: 'athlete' }],
-      description:
-        'Still a reference, not a typed name. This is the exact split that produced ' +
-        '"Brain List" and "Brian List" on the live site.',
+      // A typed name is the exact split that produced "Brain List" and "Brian List"
+      // in the old hand-maintained tables.
+      description: 'Point at the athlete document. Do not type a name here.',
     }),
     defineField({
       name: 'distance',
@@ -65,11 +65,14 @@ export const recordEntry = defineType({
       name: 'bracket',
       title: 'Age bracket',
       type: 'string',
+      // The values must match the bracket ids in src/lib/age-brackets.ts so these rows
+      // can merge with the derived records. There is deliberately no "Course" bracket:
+      // the outright record is computed as the fastest row and never stored, because
+      // storing it as a duplicate of an age row is what let the old hand-maintained
+      // tables file one time under two different years.
       description:
-        'Must match a bracket id from src/lib/age-brackets.ts so it can merge with the ' +
-        'derived records. There is deliberately no "Course" bracket: the outright record ' +
-        'is computed as the fastest row, never stored, because storing it as a duplicate ' +
-        'of an age row is what let the live tables file one time under two different years.',
+        'Which age bracket this record belongs to. There is no outright course record here: ' +
+        'that one is worked out from the results.',
       options: {
         list: [
           { title: 'Under 30', value: 'u30' },
@@ -87,7 +90,8 @@ export const recordEntry = defineType({
       name: 'timeSeconds',
       title: 'Time (seconds)',
       type: 'number',
-      description: 'Same units as a result, so the two sets can be compared directly.',
+      // Same units as a result, so the two sets can be compared directly.
+      description: 'Whole seconds, not a clock time. 3:40:56 is 13256.',
       validation: (Rule) => Rule.required().integer().min(1),
     }),
     defineField({
@@ -100,10 +104,11 @@ export const recordEntry = defineType({
       name: 'sourceNote',
       title: 'Note on the source',
       type: 'string',
+      // Two such conflicts exist and are carried as data rather than quietly picking
+      // a side.
       description:
-        'Used where the published tables genuinely disagree with themselves. Two such ' +
-        'conflicts exist and are carried as data, with a footnote marker on the page, ' +
-        'rather than quietly picking a side.',
+        'Only where the published tables disagree with themselves. Shown as a footnote ' +
+        'marker on the records page.',
     }),
   ],
   preview: {

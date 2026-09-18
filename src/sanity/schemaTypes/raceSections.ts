@@ -54,7 +54,7 @@ export const raceHeroSection = defineType({
       name: 'eyebrow',
       title: 'Eyebrow (optional)',
       type: 'string',
-      description: 'The small label above the headline. Example: "Sunday, October 25, 2026".',
+      description: 'The small label above the headline. Usually the race date.',
     }),
     defineField({
       name: 'headline',
@@ -81,9 +81,8 @@ export const raceHeroSection = defineType({
       title: 'The claim (stamped mark)',
       type: 'string',
       description:
-        'Struck across the hero as a rubber stamp, not set as a sentence. Keep it to the ' +
-        'claim itself: "Cincinnati\'s longest running ultra marathon". The edition number ' +
-        'comes from The Race, so do not retype the year here.',
+        'Struck across the hero as a stamp, not a sentence. Just the claim itself. Do not ' +
+        'retype the edition number, it comes from The Race.',
     }),
     // THE HERO IS A SLIDESHOW, and the cap is the point of the field rather
     // than a limitation of it. Every photograph here loads on the first paint,
@@ -98,9 +97,8 @@ export const raceHeroSection = defineType({
       name: 'images',
       title: 'Hero photographs',
       description:
-        'One photograph, or up to four to cross-fade slowly between. Tall shots ' +
-        'work best: on a wide screen this is a full-height column down the right ' +
-        'of the page. The first one is what most people see, so make it the good one.',
+        'One photograph, or up to four to cross-fade between. Tall shots work best. The ' +
+        'first one is what most people see, so make it the good one.',
       type: 'array',
       validation: (Rule) => Rule.max(4),
       of: [
@@ -112,10 +110,9 @@ export const raceHeroSection = defineType({
               name: 'alt',
               title: 'Alt text',
               type: 'string',
-              description:
-                'Describe what is happening in the photo, not the file name. Only ' +
-                'the first photograph is announced to a screen reader: the rest are ' +
-                'the same subject again and reading all four would be noise.',
+              // Only the first photograph is announced to a screen reader: the rest are
+              // the same subject again and reading all four would be noise.
+              description: 'Describe what is happening in the photo, not the file name.',
               validation: (Rule) => Rule.required(),
             }),
           ],
@@ -284,10 +281,11 @@ export const loopCardSection = defineType({
       name: 'loops',
       title: 'The loops, in order',
       type: 'array',
+      // The card punches a hole for every loop the 27K covers, so the graphic carries
+      // the difference between the distances rather than just decorating it.
       description:
-        'The 50K runs all of these; the 27K runs the ones marked as included. The card ' +
-        'punches a hole for every loop the 27K covers, so the graphic carries the ' +
-        'difference between the distances rather than just decorating it.',
+        'In running order. The 50K runs all of these, the 27K runs the ones ticked as ' +
+        'included.',
       of: [
         defineArrayMember({
           type: 'object',
@@ -311,20 +309,22 @@ export const loopCardSection = defineType({
               name: 'miles',
               title: 'Loop distance',
               type: 'string',
+              // The race's public copy still says "5+" and "3+", but its timing sheets for
+              // 2006 through 2009 all carry the same split marks, so 5.3 and 3.2 are the
+              // numbers the race itself ran the clock against.
               description:
-                'What the race itself measured: 5.3 for a long loop, 3.2 for a short one. ' +
-                'Its public copy still says "5+" and "3+", but its timing sheets for 2006 ' +
-                'through 2009 all carry the same split marks, so these are the numbers the ' +
-                'race itself ran the clock against. See the note field below.',
+                'How long this one loop is, in miles. Examples: "5.3" for a long loop, ' +
+                '"3.2" for a short one.',
             }),
             defineField({
               name: 'throughMiles',
               title: 'Total miles at the end of this loop',
               type: 'string',
+              // Taken from the same split columns: 5.3, 8.5, 13.8, 17, 22.3, 25.5, then
+              // the finish. This is the column a runner actually uses on the day.
               description:
-                'What the mile counter reads when you come back through The Oval. Taken ' +
-                'from the same split columns: 5.3, 8.5, 13.8, 17, 22.3, 25.5, then the ' +
-                'finish. This is the column a runner actually uses on the day.',
+                'What the mile counter reads coming back through The Oval at the end of ' +
+                'this loop.',
             }),
             defineField({
               name: 'inShortDistance',
@@ -355,9 +355,8 @@ export const loopCardSection = defineType({
       title: 'Notes beside the card',
       type: 'array',
       description:
-        'Short answers that belong next to the loop order: what the 27K is, where aid is, ' +
-        'where the start and finish are, and the cutoff. Anything unconfirmed should say so ' +
-        'rather than being left off the page.',
+        'Short answers that sit beside the loop order: what the 27K is, where aid is, ' +
+        'where the start is, and the cutoff.',
       of: [
         defineArrayMember({
           type: 'object',
@@ -389,19 +388,20 @@ export const loopCardSection = defineType({
       name: 'legend',
       title: 'Legend',
       type: 'string',
-      description:
-        'States the punch metaphor in words, for anyone who does not read it from the ' +
-        'graphic. Not optional in practice: the holes carry meaning.',
+      // Not optional in practice: the holes carry meaning, so the words have to exist
+      // for anyone who does not read it from the graphic.
+      description: 'One line saying in words what the punched holes mean.',
     }),
     defineField({
       name: 'sourceNote',
       title: 'Where the mileages came from',
       type: 'text',
       rows: 3,
+      // The loop distances above are more exact than anything the race publishes today.
+      // Without this line the numbers read as invented, which is worse than saying "5+".
       description:
-        'The loop distances are more exact than anything the race publishes today, so the ' +
-        'page has to say where they came from. Without this line the numbers read as ' +
-        'invented, which is worse than saying "5+".',
+        'One line saying where the loop distances came from. Shown in small type under ' +
+        'the card.',
     }),
   ],
   preview: {
@@ -428,7 +428,8 @@ export const elevationSection = defineType({
       name: 'totalGain',
       title: 'Total elevation change',
       type: 'string',
-      description: 'Verified: 10,726 ft.',
+      // Verified: 10,726 ft.
+      description: 'Total climb over the full distance, written as it should read.',
     }),
   ],
   preview: {
@@ -529,10 +530,11 @@ export const pageHeaderSection = defineType({
       name: 'headline',
       title: 'Title',
       type: 'string',
+      // Never allow a raw line-break tag in here: it is an injection surface the moment
+      // the value comes from the CMS. That is what the second-line field is for.
       description:
-        'Set in the condensed display face, which is CAPS ONLY. Use the second-line field ' +
-        'below rather than typing HTML: the mockup allowed a raw line-break tag here, and ' +
-        'that becomes an injection surface the moment the value comes from the CMS.',
+        'Set in the condensed display face, which is CAPS ONLY. To break it onto two ' +
+        'lines, use the field below.',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -562,9 +564,8 @@ export const pageHeaderSection = defineType({
       title: 'Show the photograph as a cut-out',
       type: 'boolean',
       description:
-        'For a picture with a transparent background (a person cut out of their photo). ' +
-        'Drops the frame and stands them on a pool of contour lines and mud, the way the ' +
-        'race director appears on the home page. Leave off for an ordinary photograph.',
+        'Tick this for a picture with a transparent background. Drops the frame and stands ' +
+        'the subject on contour lines and mud.',
       initialValue: false,
     }),
   ],
@@ -651,10 +652,11 @@ export const faqKioskSection = defineType({
                 list: [{ title: 'Entry fees, from the distances', value: 'fees' }],
                 layout: 'radio',
               },
+              // Built from the fee tiers on the distances, so it can never disagree with
+              // the tickets on the home page.
               description:
                 'Leave empty to write the answer yourself. Set it and the answer is built ' +
-                'from the fee tiers on the distances, so it can never disagree with the ' +
-                'tickets on the home page.',
+                'from the race data instead.',
             }),
             defineField({
               name: 'answer',
@@ -700,11 +702,11 @@ export const faqKioskSection = defineType({
       title: 'The open questions',
       type: 'array',
       of: [{ type: 'string' }],
+      // Listing these is not an admission: every one is something a runner emails to
+      // ask, and answering them is free content the race is currently missing.
       description:
-        'Questions the race publishes no answer to. Listing them is not an admission, it ' +
-        'is the most useful thing on the page: every one is something a runner emails to ' +
-        'ask, and answering them is free content the race is currently missing. Delete a ' +
-        'line as it gets answered.',
+        'Questions the race publishes no answer to, one per line. Delete a line once it ' +
+        'has an answer.',
     }),
   ],
   preview: {
@@ -861,10 +863,11 @@ export const raceWeatherSection = defineType({
   title: 'Race-day weather since 2003',
   type: 'object',
   icon: SunIcon,
+  // The data is a committed file, src/data/raceDayWeather.json, built by
+  // scripts/build-weather.mjs. There is no field to fill in here.
   description:
-    'The weather on every race day we have a date for: a temperature strip, one bar per ' +
-    'year, and a sentence computed from it. The data is a committed file ' +
-    '(src/data/raceDayWeather.json, built by scripts/build-weather.mjs), not a field here.',
+    'The weather on every race day with a date on record: a temperature strip, one bar ' +
+    'per year, and a sentence computed from it.',
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
     defineField({ name: 'headline', title: 'Headline', type: 'string' }),
@@ -997,10 +1000,11 @@ export const photoBandSection = defineType({
           name: 'alt',
           title: 'Alt text',
           type: 'string',
+          // This one is NOT decoration: it is the only thing in its band, so a reader
+          // who cannot see it has to be told what it shows.
           description:
-            'Describe what is happening in the photo. This one is NOT decoration: ' +
-            'it is the only thing in its band, so a reader who cannot see it should ' +
-            'be told what it shows.',
+            'Describe what is happening in the photo. This one carries the whole band, so ' +
+            'do not leave it thin.',
           validation: (Rule) => Rule.required(),
         }),
       ],

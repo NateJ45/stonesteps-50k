@@ -117,7 +117,8 @@ export const businessInfo = defineType({
       title: 'Availability status',
       type: 'string',
       description:
-        'Short status shown on the Contact page. Examples: "Accepting new clients", "Booking for Fall 2026", "Currently full, accepting waitlist".',
+        'Short status shown on the Contact page. Examples: "Accepting new clients", ' +
+        '"Booking for the fall", "Currently full, accepting waitlist".',
       validation: (Rule) => Rule.required().max(80),
     }),
     defineField({

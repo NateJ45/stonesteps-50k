@@ -50,10 +50,10 @@ export const ctaBlock = defineType({
       name: 'internalPath',
       title: 'Or a path on this site',
       type: 'string',
+      // Prefer the picker above: a reference survives a slug change, a typed path does not.
       description:
-        'For routes that have no page document to point at, like /results. Start with a ' +
-        'slash. Use the picker above whenever the destination IS a document, because a ' +
-        'reference survives a slug change and a typed path does not.',
+        'For routes with no page document to point at, like /results. Start with a slash. ' +
+        'Use the picker above whenever the destination is a document.',
       hidden: ({ parent }) => parent?.linkType !== 'internal',
       validation: (Rule) =>
         Rule.custom((value) =>

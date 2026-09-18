@@ -75,7 +75,7 @@ export const testimonial = defineType({
       title: 'Source type',
       type: 'string',
       description:
-        'Where this review was originally posted. Used to show a source badge on the testimonial card.',
+        'Where this review was originally posted. Shows a source badge on the testimonial card.',
       options: {
         list: [
           { title: 'Google', value: 'Google' },

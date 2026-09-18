@@ -10,6 +10,39 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-18 — A field description is for the editor typing into the box, not the maintainer who added the field._
+
+The edition-number field on The Race read "The 2026 race is the 24th running, confirmed by
+David Corfman. Count it off the archive rather than the RunSignUp blurb: /results holds 2003
+through 2025 with no year missed, so 2026 is the 24th. The RunSignUp listing still says
+23rd." Every sentence of that is true, useful, and wrong for the place it was in. It is a
+maintainer's note wearing an editor's hat, and it started going stale the day it was
+written. Roughly a quarter of the 406 descriptions in the schemas read the same way, worst
+in the race's own types: years, people's names, "verified from", "it used to", arguments for
+why the field exists, and file paths an editor cannot open.
+
+**The rule from here on.** A description answers, in one or two plain sentences and about
+140 characters at most: what to put in this box, in what format, with an example where the
+format is not obvious, where it shows on the site, and what happens if it is left blank.
+Nothing else. No years or dates, no names, no provenance ("verified from", "confirmed by"),
+no file paths, no history of the field, no argument for why it exists, no warning about what
+other code derives from it. Site copy rules apply, because editors read these: no em-dashes,
+no AI-tell vocabulary, plain and specific. The edition field now reads "Which running of the
+race this is, as a number. Shown as an ordinal on the site, for example 24 becomes 24th."
+
+**None of the knowledge was thrown away.** Every sentence removed from a description moved
+into a `//` comment directly above its `defineField(`, where maintainers read it and editors
+never see it. Those comments keep the house voice and may keep their dates and names. The
+provenance note in race.ts's own header was rewritten to describe this split rather than the
+old one.
+
+64 descriptions changed across 16 schema files. The audit that flags a description for
+narrative words or for running past 140 characters went from 115 to 69; the race's own
+schemas went from 39 flags to 3, and those three are instructional text that merely mentions
+RunSignUp or runs a few characters long. Descriptions are Studio-only strings, so nothing
+the site or the generated types depends on moved: `npm run typegen` produced no diff in
+`src/lib/sanity.types.ts` and `npm run parity compare` stayed 31/31.
+
 _2026-09-18 — The home page's LCP has a second of margin, and the reason it did not was never the stylesheet._
 
 For two PRs running, the Lighthouse LCP gate on the home page flapped at 4.6 to 4.7s in CI against a 4.5s budget, on changes that never touched the hero. Blocking one resource class at a time showed what the model was charging against the wordmark on the phone profile: the mud masks (0.9s), the React islands (0.75s), the hero photo (0.3s) and the fonts (0.2s), because Lantern's pessimistic graph holds every request that starts before the observed paint. Four changes: the masks are written as 64-entry palettes with the phone hero mask at 560px wide (138KB to 48KB, no visible difference under the grain), the hero photo is AVIF at quality 45 (164KB to 99KB, compared at 2x), the second and third hero slides render without a src and get it a second after load (lazy did nothing, a stacked slide is in the viewport), and the phone menu hydrates on idle instead of client:only, which the file had said was impossible and is not with the pinned React and Radix set. Locally: FCP 2.2s to 1.88s, LCP 3.98s to 3.23s, performance 0.85 to 0.92, CLS 0.

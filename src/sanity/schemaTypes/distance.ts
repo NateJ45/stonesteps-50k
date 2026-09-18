@@ -40,9 +40,11 @@ export const distance = defineType({
       name: 'loopStructure',
       title: 'Loop structure',
       type: 'string',
+      // The race publishes "five plus" and "three plus" mile loops rather than exact
+      // per-loop mileages, so precise figures here would be invented.
       description:
-        'In the race\'s own words. It publishes "five plus" and "three plus" mile loops ' +
-        'rather than exact per-loop mileages, so do not invent precise figures here.',
+        'How the loops are structured, in the words the race uses. Example: "four five-plus ' +
+        'mile loops". Do not invent exact per-loop mileages.',
     }),
     // A DISTANCE HAS A LENGTH AND A LOOP COUNT, and until now those facts only
     // existed inside the loopStructure sentence, where nothing could read them.
@@ -52,17 +54,19 @@ export const distance = defineType({
       name: 'totalMiles',
       title: 'Total distance (miles)',
       type: 'number',
+      // From the 2006 to 2009 timing sheets: 30.8 miles for the 50K (four 5.3s and
+      // three 3.2s) and 17.0 for the 27K. It is on the ticket because "50K" alone
+      // tells a US trail runner very little.
       description:
-        'The loops for this distance added up, taken from the 2006 to 2009 timing ' +
-        'sheets: 30.8 for the 50K (four 5.3s and three 3.2s) and 17.0 for the 27K. ' +
-        'Shown on the ticket because "50K" alone tells a US trail runner very little. ' +
-        'Leave empty rather than rounding to a nicer number.',
+        'The loops for this distance added up, in miles. Shown on the entry ticket. Leave ' +
+        'empty rather than rounding to a nicer number.',
     }),
     defineField({
       name: 'loopCount',
       title: 'Number of loops',
       type: 'number',
-      description: 'Seven for the 50K, four for the 27K.',
+      // Seven loops for the 50K, four for the 27K.
+      description: 'How many loops make up this distance, as a number.',
     }),
     defineField({
       name: 'blurb',
@@ -88,17 +92,17 @@ export const distance = defineType({
       name: 'startTime',
       title: 'Start time',
       type: 'string',
-      description:
-        'Verified from the RunSignUp event details: the 50K starts at 8:00 am and the ' +
-        '27K at 8:30 am.',
+      // Verified from the RunSignUp event details: the 50K starts at 8:00 am, the
+      // 27K at 8:30 am.
+      description: 'When this distance starts, written as it should read. Example: "8:00 am".',
     }),
     defineField({
       name: 'trekkerNote',
       title: 'Early (trekker) start',
       type: 'string',
-      description:
-        'Verified: 50K trekkers may start at 7:00 am, 27K trekkers at 8:00 am and are ' +
-        'ineligible for age group and overall awards.',
+      // Verified: 50K trekkers may start at 7:00 am, 27K trekkers at 8:00 am, and are
+      // ineligible for age group and overall awards.
+      description: 'One line about the early start for this distance. Leave blank if it has none.',
     }),
     defineField({
       name: 'entryCap',
@@ -110,9 +114,8 @@ export const distance = defineType({
       // year. Rehearsing 2027 in the Studio, it read as instruction rather than
       // history (2026-09-12). It says where to LOOK instead, which stays true.
       description:
-        'How many places this distance takes. It is RunSignUp that enforces it, so copy ' +
-        "the number from that event's participant cap rather than setting one here. " +
-        'Leave it empty rather than guessing: the ticket simply omits the line.',
+        'How many places this distance takes. Copy the number from the participant cap on ' +
+        'RunSignUp. Leave it empty rather than guessing.',
     }),
     defineField({
       name: 'runSignUpEventId',
@@ -121,10 +124,10 @@ export const distance = defineType({
       // Also no year's numbers: see the note on Entry cap. This one matters
       // more, because a stale id sends a runner to a closed event and the
       // description used to name the ids for one particular year.
+      // A wrong id sends an entrant to a closed event, so re-check it every rollover.
       description:
-        'Sends the Register button straight to this distance instead of the race page. ' +
-        "It is a NEW number every year: open this year's event on RunSignUp and take the " +
-        "eventId from the address bar. Wrong, and entrants land on last year's closed event.",
+        'Sends the Register button straight to this distance. A new number every year: ' +
+        "take the eventId from the address bar of this year's RunSignUp event.",
     }),
     defineField({
       name: 'featured',
@@ -138,10 +141,12 @@ export const distance = defineType({
       name: 'feeTiers',
       title: 'Entry fee tiers',
       type: 'array',
+      // The ladder lives here, not on The Race, because the two distances are priced
+      // differently at every stage. The race-level tiers still exist for the JSON-LD
+      // offers and the Studio checkup.
       description:
-        'In date order, for THIS distance. The two distances are priced differently at every ' +
-        'stage, which is why the ladder lives here and not on The Race. The race-level tiers ' +
-        'still exist for the JSON-LD offers and the Studio checkup.',
+        'Entry prices for this distance, in date order, cheapest first. Each needs a label, ' +
+        'an amount and the date it ends.',
       of: [
         defineArrayMember({
           type: 'object',
