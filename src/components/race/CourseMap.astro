@@ -74,6 +74,12 @@ const shortMiles = meta.loops.find((l) => l.kind === 'short')?.publishedMiles ??
   :global(.cmap__frame) {
     position: relative;
     aspect-ratio: 4 / 3;
+    /* The height cap only applies while the frame is 4:3: on a tablet a 4:3
+       box the width of the column would be taller than the screen. At 16:9
+       the column's own maximum width keeps the frame under 720px tall, and a
+       cap there did something worse than nothing: aspect-ratio ties the two
+       sides, so capping the height shrank the WIDTH and the map stopped short
+       of the column's right edge (2026-09-18). */
     max-height: 70vh;
     overflow: hidden;
     background: var(--color-muted);
@@ -83,45 +89,34 @@ const shortMiles = meta.loops.find((l) => l.kind === 'short')?.publishedMiles ??
        The edge is the ridge below instead, which is the same contour every band
        on this site is cut with. */
 
-    /* IT ESCAPES THE COLUMN, a little. Not 100vw: that includes the scrollbar
-       and produces a horizontal scroll on Windows, which is a worse bug than a
-       narrow map. A fixed bleed on each side is predictable and still reads as
-       breaking out of the text.
+    /* IT SITS IN THE COLUMN (2026-09-18). It used to bleed 1.5rem past it,
+       and 4rem past 96rem, on the argument that a map breaking out of the text
+       reads as a bigger thing. Once every other object on the site was put on
+       one column (PR #31) the map was the one element still reaching past the
+       heading above it and the profile below it, and Nathan read that as
+       unpolished rather than dramatic, which is the right reading: a photograph
+       that overhangs its own caption looks misplaced, not big.
 
-       ONE VARIABLE, USED THREE TIMES. The bleed also has to inset every control
-       that sits in a corner, or they hang off the edge of the screen: the first
-       version pushed the play button half out of the viewport and cut the scale
-       bar in two. Deriving the insets from the same number is what keeps them
-       together when it changes. */
-    /* 1.5rem IS ALWAYS SAFE because it is exactly the content column's own
-       px-6 padding, so the frame reaches the column's outer edge and no
-       further. */
-    --cmap-bleed: 1.5rem;
-    margin-inline: calc(-1 * var(--cmap-bleed));
+       THE VARIABLE STAYS AT ZERO rather than being deleted, because every
+       control that sits in a corner derives its inset from it (the play HUD,
+       the scale bar, the zoom stack, the legend). The first bleed pushed the
+       play button half out of the viewport and cut the scale bar in two, and
+       one number feeding all of them is what stopped that. Set it back above
+       zero and they all move together. */
+    --cmap-bleed: 0rem;
   }
 
-  /* 16:9 EARLIER THAN THE BIGGER BLEED. The shape is safe at any width; the
-     bleed is not. */
+  /* 16:9 from the laptop width up, 4:3 below it, where a wide frame would be
+     too short to read the terrain. */
   @media (min-width: 64rem) {
     :global(.cmap__frame) {
       aspect-ratio: 16 / 9;
+      max-height: none;
     }
   }
 
-  /* A DEEPER BLEED ONLY WHERE THERE IS PROVABLY ROOM FOR IT. The content column
-     maxes out at --container-content (82.5rem), so free space beside it only
-     exists past that width; below it the column is viewport-bound and there is
-     nothing to bleed into but the padding. Setting 4rem at 64rem overflowed the
-     page by 40px at exactly 1024px, which the reflow test caught. 96rem leaves
-     108px of free space each side for a 64px bleed. */
-  @media (min-width: 96rem) {
-    :global(.cmap__frame) {
-      --cmap-bleed: 4rem;
-    }
-  }
-
-  /* MapLibre puts its own controls in the frame's corners, which the bleed has
-     just moved off screen. Shift each corner in by the bleed. */
+  /* MapLibre puts its own controls in the frame's corners. Each corner is
+     inset by the bleed so they follow it if it ever comes back. */
   :global(.cmap__frame .maplibregl-ctrl-bottom-left) {
     left: var(--cmap-bleed);
     bottom: 1.4rem;
