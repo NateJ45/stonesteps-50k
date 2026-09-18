@@ -66,6 +66,15 @@ const FIELDS = [
         suffix: 'phone',
         W: 760,
         H: 2530, // 390x1298 measured 2026-09-13
+        // DRAWN AT 760, WRITTEN AT 560 (2026-09-18). The canvas size sets the
+        // mark size (see `big` below), so it stays; the RASTER is scaled to
+        // 560 wide on the way out. A mask is `cover`ed to its box, so a
+        // smaller file changes nothing about where the mud sits or how big
+        // it is, only how crisp an edge is, and these edges are chewed up by
+        // design and painted under the grain. 72KB became 40KB. It matters
+        // because this is the one mud file inside the first phone screen, and
+        // Lighthouse's model puts every byte of it in front of the wordmark.
+        raster: 560,
         density: 1.2,
         // `big` IS THE KNOB THAT MATTERED, not density. Mark size comes from
         // `Math.min(W, H) / 933`, so on a 760x2530 canvas it is driven by the
@@ -249,8 +258,20 @@ for (const field of FIELDS) {
       // A mask only needs its alpha channel, so the art is white on transparent
       // and the PNG is written 8-bit palettised. Most of the frame is empty,
       // which is why a field this busy still compresses to a few tens of KB.
-      const buf = await sharp(Buffer.from(svg))
-        .png({ compressionLevel: 9, palette: true, effort: 10 })
+      //
+      // 64 PALETTE ENTRIES, NOT 256 (2026-09-18). A palette entry here is one
+      // alpha level, and the soft edges only ever use a spread of them; cutting
+      // the palette to 64 halves every file (the phone hero mask went from
+      // 138KB to 72KB) for a maximum alpha error of 23/255 on a handful of
+      // edge pixels and a mean of 0.4, which is below anything a screen can
+      // show once the mask is painted with a colour and sat under the grain.
+      // The reason to care is the home page's LCP: Lighthouse's model charges
+      // every request that finishes before the wordmark paints, and on the
+      // phone profile the five masks were 223KB of that bill.
+      let image = sharp(Buffer.from(svg));
+      if (shape.raster && shape.raster < W) image = image.resize(shape.raster);
+      const buf = await image
+        .png({ compressionLevel: 9, palette: true, colors: 64, effort: 10 })
         .toBuffer();
 
       await writeFile(outPath, buf);

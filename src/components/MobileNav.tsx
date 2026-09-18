@@ -14,9 +14,21 @@
 // rust Register plate underneath, and the claim stamped in the corner.
 //
 // Still a Radix Dialog under the hood (shadcn Sheet), so focus trapping,
-// Escape, scroll locking and the aria wiring are the library's, not ours. It
-// must stay client:only="react": Radix's portal hook throws "Invalid hook call"
-// under Astro's SSR.
+// Escape, scroll locking and the aria wiring are the library's, not ours.
+//
+// HYDRATED ON IDLE, NOT client:only (2026-09-18). This file said for months
+// that it had to be client:only="react" because Radix's portal hook threw
+// "Invalid hook call" under Astro's SSR. That was true of an older React and
+// Radix pairing and is not true of the pinned set: the closed Sheet renders
+// only its trigger button on the server, the portal mounts nothing until it
+// opens, and the build prerenders every page without a complaint. What
+// client:only was costing was the home page's LCP. client:only hydrates at
+// load, which pulled the React runtime and this island onto the wire at
+// 135ms on the phone profile, and Lighthouse's model charges every request
+// that starts before the wordmark paints against the wordmark: moving the
+// runtime behind requestIdleCallback took the modelled LCP from 3.98s to
+// 3.23s and FCP from 2.2s to 1.88s. The trigger is in the server HTML now,
+// which is also what the desktop nav rule in page-architecture.md asks for.
 //
 // IT FOLLOWS THE THEME: bark with cream type on the dark page, cream stock
 // with bark ink on the light one (see `.menu-sheet` in globals.css). It was

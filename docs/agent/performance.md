@@ -49,7 +49,7 @@ Target: 100 on all four categories (Performance, Accessibility, Best Practices, 
 
 **Levers that achieve this -- preserve unless you have a stronger reason than "I want to simplify":**
 
-- All islands hydrate at `client:idle` or `client:visible` except `MobileNav` (Radix Sheet portal requires `client:only="react"`)
+- All islands hydrate at `client:idle` or `client:visible`, including `MobileNav` since 2026-09-18 (it was `client:only="react"`, which hydrates at load; see MobileNav.tsx for why that cost the home page 750ms of modelled LCP)
 - Lenis init wrapped in `requestIdleCallback`
 - Logo PNGs moved from `public/` to `src/assets/` so Astro emits WebPs
 - Single-img theme-aware logo (one fetch per page load instead of two)

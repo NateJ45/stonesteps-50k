@@ -17,9 +17,9 @@ File naming:
 - PascalCase for top-level components (`Hero.astro`, `ServiceCard.astro`, `JournalCard.astro`)
 - kebab-case for shadcn primitives in `src/components/ui/` (matches shadcn CLI convention)
 
-### Radix-based primitives need `client:only="react"`
+### Radix-based primitives and SSR (revised 2026-09-18)
 
-shadcn primitives that wrap Radix's Dialog (Sheet, Dialog, DropdownMenu with portal positioning) don't SSR cleanly inside Astro. The portal hook calls during server render throw "Invalid hook call" and blank the page. When a new component leans on those, hydrate it with `client:only="react"` instead of `client:load`. The mobile nav is the existing reference.
+shadcn primitives that wrap Radix's Dialog (Sheet, Dialog, DropdownMenu with portal positioning) used to throw "Invalid hook call" during Astro's server render, and the rule was to hydrate them with `client:only="react"`. With the pinned React 19.2.7 and Radix set that is no longer the case: a CLOSED Sheet renders only its trigger on the server and the portal mounts nothing until it opens. The mobile nav moved to `client:idle` on 2026-09-18 for the home page's LCP (client:only hydrates at load and put the React runtime on the wire before the wordmark painted). If a new Radix island does blank a page at build time, prefer making it render nothing on the server (`typeof document === 'undefined'`) over `client:only`, and measure the LCP either way.
 
 ### Button variants
 
@@ -33,7 +33,7 @@ The core component set, by role. All in `src/components/` unless noted.
 
 - `Header.astro` -- two-row desktop (eyebrow strip + main nav), single-row mobile. Sticky-with-hide-on-scroll-down behavior wired via `.site-header`. The eyebrow strip carries availability status, email, and phone; on mobile the availability shows a compact pill.
 - `Footer.astro` -- a responsive link grid, brand logo, auto-year copyright, and "Site by..." credit on a thin bottom bar.
-- `MobileNav.tsx` -- shadcn Sheet drawer (`client:only="react"` -- Radix portal can't SSR). Primary CTA, tagline, nav links, email + phone + socials + theme toggle, logo at bottom.
+- `MobileNav.tsx` -- the phone menu as a trail-sign board, a shadcn Sheet underneath (`client:idle` since 2026-09-18; the trigger is server-rendered and the portal mounts on open).
 - `BaseLayout.astro` -- anti-FOUC theme bootstrap, View Transitions, Lenis init, scroll-reveal observer, sticky-header scroll listener.
 
 **Hero + page-top:**
