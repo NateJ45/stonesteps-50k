@@ -58,6 +58,19 @@ export const ATHLETE_ALIASES: Record<string, AthleteAlias> = {
   // Robert), which is the same person aging one year per race with 2006
   // carrying no age. Both spellings are the only Apple in twenty-two years.
   'robert-apple': { slug: 'rob-apple', name: 'Rob Apple' },
+
+  // The 2014 results page printed the short form; 2015 and 2016 (the archive)
+  // and 2017 (RunSignUp, where he typed his own name) all print the long one.
+  // Canonical is the long form: it is his own registration and three rows of
+  // four. The home page caption still calls him Jon, which is the race's own
+  // voice and is left alone.
+  //
+  // EVIDENCE: ages 39 (2014, as Jon), 40 (2015), 41 (2016), 42 (2017), one per
+  // year without a gap. The cities differ, Columbus in 2014 and Dublin after,
+  // but Dublin is a Columbus suburb, the state matches, and he ran 4:02, 3:58,
+  // 3:58 and 4:13, winning twice. Both spellings are the only Hastings man in
+  // the archive.
+  'jon-hastings': { slug: 'jonathan-hastings', name: 'Jonathan Hastings' },
 };
 
 /**
