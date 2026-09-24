@@ -10,6 +10,23 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-23 — Build reads go through the CDN; a failed fetch fails a production build._
+
+Ported from fbcm (`897cec9`), a sibling repo in the same family that hit the failure
+first: `src/lib/sanity.ts` had `useCdn: !readToken`, on the belief that the CDN
+rejects token-based reads. It does not; the API CDN has accepted authenticated
+requests since API version 2021-03-25. With a token in `.env`, every LOCAL build
+was reading the uncached API instead of the CDN, and a day of agent-heavy local
+builds (parity rebuilds, Playwright webServer builds) can spend a large fraction
+of a Sanity plan's monthly API quota this way while CI, which carries no token,
+stays on the CDN throughout. Fixed here the same way: `useCdn: true` unconditionally
+for the published build client, and `sanityFetch`'s catch now throws instead of
+returning the fallback when `import.meta.env.PROD`, so a quota block or an outage
+fails the build rather than shipping placeholder content in production. The dev
+warn-and-fallback path, and the no-project-configured fallback (so a fresh clone
+still builds with nothing set), are both unchanged. This repo has no separate
+preview/draft client in `sanity.ts`, so only the one client was touched.
+
 _2026-09-18 — The weather strip stops needing a hand each November._
 
 The one yearly touch left on the site was the race-day weather: a committed list of dates and a committed bake. Nathan asked for it to be automatic, since the race date sits on The Race document months ahead. `scripts/weather-sync.mjs` now does two things. With `--record` it reads The Race's date and, once the day is six days past (ERA5's publication lag) and not on file, writes a `raceDay` document, which is the durable memory for the year after Dave moves the date on. By default it merges the committed dates with those documents, fetches only the years the baked file lacks, and rewrites it, failing soft if the archive is down. The results-import workflow runs both daily through October and November and rebuilds when the bake moved; the deploy bakes before every build so the live site is never behind the data. The decision rule is shared in `scripts/lib/weather.mjs` and pinned by `src/lib/race-day-due.test.ts`. Proven by deleting 2025 from the bake and watching the sync restore it byte for byte.
