@@ -27,7 +27,7 @@ import Hero from '@/components/Hero.astro';
 import { getSiteSettings } from '@/lib/queries';
 import { hasCfAnalytics, hasGa } from '@/lib/analytics-config';
 
-const siteSettings = await getSiteSettings().catch(() => null);
+const siteSettings = await getSiteSettings();
 
 // The address for questions and removals. Site settings owns it so it can be
 // changed without a deploy; the fallback is the address the contact form

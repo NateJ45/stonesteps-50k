@@ -20,9 +20,9 @@ import Topo from '@/components/race/Topo.astro';
 import { getNotFoundPage, getRace, getSiteSettings } from '@/lib/queries';
 
 const [notFoundPage, siteSettings, race] = await Promise.all([
-  getNotFoundPage().catch(() => null),
-  getSiteSettings().catch(() => null),
-  getRace().catch(() => null),
+  getNotFoundPage(),
+  getSiteSettings(),
+  getRace(),
 ]);
 
 const seoTitle = notFoundPage?.seoTitle ?? 'Wrong turn';

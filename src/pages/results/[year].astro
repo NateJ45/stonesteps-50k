@@ -43,10 +43,7 @@ import { formatRaceTime } from '@/lib/race-time';
 import { fastestByBracket } from '@/lib/bracket-leaders';
 
 export async function getStaticPaths() {
-  const [results, distances] = await Promise.all([
-    getAllResults().catch(() => []),
-    getDistanceRefs().catch(() => []),
-  ]);
+  const [results, distances] = await Promise.all([getAllResults(), getDistanceRefs()]);
 
   const rows = results as ResultRow[];
   const dists = distances as DistanceRef[];
@@ -70,7 +67,7 @@ export async function getStaticPaths() {
 }
 
 const { edition, newer, older } = Astro.props;
-const siteSettings = await getSiteSettings().catch(() => null);
+const siteSettings = await getSiteSettings();
 
 const anyTrekker = edition.distances.some((d) => d.rows.some((r) => r.trekker));
 

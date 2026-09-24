@@ -12,11 +12,7 @@ import { site } from '@/data/site';
 import { DEFAULT_HOME_SECTIONS } from '@/data/defaultSections';
 import { raceEventSchema } from '@/lib/race-schema';
 
-const [page, siteSettings, race] = await Promise.all([
-  getHomePage().catch(() => null),
-  getSiteSettings().catch(() => null),
-  getRace().catch(() => null),
-]);
+const [page, siteSettings, race] = await Promise.all([getHomePage(), getSiteSettings(), getRace()]);
 
 const title = page?.seoTitle ?? site.name;
 const description =

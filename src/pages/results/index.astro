@@ -27,9 +27,9 @@ import { summariseEditions, type ResultRow, type DistanceRef } from '@/lib/editi
 import { formatRaceTime } from '@/lib/race-time';
 
 const [results, distances, siteSettings] = await Promise.all([
-  getAllResults().catch(() => []),
-  getDistanceRefs().catch(() => []),
-  getSiteSettings().catch(() => null),
+  getAllResults(),
+  getDistanceRefs(),
+  getSiteSettings(),
 ]);
 
 const editions = summariseEditions(results as ResultRow[], distances as DistanceRef[]);

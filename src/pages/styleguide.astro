@@ -36,7 +36,7 @@ import Ticker from '@/components/sections/Ticker.astro';
 import Provisional from '@/components/race/Provisional.astro';
 import { getSiteSettings } from '@/lib/queries';
 
-const siteSettings = await getSiteSettings().catch(() => null);
+const siteSettings = await getSiteSettings();
 
 /** Fixed stand-ins. Never read from Sanity: that is the whole point. */
 const DISTANCES = [
