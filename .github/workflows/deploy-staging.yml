@@ -70,7 +70,7 @@ jobs:
       # 404s. Deploy the adapter's own config, exactly as `npm run deploy`
       # does, and override only the Worker name so production is never touched.
       - name: Deploy to the staging Worker
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
