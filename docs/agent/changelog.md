@@ -10,6 +10,16 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-30 — Reduced-motion reset: transitions are `0s`, not `0.01ms` (starter PORTS.md card 61)._
+
+The global `prefers-reduced-motion: reduce` reset gave every element a 0.01ms
+transition (`transition-property` defaults to `all`), and WebKit never finishes a
+10-microsecond one, so they pile up at progress 0 holding old values. Now
+`transition-duration: 0s` plus `transition-delay: 0s`; animations keep 0.01ms so
+`animationend` still fires. Nothing here listens for `transitionend`. Added the
+PORTABLE `tests/reduced-motion.spec.ts` and put it on the `webkit-iphone`
+project's `testMatch` (`playwright.config.ts` replaced with the starter's copy).
+
 _2026-09-29 — `astro dev` on Windows: `@sanity/astro`'s dedupe alias repaired (starter PORTS.md card 60)._
 
 `@sanity/astro`'s dev-only `sanity:module-dedupe` Vite plugin aliases `sanity` and
