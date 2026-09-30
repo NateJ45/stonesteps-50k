@@ -21,8 +21,12 @@ never loads the plugin, so CI and production never saw it. Ported from the start
 took it from reid-design-site, PR #48): `src/lib/sanity-dedupe-alias.ts` (PORTABLE) plus its
 node:test spec (10 tests), wired into `vite.plugins` in `astro.config.mjs`. Do not remove it
 and do not use `SANITY_ASTRO_DISABLE_MODULE_DEDUPE=1` (the Studio then fails to hydrate).
-This repo never hit the crash because `optimizeDeps.exclude` already skipped the pre-bundle
-for `sanity`; see the next entry for what that exclude was costing.
+This repo did not reproduce the crash before the port: its `optimizeDeps.exclude` had
+`sanity` in it, which skipped the pre-bundle that trips the bad alias. That exclude was a
+workaround for the same bug and had a known cost, the embedded Studio not hydrating under
+`npm run dev` (`react/compiler-runtime ... does not provide an export named 'c'`). With the
+alias repaired the exclude is dropped (`['@sanity/ui', 'styled-components']`, same as the
+starter) and the Studio hydrates in dev; `astro build` output is byte-identical either way.
 
 _2026-09-23 — Build reads go through the CDN; a failed fetch fails a production build._
 

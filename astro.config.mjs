@@ -197,30 +197,23 @@ export default defineConfig({
     // Full story: src/lib/sanity-dedupe-alias.ts and PORTS.md card 60.
     plugins: [tailwindcss(), fixSanityDedupeAlias()],
     optimizeDeps: {
-      // THE `sanity` ENTRY IS WHAT MAKES `npm run dev` START AT ALL.
-      // Astro 7 pre-bundles dependencies with rolldown. `sanity` is
-      // exports-only (no `main` field) and its own modules import the package
-      // by name — `import { FormRow, ... } from 'sanity'` at the top of
-      // node_modules/sanity/lib/presentation.js. Rolldown resolves that
-      // self-reference to the package.json instead of to the "." entry it
-      // points at, and every name comes back MISSING_EXPORT: "Build failed
-      // with 346 errors", process exit 1, nothing ever listening on 4321.
-      // Skipping the pre-bundle skips the whole failure.
+      // `sanity` USED TO BE EXCLUDED HERE; IT IS NOT ANY MORE (2026-09-29).
+      // The exclude was a workaround for a misdiagnosed crash: on Windows
+      // `astro dev` died with `[MISSING_EXPORT] ... is not exported by
+      // "node_modules/sanity/package.json"`, which looked like a rolldown
+      // self-reference bug in sanity's own imports. It was really
+      // @sanity/astro's dev-only `sanity:module-dedupe` alias pointing `sanity`
+      // at its package.json FILE (a forward-slash-only regex). Now that
+      // fixSanityDedupeAlias() (vite.plugins above) repairs the alias, `sanity`
+      // pre-bundles normally, and the embedded Studio hydrates under
+      // `npm run dev` (it did not while `sanity` was excluded: the browser
+      // logged "does not provide an export named 'c'" for
+      // react/compiler-runtime, because that CJS entry never got its ESM
+      // pre-bundle). Do not add `sanity` back to this list.
+      // Story: starter PORTS.md card 60.
       //
-      // `astro build` does not run the optimizer, which is why this was
-      // invisible in CI and total locally, and why the deployed site was never
-      // affected.
-      //
-      // KNOWN REMAINING GAP: the same bad resolution then happens in the
-      // browser for the EMBEDDED STUDIO, so /studio does not hydrate under
-      // `npm run dev` ("does not provide an export named
-      // 'DEFAULT_STUDIO_CLIENT_OPTIONS'"). The public site is fine. To work on
-      // the Studio locally, build and serve it: `npm run build && npm run
-      // preview`. Tried and rejected: a `resolve.alias` pinning the bare
-      // specifier to lib/index.js (neither the optimizer nor the browser
-      // honours it for these node_modules-internal imports), explicit
-      // `include` of the sanity subpaths (optimizer fails identically), and
-      // dropping `sanity` from `dedupe` below (no effect).
+      // `astro build` does not run the optimizer, which is why none of this
+      // was ever visible in CI or on the deployed site.
       //
       // @sanity/ui and styled-components predate this and are here for the
       // same class of reason: their ESM builds get mis-scanned by the
@@ -233,7 +226,7 @@ export default defineConfig({
       // init, surfacing as "TypeError: Cannot read properties of undefined
       // (reading 'v2')" from inside styled-components' generateAndInjectStyles.
       // Leave the bundler's default chunking alone.
-      exclude: ['@sanity/ui', 'styled-components', 'sanity'],
+      exclude: ['@sanity/ui', 'styled-components'],
       // Tried and reverted: `include: ['react/compiler-runtime']`, meant to
       // give the unbundled Studio an ESM copy of that CJS entry. It did not get
       // the Studio hydrating (the sanity self-reference fails in the browser
