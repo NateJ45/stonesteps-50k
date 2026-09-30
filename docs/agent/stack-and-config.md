@@ -33,6 +33,8 @@ A few `astro.config.mjs` levers that look tempting but break things -- left docu
 
 - **`crossorigin="anonymous"` on Sanity CDN images breaks them.** Sanity's CDN doesn't send `Access-Control-Allow-Origin` for credential-less image requests, so the browser refuses the response and the image fails to render. Lighthouse's third-party-cookie warning about `sanitySession` is a real cookie, but the only known fix would proxy every image through a Cloudflare Worker -- not worth the engineering for an unscored Best Practices flag.
 
+- **Do not remove `fixSanityDedupeAlias()` from `vite.plugins`, and do not set `SANITY_ASTRO_DISABLE_MODULE_DEDUPE=1`.** `@sanity/astro`'s dev-only `sanity:module-dedupe` plugin builds its alias with `.replace(/\/package\.json$/, '')`, which matches a forward slash only. On Windows the alias therefore points `sanity` at `node_modules/sanity/package.json` and `astro dev` dies with `[MISSING_EXPORT] ... is not exported by "node_modules/sanity/package.json"`. `astro build` never loads the plugin, so CI and production are unaffected. The helper (`src/lib/sanity-dedupe-alias.ts`, PORTABLE, spec `sanity-dedupe-alias.test.ts`) corrects the alias in place and is a no-op elsewhere. The off-switch env var drops the plugin's `optimizeDeps.include` list too, and the Studio then fails to hydrate in the browser. Story and measurements: starter PORTS.md card 60.
+
 ### Build order: typegen before build
 
 `npm run build` runs `astro build` only. It does NOT chain typegen.

@@ -10,6 +10,20 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-29 — `astro dev` on Windows: `@sanity/astro`'s dedupe alias repaired (starter PORTS.md card 60)._
+
+`@sanity/astro`'s dev-only `sanity:module-dedupe` Vite plugin aliases `sanity` and
+`styled-components` to `require.resolve('<pkg>/package.json').replace(/\/package\.json$/, '')`.
+The regex matches a forward slash only, so on Windows `sanity` is aliased to its
+`package.json` file and any dev run that reaches the optimizer dies with
+`[MISSING_EXPORT] ... is not exported by "node_modules/sanity/package.json"`. `astro build`
+never loads the plugin, so CI and production never saw it. Ported from the starter (which
+took it from reid-design-site, PR #48): `src/lib/sanity-dedupe-alias.ts` (PORTABLE) plus its
+node:test spec (10 tests), wired into `vite.plugins` in `astro.config.mjs`. Do not remove it
+and do not use `SANITY_ASTRO_DISABLE_MODULE_DEDUPE=1` (the Studio then fails to hydrate).
+This repo never hit the crash because `optimizeDeps.exclude` already skipped the pre-bundle
+for `sanity`; see the next entry for what that exclude was costing.
+
 _2026-09-23 — Build reads go through the CDN; a failed fetch fails a production build._
 
 Ported from fbcm (`897cec9`), a sibling repo in the same family that hit the failure
