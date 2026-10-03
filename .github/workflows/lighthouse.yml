@@ -3,21 +3,47 @@
 # block, and the `url` list in lighthouserc.json names the pages a given repo
 # builds. The ASSERTIONS in lighthouserc.json are the part that must not
 # diverge. Copy the shape, not the bytes.
+#
+# -- WHEN IT RUNS (card 62) ---------------------------------------------------
+# Lighthouse is the slowest gate by a distance (three passes over every listed
+# URL). It is NOT a required status check (only `build` and `test` are), so it
+# is free to be scheduled rather than blocking:
+#
+#   - pull_request, path-filtered to what can move a score (markup, styles,
+#     assets, scripts, config), and audited on a SAMPLE of URLs, one per
+#     distinct template, via --collect.url flags below. The full list in
+#     lighthouserc.json is untouched.
+#   - weekly schedule, FULL url list: catches drift nobody pushed (a font host
+#     change, a dependency bump that landed on a different path).
+#   - workflow_dispatch: a branch tip on demand, full list.
+#
+# A docs-only, content-only or workflow-only PR therefore runs no Lighthouse and
+# reports no check, which the dependabot auto-merge workflow treats as green.
 name: Lighthouse
 
 on:
-  # NOT ON PUSH, since 2026-09-12. This audit runs six URLs three times each,
-  # which made it the most expensive workflow in the repo by a distance: 507 of
-  # roughly 1,360 Actions minutes over the first five days of September, on a
-  # private repo with a 2,000 minute monthly allowance. The signal is worth
-  # having and almost never worth having per commit, so it runs weekly against
-  # main, on any pull request, and on demand.
+  # NOT ON PUSH, since 2026-09-12, and card 62 deliberately did not bring it
+  # back. This audit runs six URLs three times each, which made it the most
+  # expensive workflow in the repo by a distance: 507 of roughly 1,360 Actions
+  # minutes over the first five days of September, on a private repo with a
+  # 2,000 minute monthly allowance. The signal is worth having and almost never
+  # worth having per commit, so it runs weekly against main, on score-moving
+  # pull requests, and on demand.
   #
   # Dispatchable so a branch tip can be re-audited without pushing an empty
   # commit, which is also now the way to audit a specific main commit.
   schedule:
     - cron: '30 8 * * 1' # Mondays 08:30 UTC
   pull_request:
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/serve-dist.mjs'
+      - 'lighthouserc.json'
+      - 'astro.config.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/lighthouse.yml'
   workflow_dispatch:
 
 # A newer push to the same branch obsoletes the in-flight run; cancel it
@@ -48,7 +74,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       # Same build ci.yml runs: consumes the committed src/lib/sanity.types.ts,
       # emits dist/client (audited here) and dist/server (the SSR bundle for
@@ -59,5 +85,24 @@ jobs:
       # Accessibility is a hard gate (minScore 1) in lighthouserc.json, as are
       # LCP 4500ms and CLS 0.1; performance, best-practices and SEO are
       # warnings so normal CI variance does not block a PR.
-      - name: Lighthouse CI
+      #
+      # On a PR the URL list is overridden with ONE PAGE PER TEMPLATE. Passing
+      # --collect.url replaces the config's list, so the assertions and the
+      # median-of-3 stay exactly as the standard defines them; only the page set
+      # shrinks. The sample: home (src/pages/index.astro), /course/ (the
+      # Sanity-page template src/pages/[slug].astro, shared with /records/ and
+      # /contact/), /results/ (the listing) and /results/2025/ (the per-year
+      # template [year].astro). The 404 is bespoke but is not in the full list
+      # either, so it is not added here.
+      - name: Lighthouse CI (sample, pull request)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: >-
+          npx lhci autorun
+          --collect.url=http://localhost:4173/
+          --collect.url=http://localhost:4173/course/
+          --collect.url=http://localhost:4173/results/
+          --collect.url=http://localhost:4173/results/2025/
+
+      - name: Lighthouse CI (full)
+        if: ${{ github.event_name != 'pull_request' }}
         run: npx lhci autorun
