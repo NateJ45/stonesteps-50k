@@ -62,8 +62,10 @@ npm test             # Playwright: smoke, axe light, axe dark, reflow
 npx lhci autorun     # Lighthouse against the built dist/client
 ```
 
-`ci.yml` runs the first five in two parallel jobs on every push and PR; `lighthouse.yml`
-runs the audit separately. Accessibility is a hard gate at 100, LCP 4500ms and CLS 0.1
+`ci.yml` runs the first five as parallel jobs on every push and PR (`static` and `site`, then
+`e2e` in 3 Playwright shards on the build `site` uploaded; `build` and `test` are the
+required-check aggregators); `lighthouse.yml` runs the audit separately (weekly on the full
+URL list, and on PRs that touch score-moving paths using one URL per template). Accessibility is a hard gate at 100, LCP 4500ms and CLS 0.1
 are hard, performance / SEO / best-practices are warnings. The Playwright suites run on
 Chromium and a real WebKit iPhone profile, because that is where a Tailwind focus ring
 on a `<select>` turns out to be invisible.

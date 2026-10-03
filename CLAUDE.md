@@ -46,7 +46,7 @@ Full stack notes and the `astro.config.mjs` landmines are in `docs/agent/stack-a
 
 ## Branch, CI and deploy
 
-- Work on a branch and open a PR; CI (`ci.yml`) runs on pushes to `main` and on every PR: the fast gate, `check:full`, `format:check`, `check:links` and Playwright, in two parallel jobs. `lighthouse.yml` runs `npx lhci autorun` separately. Parity is deliberately a local gate.
+- Work on a branch and open a PR; CI (`ci.yml`) runs on pushes to `main` and on every PR as parallel jobs: `static` (audits, typegen, stale-types guard, check, lint, format, unit) and `site` (build once, links, upload `dist/client`) feed the required check `build`; `e2e` (Playwright in 3 shards on the uploaded build) feeds the required check `test`. `build` and `test` are aggregators: keep the names, and never path-filter `ci.yml`. `lighthouse.yml` (path-filtered PRs on a 4-URL sample, weekly full run, never on push) and `visual.yml` (path-filtered) run separately. Parity is deliberately a local gate.
 - Push to `main` deploys to the Cloudflare Worker (`deploy.yml`; prose-only paths such as `docs/**`, `CLAUDE.md`, `*.md` are ignored). `main` is the only branch and a merge is the production deploy (staging was abandoned 2026-10-03). Work on short-lived branches, PR into `main`, merge when CI (`build`, `test`) is green.
 - Content is statically built: a Sanity edit only goes live after a rebuild (push to `main`, or the Sanity publish webhook). Detail in `docs/agent/deployment.md`.
 - Never read or print `.env` or `.dev.vars`. `SANITY_TOKEN` is a runtime secret (`npx wrangler secret put SANITY_TOKEN`).

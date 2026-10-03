@@ -10,6 +10,10 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-10-03 — CI is parallel, sharded and builds once; Lighthouse is path-filtered (starter PORTS.md card 70)._
+
+Before: `ci.yml` was two serial jobs, the site was built twice per run (the `build` job, then Playwright's `webServer`) and the Playwright browsers were downloaded fresh every run. Now `static` and `site` run in parallel, `site` builds once and uploads `dist/client`, and `e2e` runs Playwright in 3 shards (`--shard=N/3`, `PLAYWRIGHT_SKIP_BUILD=1`, browsers cached by Playwright version via `actions/cache@v6`). `build` and `test` are cheap aggregator jobs and are REQUIRED status checks in this repo's ruleset, so those names stay and `ci.yml` has no path filter. `playwright.config.ts` (PORTABLE) was replaced with the starter's copy; its only change is the `PLAYWRIGHT_SKIP_BUILD` switch in `webServer.command`. `lighthouse.yml`: PRs run only when score-moving paths change (`src/**`, `public/**`, `scripts/serve-dist.mjs`, `lighthouserc.json`, `astro.config.mjs`, package files, the workflow) and audit one URL per template (`/`, `/course/`, `/results/`, `/results/2025/`) via `--collect.url`; the weekly cron keeps the full six-URL list. The `env:` block, `lighthouserc.json` and its assertions are untouched. Deliberately NOT done: re-adding a `push` trigger to Lighthouse (removed 2026-09-12 to save Actions minutes on this private repo). `visual.yml`: the pull_request trigger got the same `paths:` as push. `npm ci --no-audit --no-fund` everywhere.
+
 _2026-09-30 — Reduced-motion reset: transitions are `0s`, not `0.01ms` (starter PORTS.md card 61)._
 
 The global `prefers-reduced-motion: reduce` reset gave every element a 0.01ms
