@@ -26,6 +26,8 @@ paths:
   - 'scripts/free-dist.mjs'
   - 'scripts/page-parity.mjs'
   - 'scripts/sync-check.mjs'
+  - '.claude/settings.json'
+  - 'docs/claude/family-conventions.md'
   - 'scripts/lib/sanity-lib.mjs'
   - 'scripts/generate-*.mjs'
   - 'scripts/optimize-logo-files.mjs'
@@ -55,6 +57,7 @@ Moved verbatim from CLAUDE.md. Loads when a foundation file is touched. Files th
 - `scripts/apply-brand.mjs` -- the brand reskin script. Reads `brand/brand.config.json` and rewrites globals.css, site.ts, Studio config, and regenerates the OG image. Idempotent.
 - `scripts/generate-og-default.mjs`, `scripts/generate-og-pages.mjs`, `scripts/generate-llms-full.mjs`, `scripts/generate-logo-variants.mjs`, `scripts/optimize-logo-files.mjs`, `scripts/import-content.mjs` -- reusable generator and import scripts
 - `scripts/with-workerd.mjs`, `scripts/free-dist.mjs`, `scripts/page-parity.mjs`, `scripts/sync-check.mjs`, `scripts/lib/sanity-lib.mjs`, `src/lib/contrast.ts`, `src/lib/sanity-dedupe-alias.ts` (+ its `.test.ts`) -- **canonical copies owned by this repo on behalf of the whole site family.** Each carries a `PORTABLE:` first-line marker. Editing one changes the family's copy, so make general changes only and note them on the matching PORTS.md card. Site-specific behavior does not belong in a marked file.
+- `.claude/settings.json` and `docs/claude/family-conventions.md` -- **canonical copies owned by the starter** (PORTS.md card 71): the first is the tracked deny-rule file (no `reset --hard`, no force pushes), the second is the shared code-conventions and working-with-Claude text that CLAUDE.md imports. Both are byte-exact; change them in the starter, never here.
 - The in-canvas control layer is canonical too (PORTS.md cards 28, 28a, 28b): `src/lib/sanity-path.ts`, `src/lib/inline-rich.ts`, `src/lib/inline-rich-write.ts`, `src/lib/heading-accent.ts` (+ their `.test.ts`) and `src/components/preview/overlay/{usePopover,useDraftDocument,styles}.ts`. **Three seams keep them shareable, and every one of them is a per-repo file, never a branch inside a marked one:** `readSectionPath(path, arrayFields)` takes the page-builder array names (the list lives in `src/lib/section-fields.ts`), `overlay/tool-theme.ts` holds the six palette values `styles.ts` draws with, and `RichWriteOptions.multiline` says whether a repo's twin keeps its line breaks. Reid-design-site and mas-monograms carry four of these files, so a change to any of them puts five repos into drift -- reach for a seam before an edit.
 - `astro.config.mjs`, `wrangler.jsonc`, `package.json`, `tsconfig.json`, `components.json`
 - `public/_headers` (security response headers shipped with the deploy)

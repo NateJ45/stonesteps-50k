@@ -1,7 +1,8 @@
-# The family test standard's CI workflow (PORTS.md card 35). Deliberately NOT
-# marked PORTABLE: it carries a per-site `env:` block, so a byte-exact drift
-# check would fail forever on every repo. Copy the SHAPE from here, and keep
-# the step list, the concurrency group and the linkinator skip identical.
+# The family test standard's CI workflow (PORTS.md card 35, restructured for
+# speed by card 70). Deliberately NOT marked PORTABLE: it carries a per-site
+# `env:` block, so a byte-exact drift check would fail forever on every repo.
+# Copy the SHAPE from here, and keep the job ids, the step list, the
+# concurrency group and the linkinator skip identical.
 #
 # This repo HAS a Sanity project, and the identifiers below are wired at the
 # workflow level on purpose. They are public: they appear in every GROQ request
@@ -15,6 +16,22 @@
 # yields zero paths, and those three routes simply do not exist in dist. The
 # build stays green and the smoke suite then 404s on three of the site's four
 # pages. That is exactly how this workflow failed on 2026-09-07.
+#
+# -- SHAPE (why it looks like this) -------------------------------------------
+# Before card 70 this was two serial jobs and the site was built TWICE per run
+# (the build job, then Playwright's webServer), with the Playwright browsers
+# downloaded from scratch every time. Wall time was the sum of every gate. Now:
+#
+#   static -+                      (audits, typegen, types, check, lint, format,
+#           |                       unit)
+#   site ---+-> build (aggregator)  (build once, link check, upload dist/client)
+#           +-> e2e x3 shards -> test (aggregator)  (reuse the uploaded build)
+#
+# `build` and `test` are REQUIRED status checks in this repo's ruleset, so those
+# two names must keep existing and must fail when anything behind them fails.
+# They are aggregators now; the work runs in `static`, `site` and `e2e`. Do not
+# rename them, and do not put a path filter on this workflow: a required check
+# that never reports blocks the merge forever.
 name: CI
 
 on:
@@ -29,15 +46,17 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# Wired at the workflow level so the build job and the test job agree about what
-# the site contains. Setting it per-step is how three routes came to exist in
-# one job and not the other.
+# Wired at the workflow level so every job agrees about what the site contains.
+# Setting it per-step is how three routes came to exist in one job and not the
+# other.
 env:
   PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
   PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
 
 jobs:
-  build:
+  # Everything that does not need a built site. Runs in parallel with `site`.
+  static:
+    name: Static checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -51,7 +70,7 @@ jobs:
       # there is no `npm ci --prefix studio` step and no separate Studio build:
       # `npm run build` builds the embedded /studio along with the site.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       # The library of record checks ITSELF: run from the starter, sync-check
       # resolves the starter to this repo root, so site and library are the
@@ -63,12 +82,6 @@ jobs:
       - name: Canonical files have not drifted (self-check)
         run: node scripts/sync-check.mjs
 
-      # NODE_OPTIONS raises the heap for this step only. `sanity schema extract`
-      # bundles the whole Studio config and its import graph, and on the hosted
-      # runners it intermittently dies with "Aborted (core dumped)" (exit 134)
-      # while the same command succeeds locally: the classic signature of a
-      # Linux CI box with less memory than the dev machine. It is runner flake,
-      # not a schema problem, so retry up to three times before calling it red.
       # What can a stranger read out of this site's dataset? Sanity's free plan
       # is "2 datasets (public only)", so a public dataset is world readable over
       # a plain URL with no token, and the project id ships in the page source.
@@ -101,6 +114,12 @@ jobs:
       - name: Share cards match the content
         run: npm run og:check
 
+      # NODE_OPTIONS raises the heap for this step only. `sanity schema extract`
+      # bundles the whole Studio config and its import graph, and on the hosted
+      # runners it intermittently dies with "Aborted (core dumped)" (exit 134)
+      # while the same command succeeds locally: the classic signature of a
+      # Linux CI box with less memory than the dev machine. It is runner flake,
+      # not a schema problem, so retry up to three times before calling it red.
       - name: Generate Sanity types
         env:
           NODE_OPTIONS: --max-old-space-size=4096
@@ -148,6 +167,21 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+  # Builds the site ONCE. Everything downstream reuses what this uploads.
+  site:
+    name: Build and links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
       # `astro build` builds the embedded Studio at /studio as part of the
       # site, so there is no separate `sanity build` step. Do NOT add one back:
       # `sanity build` writes to ./dist by default and would clobber the Astro
@@ -173,8 +207,36 @@ jobs:
       # meant to be render-neutral (PORTS.md card 3). Wire it in here only after
       # proving a CI capture matches a local one.
 
-  test:
+      # Only dist/client: that is all the Playwright shards serve. dist/server
+      # (the SSR bundle) is never exercised by the static suite.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist-client
+          path: dist/client
+          retention-days: 1
+          if-no-files-found: error
+
+  # REQUIRED CHECK. Green only when both halves are green.
+  build:
+    name: build
+    if: ${{ always() }}
+    needs: [static, site]
     runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "static=${{ needs.static.result }} site=${{ needs.site.result }}"
+          [ "${{ needs.static.result }}" = "success" ] && [ "${{ needs.site.result }}" = "success" ]
+
+  # The Playwright suite, sharded. fullyParallel is on in playwright.config.ts,
+  # so --shard splits at TEST granularity and the shards come out even.
+  e2e:
+    name: e2e (shard ${{ matrix.shard }}/3)
+    needs: [site]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     steps:
       - uses: actions/checkout@v7
 
@@ -184,35 +246,75 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
-      # Both projects in playwright.config.ts: chromium (desktop) AND
-      # webkit-iphone (iPhone 14). Installing only chromium makes every webkit
-      # test die with "Executable doesn't exist".
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist-client
+          path: dist/client
+
+      # The browser download is the slow part, the apt libraries are not. Cache
+      # the browsers by Playwright version; on a hit install only the system
+      # libraries. Both projects in playwright.config.ts need a browser:
+      # chromium (desktop) AND webkit-iphone (iPhone 14). Installing only
+      # chromium makes every webkit test die with "Executable doesn't exist".
+      - name: Resolve Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v6
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      # `--with-deps` runs `apt-get update`, which fails outright when the
+      # runner's third-party Chrome/Microsoft apt sources are mid-sync and
+      # report a "Hash Sum mismatch" (that killed a WCP deploy 2026-09-09).
+      # Playwright's system libraries come from Ubuntu's own archive, so drop
+      # those sources first, then retry once for transient network failures.
       - name: Install Playwright browsers
-        # `--with-deps` runs `apt-get update`, which fails outright when the
-        # runner's third-party Chrome/Microsoft apt sources are mid-sync and
-        # report a "Hash Sum mismatch" (that killed a WCP deploy 2026-09-09).
-        # Playwright's system libraries come from Ubuntu's own archive, so drop
-        # those sources first, then retry once for transient network failures.
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: |
           sudo rm -f /etc/apt/sources.list.d/google-chrome* /etc/apt/sources.list.d/microsoft*
           npx playwright install --with-deps chromium webkit ||
             npx playwright install --with-deps chromium webkit
 
+      - name: Install Playwright system libraries (browsers cached)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome* /etc/apt/sources.list.d/microsoft*
+          npx playwright install-deps chromium webkit ||
+            npx playwright install-deps chromium webkit
+
       # smoke (every route 200s and carries the site name in its title), axe in
       # light, axe in dark as a separate sweep plus a focus-indicator check (a
       # theme swap is a different resting DOM), and reflow at 320/768/1024/1440
-      # (WCAG 1.4.10 starts at 320, not 375). The config's webServer runs
-      # `npm run build` itself and serves dist/client. The html reporter is
-      # added on the command line so local runs keep the quiet `list` output
-      # while CI still produces the report artifact below.
+      # (WCAG 1.4.10 starts at 320, not 375). PLAYWRIGHT_SKIP_BUILD makes the
+      # config serve the downloaded dist/client instead of running
+      # `npm run build` a second time. The html reporter is added on the command
+      # line so local runs keep the quiet `list` output while CI still produces
+      # the report artifact below.
       - name: Run tests (smoke, a11y light + dark, reflow)
-        run: npm test -- --reporter=github,html
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npm test -- --shard=${{ matrix.shard }}/3 --reporter=github,html
 
+      # Only on failure: a green run has nothing worth the upload time.
       - uses: actions/upload-artifact@v7
-        if: ${{ !cancelled() }}
+        if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 14
+
+  # REQUIRED CHECK. Green only when every shard is green.
+  test:
+    name: test
+    if: ${{ always() }}
+    needs: [e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "e2e=${{ needs.e2e.result }}"
+          [ "${{ needs.e2e.result }}" = "success" ]

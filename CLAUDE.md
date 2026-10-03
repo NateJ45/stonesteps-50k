@@ -4,6 +4,8 @@ Always-loaded rules for this repo, kept short on purpose. Anything file-specific
 
 The site is stonesteps50k.com for the Stone Steps 50K / 27K race (Mt. Airy Forest, Cincinnati). Astro 7 + Sanity (project 7iynvqq6, dataset production, Studio embedded at `/studio`) on a Cloudflare Worker, forked from `ncs-astro-sanity-starter`.
 
+**Design context.** `PRODUCT.md` (audience, purpose, tone, anti-references; open questions are `TODO(Nathan)` lines) and `DESIGN.md` (the visual system as built) sit at the repo root; read them before any design work and update them in the same change when the system moves.
+
 **Read `docs/PENDING.md` early in a session.** It is the live registry of open loops: queued work, known gaps, and waiting-on-a-human items. If you finish or discover one, update it in the same commit.
 
 `ncs-astro-sanity-starter` is a production-ready Astro + Sanity + Cloudflare Workers site template forked from a finished client build. This is a **page-builder-first** starter: the home, about, services, and process pages all render via a shared `SectionRenderer` component fed by Sanity `pageBuilder` arrays, and any custom page created in the Studio gets a `/[slug]` route for free. The infrastructure -- build pipeline, CMS integration, deploy hooks, polish layer, section-visibility system, component library, Lighthouse 100/100/100/100 baseline -- is already standing. A new project pours in two things: its brand identity (run `npm run apply-brand` with `brand/brand.config.json`) and its content.
@@ -46,7 +48,7 @@ Full stack notes and the `astro.config.mjs` landmines are in `docs/agent/stack-a
 
 ## Branch, CI and deploy
 
-- Work on a branch and open a PR; CI (`ci.yml`) runs on pushes to `main` and on every PR: the fast gate, `check:full`, `format:check`, `check:links` and Playwright, in two parallel jobs. `lighthouse.yml` runs `npx lhci autorun` separately. Parity is deliberately a local gate.
+- Work on a branch and open a PR; CI (`ci.yml`) runs on pushes to `main` and on every PR as parallel jobs: `static` (audits, typegen, stale-types guard, check, lint, format, unit) and `site` (build once, links, upload `dist/client`) feed the required check `build`; `e2e` (Playwright in 3 shards on the uploaded build) feeds the required check `test`. `build` and `test` are aggregators: keep the names, and never path-filter `ci.yml`. `lighthouse.yml` (path-filtered PRs on a 4-URL sample, weekly full run, never on push) and `visual.yml` (path-filtered) run separately. Parity is deliberately a local gate.
 - Push to `main` deploys to the Cloudflare Worker (`deploy.yml`; prose-only paths such as `docs/**`, `CLAUDE.md`, `*.md` are ignored). `main` is the only branch and a merge is the production deploy (staging was abandoned 2026-10-03). Work on short-lived branches, PR into `main`, merge when CI (`build`, `test`) is green.
 - Content is statically built: a Sanity edit only goes live after a rebuild (push to `main`, or the Sanity publish webhook). Detail in `docs/agent/deployment.md`.
 - Never read or print `.env` or `.dev.vars`. `SANITY_TOKEN` is a runtime secret (`npx wrangler secret put SANITY_TOKEN`).
@@ -79,27 +81,16 @@ PORTABLE-marked files are canonical in the starter; do not make site-specific ed
 
 ---
 
-## Code conventions
+## Code conventions and Working with Claude
 
-- TypeScript strict mode. No `any`.
-- Comment generously, especially in components that a future maintainer might edit by hand.
-- At the top of each component file, add a header comment marking it `// Safe to edit by hand` or `// Foundation, edit with care`.
-- Astro components for static content. React islands only where interactivity is required (lightbox, mobile nav, form handler, before/after slider, accordions).
-- Prefer Astro's built-in `<Image />` and `<Picture />` components over plain `<img>` tags for any locally-bundled assets. For Sanity-hosted images, use the project's `<SanityImage />` wrapper (see image handling section).
-- Tailwind utility classes inline. Pull into `@apply` only when a pattern repeats four or more times.
-- Use `clsx` or `class-variance-authority` for conditional classes once components get state-dependent styling.
+Shared by every site repo in the family, so they live in one PORTABLE file imported here (it is expanded into context at launch, so this saves lines in this file, not tokens): the code conventions (strict TypeScript, header comments, Astro and React islands, images, Tailwind) and the working-with-Claude habits (desktop app, Plan Mode, confirm before installing, describe design in plain language, verify in a real browser).
 
----
+@docs/claude/family-conventions.md
 
-## Working with Claude
+Stone Steps specifics on top of the shared text:
 
-- Use Claude Code from the desktop app, not the terminal. Show diffs clearly so they read well in that UI.
-- Prefer Plan Mode for any multi-file change, especially when touching Sanity schemas (schema changes propagate to live content).
-- Pause for confirmation before installing new dependencies.
-- When proposing design changes, describe the visual outcome in plain language, not just the code.
-- For browser-based verification, prefer the Playwright MCP. What to verify (both themes, both viewports, interactive states, adjacent sections) is in `.claude/rules/ui-verification.md`, which loads when you touch UI files.
-- For Sanity Studio testing, run `npm run dev` and open `/studio` in a real browser. A 200 response is not verification; read the console.
-- Don't report a UI change as done without screenshots in both themes and both viewports.
+- Images: the shared file says to use `<SanityImage />` for Sanity-hosted images; the image handling detail is in `docs/agent/images.md`.
+- What to verify in the browser (both themes, both viewports, interactive states, adjacent sections) is in `.claude/rules/ui-verification.md`, which loads when you touch UI files. This site ships light AND dark, so every UI change needs screenshots in both themes at both viewports.
 
 ## Style (short version; full rules in `.claude/rules/copy-and-voice.md`)
 
@@ -132,6 +123,7 @@ PORTABLE-marked files are canonical in the starter; do not make site-specific ed
 | Routes table and opt-in modules                                         | `docs/claude/routes-and-modules.md`              |
 | Files safe to edit by hand                                              | `docs/claude/safe-to-edit.md`                    |
 | PORTS.md and sync-check working rules                                   | `docs/claude/library-of-record.md`               |
+| Shared code conventions and Claude habits (PORTABLE, imported above)    | `docs/claude/family-conventions.md`              |
 | Deep dives (theme, components, SEO, performance, Sanity, deployment...) | `docs/claude/topic-index.md` then `docs/agent/*` |
 | Cross-repo registry                                                     | `PORTS.md`                                       |
 | New-project setup                                                       | `docs/bootstrap/NEW-PROJECT.md`                  |
