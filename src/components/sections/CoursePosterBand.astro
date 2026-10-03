@@ -1,33 +1,47 @@
 ---
 // Foundation, edit with care
 /**
- * The home page's way in to the course map: a still of the real map, with the
- * course drawing itself over it.
+ * The home page's way in to the course map: a live plate of the course, run by
+ * a small figure that does the race in front of you.
  *
- * WHY A PICTURE AND NOT THE MAP. MapLibre is about 250KB before a single tile,
- * and the home page is the one most likely to be opened on a phone on bad
- * signal in a car park. It would also spend the reward: the terrain map is what
- * makes clicking through to /course worth doing. The site's design record
- * already declined WebGL on the home page for both reasons.
+ * WHAT THIS REPLACED. Until 2026-10-03 this band was a screenshot of the 3D map
+ * (`npm run map-poster`) with a caption laid over it. It read as a photograph
+ * of a map: busy, low-contrast, and with nothing to do. Nathan hated it, and
+ * the criticism was right. A still that says "explore" is asking for a click it
+ * has not earned.
  *
- * WHY IT IS STILL HONEST. The picture is THIS SITE'S map, captured from the
- * built page by `npm run map-poster`, and the route over it was projected by
- * that same map at the same instant, so the line cannot drift off the picture.
- * Re-run the command after any change to the map's camera or terrain.
+ * WHAT IT IS NOW. The same recorded run the real map uses (see
+ * `src/lib/courseTeaser.ts`), drawn as an inline SVG on a dark survey plate:
  *
- * IT IS THE TOPOGRAPHIC QUAD, NOT THE SATELLITE IMAGERY, since 2026-09-16.
- * Nathan chose it. Satellite at this size is a continuous green canopy: the
- * relief the course is famous for is under the leaves, so the still showed a
- * route on a lawn. The USGS quad draws the contours, the creeks and the street
- * names, and the terrain exaggeration in the map's camera is still in the
- * picture, so the ridges read as ridges. `POSTER_BASEMAP=satellite npm run
- * map-poster` captures the old version for comparison.
+ *   1. The route draws itself when the band scrolls into view.
+ *   2. A runner then does the actual race, long, short, long, short, long,
+ *      short, long, each lap in its own length, with the elevation strip and
+ *      the lap chips following along. That is the whole race in about half a
+ *      minute, and it teaches the one thing the old picture could not: the
+ *      course is TWO loops, run seven times.
+ *   3. Anything the reader does takes the wheel. Hover or tap a lap chip and
+ *      the runner loops that lap. Move the mouse over the plate and the runner
+ *      goes to the nearest point on the route and reads out the mile and the
+ *      elevation there.
+ *   4. A click anywhere on the plate opens /course on that lap, and on that
+ *      mile if the reader was pointing at one (`?loop=` and `?mile=` are the
+ *      map's own deep links).
  *
- * THE WHOLE THING IS A LINK. Nothing here is interactive on its own: a still
- * that behaves like a map invites people to drag it and conclude the site is
- * broken, so it says what it is and goes to the page that does.
+ * WHY STILL NO MAP LIBRARY. MapLibre is about 250KB before a tile, and this is
+ * the page most likely to be opened on a phone on bad signal in a car park.
+ * This band is inline SVG plus about 200 lines of script, and the real map
+ * stays the reward for the click.
+ *
+ * COLOURS ARE LITERAL, ON PURPOSE. The plate is a dark object in both themes,
+ * like the ink band, so none of it follows the light/dark tokens. The copy
+ * beside it does.
  */
-import poster from '../../../scripts/data/course-poster.json';
+import Topo from '@/components/race/Topo.astro';
+import { buildCourseTeaser, sparkPath } from '@/lib/courseTeaser';
+import profile from '../../../scripts/data/course-profile.json';
+import courseMap from '../../../scripts/data/course-map.json';
+import grade from '../../../scripts/data/course-grade.json';
+import miles from '../../../scripts/data/course-miles.json';
 
 interface Props {
   eyebrow?: string;
@@ -40,7 +54,7 @@ interface Props {
 const {
   eyebrow = 'The map',
   headline = 'See where it actually goes',
-  intro = 'Seven loops out of The Oval, drawn from a recorded run of the course. The full map is yours to move around, tilt and fly.',
+  intro = 'Seven laps out of The Oval, run long, short, long, short, long, short, long. Watch the race, pick a lap, then fly the full 3D map.',
   surface = 'background',
   headingId,
 } = Astro.props as Props;
@@ -49,167 +63,697 @@ const {
 // edge is the site's own band treatment.
 const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 
-const W = poster.width;
-const H = poster.height;
+const t = buildCourseTeaser({ profile, courseMap, grade, miles } as Parameters<
+  typeof buildCourseTeaser
+>[0]);
+
+// One elevation range for every lap, so a long lap's plunge to the creek and a
+// short lap's stay on the ridge can be compared at a glance.
+const chipSpark = (samples: [number, number][]) =>
+  sparkPath(
+    samples.filter((_, i) => i % 2 === 0 || i === samples.length - 1),
+    t.lowFt,
+    t.highFt,
+    64,
+    26,
+  );
+
+// Everything the script needs, as one attribute: seven laps of 48 samples.
+const plateData = JSON.stringify({
+  w: t.width,
+  h: t.height,
+  low: t.lowFt,
+  high: t.highFt,
+  laps: t.laps.map((l) => ({
+    n: l.index,
+    kind: l.kind,
+    mi: l.miles,
+    start: l.startMile,
+    span: l.spanMiles,
+    lo: l.lowFt,
+    hi: l.highFt,
+    s: l.samples,
+  })),
+});
+
+const labelOffset: Record<string, string> = {
+  oval: 'ctease__pin--left',
+  steps: 'ctease__pin--below-left',
+  low: 'ctease__pin--below-right',
+  high: 'ctease__pin--right',
+};
+const mileBar = t.mileUnits * 0.5;
 ---
 
-<section class={`cposter relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+<section
+  class={`ctease relative py-section-lg ${surfaceClass}`}
+  aria-labelledby={headingId}
+  data-course-plate
+  data-plate={plateData}
+>
   {
     /* THE CONTENT COLUMN, NOT A COLUMN OF ITS OWN (2026-09-18). This band used
-      to set its own 72rem box inside the page's 82.5rem one, so at 1280 its
-      heading started at x=88 and its picture ran 88 to 1192 while the elevation
-      chart above it and the ticket board below it both ran 24 to 1256. One band
-      indented against both its neighbours is the sort of thing a reader does
-      not consciously see and does feel. Same `max-w-content px-6` every other
-      band uses; the map still is now a full-column object like the map itself
-      on /course. */
+      to set its own 72rem box inside the page's 82.5rem one, so its heading
+      started at x=88 while the bands above and below it ran 24 to 1256. Same
+      `max-w-content px-6` every other band uses. */
   }
-  <div class="cposter__inner mx-auto w-full max-w-content px-6">
-    <div class="cposter__copy">
-      {
-        /* THE OUTLINED LABEL, NOT A FOURTH EYEBROW (2026-09-17). This band had
-          its own: 13px display caps in muted, scoped to the component, which is
-          how a fourth heading system gets onto a page without anybody deciding
-          to add one. It is a content band, so it takes the same
-          `.section-label` the bands above and below it take. */
-      }
+  <div class="ctease__inner mx-auto w-full max-w-content px-6">
+    <div class="ctease__head" data-reveal>
       {eyebrow && <p class="section-label text-foreground/80">{eyebrow}</p>}
-      <h2 class="cposter__headline" id={headingId}>{headline}</h2>
-      {intro && <p class="cposter__intro">{intro}</p>}
+      <h2 class="ctease__headline" id={headingId}>{headline}</h2>
+      {intro && <p class="ctease__intro">{intro}</p>}
     </div>
 
-    <a
-      class="cposter__link"
-      href="/course"
+    <div
+      class="ctease__stage"
       data-reveal
-      data-poster-tilt
-      style={`--poster-band-bg: var(${surface === 'muted' ? '--color-muted' : '--color-background'})`}
+      style={`--plate-band-bg: var(${surface === 'muted' ? '--color-muted' : '--color-background'})`}
     >
-      <figure class="cposter__figure" style={`--poster-ratio:${W} / ${H}`}>
-        <picture>
-          <source
-            type="image/avif"
-            srcset={`/course-poster.avif 1x, /course-poster@1_5x.avif 1.5x`}
-          />
-          <img
-            class="cposter__img"
-            src="/course-poster.webp"
-            srcset={`/course-poster.webp 1x, /course-poster@1_5x.webp 1.5x`}
-            width={W}
-            height={H}
-            loading="lazy"
-            decoding="async"
-            alt="A topographic map of Mt. Airy Forest, tilted into its hills, with the Stone Steps 50K course drawn on the ridges it runs, mile markers round each loop, and the Stone Steps themselves marked."
-          />
-        </picture>
-
-        <figcaption class="cposter__cap">
-          <span class="cposter__cta">Explore the course map</span>
-          <span class="cposter__note">3D terrain, mile by mile</span>
-        </figcaption>
+      <div class="ctease__plate" style={`--plate-ratio:${t.width} / ${t.height}`} data-stage>
+        <Topo seed={41} lines={13} opacity={1} />
+        <svg
+          class="ctease__svg"
+          viewBox={`0 0 ${t.width} ${t.height}`}
+          aria-hidden="true"
+          focusable="false"
+        >
+          {
+            /* Two routes, each drawn twice: a wide faint underlay for the glow
+            (a filter would repaint on every frame the runner moves) and the
+            line itself. pathLength=1 makes the draw-in and the progress trail a
+            plain 0..1 dash offset whatever the real length. */
+          }
+          <g class="ctease__routes">
+            <path class="ctease__glow ctease__glow--short" d={t.routes.short}></path>
+            <path
+              class="ctease__route ctease__route--short"
+              data-route="short"
+              d={t.routes.short}
+              pathLength="1"></path>
+            <path class="ctease__glow ctease__glow--long" d={t.routes.long}></path>
+            <path
+              class="ctease__route ctease__route--long"
+              data-route="long"
+              d={t.routes.long}
+              pathLength="1"></path>
+          </g>
+          <path class="ctease__steep" d={t.steep.long + t.steep.short}></path>
+          <g class="ctease__miles">
+            {
+              t.mileDots.map((m) => (
+                <circle class={`ctease__mile ctease__mile--${m.kind}`} cx={m.x} cy={m.y} r="5" />
+              ))
+            }
+          </g>
+          <path class="ctease__trail-glow" data-trail-glow d={t.routes.long} pathLength="1"></path>
+          <path class="ctease__trail" data-trail d={t.routes.long} pathLength="1"></path>
+          <g data-runner>
+            <circle class="ctease__pulse" r="16"></circle>
+            <circle class="ctease__dot" r="9"></circle>
+          </g>
+          <g class="ctease__scale" transform={`translate(${t.width * 0.07} ${t.height * 0.915})`}>
+            <path
+              d={`M0,0 L${mileBar.toFixed(1)},0 M0,-8 L0,8 M${mileBar.toFixed(1)},-8 L${mileBar.toFixed(1)},8`}
+            ></path>
+          </g>
+        </svg>
 
         {
-          /* THE SAME CUT THE REAL MAP HAS. Two band-coloured strips masked with
-          --ridge-mask, exactly as `.cmap__ridge` does it on /course, so the
-          still and the map it is a still OF are bounded by the same contour
-          instead of one being a rounded rectangle and the other a torn band.
-          Decoration with nothing to announce, so they are aria-hidden and sit
-          outside the figure's flow. Above the caption's scrim on purpose: the
-          cut has to read as the band closing over the picture, and the caption
-          clears it with padding rather than being painted over. */
+          t.labels.map((l) => (
+            <span
+              class={`ctease__pin ${labelOffset[l.key]} ctease__pin--${l.key}`}
+              style={`left:${l.left}%;top:${l.top}%`}
+              aria-hidden="true"
+            >
+              <b>{l.text}</b>
+              <i>{l.detail}</i>
+            </span>
+          ))
         }
-        <span class="cposter__ridge cposter__ridge--top" aria-hidden="true"></span>
-        <span class="cposter__ridge cposter__ridge--bottom" aria-hidden="true"></span>
-      </figure>
-    </a>
+        <span class="ctease__scale-label" aria-hidden="true">½ mile</span>
+
+        <span class="ctease__tag" data-tag aria-hidden="true">Mile 0.0 · 867 ft</span>
+
+        <a class="ctease__hit" href="/course" data-hit aria-label="Open the 3D course map">
+          <span class="ctease__open" aria-hidden="true">
+            <span class="ctease__open-hint ctease__open-hint--mouse">Hover to run it</span>
+            <span class="ctease__open-go">Fly it in 3D <span>&rarr;</span></span>
+          </span>
+        </a>
+      </div>
+
+      <span class="ctease__ridge ctease__ridge--top" aria-hidden="true"></span>
+      <span class="ctease__ridge ctease__ridge--bottom" aria-hidden="true"></span>
+    </div>
+
+    <div class="ctease__ctrl" data-reveal>
+      <p class="ctease__kicker" data-kicker>Running the race</p>
+      <div class="ctease__laps" role="group" aria-label="Pick a lap">
+        {
+          t.laps.map((l) => (
+            <button
+              type="button"
+              class={`ctease__lap ctease__lap--${l.kind}`}
+              data-lap={l.index}
+              aria-pressed="false"
+            >
+              <span class="ctease__lap-n">
+                <span class="sr-only">Lap </span>
+                {l.index}
+              </span>
+              <svg viewBox="0 -2 64 30" aria-hidden="true" focusable="false">
+                <path d={chipSpark(l.samples)} />
+              </svg>
+              <span class="ctease__lap-mi">
+                {l.miles}
+                <span class="sr-only"> miles, {l.kind} loop</span>
+              </span>
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="ctease__strip" aria-hidden="true">
+        <div class="ctease__strip-head">
+          <span data-strip-title>Lap 1 &middot; Long loop</span>
+          <span data-strip-range>531 to 868 ft</span>
+        </div>
+        <div class="ctease__chart">
+          <svg viewBox="0 0 600 100" preserveAspectRatio="none" focusable="false">
+            <path class="ctease__area" data-area d="M0,100 L600,100 Z"></path>
+            <path class="ctease__line" data-line d="M0,100"></path>
+          </svg>
+          <span class="ctease__marker" data-marker></span>
+          <span class="ctease__mdot" data-mdot></span>
+        </div>
+      </div>
+
+      <dl class="ctease__stats">
+        <div>
+          <dt data-stat-kind>Long loop</dt>
+          <dd data-stat-mi>5.3 mi</dd>
+        </div>
+        <div>
+          <dt>Low point</dt>
+          <dd data-stat-lo>531 ft</dd>
+        </div>
+        <div>
+          <dt>High point</dt>
+          <dd data-stat-hi>868 ft</dd>
+        </div>
+      </dl>
+
+      <div class="ctease__actions">
+        <a class="btn-plate" href="/course" data-cta>
+          Fly the 3D map <span class="btn-plate__arrow" aria-hidden="true">&rarr;</span>
+        </a>
+        <p class="ctease__note">Tilt it, zoom it, pin any mile.</p>
+      </div>
+    </div>
   </div>
 </section>
 
 <style>
-  /* The width and the gutter come from the utilities on the element now (see
-     the note in the markup). What is left here is the one thing that is this
-     band's own: the intro copy holds a reading measure instead of running the
-     full 1232px, the way the lede under every other heading does. */
-  .cposter__copy {
-    max-width: 44rem;
-    margin-bottom: 1.5rem;
+  .ctease__inner {
+    display: grid;
+    gap: 1.75rem;
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .cposter__headline {
+  /* Desktop: copy and controls stack on the left, the plate stands on the right
+     and is the taller of the two, so the text column centres against it. */
+  @media (width >= 64rem) {
+    .ctease__inner {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      grid-template-areas:
+        'head stage'
+        'ctrl stage';
+      grid-template-rows: auto 1fr;
+      column-gap: 3.5rem;
+      row-gap: 2rem;
+      align-items: start;
+    }
+    .ctease__head {
+      grid-area: head;
+      align-self: end;
+    }
+    .ctease__stage {
+      grid-area: stage;
+      align-self: center;
+    }
+    .ctease__ctrl {
+      grid-area: ctrl;
+      align-self: start;
+    }
+  }
+
+  .ctease__headline {
     margin: 0;
     font-family: var(--font-display);
-    font-size: clamp(1.75rem, 4vw, 2.75rem);
-    line-height: 1.05;
+    font-size: clamp(2rem, 4.6vw, 3.4rem);
+    line-height: 1;
   }
 
-  .cposter__intro {
-    margin: 0.75rem 0 0;
+  .ctease__intro {
+    margin: 0.9rem 0 0;
     color: var(--color-muted-foreground);
-    max-width: 38rem;
+    max-width: 34rem;
   }
 
-  .cposter__link {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-    border-radius: 0.5rem;
-    /* The vanishing point for the tilt below. On the LINK rather than on the
-       figure, because an element cannot supply its own perspective: a
-       `perspective()` function inside the figure's own transform is measured
-       from the figure's centre and gives a flat, hinge-like rotation instead of
-       a plate lifting off the page. */
-    perspective: 1100px;
-  }
-
-  .cposter__link:focus-visible {
-    outline: 2px solid var(--color-ring);
-    outline-offset: 4px;
-  }
-
-  .cposter__figure {
+  /* ---- The plate ------------------------------------------------------- */
+  .ctease__stage {
     position: relative;
-    margin: 0;
+    background: #12100c;
+    color: #f3e9d2;
+    /* The cut's depth. The ridges are painted OVER the plate, and the route
+       sits inside the 7% pad the geometry leaves, which is deeper than this. */
+    --ridge-h: 24px;
+  }
+
+  .ctease__plate {
+    position: relative;
+    aspect-ratio: var(--plate-ratio);
     overflow: hidden;
-    /* NO RADIUS. The rounded rectangle was the last thing making this read as
-       an embedded thumbnail rather than as the map. The edge is the ridge
-       below, which is the same argument `.cmap__frame` makes on /course. */
-    background: var(--color-muted);
-    /* The picture's own proportions, so the box exists before the image lands
-       and the page below it never jumps. */
-    aspect-ratio: var(--poster-ratio);
-    /* Set by the pointer script, read here. Two degrees is the whole range: it
-       is meant to be felt rather than watched, and this plate is 1100px wide on
-       a desktop, where a few degrees is already tens of pixels of travel at the
-       corners. */
-    --poster-rx: 0deg;
-    --poster-ry: 0deg;
-    /* The cut's depth, shared by the two ridges and by the caption's padding,
-       so the text can never end up under the contour. */
-    --poster-ridge-h: 34px;
-    transform: rotateX(var(--poster-rx)) rotateY(var(--poster-ry));
-    /* Slower coming back than going out, because the return is the gesture
-       ending rather than the gesture. */
-    transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform;
+    background: radial-gradient(120% 90% at 40% 45%, #241d14 0%, #17130e 55%, #0f0d0a 100%);
+    isolation: isolate;
+    cursor: pointer;
   }
 
-  /* While the pointer is over it the transform follows the pointer directly,
-     so the easing above would lag every move by half a second. */
-  .cposter__figure[data-tilting] {
-    transition: transform 90ms linear;
+  /* The shared Topo reads the theme's foreground colour; on this plate it has
+     to be cream whatever the theme is. */
+  .ctease__plate :global(.topo) {
+    z-index: 0;
+  }
+  .ctease__plate :global(.topo path) {
+    stroke: rgb(243 233 210 / 0.07);
+  }
+  .ctease__plate :global(.topo path:nth-child(3n)) {
+    stroke: rgb(255 138 91 / 0.1);
   }
 
-  /* The band closing over the picture, top and bottom. Painted in the band's
-     own colour (passed down as --poster-band-bg by the section, the same way
-     CourseMapBand hands --cmap-band-bg to the real map), so the cut is the page
-     rather than a line drawn on the image. */
-  .cposter__ridge {
+  .ctease__svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: visible;
+  }
+
+  .ctease__svg path,
+  .ctease__svg circle {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Stroke widths are in viewBox units, which is 0.7px on a desktop plate and
+     0.34px on a phone, so the phone gets a heavier line instead of a hairline. */
+  .ctease__route {
+    stroke-width: 6;
+  }
+  .ctease__glow {
+    stroke-width: 20;
+    opacity: 0.2;
+    transition: opacity 400ms ease;
+  }
+  .ctease__route--long {
+    stroke: #ff6b3d;
+  }
+  .ctease__glow--long {
+    stroke: #ff6b3d;
+  }
+  .ctease__route--short {
+    stroke: #ffc45e;
+  }
+  .ctease__glow--short {
+    stroke: #ffc45e;
+  }
+
+  .ctease__route {
+    transition:
+      opacity 400ms ease,
+      stroke-dashoffset 1.9s cubic-bezier(0.5, 0, 0.2, 1);
+  }
+
+  /* THE INACTIVE KIND RECEDES. The runner is only ever on one of the two loops,
+     and the other one stays as a ghost so the whole course stays in view. */
+  .ctease[data-kind='long'] .ctease__route--short,
+  .ctease[data-kind='short'] .ctease__route--long {
+    opacity: 0.32;
+  }
+  .ctease[data-kind='long'] .ctease__glow--short,
+  .ctease[data-kind='short'] .ctease__glow--long {
+    opacity: 0.04;
+  }
+
+  /* Draw-in. Before the script marks the plate ready, the routes are simply
+     there, so no-JS readers and the first paint show a finished map. */
+  .ctease[data-ready]:not([data-live]) .ctease__route {
+    stroke-dashoffset: 1;
+    stroke-dasharray: 1;
+  }
+  .ctease[data-ready][data-live] .ctease__route {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+  .ctease[data-ready][data-live] .ctease__route--short {
+    transition-delay: 0.35s;
+  }
+  .ctease[data-ready]:not([data-live]) .ctease__glow,
+  .ctease[data-ready]:not([data-live]) .ctease__steep,
+  .ctease[data-ready]:not([data-live]) .ctease__miles {
+    opacity: 0;
+  }
+
+  .ctease__steep {
+    stroke: #fff1c9;
+    stroke-width: 7;
+    transition: opacity 600ms ease 1.8s;
+  }
+
+  .ctease__mile {
+    fill: #12100c;
+    stroke-width: 3;
+    transition: opacity 400ms ease 1.6s;
+  }
+  .ctease__mile--long {
+    stroke: #ff9a72;
+  }
+  .ctease__mile--short {
+    stroke: #ffd98f;
+  }
+  .ctease[data-kind='long'] .ctease__mile--short,
+  .ctease[data-kind='short'] .ctease__mile--long {
+    opacity: 0.2;
+  }
+
+  .ctease__trail {
+    stroke: #fff6e0;
+    stroke-width: 7;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .ctease__trail-glow {
+    stroke: #ffd7b8;
+    stroke-width: 24;
+    opacity: 0.22;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .ctease__dot {
+    fill: #fff;
+    stroke: #ff6b3d;
+    stroke-width: 5;
+  }
+  .ctease__pulse {
+    fill: rgb(255 107 61 / 0.35);
+    stroke: none;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ctease-pulse 1.6s ease-out infinite;
+  }
+  @keyframes ctease-pulse {
+    from {
+      transform: scale(0.5);
+      opacity: 1;
+    }
+    to {
+      transform: scale(2.1);
+      opacity: 0;
+    }
+  }
+
+  .ctease__scale path {
+    stroke: rgb(243 233 210 / 0.55);
+    stroke-width: 2;
+  }
+  .ctease__scale-label {
+    position: absolute;
+    left: 7%;
+    bottom: 7.2%;
+    z-index: 2;
+    transform: translateY(-4px);
+    font: 600 0.625rem/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(243 233 210 / 0.6);
+  }
+
+  @media (width < 48rem) {
+    .ctease__route {
+      stroke-width: 9;
+    }
+    .ctease__glow {
+      stroke-width: 26;
+    }
+    .ctease__trail {
+      stroke-width: 10;
+    }
+    .ctease__steep {
+      stroke-width: 10;
+    }
+    .ctease__mile {
+      r: 6;
+    }
+    .ctease__dot {
+      r: 12;
+    }
+    .ctease__pulse {
+      r: 20;
+    }
+    .ctease__stage {
+      --ridge-h: 16px;
+    }
+  }
+
+  /* ---- Pins and the live tag ---------------------------------------------- */
+  .ctease__pin {
+    position: absolute;
+    z-index: 2;
+    display: grid;
+    gap: 1px;
+    pointer-events: none;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    line-height: 1.05;
+    text-shadow: 0 1px 6px rgb(0 0 0 / 0.9);
+    white-space: nowrap;
+    transition: opacity 500ms ease 2s;
+  }
+  .ctease[data-ready]:not([data-live]) .ctease__pin {
+    opacity: 0;
+  }
+  .ctease__pin b {
+    font-weight: 400;
+    font-size: clamp(0.72rem, 0.55rem + 0.55vw, 0.95rem);
+    color: #fff6e0;
+  }
+  .ctease__pin i {
+    font: 500 clamp(0.58rem, 0.5rem + 0.25vw, 0.68rem) / 1.1 var(--font-body);
+    letter-spacing: 0.04em;
+    font-style: normal;
+    color: rgb(243 233 210 / 0.78);
+  }
+  .ctease__pin--left {
+    transform: translate(calc(-100% - 14px), -50%);
+    text-align: right;
+  }
+  .ctease__pin--below-left {
+    transform: translate(calc(-100% + 6px), 14px);
+    text-align: right;
+  }
+  .ctease__pin--below-right {
+    transform: translate(-6px, 14px);
+    text-align: left;
+  }
+  .ctease__pin--right {
+    transform: translate(14px, -50%);
+    text-align: left;
+  }
+  /* The one pin that matters most gets the colour. */
+  .ctease__pin--steps b {
+    color: #ffd98f;
+  }
+  @media (width < 40rem) {
+    .ctease__pin i {
+      display: none;
+    }
+  }
+
+  .ctease__tag {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 3;
+    pointer-events: none;
+    padding: 0.28rem 0.55rem;
+    border: 1px solid rgb(255 255 255 / 0.28);
+    background: rgb(18 16 12 / 0.92);
+    color: #fff6e0;
+    font: 600 0.6875rem/1 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transform: translate(-50%, -190%);
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+  .ctease[data-live] .ctease__tag {
+    opacity: 1;
+  }
+
+  /* ---- The click target, and what it says ---------------------------------- */
+  .ctease__hit {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+  .ctease__hit:focus-visible {
+    outline: 3px solid var(--color-ring);
+    outline-offset: -3px;
+  }
+  .ctease__open {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    display: grid;
+    justify-items: end;
+    pointer-events: none;
+  }
+  .ctease__open-hint,
+  .ctease__open-go {
+    padding: 0.4rem 0.75rem;
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition:
+      opacity 220ms ease,
+      transform 220ms ease;
+  }
+  .ctease__open-hint {
+    border: 1px solid rgb(255 255 255 / 0.3);
+    background: rgb(18 16 12 / 0.7);
+    color: rgb(243 233 210 / 0.9);
+  }
+  .ctease__open-go {
+    grid-area: 1 / 1;
+    background: #ff6b3d;
+    color: #1a1712;
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  .ctease__open-go span {
+    display: inline-block;
+    transition: transform 220ms ease;
+  }
+  .ctease__open-hint {
+    grid-area: 1 / 1;
+  }
+  .ctease__plate:hover .ctease__open-hint,
+  .ctease__hit:focus-visible .ctease__open-hint {
+    opacity: 0;
+  }
+  .ctease__plate:hover .ctease__open-go,
+  .ctease__hit:focus-visible .ctease__open-go {
+    opacity: 1;
+    transform: none;
+  }
+  .ctease__plate:hover .ctease__open-go span {
+    transform: translateX(3px);
+  }
+  /* On a touch screen there is no hover: the plate says what a tap does. */
+  @media (pointer: coarse) {
+    .ctease__open-hint {
+      display: none;
+    }
+    .ctease__open-go {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ---- The elevation strip -------------------------------------------------- */
+  .ctease__strip {
+    margin-top: 1rem;
+    padding: 0.8rem 0.9rem 0.9rem;
+    background: #12100c;
+    color: #f3e9d2;
+    border: 1px solid rgb(243 233 210 / 0.14);
+  }
+  .ctease__strip-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    font: 600 0.6875rem/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(243 233 210 / 0.75);
+  }
+  .ctease__chart {
+    position: relative;
+    height: 3.4rem;
+  }
+  .ctease__chart svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .ctease__area {
+    fill: rgb(255 107 61 / 0.2);
+    stroke: none;
+  }
+  .ctease__line {
+    fill: none;
+    stroke: #ff8a5b;
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+  }
+  .ctease[data-kind='short'] .ctease__area {
+    fill: rgb(255 196 94 / 0.2);
+  }
+  .ctease[data-kind='short'] .ctease__line {
+    stroke: #ffc45e;
+  }
+  .ctease__marker {
+    position: absolute;
+    top: -3px;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    background: rgb(255 246 224 / 0.7);
+    pointer-events: none;
+  }
+  .ctease__mdot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 11px;
+    height: 11px;
+    margin: -5.5px 0 0 -5.5px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #ff6b3d;
+    pointer-events: none;
+  }
+
+  /* ---- The torn edge the real map has ---------------------------------------- */
+  .ctease__ridge {
     position: absolute;
     inset-inline: 0;
-    height: var(--poster-ridge-h);
-    z-index: 2;
+    height: var(--ridge-h);
+    z-index: 5;
     pointer-events: none;
-    background-color: var(--poster-band-bg, var(--color-background));
+    background-color: var(--plate-band-bg, var(--color-background));
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
     -webkit-mask-repeat: no-repeat;
@@ -217,246 +761,491 @@ const H = poster.height;
     -webkit-mask-image: var(--ridge-mask);
     mask-image: var(--ridge-mask);
   }
-
-  .cposter__ridge--top {
+  .ctease__ridge--top {
     top: 0;
-    /* The mask draws its solid half BELOW the contour, so the top edge uses it
-       flipped. Same trick as `.cmap__ridge.is-top`. */
     transform: scaleY(-1);
   }
-
-  .cposter__ridge--bottom {
+  .ctease__ridge--bottom {
     bottom: 0;
   }
 
-  /* Shallower on a phone, where the figure is a third of the height and a 34px
-     cut would eat the picture. Matches `.cmap__ridge` and `.band-torn`. */
-  @media (width < 48rem) {
-    .cposter__figure {
-      --poster-ridge-h: 22px;
-    }
+  /* ---- Controls ----------------------------------------------------------------- */
+  .ctease__kicker {
+    margin: 0 0 0.6rem;
+    font: 600 0.75rem/1 var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted-foreground);
   }
 
-  .cposter__img {
-    display: block;
+  .ctease__laps {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+
+  .ctease__lap {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+    padding: 0.5rem 0.2rem 0.4rem;
+    min-height: 44px;
+    border: 1px solid color-mix(in srgb, var(--color-foreground) 22%, transparent);
+    border-top: 4px solid var(--lap-color);
+    background: transparent;
+    color: var(--color-foreground);
+    cursor: pointer;
+    transition:
+      background-color 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+  .ctease__lap--long {
+    --lap-color: #e8512a;
+  }
+  .ctease__lap--short {
+    --lap-color: #d9a032;
+  }
+  .ctease__lap:hover {
+    transform: translateY(-2px);
+  }
+  .ctease__lap:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+  .ctease__lap[aria-pressed='true'] {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+  /* Laps already run in this pass of the race keep a tint of their colour. */
+  .ctease__lap[data-done] {
+    background: color-mix(in srgb, var(--lap-color) 18%, transparent);
+  }
+  .ctease__lap[aria-pressed='true'][data-done] {
+    background: var(--color-foreground);
+  }
+  .ctease__lap-n {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+  .ctease__lap svg {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* The photograph carries the whole band, so it gets a slow push in on
-       hover. Transform only: it cannot reflow anything. */
-    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    height: 1.35rem;
+    overflow: visible;
+  }
+  .ctease__lap svg path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ctease__lap-mi {
+    font: 600 0.6875rem/1 var(--font-mono);
+    letter-spacing: 0.04em;
   }
 
-  .cposter__link:hover .cposter__img {
-    transform: scale(1.03);
+  .ctease__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, auto));
+    justify-content: start;
+    gap: 0.5rem 2rem;
+    margin: 1.4rem 0 0;
+  }
+  .ctease__stats dt {
+    font: 600 0.6875rem/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted-foreground);
+  }
+  .ctease__stats dd {
+    margin: 0.3rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.3rem);
+    line-height: 1;
   }
 
-  .cposter__cap {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+  .ctease__actions {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.25rem 0.75rem;
-    /* The bottom pad clears the ridge, which is painted OVER this scrim: the
-       cut belongs to the band, and type sitting in it would be type sitting in
-       the page's own colour. */
-    padding: 3.5rem 1rem calc(1rem + var(--poster-ridge-h, 34px));
-    color: #fff;
-    z-index: 1;
-    /* Bottom-up scrim rather than a flat panel: the text has to be legible over
-       whatever the picture happens to be doing under it.
-
-       DEEPENED FOR THE TOPO, 2026-09-16. A two-stop ramp over the satellite
-       capture was fine, because the bottom of that picture was dark canopy and
-       the scrim only had to finish a job the photograph had started. The
-       topographic quad is pale olive down there, and measured at the caption's
-       own height the old ramp had only reached about 0.3 alpha: white type on
-       a light map, which is the one combination this scrim exists to prevent.
-       Four stops and a taller box put the text band at 0.88 or better, which
-       is about 13:1 for the CTA and 9:1 for the note at its 0.85 ink. */
-    background: linear-gradient(
-      to top,
-      rgba(26, 23, 18, 0.94) 0%,
-      rgba(26, 23, 18, 0.88) 45%,
-      rgba(26, 23, 18, 0.5) 72%,
-      rgba(26, 23, 18, 0) 100%
-    );
+    align-items: center;
+    gap: 0.9rem 1.4rem;
+    margin-top: 1.6rem;
+  }
+  .ctease__note {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-muted-foreground);
   }
 
-  .cposter__cta {
-    font-family: var(--font-display);
-    font-size: clamp(1rem, 2.2vw, 1.25rem);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  .cposter__cta::after {
-    content: ' \2192';
-    display: inline-block;
-    transition: transform 240ms ease;
-  }
-
-  .cposter__link:hover .cposter__cta::after {
-    transform: translateX(0.25rem);
-  }
-
-  .cposter__note {
-    font-size: 0.8125rem;
-    opacity: 0.85;
-  }
-
-  /* THE SCRIM WAS SIZED FOR THE DESKTOP PLATE AND IT ATE THE PHONE ONE.
-     Measured at 390px: the figure is 184px tall and the caption's box was
-     141.5px of it, so 77% of a picture whose whole job is to show the terrain
-     was gradient, and the route below the first ridge read as a smear. The
-     same box on the 621px desktop plate is 22%, which is why this was never
-     visible where it was designed. The 3.5rem top pad is the whole difference:
-     it is run-up for the ramp, and a plate a third of the height needs a third
-     of the run-up.
-
-     THE RAMP IS RE-CUT, NOT JUST SQUEEZED, and that is the half of this worth
-     keeping. The desktop stops over a box 40px shorter put the caption's own
-     top line at 4.16:1, WORSE than the 6.25 it had before the box shrank,
-     because a shorter box moves the type up into the thin end of the same
-     ramp. Pulling the stops up with it measures better on every count than the
-     version this replaces: the CTA 9.64:1 against 6.25, the note 14.53 against
-     12.94, and the picture's clear area 83px against 42px of a 184px figure.
-     All four numbers read off the rendered pixels at 390px with the type
-     hidden, so they are the background and nothing else.
-
-     BELOW `.cposter__cap` ON PURPOSE: this override and the base rule have the
-     same specificity, the base rule sets `padding` as a shorthand, and the
-     first version of this lived in the ridge-height media block forty lines
-     up, where the shorthand simply won and the built CSS showed the override
-     ahead of the rule it was overriding. */
-  @media (width < 48rem) {
-    .cposter__cap {
-      padding-top: 1rem;
-      background: linear-gradient(
-        to top,
-        rgba(26, 23, 18, 0.94) 0%,
-        rgba(26, 23, 18, 0.92) 60%,
-        rgba(26, 23, 18, 0.78) 86%,
-        rgba(26, 23, 18, 0) 100%
-      );
-    }
-  }
-
-  /* A line that draws itself is decoration, and decoration is what this setting
-     refuses. The route is simply there.
-
-     THE TILT IS OFF HERE TWICE OVER: the script never binds under this setting,
-     and the rule below means a stale inline value from a session that started
-     before the setting changed still cannot move the plate. */
+  /* A plate that moves when the reader did not ask anything to move is exactly
+     what this setting is about. The script never starts the tour or the
+     draw-in under it either; this covers a setting flipped mid-session. */
   @media (prefers-reduced-motion: reduce) {
-    .cposter__img {
+    .ctease__route,
+    .ctease__glow,
+    .ctease__steep,
+    .ctease__mile,
+    .ctease__pin,
+    .ctease__lap {
       transition: none;
     }
-
-    .cposter__link:hover .cposter__img {
-      transform: none;
+    .ctease__pulse {
+      animation: none;
+      opacity: 0.5;
     }
-
-    .cposter__figure {
+    .ctease__lap:hover {
       transform: none;
-      transition: none;
-      will-change: auto;
     }
   }
 </style>
 
 <script>
-  // THE PLATE FOLLOWS THE POINTER, a couple of degrees, and nothing else.
+  // THE RUNNER, THE TOUR AND THE HOVER. All of it is one small state machine:
   //
-  // WHY BY HAND AND NOT IN CSS. A tilt that reads as an object needs the
-  // pointer's position inside the box, and CSS has no way to ask for it. It is
-  // about thirty lines, it touches two custom properties, and it is the whole
-  // reason this band has no framework on it.
+  //   mode 'tour'  : the race, lap 1 to lap 7, each at its own length.
+  //   mode 'loop'  : the reader picked a lap; it repeats.
+  //   (scrubbing)  : while a mouse is over the plate the runner sits on the
+  //                  nearest point of the route and does not advance.
   //
-  // THREE THINGS IT WILL NOT DO.
-  //   1. Bind under prefers-reduced-motion. A plate that moves when the reader
-  //      did not ask anything to move is exactly what that setting is about.
-  //   2. Bind on a coarse pointer. On a touch screen the "pointer" arrives with
-  //      the tap that is already following the link, so the tilt would be a
-  //      flicker on the way out of the page, and hover state on touch is the
-  //      oldest bad idea on the web.
-  //   3. Write anything but a transform. Two custom properties feed one
-  //      `rotateX/rotateY`, so this cannot reflow the page and cannot move the
-  //      countdown, the header or anything else a layout shift would catch.
-  //      Home page CLS is 0 and the point is that it stays 0.
+  // THINGS IT WILL NOT DO. It never starts the tour or the draw-in under
+  // prefers-reduced-motion (the chips and the hover still work, because the
+  // reader asked for those). It pauses entirely when the band is off screen or
+  // the tab is hidden. It scrubs only for a MOUSE: on a touch screen a finger on
+  // the plate is a scroll or a tap, and the tap opens the map.
   //
-  // It re-binds on every client-side navigation for the same reason the
-  // countdown does: a module runs once per full load, and the ClientRouter
-  // swaps the document without re-running it.
-  const MAX_DEG = 2.4;
+  // Writes are transforms, dash offsets and the tag's position, all inside a box
+  // that does not change size, so the home page's CLS stays at 0.
+  type Lap = {
+    n: number;
+    kind: 'long' | 'short';
+    mi: number;
+    start: number;
+    span: number;
+    lo: number;
+    hi: number;
+    s: [number, number][];
+  };
+  type Data = { w: number; h: number; low: number; high: number; laps: Lap[] };
+  type Kind = 'long' | 'short';
+
+  const LAP_MS: Record<Kind, number> = { long: 5200, short: 3300 };
+  const TOUR_DELAY = 1700;
+  const SNAP = 0.14; // how close (fraction of the plate width) the mouse must be to the route
+
   const bound: Array<() => void> = [];
 
-  const bind = (link: HTMLElement) => {
-    if (link.dataset.tiltBound === '1') return;
-    const figure = link.querySelector<HTMLElement>('.cposter__figure');
-    if (!figure) return;
-    link.dataset.tiltBound = '1';
+  const lerpSamples = (s: [number, number][], t: number) => {
+    const f = Math.min(1, Math.max(0, t)) * (s.length - 1);
+    const i = Math.min(s.length - 2, Math.floor(f));
+    const u = f - i;
+    return s[i][1] + (s[i + 1][1] - s[i][1]) * u;
+  };
 
-    // One read per frame. A pointermove can fire far more often than the
-    // compositor paints, and the value from the last event in a frame is the
-    // only one that was ever going to be seen.
-    let frame = 0;
-    let pending: { x: number; y: number } | null = null;
+  const setup = (root: HTMLElement) => {
+    if (root.dataset.plateBound === '1') return;
+    root.dataset.plateBound = '1';
 
-    const apply = () => {
-      frame = 0;
-      if (!pending) return;
-      const rect = figure.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      // -1 .. 1 from the centre of the plate.
-      const px = (pending.x - rect.left) / rect.width - 0.5;
-      const py = (pending.y - rect.top) / rect.height - 0.5;
-      // Pointer above centre tips the TOP away, which is the direction a hand
-      // pressing there would push it.
-      figure.style.setProperty('--poster-rx', `${(-py * 2 * MAX_DEG).toFixed(2)}deg`);
-      figure.style.setProperty('--poster-ry', `${(px * 2 * MAX_DEG).toFixed(2)}deg`);
+    const data = JSON.parse(root.dataset.plate ?? 'null') as Data | null;
+    const stage = root.querySelector<HTMLElement>('[data-stage]');
+    const routeEls = {
+      long: root.querySelector<SVGPathElement>('[data-route="long"]'),
+      short: root.querySelector<SVGPathElement>('[data-route="short"]'),
     };
+    const trail = root.querySelector<SVGPathElement>('[data-trail]');
+    const trailGlow = root.querySelector<SVGPathElement>('[data-trail-glow]');
+    const runner = root.querySelector<SVGGElement>('[data-runner]');
+    const tag = root.querySelector<HTMLElement>('[data-tag]');
+    const hit = root.querySelector<HTMLAnchorElement>('[data-hit]');
+    const cta = root.querySelector<HTMLAnchorElement>('[data-cta]');
+    const marker = root.querySelector<HTMLElement>('[data-marker]');
+    const mdot = root.querySelector<HTMLElement>('[data-mdot]');
+    const area = root.querySelector<SVGPathElement>('[data-area]');
+    const line = root.querySelector<SVGPathElement>('[data-line]');
+    const kicker = root.querySelector<HTMLElement>('[data-kicker]');
+    const chips = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-lap]'));
+    if (
+      !data ||
+      !stage ||
+      !routeEls.long ||
+      !routeEls.short ||
+      !trail ||
+      !trailGlow ||
+      !runner ||
+      !tag ||
+      !hit ||
+      !marker ||
+      !mdot ||
+      !area ||
+      !line
+    ) {
+      return;
+    }
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const el = (sel: string) => root.querySelector<HTMLElement>(sel);
+
+    // Sample each route once: 360 points of (x, y) in viewBox units. Reading
+    // the real path keeps the runner exactly on the drawn line.
+    const SAMPLES = 360;
+    const pts: Record<Kind, { x: number; y: number }[]> = { long: [], short: [] };
+    (['long', 'short'] as Kind[]).forEach((k) => {
+      const p = routeEls[k]!;
+      const len = p.getTotalLength();
+      for (let i = 0; i <= SAMPLES; i++) {
+        const q = p.getPointAtLength((i / SAMPLES) * len);
+        pts[k].push({ x: q.x, y: q.y });
+      }
+    });
+    const pointAt = (k: Kind, t: number) => {
+      const f = Math.min(1, Math.max(0, t)) * SAMPLES;
+      const i = Math.min(SAMPLES - 1, Math.floor(f));
+      const u = f - i;
+      const a = pts[k][i];
+      const b = pts[k][i + 1];
+      return { x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u };
+    };
+
+    let lap = 0;
+    let t = 0;
+    let mode: 'tour' | 'loop' = 'tour';
+    let scrubbing = false;
+    let visible = false;
+    let live = false;
+    let raf = 0;
+    let last = 0;
+    let startAt = 0;
+    const done = new Set<number>();
+
+    const range = data.high - data.low || 1;
+
+    const drawStrip = () => {
+      const s = data.laps[lap].s;
+      const d = s
+        .map(
+          ([x, e], i) =>
+            `${i ? 'L' : 'M'}${(x * 600).toFixed(1)},${(100 - ((e - data.low) / range) * 100).toFixed(1)}`,
+        )
+        .join('');
+      line.setAttribute('d', d);
+      area.setAttribute('d', `${d}L600,100L0,100Z`);
+    };
+
+    const paintLap = () => {
+      const L = data.laps[lap];
+      root.dataset.kind = L.kind;
+      // The progress trail copies the route it runs on.
+      const d = routeEls[L.kind]!.getAttribute('d') ?? '';
+      trail.setAttribute('d', d);
+      trailGlow.setAttribute('d', d);
+      drawStrip();
+      chips.forEach((c, i) => {
+        const on = i === lap;
+        c.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (done.has(i)) c.setAttribute('data-done', '');
+        else c.removeAttribute('data-done');
+      });
+      const kind = L.kind === 'long' ? 'Long loop' : 'Short loop';
+      const title = el('[data-strip-title]');
+      if (title) title.textContent = `Lap ${L.n} · ${kind}`;
+      const rng = el('[data-strip-range]');
+      if (rng) rng.textContent = `${L.lo} to ${L.hi} ft`;
+      const sk = el('[data-stat-kind]');
+      if (sk) sk.textContent = `${kind}, lap ${L.n}`;
+      const smi = el('[data-stat-mi]');
+      if (smi) smi.textContent = `${L.mi} mi`;
+      const slo = el('[data-stat-lo]');
+      if (slo) slo.textContent = `${L.lo} ft`;
+      const shi = el('[data-stat-hi]');
+      if (shi) shi.textContent = `${L.hi} ft`;
+      if (kicker) {
+        kicker.textContent =
+          mode === 'tour' ? `Running the race, lap ${L.n} of 7` : `Lap ${L.n} on repeat`;
+      }
+    };
+
+    const paintRunner = () => {
+      const L = data.laps[lap];
+      const p = pointAt(L.kind, t);
+      runner.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
+      const off = String(1 - t);
+      trail.style.strokeDashoffset = off;
+      trailGlow.style.strokeDashoffset = off;
+
+      const ele = Math.round(lerpSamples(L.s, t));
+      const mile = L.start + t * L.span;
+      tag.textContent = `Mile ${mile.toFixed(1)} · ${ele} ft`;
+      const rect = stage.getBoundingClientRect();
+      const px = (p.x / data.w) * rect.width;
+      const py = (p.y / data.h) * rect.height;
+      // Keep the tag on the plate: it is about 130px wide.
+      const x = Math.min(rect.width - 70, Math.max(70, px));
+      tag.style.left = `${x.toFixed(1)}px`;
+      tag.style.top = `${Math.max(34, py).toFixed(1)}px`;
+
+      marker.style.left = `${(t * 100).toFixed(2)}%`;
+      mdot.style.left = `${(t * 100).toFixed(2)}%`;
+      mdot.style.top = `${(100 - ((ele - data.low) / range) * 100).toFixed(2)}%`;
+    };
+
+    const select = (i: number, as: 'tour' | 'loop') => {
+      lap = i;
+      t = 0;
+      mode = as;
+      if (as === 'loop') done.clear();
+      paintLap();
+      paintRunner();
+    };
+
+    const frame = (now: number) => {
+      raf = 0;
+      if (!visible || document.hidden) return;
+      if (!last) last = now;
+      const dt = Math.min(64, now - last);
+      last = now;
+      if (live && now >= startAt && !scrubbing && !reduced) {
+        const L = data.laps[lap];
+        t += dt / LAP_MS[L.kind];
+        if (t >= 1) {
+          if (mode === 'tour') {
+            done.add(lap);
+            if (lap === data.laps.length - 1) {
+              done.clear();
+              lap = 0;
+            } else {
+              lap += 1;
+            }
+            t = 0;
+            paintLap();
+          } else {
+            t = 0;
+          }
+        }
+        paintRunner();
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    const kick = () => {
+      if (!raf && visible && !document.hidden) {
+        last = 0;
+        raf = requestAnimationFrame(frame);
+      }
+    };
+
+    // ---- Reader input ---------------------------------------------------------
+    chips.forEach((chip, i) => {
+      const pick = () => {
+        if (mode === 'loop' && lap === i) return;
+        select(i, 'loop');
+        startAt = 0;
+      };
+      chip.addEventListener('click', pick);
+      // Hover picks too, for a mouse: that is the discovery gesture.
+      chip.addEventListener('pointerenter', (e) => {
+        if (e.pointerType === 'mouse') pick();
+      });
+    });
 
     const onMove = (e: PointerEvent) => {
-      pending = { x: e.clientX, y: e.clientY };
-      figure.setAttribute('data-tilting', '');
-      if (!frame) frame = requestAnimationFrame(apply);
+      if (e.pointerType !== 'mouse') return;
+      const rect = stage.getBoundingClientRect();
+      const vx = ((e.clientX - rect.left) / rect.width) * data.w;
+      const vy = ((e.clientY - rect.top) / rect.height) * data.h;
+      // The nearest point on EITHER loop. Pointing at the loop the runner is
+      // not on is a request to see that loop, so the plate switches to it.
+      let best = -1;
+      let bestKind: Kind = data.laps[lap].kind;
+      let bestD = Infinity;
+      (['long', 'short'] as Kind[]).forEach((k) => {
+        pts[k].forEach((p, i) => {
+          const d = (p.x - vx) ** 2 + (p.y - vy) ** 2;
+          if (d < bestD) {
+            bestD = d;
+            best = i;
+            bestKind = k;
+          }
+        });
+      });
+      if (Math.sqrt(bestD) > data.w * SNAP) {
+        scrubbing = false;
+        return;
+      }
+      if (bestKind !== data.laps[lap].kind) {
+        // Lap 1 is the first long lap and lap 2 the first short one.
+        select(bestKind === 'long' ? 0 : 1, 'loop');
+      } else if (mode === 'tour') {
+        mode = 'loop';
+        done.clear();
+        paintLap();
+      }
+      scrubbing = true;
+      t = best / SAMPLES;
+      paintRunner();
     };
-
     const onLeave = () => {
-      if (frame) cancelAnimationFrame(frame);
-      frame = 0;
-      pending = null;
-      figure.removeAttribute('data-tilting');
-      figure.style.setProperty('--poster-rx', '0deg');
-      figure.style.setProperty('--poster-ry', '0deg');
+      scrubbing = false;
     };
+    stage.addEventListener('pointermove', onMove);
+    stage.addEventListener('pointerleave', onLeave);
 
-    link.addEventListener('pointermove', onMove);
-    link.addEventListener('pointerleave', onLeave);
-    // A keyboard visit gets the plate square, not wherever the mouse was left.
-    link.addEventListener('focus', onLeave);
+    // A click opens the map where the reader was pointing. Set on the target
+    // phase, which runs before the ClientRouter's document-level handler.
+    const aim = () => {
+      const L = data.laps[lap];
+      const mile = scrubbing ? `&mile=${(L.start + t * L.span).toFixed(1)}` : '';
+      hit.setAttribute('href', `/course?loop=${L.n}${mile}`);
+    };
+    hit.addEventListener('click', aim);
+    hit.addEventListener('focus', aim);
+    cta?.addEventListener('click', () => {
+      cta.setAttribute('href', `/course?loop=${data.laps[lap].n}`);
+    });
+
+    // ---- Visibility and the draw-in -----------------------------------------------
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          visible = entry.isIntersecting;
+          if (visible && !live) {
+            live = true;
+            root.setAttribute('data-live', '');
+            startAt = performance.now() + TOUR_DELAY;
+          }
+          if (visible) kick();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    io.observe(stage);
+    const onVis = () => kick();
+    document.addEventListener('visibilitychange', onVis);
+
+    // The plate is a still-life until the script is sure it can animate it.
+    paintLap();
+    paintRunner();
+    root.setAttribute('data-ready', '');
+    // Under reduced motion the route is simply drawn.
+    if (reduced) root.setAttribute('data-live', '');
 
     bound.push(() => {
-      if (frame) cancelAnimationFrame(frame);
-      link.removeEventListener('pointermove', onMove);
-      link.removeEventListener('pointerleave', onLeave);
-      link.removeEventListener('focus', onLeave);
+      cancelAnimationFrame(raf);
+      io.disconnect();
+      document.removeEventListener('visibilitychange', onVis);
+      stage.removeEventListener('pointermove', onMove);
+      stage.removeEventListener('pointerleave', onLeave);
     });
   };
 
-  const setup = () => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-    document.querySelectorAll<HTMLElement>('[data-poster-tilt]').forEach(bind);
-  };
+  const init = () => document.querySelectorAll<HTMLElement>('[data-course-plate]').forEach(setup);
 
-  setup();
-  document.addEventListener('astro:page-load', setup);
+  init();
+  document.addEventListener('astro:page-load', init);
   document.addEventListener('astro:before-swap', () => {
     for (const stop of bound.splice(0)) stop();
+    document
+      .querySelectorAll<HTMLElement>('[data-course-plate]')
+      .forEach((r) => delete r.dataset.plateBound);
   });
 </script>
