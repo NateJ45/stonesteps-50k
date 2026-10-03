@@ -13,7 +13,7 @@ on:
   # having and almost never worth having per commit, so it runs weekly against
   # main, on any pull request, and on demand.
   #
-  # Dispatchable so a staging tip can be re-audited without pushing an empty
+  # Dispatchable so a branch tip can be re-audited without pushing an empty
   # commit, which is also now the way to audit a specific main commit.
   schedule:
     - cron: '30 8 * * 1' # Mondays 08:30 UTC

@@ -132,8 +132,8 @@ import { cfAnalyticsToken as cfToken, gaId, hasCfAnalytics, hasGa } from '@/lib/
 // means no Cloudflare beacon.
 //
 // Deliberately supplied only by the PRODUCTION deploy (deploy.yml passes
-// `vars.PUBLIC_GA_ID`; deploy-staging.yml, ci.yml and lighthouse.yml do not),
-// so staging builds and CI runs cannot post hits against the real property.
+// `vars.PUBLIC_GA_ID`; ci.yml and lighthouse.yml do not),
+// so CI runs cannot post hits against the real property.
 // That is also why the Lighthouse gate never measures this tag: an audit that
 // loaded it would file ~18 localhost page views per run into the live data,
 // and the tag is fetched after the load event anyway, outside LCP by
