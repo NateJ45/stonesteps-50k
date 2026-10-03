@@ -10,6 +10,26 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-10-03 — Home page: the course map band is a live plate, and three bands stop hugging the left edge._
+
+**`CoursePosterBand` is rebuilt.** The screenshot of the 3D map (busy, low contrast, nothing to do)
+is replaced by an inline-SVG survey plate drawn from the recorded GPS run
+(`src/lib/courseTeaser.ts`, tested in `courseTeaser.test.ts`). The route draws itself on scroll;
+a runner then does the race (long, short, long, short, long, short, long), with lap chips, an
+elevation strip and a live "Mile N, X ft" tag following along. Hover a chip or the plate and the
+runner takes that lap or point; a click opens `/course?loop=N&mile=M`. The plate shows two routes,
+not seven (laps of one kind overlap to within GPS noise), and states published miles and recorded
+low/high only, never GPS climb, which disagrees with the race's published figure. No new
+dependency, no schema change (same section type and fields). Reduced motion: no draw-in, no tour;
+chips and hover still work. The baked poster assets are now unused (PENDING 0e).
+
+**Race-day clipboard, record board and Facebook card fill the column from `lg`.** They were
+width-capped and hung off the left edge, leaving the right half of each band empty (the 2026-09-18
+left-edge decision, reversed by Nathan). Clipboard: heading and parking note left, board right.
+Record board (home and /records, `Dynasties`): `board--wide` lays four rows out as two halves, 50K
+left and 27K right. Facebook card: full width, copy left, three promises as pinned slips right.
+Phone layouts unchanged.
+
 _2026-10-03 — Claude Code setup adopted from the starter (starter PORTS.md card 71)._
 
 Added `.claude/settings.json` (tracked deny rules for `git reset --hard` and force pushes, Bash and PowerShell forms) and `docs/claude/family-conventions.md` (the shared "Code conventions" and "Working with Claude" text), both byte-for-byte copies marked PORTABLE. CLAUDE.md lost its own copies of those two sections (about 17 lines) and now imports the shared file with `@docs/claude/family-conventions.md`; the two repo-specific deltas (images doc pointer, `ui-verification.md` pointer and the light-and-dark screenshot rule) stay as a short list beside the import. No code or site behaviour changed.

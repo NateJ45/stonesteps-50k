@@ -89,33 +89,38 @@ const button: ProjectedCommunitySection['cta'] =
           d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
         ></path>
       </svg>
-      {
-        eyebrow && (
-          <p class="community__eyebrow font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-            {eyebrow}
-          </p>
-        )
-      }
-      <h2 id={headingId} class="display mt-3 text-h2">{headline}</h2>
-      {body && <p class="community__body mt-4 max-w-[54ch]">{body}</p>}
+      <div class="community__grid">
+        <div class="community__copy">
+          {
+            eyebrow && (
+              <p class="community__eyebrow font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+                {eyebrow}
+              </p>
+            )
+          }
+          <h2 id={headingId} class="display mt-3 text-h2">{headline}</h2>
+          {body && <p class="community__body mt-4 max-w-[54ch]">{body}</p>}
 
-      {
-        points.length > 0 && (
-          <ul class="community__points mt-6 grid gap-2">
-            {points.map((point) => (
-              <li class="community__point font-mono text-[0.8125rem] tracking-[0.08em]">{point}</li>
-            ))}
-          </ul>
-        )
-      }
-
-      {
-        button && (
-          <div class="mt-8">
-            <CtaLink cta={button} class="btn-plate" />
-          </div>
-        )
-      }
+          {
+            button && (
+              <div class="mt-8">
+                <CtaLink cta={button} class="btn-plate" />
+              </div>
+            )
+          }
+        </div>
+        {
+          points.length > 0 && (
+            <ul class="community__points mt-6 grid gap-2 lg:mt-0 lg:gap-4">
+              {points.map((point) => (
+                <li class="community__point font-mono text-[0.8125rem] tracking-[0.08em]">
+                  {point}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
     </div>
   </div>
 </section>
@@ -165,6 +170,43 @@ const button: ProjectedCommunitySection['cta'] =
   @media (width >= 64rem) {
     .community__card {
       margin-inline: 0 auto;
+    }
+  }
+
+  /* FULL COLUMN FROM `lg` (2026-10-03). The 44rem cap left the right half of
+     the band bare. The card now spans the column like every board around it,
+     with the copy and button on the left and the three promises on the right
+     as slips pinned to it. It keeps the tilt, the pins and the watermark. */
+  @media (width >= 64rem) {
+    .community__card {
+      max-width: none;
+      padding: 3.5rem 4rem;
+    }
+    .community__grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: 4rem;
+      align-items: center;
+    }
+    .community__points .community__point {
+      padding: 1.1rem 1.25rem 1.1rem 3rem;
+      font-size: 0.9375rem;
+      line-height: 1.45;
+      background: var(--plate-face);
+      border: 2px dashed color-mix(in srgb, var(--plate-ink) 35%, transparent);
+      border-radius: 0.35rem;
+      box-shadow: 3px 4px 0 color-mix(in srgb, var(--plate-edge) 35%, transparent);
+    }
+    .community__points .community__point::before {
+      left: 1.1rem;
+      top: 1.65em;
+    }
+    .community__points .community__point:nth-child(odd) {
+      rotate: -0.6deg;
+    }
+    .community__points .community__point:nth-child(even) {
+      rotate: 0.5deg;
+      margin-left: 1.25rem;
     }
   }
 

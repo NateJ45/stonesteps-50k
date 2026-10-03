@@ -67,6 +67,12 @@ const holders = distances
   )
   .filter((x): x is NonNullable<typeof x> => x !== null);
 
+// FOUR ROWS (two distances, two genders) FILL THE COLUMN AS TWO HALVES: the 50K
+// down the left, the 27K down the right. The board used to be a 54rem strip
+// hanging off the left edge with the right half of the band empty. Any other
+// row count keeps the single narrow rail, which is what that cap was for.
+const wide = holders.length === 4;
+
 const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 ---
 
@@ -85,7 +91,7 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
             from the names that a row stops reading as one line, which is the
             same failure the results tables were rebuilt to fix. */}
         <RecordBoard
-          class="mob-left mt-10 max-w-[54rem]"
+          class:list={['mob-left mt-10', wide ? 'board--wide' : 'max-w-[54rem]']}
           label="Course record holders"
           rows={holders.map((h) => ({
             label: `${h.gender} ${h.distance}`,

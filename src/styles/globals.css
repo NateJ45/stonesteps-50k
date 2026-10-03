@@ -5105,6 +5105,53 @@ main > .band-torn:first-child::before {
   }
 }
 
+/* THE WIDE BOARD (2026-10-03). Four rows laid out as two columns read down:
+   the first two rows (one distance) on the left, the next two on the right,
+   with a dashed seam between them like the one between rows. At the content
+   column's full width a single column of rows left the right half of the band
+   empty; two halves fill it and each half is the same 580px board the single
+   column was already comfortable at. Opt-in (`board--wide`), and only for
+   exactly four rows, so the year pages' two-row boards are untouched. */
+@media (min-width: 64rem) {
+  .board--wide {
+    padding: 2.5rem 3rem 2.25rem;
+  }
+  .board--wide .board__rows {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    grid-auto-flow: column;
+    column-gap: 4.5rem;
+  }
+  .board--wide .board__rows::before {
+    content: '';
+    position: absolute;
+    top: 0.2rem;
+    bottom: 0.2rem;
+    left: 50%;
+    border-left: 2px dashed color-mix(in srgb, var(--board-ink) 20%, transparent);
+  }
+  .board--wide .board__row {
+    padding-block: 1.25rem;
+    /* A half-width row has to hold "KATIE RUHLMAN" on one line, so the label
+       track and the gaps come in and the name is a notch smaller than the
+       single-column board's. */
+    grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+    column-gap: 1rem;
+  }
+  .board--wide .board__name {
+    font-size: clamp(1.6rem, 2.5vw, 2.3rem);
+    overflow-wrap: normal;
+  }
+  .board--wide .board__row:nth-child(2n) {
+    border-bottom: 0;
+    padding-bottom: 0.2rem;
+  }
+  .board--wide .board__row:nth-child(2n + 1) {
+    padding-top: 0.2rem;
+  }
+}
+
 /* THE NAMES ARE STRUCK ON, ONE ROW AFTER ANOTHER, the way the phone menu
    strikes its five destinations. The press is the hero's, with its own
    keyframe rather than `.stamp-word`'s: that one drops a word in at 2.4x, and
