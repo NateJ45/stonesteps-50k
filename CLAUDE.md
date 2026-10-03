@@ -4,6 +4,8 @@ Always-loaded rules for this repo, kept short on purpose. Anything file-specific
 
 The site is stonesteps50k.com for the Stone Steps 50K / 27K race (Mt. Airy Forest, Cincinnati). Astro 7 + Sanity (project 7iynvqq6, dataset production, Studio embedded at `/studio`) on a Cloudflare Worker, forked from `ncs-astro-sanity-starter`.
 
+**Design context.** `PRODUCT.md` (audience, purpose, tone, anti-references; open questions are `TODO(Nathan)` lines) and `DESIGN.md` (the visual system as built) sit at the repo root; read them before any design work and update them in the same change when the system moves.
+
 **Read `docs/PENDING.md` early in a session.** It is the live registry of open loops: queued work, known gaps, and waiting-on-a-human items. If you finish or discover one, update it in the same commit.
 
 `ncs-astro-sanity-starter` is a production-ready Astro + Sanity + Cloudflare Workers site template forked from a finished client build. This is a **page-builder-first** starter: the home, about, services, and process pages all render via a shared `SectionRenderer` component fed by Sanity `pageBuilder` arrays, and any custom page created in the Studio gets a `/[slug]` route for free. The infrastructure -- build pipeline, CMS integration, deploy hooks, polish layer, section-visibility system, component library, Lighthouse 100/100/100/100 baseline -- is already standing. A new project pours in two things: its brand identity (run `npm run apply-brand` with `brand/brand.config.json`) and its content.
