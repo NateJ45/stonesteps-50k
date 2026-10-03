@@ -4,7 +4,7 @@ Read `CLAUDE.md` first, then follow this guide in order. Each step lists the
 exact commands and files to touch. Complete all steps before launch.
 
 This runbook is the single entry point for adapting the starter to a new client
-site. The Foundation-vs-Safe-to-edit taxonomy in `CLAUDE.md` tells you which
+site. The Foundation-vs-Safe-to-edit taxonomy in `docs/claude/safe-to-edit.md` and `.claude/rules/foundation-files.md` tells you which
 files are safe to change freely and which require a planned session. Read that
 section before touching anything in the "Foundation" list.
 
@@ -194,7 +194,7 @@ manual token adjustments beyond what `apply-brand` covers.
 
 Fill in `docs/brand/voice.md` with the client's specific tone, vocabulary
 rules, and banned words. This file is what an AI agent reads when writing or
-editing site copy for this project. The `CLAUDE.md` Communication style section
+editing site copy for this project. The `.claude/rules/copy-and-voice.md` Communication style section
 is the always-on baseline; `voice.md` layers the client's specifics on top.
 
 ---
@@ -286,7 +286,7 @@ desktop (~1280px):
 Run Lighthouse on the key pages (Home, Services, Contact). Targets:
 100/100/100/100 on desktop. If a score drops, find the cause before launch.
 
-See `CLAUDE.md` Visual verification workflow for the full checklist.
+See `.claude/rules/ui-verification.md` (Visual verification workflow) for the full checklist.
 
 ---
 
@@ -338,7 +338,7 @@ Run through `docs/bootstrap/setup-checklist.md` before DNS cutover.
 ## What NOT to casually edit
 
 Before making changes to any "Foundation" file, read the Foundation-vs-Safe-to-edit
-taxonomy in `CLAUDE.md`. Key files to route through a planned session:
+taxonomy in `.claude/rules/foundation-files.md`. Key files to route through a planned session:
 
 - `src/styles/globals.css` beyond the design-seam tokens (polish-layer utilities,
   shadcn overrides, base resets)
@@ -351,4 +351,4 @@ taxonomy in `CLAUDE.md`. Key files to route through a planned session:
 
 The `src/components/ui/` shadcn primitives are also Foundation: if you
 reinstall via `npx shadcn add`, reapply the customizations documented in
-`CLAUDE.md` (notably the `accordion.tsx` changes).
+`.claude/rules/foundation-files.md` (notably the `accordion.tsx` changes).

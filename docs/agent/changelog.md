@@ -441,6 +441,6 @@ and fails if the committed `src/lib/sanity.types.ts` differs. New npm scripts: `
 `scripts/.parity/`, proven by a build, capture, rebuild, compare cycle at 9/9 PASS.
 
 `PORTS.md` was created with fifteen port cards and the applied-to matrix. See the
-[Library of record](../../CLAUDE.md) section of CLAUDE.md for the working rules, above
+[Library of record](../claude/library-of-record.md) doc (split out of CLAUDE.md) for the working rules, above
 all the docs-in-sync clause: an improvement that generalizes gets a card in the same
 commit that generalizes it.

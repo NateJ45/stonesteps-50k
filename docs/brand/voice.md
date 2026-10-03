@@ -1,7 +1,7 @@
 # Brand Voice
 
 This file defines the client-specific voice for this project. It layers on top
-of the always-on baseline in `CLAUDE.md` Communication style section: that
+of the always-on baseline in `.claude/rules/copy-and-voice.md` Communication style section: that
 section's rules (warm conversational tone, no AI-tells, no filler openers, stop
 when done) apply to everything. Fill in the blanks below for the specifics of
 this client.
