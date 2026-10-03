@@ -33,6 +33,18 @@ updates:
       - dependency-name: 'react'
       - dependency-name: 'react-dom'
       - dependency-name: 'sanity-plugin-*'
+      # Added to match the starter's dependabot.yml (PORTS.md card 62): the rest of the
+      # pinned React / styled-components set lives outside the @sanity/* namespace.
+      - dependency-name: 'react-is'
+      - dependency-name: 'styled-components'
+      # Adapter and wrangler are pinned as a pair: a lone bump of either can pass
+      # `astro build` and still break `wrangler deploy` (starter dependabot.yml).
+      - dependency-name: '@astrojs/cloudflare'
+      - dependency-name: 'wrangler'
+      # TypeScript 7 (the native compiler) breaks Astro's tooling; majors only, 6.x flows
+      # (vault gotcha typescript-not-7).
+      - dependency-name: 'typescript'
+        versions: ['>=7']
 
   - package-ecosystem: github-actions
     directory: /
