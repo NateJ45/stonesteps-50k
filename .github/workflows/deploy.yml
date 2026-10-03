@@ -3,11 +3,12 @@ name: Deploy
 # Deploys the production Worker (stonesteps-50k).
 #
 # ── WHY THIS EXISTS ─────────────────────────────────────────────────────────
-# Until 2026-09-07 this repo had no production deploy at all. deploy-staging.yml
-# only handles the `staging` branch, results-import.yml only deploys when it
-# finds new results, and everything else came off a laptop by hand. So a merged
-# code change was live only if somebody remembered, and a Sanity publish was
-# live only if somebody remembered twice.
+# Until 2026-09-07 this repo had no production deploy at all. results-import.yml
+# only deploys when it finds new results, and everything else came off a laptop
+# by hand. (There was a staging deploy for a while; staging was abandoned on
+# 2026-10-03 and main is the only branch.) So a merged code
+# change was live only if somebody remembered, and a Sanity publish was live
+# only if somebody remembered twice.
 #
 # ── THE THREE WAYS IT FIRES ─────────────────────────────────────────────────
 # push to main          a code change. Docs-only paths are ignored, see below.
@@ -42,6 +43,7 @@ on:
       - 'OPERATIONS.md'
       - 'PORTS.md'
       - '.github/**/*.md'
+      - '.claude/**/*.md'
   repository_dispatch:
     types: [sanity-publish]
   workflow_dispatch:
@@ -122,7 +124,7 @@ jobs:
           # deploy, so treat a missing variable here as a real problem.
           PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
           PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
-          # GA4, and ONLY here. deploy-staging.yml, ci.yml and lighthouse.yml
+          # GA4, and ONLY here. ci.yml and lighthouse.yml
           # build without it on purpose, so nothing but the real site can post
           # hits against the live property. An empty value is a no-op, not a
           # failure: the tag is simply omitted.

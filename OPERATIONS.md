@@ -4,6 +4,8 @@ Tactical reference for common tasks. `CLAUDE.md` is the architecture and design 
 
 If you are a future Claude session and you can only read one doc, read `CLAUDE.md`. This file is the second one to open when you need to do something specific (deploy, patch, audit, regenerate).
 
+2026-10-03: staging abandoned; `main` is the only branch. Work on short-lived branches, PR into `main`, merge when CI (`build`, `test`) is green; a merge is the production deploy.
+
 ---
 
 ## Reskin (apply a new brand identity)

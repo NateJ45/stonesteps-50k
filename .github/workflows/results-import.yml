@@ -28,7 +28,7 @@ name: Import race results
 # Every one of those is checked in a step rather than an `if:`, because a
 # secret cannot be read in an `if:` expression. Missing credentials WARN and
 # skip rather than failing, so this file is safe to commit before any of them
-# exist. Same stance as sanity-backup.yml and deploy-staging.yml.
+# exist. Same stance as sanity-backup.yml.
 #
 # ── THE SCHEDULE ────────────────────────────────────────────────────────────
 # Daily through October and November, which covers the race (late October) and
