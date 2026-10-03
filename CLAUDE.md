@@ -79,27 +79,16 @@ PORTABLE-marked files are canonical in the starter; do not make site-specific ed
 
 ---
 
-## Code conventions
+## Code conventions and Working with Claude
 
-- TypeScript strict mode. No `any`.
-- Comment generously, especially in components that a future maintainer might edit by hand.
-- At the top of each component file, add a header comment marking it `// Safe to edit by hand` or `// Foundation, edit with care`.
-- Astro components for static content. React islands only where interactivity is required (lightbox, mobile nav, form handler, before/after slider, accordions).
-- Prefer Astro's built-in `<Image />` and `<Picture />` components over plain `<img>` tags for any locally-bundled assets. For Sanity-hosted images, use the project's `<SanityImage />` wrapper (see image handling section).
-- Tailwind utility classes inline. Pull into `@apply` only when a pattern repeats four or more times.
-- Use `clsx` or `class-variance-authority` for conditional classes once components get state-dependent styling.
+Shared by every site repo in the family, so they live in one PORTABLE file imported here (it is expanded into context at launch, so this saves lines in this file, not tokens): the code conventions (strict TypeScript, header comments, Astro and React islands, images, Tailwind) and the working-with-Claude habits (desktop app, Plan Mode, confirm before installing, describe design in plain language, verify in a real browser).
 
----
+@docs/claude/family-conventions.md
 
-## Working with Claude
+Stone Steps specifics on top of the shared text:
 
-- Use Claude Code from the desktop app, not the terminal. Show diffs clearly so they read well in that UI.
-- Prefer Plan Mode for any multi-file change, especially when touching Sanity schemas (schema changes propagate to live content).
-- Pause for confirmation before installing new dependencies.
-- When proposing design changes, describe the visual outcome in plain language, not just the code.
-- For browser-based verification, prefer the Playwright MCP. What to verify (both themes, both viewports, interactive states, adjacent sections) is in `.claude/rules/ui-verification.md`, which loads when you touch UI files.
-- For Sanity Studio testing, run `npm run dev` and open `/studio` in a real browser. A 200 response is not verification; read the console.
-- Don't report a UI change as done without screenshots in both themes and both viewports.
+- Images: the shared file says to use `<SanityImage />` for Sanity-hosted images; the image handling detail is in `docs/agent/images.md`.
+- What to verify in the browser (both themes, both viewports, interactive states, adjacent sections) is in `.claude/rules/ui-verification.md`, which loads when you touch UI files. This site ships light AND dark, so every UI change needs screenshots in both themes at both viewports.
 
 ## Style (short version; full rules in `.claude/rules/copy-and-voice.md`)
 
@@ -132,6 +121,7 @@ PORTABLE-marked files are canonical in the starter; do not make site-specific ed
 | Routes table and opt-in modules                                         | `docs/claude/routes-and-modules.md`              |
 | Files safe to edit by hand                                              | `docs/claude/safe-to-edit.md`                    |
 | PORTS.md and sync-check working rules                                   | `docs/claude/library-of-record.md`               |
+| Shared code conventions and Claude habits (PORTABLE, imported above)    | `docs/claude/family-conventions.md`              |
 | Deep dives (theme, components, SEO, performance, Sanity, deployment...) | `docs/claude/topic-index.md` then `docs/agent/*` |
 | Cross-repo registry                                                     | `PORTS.md`                                       |
 | New-project setup                                                       | `docs/bootstrap/NEW-PROJECT.md`                  |
