@@ -35,6 +35,12 @@ still carries its column and its historical cards, but nothing syncs to it any m
   byte-exact. Point it at the starter with `NCS_STARTER_DIR`, or let it find a sibling
   `ncs-astro-sanity-starter`. It is dependency-free so it runs in any repo in the family.
   Run with no argument from here for a self-check (everything must be `SAME`).
+- **Claude Code setup files are canonical too (starter PORTS.md card 71, adopted 2026-10-03).**
+  `.claude/settings.json` (tracked deny rules for `git reset --hard` and force pushes; the JSON
+  carries its marker as a top-level `"_portable"` key because JSON has no comments) and
+  `docs/claude/family-conventions.md` (imported from CLAUDE.md with
+  `@docs/claude/family-conventions.md`) are byte-exact copies, so edit them in the starter only.
+  `.claude/settings.local.json` stays untracked and holds each person's own allow rules.
 - **If you change a marked file, you are changing the family's copy.** Either the change
   is general (make it here, note it on the card, and the next sync session pushes it out)
   or it is site-specific (then it does not belong in a marked file at all).
