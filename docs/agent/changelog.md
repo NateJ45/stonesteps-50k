@@ -10,6 +10,10 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-10-03 - Scripts tests run in CI (starter PR #68 wiring)._
+
+Tooling only, no site behaviour change, no workflow edited. `ci.yml` and `deploy.yml` call `npm run test:unit`, never `check:full`, so the `test:scripts` specs added in PR #70 ran only locally. `test:unit` now ends with `&& npm run test:scripts` and `check:full` no longer chains it, so the specs run exactly once and in CI.
+
 _2026-10-04 - Parity files resynced with the starter (starter PORTS.md card 74)._
 
 Tooling only, no site behaviour change. `scripts/page-parity.mjs` was replaced with the starter copy (it gains an optional `--exclude` / `PARITY_EXCLUDE`; no flag means nothing is excluded) and `scripts/lib/parity-glob.mjs` plus its spec `scripts/lib/parity-glob.test.mjs` were added, all byte-for-byte PORTABLE copies. New `test:scripts` npm script (`node --test scripts/lib/*.test.mjs`), chained at the end of `check:full`; `test:unit` and every workflow are untouched. `sync-check` against the starter: 82 same, 1 drifted (`page-parity.mjs`) before, 85 same, 0 drifted after. The remaining `MISSING-IN-STARTER` on `src/lib/scriptAccent.ts` is unrelated and was left alone.
