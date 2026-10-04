@@ -1,29 +1,30 @@
-# Studio Starter
+# Stone Steps 50K and 27K Trail Run
 
-> Studio Starter is a starter site built on Astro + Sanity. It serves as a neutral template for building content-managed websites with Astro, Sanity CMS, and Cloudflare Workers. Replace this description with your own business details.
+> The public site for the Stone Steps 50K and 27K Trail Run, which the site calls Cincinnati's longest running ultra marathon: single-track loops through Mt. Airy Forest in Cincinnati, Ohio, run since 2003 and directed by David Corfman. The site carries the course, fee tiers and start times, all-time records, and a results archive for 2003 to 2025; registration is handled on RunSignUp.
 
-## Key pages
-- [Services and pricing](https://example.com/services/): Every service tier and what it costs
-- [Process](https://example.com/process/): How a project works from first call to final reveal
-- [Portfolio](https://example.com/portfolio/): Recent projects
-- [E-Design](https://example.com/e-design/): Online offering delivered digitally, for clients anywhere
-- [About](https://example.com/about/): The studio's story and philosophy
-- [FAQ](https://example.com/faq/): Common questions about working together
-- [Contact](https://example.com/contact/): How to book a consultation
-- [Gift certificates](https://example.com/gift-certificates/): Give the studio's help as a gift
+Race details such as the date, fees, start times and entry caps are as published on the site and change each year, so check the pages below for current values.
 
-## Tools and resources
-- [Style quiz](https://example.com/quiz/): A short quiz that suggests a direction
-- [Budget calculator](https://example.com/calculator/): A rough budget range for a project
-- [Free guides](https://example.com/guides/): Downloadable guides
-- [Resources](https://example.com/resources/): Tools and recommendations
-- [Journal](https://example.com/journal/): Articles and project notes
-- [Shop my favorites](https://example.com/shop/): Recommended pieces and sources
-- [Press](https://example.com/press/): Where the studio has been featured
+## The race
+- [Home](https://stonesteps50k.com/): Race date, the 50K and 27K side by side, fee tiers, start times, course summary, course records, race director
+- [Course](https://stonesteps50k.com/course/): Loop order and distances, elevation, aid, cutoff, race-day weather history by year, what to bring, spectator notes
+- [Contact](https://stonesteps50k.com/contact/): Message the race director, start location, answers to common questions
 
-## Contact
-- Email: hello@example.com
-- Location: Your City
+## Records and results
+- [All-time records](https://stonesteps50k.com/records/): Course records, age-group records and fastest 10 on file for both distances
+- [Results archive](https://stonesteps50k.com/results/): Winners and finisher counts for every running, 2003 to 2025
+- [2025 results](https://stonesteps50k.com/results/2025/): Most recent year on file, every finisher with time
+- [2003 results](https://stonesteps50k.com/results/2003/): The first running; each year from 2004 to 2024 has the same page at /results/YYYY/
+
+## Elsewhere
+- [Register on RunSignUp](https://runsignup.com/Race/OH/Cincinnati/StoneSteps50KTrailRun): Registration, linked from every page of the site
+- [Full results on RunSignUp](https://runsignup.com/Race/Results/15282): The complete results archive, which the site says includes years it does not hold
+- [Facebook group](https://www.facebook.com/groups/1103063513072311/): Trail conditions, carpools and race-week updates, as described on the site
+- [Mt. Airy Forest, Cincinnati Parks](https://www.cincinnati-oh.gov/cincyparks/visit-a-park/find-a-parkfacility/mt-airy-forest/): The park the race runs in
 
 ## Optional
-- [Privacy policy](https://example.com/privacy/): How the site handles your information
+- [Privacy](https://stonesteps50k.com/privacy/): What the site collects, and how to have your name removed from the results pages
+- [Full site content for LLMs](https://stonesteps50k.com/llms-full.txt): Expanded plain-text version of the pages above
+
+## Contact
+- Email: rd@stonesteps50k.com (the address the privacy page gives for questions and results removal)
+- Location: Mt. Airy Forest, The Oval (Area 13), Cincinnati, Ohio

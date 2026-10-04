@@ -70,6 +70,8 @@ There is no static `public/robots.txt`. The generated endpoint ensures the sitem
 
 `public/llms.txt` also ships -- an AI/LLM crawler index of the site for tools that follow the emerging llms.txt convention. Keep it updated if major pages are added or removed.
 
+**Stone Steps: `public/llms.txt` and `public/llms-full.txt` are hand-maintained (2026-10-03).** Both were rewritten by hand from the live site pages, because the starter text (an interior-design studio with example.com links and a consultation price) was false for a trail-run site. Do NOT run `npm run llms:full` here: the marked starter script `scripts/generate-llms-full.mjs` reads starter content types (services, process, portfolio, journal, guides) that a race site does not have, so it would overwrite the file with a stub (starter card 81 fixed its site name and URL, not its content types). When race details change (date, fees, start times, entry caps, records, results years), edit both files by hand against the live pages, and keep every fact sourced from a page or repo file. Never put a price or time in them that the live site does not state. **Privacy:** `llms-full.txt` names winners and record holders, and the privacy page promises removal on request (email the race director with the name and year). When someone is removed from the results pages, also remove their name and time from `public/llms-full.txt` in the same change, or the file keeps publishing what the site has taken down.
+
 After DNS cutover, submit `sitemap-index.xml` to Google Search Console. Verify the property via DNS TXT record (preferred -- survives redeploys) or HTML file upload.
 
 ### Title and description rules
