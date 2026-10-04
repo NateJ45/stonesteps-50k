@@ -80,6 +80,17 @@ const phase: Phase = !valid
       ? 'race'
       : 'done';
 const TITLES: Record<Phase, string> = { count: label, race: 'Today', done: 'Next running' };
+
+/**
+ * RACE WEEK. Inside seven days of the gun the clock says so, and the hero's
+ * version offers the pack list on /course. Same arithmetic runs on every tick
+ * in the script below, so a page left open since the week before flips by
+ * itself. The title is the only thing that changes on the inline (footer)
+ * clock; the pack link is the hero's alone.
+ */
+const WEEK_SECONDS = 7 * 86400;
+const week = valid && phase === 'count' && ms / 1000 <= WEEK_SECONDS;
+const WEEK_TITLE = 'Race week, gun time in';
 const MESSAGES: Record<Phase, string> = { count: '', race: 'Race time!', done: 'TBC' };
 
 const totalSeconds = Math.floor(ms / 1000);
@@ -126,6 +137,8 @@ const srText = !valid
         ]}
         data-target={target}
         data-phase={phase}
+        data-week={week ? '1' : '0'}
+        data-title-week={WEEK_TITLE}
         data-title-count={label}
         data-title-race={TITLES.race}
         data-title-done={TITLES.done}
@@ -143,7 +156,7 @@ const srText = !valid
           mud happens to fall is not a label with contrast. On the plate's own
           face it is cream on near-black and the mud cannot reach it. */}
         <p class="clock__title font-mono text-[0.6875rem] tracking-[0.22em] uppercase">
-          {TITLES[phase]}
+          {week ? WEEK_TITLE : TITLES[phase]}
         </p>
         {/* The two messages, lit in the same LED as the digits. Hidden while
             counting; the digits row is hidden while one of these shows. */}
@@ -174,6 +187,11 @@ const srText = !valid
             </>
           ))}
         </div>
+        {!inline && (
+          <a class="clock__pack font-mono" href="/course#pack" data-pack hidden={!week}>
+            Race week: what to pack →
+          </a>
+        )}
       </div>
     </div>
   )
@@ -292,6 +310,25 @@ const srText = !valid
     text-transform: uppercase;
     color: rgb(255 235 187 / 0.5);
     margin-top: 0.35rem;
+  }
+  /* The race-week link, in the LED's own light at label size. */
+  .clock__pack {
+    display: inline-block;
+    margin-top: 0.7rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(255 235 187 / 0.85);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+    text-decoration-color: var(--led);
+  }
+  .clock__pack[hidden] {
+    display: none;
+  }
+  .clock__pack:hover,
+  .clock__pack:focus-visible {
+    color: #fff;
   }
   .clock__sep {
     color: var(--led);
@@ -421,9 +458,23 @@ const srText = !valid
       );
     };
 
+    // Race week: inside seven days the title changes and the hero's pack link
+    // shows. Idempotent, and also run when the phase leaves 'count' so the
+    // title is not left saying "Race week" on race day.
+    const packLink = clock.querySelector<HTMLElement>('[data-pack]');
+    const setWeek = (on: boolean) => {
+      const flag = on ? '1' : '0';
+      if (clock.dataset.week === flag) return;
+      clock.dataset.week = flag;
+      if (title)
+        title.textContent = on ? (clock.dataset.titleWeek ?? '') : (clock.dataset.titleCount ?? '');
+      if (packLink) packLink.hidden = !on;
+    };
+
     const tick = () => {
       const now = Date.now();
       if (now >= target.getTime()) {
+        setWeek(false);
         setPhase(now < dayEnd ? 'race' : 'done');
         return;
       }
@@ -450,6 +501,7 @@ const srText = !valid
         void el.offsetWidth;
         el.classList.add('is-lit');
       }
+      setWeek(total <= 7 * 86400);
       clock.setAttribute('aria-label', `${total} seconds remaining`);
     };
 

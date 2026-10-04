@@ -44,7 +44,15 @@ export function conditionLabel(code: number): string {
 /** Which glyph draws a WMO code. Same bands as conditionLabel, so the icon and the tooltip agree. */
 export type IconKind = 'sun' | 'partly' | 'cloud' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'storm';
 
-export function iconKind(code: number): IconKind {
+export function iconKind(code: number, wet = true): IconKind {
+  const kind = codeKind(code);
+  // The glyph must agree with the bar. A drizzle code on a day that measured
+  // under WET_THRESHOLD_IN is drawn dry (2019: 0.02 in), so its cloud carries
+  // no drops; pass `wasWet(day)` as `wet`.
+  return !wet && (kind === 'drizzle' || kind === 'rain') ? 'cloud' : kind;
+}
+
+function codeKind(code: number): IconKind {
   if (code === 0) return 'sun';
   if (code <= 2) return 'partly';
   if (code === 3) return 'cloud';
@@ -127,4 +135,48 @@ export function tempScale(days: RaceDay[]): { min: number; max: number } {
     min: Math.floor((Math.min(...lows) - 2) / 10) * 10,
     max: Math.ceil((Math.max(...highs) + 2) / 10) * 10,
   };
+}
+
+export interface PackItem {
+  /** Short label: when the advice applies. */
+  label: string;
+  /** One or two plain sentences. */
+  text: string;
+}
+
+/**
+ * What to pack, worked out from the record rather than typed, so it moves when
+ * a new year is baked. Three lines: the start, the afternoon, the ground.
+ * Thresholds are judgement calls on trail-running comfort, kept here and
+ * covered by tests so a change to them is a visible edit.
+ */
+export function packList(days: RaceDay[]): PackItem[] {
+  const s = summarise(days);
+  if (!s) return [];
+  const coldest = s.coldestStart.startTemp ?? s.coldestStart.low;
+  const gap = s.typicalHigh - s.typicalStart;
+
+  const start =
+    s.typicalStart < 40
+      ? `The usual start is ${s.typicalStart}°F. Gloves, a hat and a long-sleeve layer.`
+      : s.typicalStart < 50
+        ? `The usual start is ${s.typicalStart}°F. Gloves and a light layer, and you will want the layer off by mid-morning.`
+        : `The usual start is a mild ${s.typicalStart}°F. A singlet and arm sleeves you can pull off.`;
+
+  const afternoon =
+    gap >= 8
+      ? `It climbs about ${gap}° by the afternoon, to the ${decadeWords(s.typicalHigh)}. Wear a layer you can tie round your waist.`
+      : `It barely warms up, ${decadeWords(s.typicalHigh)} at best. Keep the layer on.`;
+
+  const wetShare = s.wetUnderfootDays / s.count;
+  const ground =
+    wetShare >= 0.25
+      ? `The steps were wet in ${s.wetUnderfootDays} of ${s.count} years. Shoes with real lugs, and dry socks for after.`
+      : `The ground was wet in ${s.wetUnderfootDays} of ${s.count} years. Mostly dry, but it is a root-and-rock trail, so trail shoes.`;
+
+  return [
+    { label: `At the 8 am start (coldest ${coldest}°F)`, text: start },
+    { label: 'By the afternoon', text: afternoon },
+    { label: 'Underfoot', text: ground },
+  ];
 }

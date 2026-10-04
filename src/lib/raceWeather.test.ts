@@ -4,6 +4,7 @@ import {
   conditionLabel,
   decadeWords,
   iconKind,
+  packList,
   summarise,
   summarySentence,
   tempScale,
@@ -108,4 +109,29 @@ test('iconKind draws the same bands conditionLabel names', () => {
   assert.equal(iconKind(81), 'rain');
   assert.equal(iconKind(73), 'snow');
   assert.equal(iconKind(95), 'storm');
+});
+
+test('packList reads the record: cold start, big afternoon climb, wet steps', () => {
+  const days = [
+    day({ year: 2020, low: 30, high: 52, startTemp: 34, rainIn: 0.3 }),
+    day({ year: 2021, low: 32, high: 50, startTemp: 36, rainIn: 0 }),
+    day({ year: 2022, low: 34, high: 56, startTemp: 38, rainIn: 0 }),
+  ];
+  const [start, afternoon, ground] = packList(days);
+  assert.match(start.text, /Gloves, a hat and a long-sleeve layer/);
+  assert.match(start.label, /coldest 34/);
+  assert.match(afternoon.text, /climbs about 16°/);
+  assert.match(ground.text, /wet in 1 of 3 years/);
+});
+
+test('packList is empty with no data and never uses an em-dash', () => {
+  assert.deepEqual(packList([]), []);
+  for (const i of packList(data as RaceDay[])) assert.ok(!/—/.test(i.label + i.text));
+});
+
+test('iconKind drops the rain from a drizzle code on a day the bar draws dry', () => {
+  assert.equal(iconKind(53, false), 'cloud');
+  assert.equal(iconKind(63, false), 'cloud');
+  assert.equal(iconKind(53, true), 'drizzle');
+  assert.equal(iconKind(73, false), 'snow');
 });

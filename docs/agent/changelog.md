@@ -53,6 +53,15 @@ _2026-10-03 - Playwright Sanity images come from a disk cache (starter PORTS.md 
 `Restore the test images` `actions/cache` step after `npm ci` so the shards share the folder between runs. Test
 tooling only, no site behaviour change. The three specs and `fixtures.ts` are now `SAME` in `sync-check`.
 
+_2026-10-03 (race week + pack list) — The hero clock knows it is race week; /course says what to pack._
+
+`packList()` in `src/lib/raceWeather.ts` computes three lines (the start, the afternoon, underfoot) from the
+same baked record as the strip, so it moves when a new year is baked; thresholds are tested. `RaceWeather.astro`
+renders them under the chart as `#pack`. `Countdown.astro`: inside 7 days of the gun the title reads "Race week,
+gun time in" (both variants) and the hero clock shows a "what to pack" link to `/course#pack`. Server-rendered and
+re-checked every tick, so a page open since the week before flips by itself, and `setWeek(false)` runs when race
+day starts. No live forecast (would need a third-party call and a CSP change); that is the obvious next step.
+
 _2026-10-03 (weather icons) — Each race-day bar wears an animated weather glyph._
 
 `/course`'s weather strip draws a small SVG above every bar, picked from that day's WMO code by
