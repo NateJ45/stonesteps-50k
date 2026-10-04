@@ -1,0 +1,91 @@
+---
+// Safe to edit by hand
+//
+// Race-week forecast, client half. Renders nothing; carries one script.
+//
+// WHEN IT RUNS: only when a countdown clock on the page says it is race week
+// (`.clock[data-week="1"]`, set by Countdown.astro on the server and flipped by
+// its script), and only if the page has somewhere to put the answer. Anywhere
+// else it does nothing, so a visitor six weeks out makes no request at all.
+//
+// WHAT IT CALLS: our own /api/forecast, never Open-Meteo directly (the Worker
+// fetches and caches; see src/pages/api/forecast.ts). The answer is kept in
+// sessionStorage for 30 minutes so moving between pages does not refetch.
+//
+// WHERE IT PUTS IT: any `[data-forecast]` element. `data-forecast="brief"` gets
+// the one-line summary; `"full"` gets the summary, the advice and the time the
+// forecast was fetched. Slots start `hidden` and are only revealed with text in
+// them, so a failure of any kind leaves the page exactly as it was (the
+// history-based pack list on /course is the fallback, and it is always there).
+//
+// Progressive enhancement, in the Countdown's own mould: binds on
+// `astro:page-load` (first load AND every client-side navigation) and on the
+// `race:week` event the clock fires when the week begins on a page left open.
+---
+
+<script>
+  const TTL_MS = 30 * 60 * 1000;
+  const TZ = 'America/New_York';
+
+  interface Answer {
+    summary: string;
+    advice: string;
+    fetchedAt: string;
+  }
+
+  // The race date as the visitor-independent calendar day in Cincinnati.
+  const raceDay = (iso: string) =>
+    new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date(iso));
+
+  const fill = (a: Answer) => {
+    const when = new Date(a.fetchedAt).toLocaleTimeString('en-US', {
+      timeZone: TZ,
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+    document.querySelectorAll<HTMLElement>('[data-forecast]').forEach((el) => {
+      el.textContent =
+        el.dataset.forecast === 'full'
+          ? `${a.summary} ${a.advice} Forecasts change; updated ${when} ET.`
+          : a.summary;
+      el.hidden = false;
+    });
+  };
+
+  const run = async () => {
+    const clock = document.querySelector<HTMLElement>('.clock[data-week="1"][data-target]');
+    if (!clock || !document.querySelector('[data-forecast]')) return;
+    const target = clock.dataset.target ?? '';
+    if (Number.isNaN(new Date(target).getTime())) return;
+    const date = raceDay(target);
+    const key = `ss-forecast:${date}`;
+
+    try {
+      const raw = sessionStorage.getItem(key);
+      if (raw) {
+        const { t, body } = JSON.parse(raw) as { t: number; body: Answer };
+        if (Date.now() - t < TTL_MS) return fill(body);
+      }
+    } catch {
+      /* storage blocked or corrupt: fetch instead */
+    }
+
+    try {
+      const res = await fetch(`/api/forecast?date=${date}`);
+      if (!res.ok) return;
+      const body = (await res.json()) as Answer;
+      if (!body.summary) return;
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), body }));
+      } catch {
+        /* a full or blocked store only costs a refetch */
+      }
+      fill(body);
+    } catch {
+      /* offline or blocked: the page keeps its history-based version */
+    }
+  };
+
+  document.addEventListener('astro:page-load', run);
+  document.addEventListener('race:week', run);
+</script>
