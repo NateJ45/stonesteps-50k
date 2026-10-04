@@ -57,6 +57,19 @@ _2026-10-03 - Playwright Sanity images come from a disk cache (starter PORTS.md 
 `Restore the test images` `actions/cache` step after `npm ci` so the shards share the folder between runs. Test
 tooling only, no site behaviour change. The three specs and `fixtures.ts` are now `SAME` in `sync-check`.
 
+`/course`'s strip: on a phone the weather glyphs now sit over every other bar (the same columns the year labels show) at 1.5rem, because 23 at 12px pitch read as a smear. Desktop is unchanged; every year is still in the tooltip and the sr-only table.
+
+_2026-10-03 (live forecast) — Race week shows a real forecast for race morning._
+
+`/api/forecast?date=` (SSR, `src/pages/api/forecast.ts`) has the Worker fetch Open-Meteo's forecast for The Oval
+(same coordinates as `scripts/lib/weather.mjs`), cache it an hour in the Workers cache, and return the numbers plus
+two sentences from the pure `src/lib/forecast.ts` (tested). The date is limited to today..+15 days, which also
+bounds the cache to sixteen keys. Browsers only ever call our own route, so no CSP change. `ForecastLoader.astro`
+(rendered by `Countdown.astro`) runs only in race week, keeps the answer in sessionStorage for 30 minutes, and fills
+`[data-forecast]` slots: a one-liner under the hero clock and a fuller block (forecast, advice, fetched time) above the
+history-based pack list on /course. Any failure leaves the slots hidden, so the history version is the fallback.
+The forecast day wears the same animated glyph as the strip (`forecastIcon()`; rain drops only when the forecast calls rain likely): `ForecastLoader` renders one inert `<template>` per glyph and clones the one the API names. There is no rebuild dependency: the route and loader are runtime, and the clock's race-week state is re-evaluated every second client-side.
+
 _2026-10-03 (race week + pack list) — The hero clock knows it is race week; /course says what to pack._
 
 `packList()` in `src/lib/raceWeather.ts` computes three lines (the start, the afternoon, underfoot) from the
@@ -64,7 +77,7 @@ same baked record as the strip, so it moves when a new year is baked; thresholds
 renders them under the chart as `#pack`. `Countdown.astro`: inside 7 days of the gun the title reads "Race week,
 gun time in" (both variants) and the hero clock shows a "what to pack" link to `/course#pack`. Server-rendered and
 re-checked every tick, so a page open since the week before flips by itself, and `setWeek(false)` runs when race
-day starts. No live forecast (would need a third-party call and a CSP change); that is the obvious next step.
+day starts. The live forecast is the entry above this one.
 
 _2026-10-03 (weather icons) — Each race-day bar wears an animated weather glyph._
 

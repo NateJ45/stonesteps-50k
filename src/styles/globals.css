@@ -3949,13 +3949,19 @@ main > .band-torn:first-child::before {
   aspect-ratio: 1;
   pointer-events: none;
 }
-/* On a phone the columns are about 12px wide: the glyph is allowed to be a
-   little wider than its column (neighbours are drawn small enough not to
-   touch) and the row stays a row. */
+/* ON A PHONE, EVERY OTHER BAR. The columns are about 12px wide, and 23 glyphs
+   at that pitch ran into one grey smear (reported 2026-10-03). The year labels
+   already show every other year here, so the icons follow the same columns,
+   each drawn at 1.5rem so it has room to be read; the tooltip and the
+   screen-reader table still carry every year. */
 @media (max-width: 40rem) {
   .wx__icon {
-    width: 1rem;
-    top: -1.5rem;
+    width: 1.5rem;
+    max-width: none;
+    top: -2.2rem;
+  }
+  .wx__col:nth-child(even of .wx__col) .wx__icon {
+    display: none;
   }
 }
 /* The foot sits just under the axis line and says wet or dry. */

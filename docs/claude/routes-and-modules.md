@@ -21,6 +21,7 @@ Core routes that ship with the starter (always on, not toggleable):
 | `/preview/**`        | `src/pages/preview/[...slug].astro` | SSR draft preview for the Studio's Presentation tool. noindex, sitemap-excluded                                          |
 | `/preview/live`      | `src/pages/preview/live.ts`         | SSE proxy for preview auto-refresh (403 without the Studio cookie)                                                       |
 | `/api/draft-mode/*`  | `src/pages/api/draft-mode/`         | Turns draft mode on/off for the preview                                                                                  |
+| `/api/forecast`      | `src/pages/api/forecast.ts`         | Race-week forecast: Worker fetches Open-Meteo, cached 1 h; `?date=` must be today to +15 days                            |
 | `/robots.txt`        | `src/pages/robots.txt.ts`           | Generated; reads production URL from `site.ts`                                                                           |
 | `/sitemap-index.xml` | `@astrojs/sitemap` (auto)           | Production sitemap                                                                                                       |
 | `/404`               | `src/pages/404.astro`               | Custom 404                                                                                                               |

@@ -17,6 +17,8 @@
 // then a small inline script takes over. If the script never runs, the visitor
 // still sees a correct countdown as of build time rather than four zeros.
 
+import ForecastLoader from '@/components/race/ForecastLoader.astro';
+
 interface Props {
   /** ISO datetime of the start. */
   target?: string | null;
@@ -192,10 +194,12 @@ const srText = !valid
             Race week: what to pack →
           </a>
         )}
+        {!inline && <p class="clock__forecast font-mono" data-forecast="brief" hidden />}
       </div>
     </div>
   )
 }
+<ForecastLoader />
 
 <style>
   /* The housing. Deliberately near-black in BOTH themes: this is a physical
@@ -322,6 +326,17 @@ const srText = !valid
     text-decoration: underline;
     text-underline-offset: 0.3em;
     text-decoration-color: var(--led);
+  }
+  .clock__forecast {
+    margin-top: 0.5rem;
+    max-width: 22rem;
+    font-size: 0.6875rem;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: rgb(255 235 187 / 0.85);
+  }
+  .clock__forecast[hidden] {
+    display: none;
   }
   .clock__pack[hidden] {
     display: none;
@@ -469,6 +484,8 @@ const srText = !valid
       if (title)
         title.textContent = on ? (clock.dataset.titleWeek ?? '') : (clock.dataset.titleCount ?? '');
       if (packLink) packLink.hidden = !on;
+      // Tell the forecast loader the week has begun on a page left open.
+      if (on) document.dispatchEvent(new CustomEvent('race:week'));
     };
 
     const tick = () => {

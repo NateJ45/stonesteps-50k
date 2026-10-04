@@ -150,6 +150,8 @@ const fmtDate = (iso: string) =>
             <h3 class="font-mono text-[0.75rem] tracking-[0.18em] text-muted-foreground uppercase">
               What to pack, going by the record
             </h3>
+            {/* Race week only: filled by ForecastLoader with the live forecast. */}
+            <p class="mt-4 max-w-[70ch] text-foreground" data-forecast="full" hidden />
             <dl class="mt-5 grid gap-x-10 gap-y-6 md:grid-cols-3">
               {pack.map((item) => (
                 <div class="border-t-2 border-dashed border-foreground/25 pt-4">
