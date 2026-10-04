@@ -64,7 +64,7 @@ bounds the cache to sixteen keys. Browsers only ever call our own route, so no C
 (rendered by `Countdown.astro`) runs only in race week, keeps the answer in sessionStorage for 30 minutes, and fills
 `[data-forecast]` slots: a one-liner under the hero clock and a fuller block (forecast, advice, fetched time) above the
 history-based pack list on /course. Any failure leaves the slots hidden, so the history version is the fallback.
-Not yet: weather icons for the forecast day, and a cron-style warm of the cache.
+The forecast day wears the same animated glyph as the strip (`forecastIcon()`; rain drops only when the forecast calls rain likely): `ForecastLoader` renders one inert `<template>` per glyph and clones the one the API names. There is no rebuild dependency: the route and loader are runtime, and the clock's race-week state is re-evaluated every second client-side.
 
 _2026-10-03 (race week + pack list) — The hero clock knows it is race week; /course says what to pack._
 

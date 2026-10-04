@@ -21,7 +21,23 @@
 // Progressive enhancement, in the Countdown's own mould: binds on
 // `astro:page-load` (first load AND every client-side navigation) and on the
 // `race:week` event the clock fires when the week begins on a page left open.
+
+import WeatherIcon from '@/components/race/WeatherIcon.astro';
+import type { IconKind } from '@/lib/raceWeather';
+
+// One inert copy of each glyph. The script clones the one the forecast names
+// into the slot, so the animated SVGs stay server-rendered and share
+// WeatherIcon's styles instead of being redrawn in JS.
+const kinds: IconKind[] = ['sun', 'partly', 'cloud', 'fog', 'drizzle', 'rain', 'snow', 'storm'];
 ---
+
+{
+  kinds.map((k) => (
+    <template data-forecast-icon={k}>
+      <WeatherIcon kind={k} />
+    </template>
+  ))
+}
 
 <script>
   const TTL_MS = 30 * 60 * 1000;
@@ -30,6 +46,7 @@
   interface Answer {
     summary: string;
     advice: string;
+    icon?: string;
     fetchedAt: string;
   }
 
@@ -43,11 +60,24 @@
       hour: 'numeric',
       minute: '2-digit',
     });
+    const tpl = a.icon
+      ? document.querySelector<HTMLTemplateElement>(`template[data-forecast-icon="${a.icon}"]`)
+      : null;
     document.querySelectorAll<HTMLElement>('[data-forecast]').forEach((el) => {
-      el.textContent =
+      const text = document.createElement('span');
+      text.textContent =
         el.dataset.forecast === 'full'
           ? `${a.summary} ${a.advice} Forecasts change; updated ${when} ET.`
           : a.summary;
+      el.replaceChildren();
+      if (tpl) {
+        const icon = document.createElement('span');
+        icon.className = 'forecast__icon';
+        icon.append(tpl.content.cloneNode(true));
+        el.append(icon);
+        el.classList.add('forecast--icon');
+      }
+      el.append(text);
       el.hidden = false;
     });
   };
@@ -89,3 +119,21 @@
   document.addEventListener('astro:page-load', run);
   document.addEventListener('race:week', run);
 </script>
+
+<style is:global>
+  /* The forecast slot with its glyph: icon left, text right. Global because the
+     spans are made by the script and carry no Astro scope attribute. */
+  .forecast--icon {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .forecast--icon[hidden] {
+    display: none;
+  }
+  .forecast__icon {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+  }
+</style>

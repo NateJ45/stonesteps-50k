@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   forecastAdvice,
+  forecastIcon,
   forecastSentence,
   parseForecast,
   type OpenMeteoForecast,
@@ -58,4 +59,11 @@ test('advice follows the numbers and never uses an em-dash', () => {
   assert.match(forecastAdvice({ ...f, rainChance: 5, rainIn: 0 }), /looks dry/);
   assert.match(forecastAdvice({ ...f, start: 35 }), /Gloves, a hat/);
   assert.ok(!forecastAdvice(f).includes('—'));
+});
+
+test('forecastIcon only draws rain when the forecast calls it likely', () => {
+  const f = parseForecast(answer, '2026-10-25')!; // code 63, 60%, 0.31 in
+  assert.equal(forecastIcon(f), 'rain');
+  assert.equal(forecastIcon({ ...f, rainChance: 15, rainIn: 0.01 }), 'cloud');
+  assert.equal(forecastIcon({ ...f, code: 0 }), 'sun');
 });

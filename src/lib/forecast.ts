@@ -8,6 +8,8 @@
 // WHAT WE PROMISE: nothing. Every sentence is a forecast, the page says when it
 // was fetched, and a missing number is a missing sentence, never a guess.
 
+import { iconKind, type IconKind } from './raceWeather.ts';
+
 export interface Forecast {
   date: string;
   /** Temperature at the 8 am start, °F. Null when the hourly row is missing. */
@@ -86,4 +88,15 @@ export function forecastAdvice(f: Forecast): string {
         : 'It looks dry. Fallen leaves can still hide the roots on the steps.';
   const warm = f.high - t >= 12 ? ' It will warm up a lot by the afternoon.' : '';
   return `${cold} ${wet}${warm}`;
+}
+
+/**
+ * The glyph for the forecast day. Same rule as the history strip (the icon must
+ * agree with the rain words beside it): a drizzle or rain code only draws drops
+ * when the forecast itself calls rain likely, so "20% chance" never wears a
+ * rain cloud.
+ */
+export function forecastIcon(f: Forecast): IconKind {
+  const wet = (f.rainChance ?? 0) >= 40 || f.rainIn >= 0.05;
+  return iconKind(f.code, wet);
 }

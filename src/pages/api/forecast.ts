@@ -15,6 +15,7 @@
 import type { APIRoute } from 'astro';
 import {
   forecastAdvice,
+  forecastIcon,
   forecastSentence,
   parseForecast,
   type Forecast,
@@ -81,6 +82,7 @@ export const GET: APIRoute = async ({ url }) => {
     ...forecast,
     summary: forecastSentence(forecast),
     advice: forecastAdvice(forecast),
+    icon: forecastIcon(forecast),
     fetchedAt: new Date().toISOString(),
   });
   try {
