@@ -67,7 +67,22 @@ _Proposed 2026-10-03, drafted by Claude on Nathan's delegation from repo evidenc
 
 ### Palette status
 
-_Decision recorded 2026-10-03, drafted by Claude on Nathan's delegation from repo evidence; edit if wrong._ **Rust, forest and rust-deep are NOT final. They wait on Dave's logo files.** The evidence is the comment in `src/styles/globals.css`: cream and gold were sampled from the mark, but "no asset published on stonesteps50k.com contains a single red or green pixel", so rust (`#A83C26`), rust deep (`#8F3323`) and forest (`#2E5738`, deep `#24462D`) were eyeballed and "must be replaced from a real brand file when one exists". The vault note lists the logo as still owed by Dave. So the `PROVISIONAL` markers stay in `globals.css`, and this is a tracked dependency, not a guess: when Dave supplies a brand file, sample the red and green from it, update `globals.css` and `brand/brand.config.json` together, re-run the contrast gates (`theme-tokens`, `layout-variants`, the axe sweep), then drop the markers.
+_Decision 2026-10-03, per Nathan: **final, derived from the live site.** The palette of record is what stonesteps50k.com serves today, not a wait for Dave's logo files._ Evidence: the inline built CSS of https://stonesteps50k.com/ (fetched 2026-10-03), compared token by token with `src/styles/globals.css`. Every brand colour token matched, so nothing was corrected and live and repo agree. The hexes (light theme, with the dark-theme change in brackets):
+
+| Role                                         | Hex                                                                   | Notes                                                             |
+| -------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Rust (`--color-primary`)                     | `#A83C26`                                                             | Action colour, button ground; dark theme `--primary` is `#B8462F` |
+| Rust deep (`--color-primary-dark`, `--link`) | `#8F3323`                                                             | Anchor text on paper; `#FED89B` on bark                           |
+| Forest (`--color-tertiary`, `--secondary`)   | `#2E5738`                                                             | 50K ticket stock; deep `#24462D`                                  |
+| Paper / soft paper / divider                 | `#FBF6EA` / `#F4EBD6` / `#E3D6B8`                                     | Page ground, alternating band, borders                            |
+| Bark / bark deep                             | `#1A1712` / `#0F0D0A`                                                 | Ink on paper, dark ground, fixed ink band                         |
+| Cream stock / gold                           | `#FFEBBB` / `#FED89B`                                                 | Sampled from the logo; plate face in dark theme, labels on forest |
+| Stone                                        | `#8A7F66`                                                             | Borders, eyebrows                                                 |
+| Muted ink                                    | `#5C513B` (dark `#C9B98F`)                                            | Secondary text                                                    |
+| Charcoal plate                               | `#3A3128`                                                             | Light-theme plate stock                                           |
+| Status                                       | info `#2E5738`, success `#24462D`, warning `#8A6318`, error `#8F3323` | Dark: `#9DC2A8`, `#9DC2A8`, `#FED89B`, `#E58A72`                  |
+
+Component-local colours also served live and left as they are: the countdown LED `#FF3B1F` and the course-plate lap colours `#E8512A` and `#D9A032`. The `PROVISIONAL` markers are gone from `globals.css`. Revisit only if Dave's logo files differ; if they do, update `globals.css` and `brand/brand.config.json` together and re-run the contrast gates. Contrast was recomputed 2026-10-03 for the main text pairs (cream on rust 5.35, cream on forest 7.04, gold on forest 6.11, rust-deep link on paper 7.30, bark on paper 16.57, muted on paper 7.22, cream on charcoal 10.82, dark cream on bark 15.19); no failures. Cream on the dark-theme rust `#B8462F` is 4.51, a pass by 0.01, and stone `#8A7F66` on paper is 3.67, so it is for borders and large labels only, not body text.
 
 ## Design Principles
 
