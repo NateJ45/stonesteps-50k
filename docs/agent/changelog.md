@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-03 - Fix: the image-count report step could fail a shard._
+
+CI only. The "Report the test images fetched from Sanity" step added in the entry below counted cached images with `grep -c`, which exits 1 when the count is zero, and Actions runs steps under `bash -e`, so a shard with no cached images (a cancelled run, a cold folder) failed that step and so could fail the job and block the required `test` check. Warm runs were unaffected, which is why the first runs passed. Reproduced locally under `bash -e` (exit 1, no output) before the fix; the counts now end in `|| true`, and all four fake-folder scenarios exit 0 and print. A reporting step must never fail a job.
+
 _2026-10-03 - The Playwright image cache is keyed per shard and reports what it saves._
 
 CI only. The first main runs after the cache landed (PR #76) restored warm in all three shards, but the three shards shared one key, so only the first to finish could save (`Unable to reserve cache`) and the other two shards' images were never kept. Each shard now restores and saves its own set (`test-images-<os>-s<shard>-<run id>`), with the old shared prefix as a second restore key so the switch does not start empty. Two small steps in the `e2e` job count `misses.log` before and after the tests and print how many images the shard fetched from Sanity, in the log and the run summary, because that number (not the cache hit line) is what Sanity meters. No job or step names that gate a merge changed; `build` and `test` are untouched.

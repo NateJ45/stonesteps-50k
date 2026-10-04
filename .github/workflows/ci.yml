@@ -282,7 +282,7 @@ jobs:
           before=0
           if [ -f "$d/misses.log" ]; then before=$(wc -l < "$d/misses.log" | tr -d ' '); fi
           echo "IMG_MISSES_BEFORE=$before" >> "$GITHUB_ENV"
-          echo "shard ${{ matrix.shard }}: $(ls "$d" 2>/dev/null | grep -c '\.bin$') images in the restored cache, $before fetches logged so far"
+          echo "shard ${{ matrix.shard }}: $(ls "$d" 2>/dev/null | grep -c '\.bin$' || true) images in the restored cache, $before fetches logged so far"
 
       # The browser download is the slow part, the apt libraries are not. Cache
       # the browsers by Playwright version; on a hit install only the system
@@ -332,7 +332,10 @@ jobs:
         run: npm test -- --shard=${{ matrix.shard }}/3 --reporter=github,html
 
       # Always runs, so a failed shard still reports. Prints the count in the log
-      # and in the run summary.
+      # and in the run summary. A report must never fail the job: Actions runs
+      # this under `bash -e`, and `grep -c` exits 1 when it counts zero, so a
+      # shard with no cached images (a cancelled run, a cold folder) would have
+      # failed here; hence the `|| true` on the counts.
       - name: Report the test images fetched from Sanity
         if: always()
         run: |
@@ -340,7 +343,7 @@ jobs:
           after=0
           if [ -f "$d/misses.log" ]; then after=$(wc -l < "$d/misses.log" | tr -d ' '); fi
           fetched=$((after - ${IMG_MISSES_BEFORE:-0}))
-          cached=$(ls "$d" 2>/dev/null | grep -c '\.bin$')
+          cached=$(ls "$d" 2>/dev/null | grep -c '\.bin$' || true)
           size=$(du -sh "$d" 2>/dev/null | cut -f1)
           echo "shard ${{ matrix.shard }}: fetched $fetched images from Sanity this run; $cached images cached now (${size:-0})"
           echo "Test images, shard ${{ matrix.shard }}: fetched $fetched from Sanity this run, $cached cached now (${size:-0})." >> "$GITHUB_STEP_SUMMARY"
