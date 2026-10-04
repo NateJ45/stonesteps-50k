@@ -925,7 +925,7 @@
 }
 .prose-blockquote cite {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.6875rem;
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: var(--tracking-eyebrow);
@@ -1973,7 +1973,7 @@ body::before {
   border: 1px solid currentColor;
   border-radius: 50%;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.6875rem;
   line-height: 1;
   cursor: help;
   text-decoration: none;
@@ -4225,6 +4225,8 @@ main > .band-torn:first-child::before {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
+  /* 44px tap floor (PRODUCT.md). It was 39px tall. */
+  min-height: 44px;
   transition:
     rotate 0.2s ease,
     box-shadow 0.2s ease;
@@ -4777,6 +4779,18 @@ main > .band-torn:first-child::before {
   padding: 0.5rem 0.1rem;
   color: var(--foreground);
   text-decoration: none;
+}
+/* 44px tap floor on a phone: the row is 38px of text plus padding, so the
+   padding grows (not min-height, which would strand the baseline-aligned
+   text at the top of the row). The long-label step is shorter text, so it
+   needs a little more. */
+@media (width < 48rem) {
+  .foot-link {
+    padding-block: 0.7rem;
+  }
+  .foot-link:has(.foot-link__label--long) {
+    padding-block: 0.95rem;
+  }
 }
 .foot-link__idx {
   flex: none;
@@ -5581,4 +5595,23 @@ main > .band-torn:first-child::before {
   text-align: right;
   font-weight: 700;
   white-space: nowrap;
+}
+
+/* ---------- Tap floor for links that live in running text ---------------- */
+/* PRODUCT.md promises 44px tap targets. A link inside a sentence or a table
+   cell cannot be made a 44px block without breaking the line it sits in, but
+   vertical padding on an INLINE box does not move the line: it only grows the
+   box the finger can hit. So a phone-width link in prose wears `.tap-pad` and
+   gains 0.55rem above and below, no layout change. Standalone links (footer
+   rows, buttons) get real padding or min-height at their own rules instead.
+   Neighbouring lines' hit areas overlap by a few pixels; the later link in
+   source order wins the overlap, which is the usual and accepted trade. */
+@media (width < 48rem) {
+  .tap-pad {
+    padding-block: 0.55rem;
+  }
+  /* For small print (12px links): 14 to 16px of text needs about 1rem a side. */
+  .tap-pad-lg {
+    padding-block: 1rem;
+  }
 }

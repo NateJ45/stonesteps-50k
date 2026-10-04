@@ -12,6 +12,10 @@
 // wide marks and object-contain letterboxes rather than squashing, so a
 // 1000x204 wordmark and a square badge both sit correctly on the patch.
 //
+// Below sm the patches sit two to a row (a 2x2 for four sponsors) instead of one per
+// row, which was the longest stretch of dead scroll on the phone home page (impeccable
+// audit 2026-10-03). From sm up they are the original centred flex row.
+//
 // SELF_CONTAINED: paints its own ground, never receives a surface prop.
 //
 // This replaced the greyscale-logos-at-70%-opacity strip, which is the single
@@ -51,9 +55,9 @@ const {
           {headline}
         </h2>
 
-        <ul class="mt-8 flex flex-wrap items-stretch justify-center gap-6">
+        <ul class="mt-8 grid grid-cols-2 justify-items-center gap-4 sm:flex sm:flex-wrap sm:items-stretch sm:justify-center sm:gap-6">
           {sponsors.map((s) => (
-            <li class="patch min-h-[9.5rem] w-full max-w-[16rem] px-6 py-7">
+            <li class="patch min-h-[8.5rem] w-full max-w-[16rem] px-3 py-5 sm:min-h-[9.5rem] sm:px-6 sm:py-7">
               {/* A patch with a url is a link to the sponsor's own site, in a
                 new tab; without one it is just a patch. The anchor fills the
                 patch so the whole object is the target, not only the mark. */}

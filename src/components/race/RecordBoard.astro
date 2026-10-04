@@ -86,7 +86,13 @@ const { rows, label, seed = 11, class: extraClass = '' } = Astro.props as Props;
           <li class="board__row" style={`--i:${i}`}>
             <p class="board__label">{row.label}</p>
             <p class="board__name">
-              {row.slug ? <a href={`/runners/${row.slug}`}>{row.name}</a> : row.name}
+              {row.slug ? (
+                <a class="tap-pad" href={`/runners/${row.slug}`}>
+                  {row.name}
+                </a>
+              ) : (
+                row.name
+              )}
             </p>
             <p class="board__mark">
               <span class="board__time tabular">{row.time}</span>
