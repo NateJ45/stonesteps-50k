@@ -23,7 +23,8 @@ still carries its column and its historical cards, but nothing syncs to it any m
   file's comment syntax. 57 files carry it as of 2026-09-06. The originals were
   `scripts/with-workerd.mjs`, `scripts/free-dist.mjs`, `scripts/page-parity.mjs`,
   `scripts/sync-check.mjs`, `scripts/lib/sanity-lib.mjs` and `src/lib/contrast.ts`; the
-  in-canvas control layer and the family test standard added the rest. Run
+  in-canvas control layer and the family test standard added the rest (86 files on
+  2026-10-03, 87 once `tests/fixtures.ts` from PORTS.md card 75 landed). Run
   `npm run sync-check` with no argument for the current list. Marking a file is a
   judgement: `ci.yml`, `lighthouse.yml`, `lighthouserc.json`, `.prettierignore` and
   `tests/routes.ts` are deliberately NOT marked because each carries something that is

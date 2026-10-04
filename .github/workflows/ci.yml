@@ -253,6 +253,19 @@ jobs:
           name: dist-client
           path: dist/client
 
+      # Sanity images for the Playwright run (PORTS.md card 75): tests/fixtures.ts
+      # serves cdn.sanity.io images from node_modules/.cache/test-images, so a
+      # shard stops re-downloading photographs a previous run already fetched
+      # (Sanity meters that bandwidth). Restored AFTER `npm ci`, which deletes
+      # node_modules and the cache inside it. The key moves every run so new
+      # images are saved; the prefix restores the last set.
+      - name: Restore the test images
+        uses: actions/cache@v6
+        with:
+          path: node_modules/.cache/test-images
+          key: test-images-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: test-images-${{ runner.os }}-
+
       # The browser download is the slow part, the apt libraries are not. Cache
       # the browsers by Playwright version; on a hit install only the system
       # libraries. Both projects in playwright.config.ts need a browser:
