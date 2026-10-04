@@ -25,6 +25,7 @@ import raw from '@/data/raceDayWeather.json';
 import {
   conditionLabel,
   iconKind,
+  packList,
   summarise,
   summarySentence,
   tempScale,
@@ -51,6 +52,7 @@ const {
 
 const days = (raw as RaceDay[]).slice().sort((a, b) => a.year - b.year);
 const summary = summarise(days);
+const pack = packList(days);
 const scale = days.length ? tempScale(days) : { min: 30, max: 80 };
 const span = scale.max - scale.min || 1;
 const pct = (t: number) => ((t - scale.min) / span) * 100;
@@ -113,7 +115,7 @@ const fmtDate = (iso: string) =>
                     )}
                   </span>
                   <span class="wx__icon">
-                    <WeatherIcon kind={iconKind(d.code)} />
+                    <WeatherIcon kind={iconKind(d.code, wasWet(d))} />
                   </span>
                   <span class="wx__foot" />
                   <span class="wx__year">{String(d.year).slice(2)}</span>
@@ -139,6 +141,27 @@ const fmtDate = (iso: string) =>
             </span>
           </figcaption>
         </figure>
+
+        {/* WHAT TO PACK. Computed from the same record as the strip (packList in
+          src/lib/raceWeather.ts), so it moves when a new year is baked. The id is
+          the target of the race-week link on the hero clock (Countdown.astro). */}
+        {pack.length > 0 && (
+          <div id="pack" class="mt-16 scroll-mt-28" data-reveal>
+            <h3 class="font-mono text-[0.75rem] tracking-[0.18em] text-muted-foreground uppercase">
+              What to pack, going by the record
+            </h3>
+            <dl class="mt-5 grid gap-x-10 gap-y-6 md:grid-cols-3">
+              {pack.map((item) => (
+                <div class="border-t-2 border-dashed border-foreground/25 pt-4">
+                  <dt class="font-mono text-[0.6875rem] tracking-wide text-(--heading-accent) uppercase">
+                    {item.label}
+                  </dt>
+                  <dd class="mt-2 max-w-[38ch] text-foreground">{item.text}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
 
         {/* The same record as a table, for a screen reader or anyone who wants
           the numbers. Visually hidden, not display:none, so it is read. The
