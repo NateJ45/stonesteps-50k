@@ -258,13 +258,31 @@ jobs:
       # shard stops re-downloading photographs a previous run already fetched
       # (Sanity meters that bandwidth). Restored AFTER `npm ci`, which deletes
       # node_modules and the cache inside it. The key moves every run so new
-      # images are saved; the prefix restores the last set.
+      # images are saved, and it carries the shard number: with one key shared by
+      # all three shards only the first to finish could save ("Unable to reserve
+      # cache"), so the other two shards' images were never kept. Each shard now
+      # restores and saves its own set; the second restore key falls back to the
+      # older shared caches so the switch does not start from empty.
       - name: Restore the test images
         uses: actions/cache@v6
         with:
           path: node_modules/.cache/test-images
-          key: test-images-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: test-images-${{ runner.os }}-
+          key: test-images-${{ runner.os }}-s${{ matrix.shard }}-${{ github.run_id }}
+          restore-keys: |
+            test-images-${{ runner.os }}-s${{ matrix.shard }}-
+            test-images-${{ runner.os }}-
+
+      # The fixture appends every image it has to fetch from Sanity to misses.log
+      # inside the cache folder, and that file travels with the cache. Count it
+      # before and after the tests (below) to see how many images this shard
+      # fetched this run: that number is what Sanity meters.
+      - name: Count the cached test images before the run
+        run: |
+          d=node_modules/.cache/test-images
+          before=0
+          if [ -f "$d/misses.log" ]; then before=$(wc -l < "$d/misses.log" | tr -d ' '); fi
+          echo "IMG_MISSES_BEFORE=$before" >> "$GITHUB_ENV"
+          echo "shard ${{ matrix.shard }}: $(ls "$d" 2>/dev/null | grep -c '\.bin$') images in the restored cache, $before fetches logged so far"
 
       # The browser download is the slow part, the apt libraries are not. Cache
       # the browsers by Playwright version; on a hit install only the system
@@ -312,6 +330,20 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BUILD: '1'
         run: npm test -- --shard=${{ matrix.shard }}/3 --reporter=github,html
+
+      # Always runs, so a failed shard still reports. Prints the count in the log
+      # and in the run summary.
+      - name: Report the test images fetched from Sanity
+        if: always()
+        run: |
+          d=node_modules/.cache/test-images
+          after=0
+          if [ -f "$d/misses.log" ]; then after=$(wc -l < "$d/misses.log" | tr -d ' '); fi
+          fetched=$((after - ${IMG_MISSES_BEFORE:-0}))
+          cached=$(ls "$d" 2>/dev/null | grep -c '\.bin$')
+          size=$(du -sh "$d" 2>/dev/null | cut -f1)
+          echo "shard ${{ matrix.shard }}: fetched $fetched images from Sanity this run; $cached images cached now (${size:-0})"
+          echo "Test images, shard ${{ matrix.shard }}: fetched $fetched from Sanity this run, $cached cached now (${size:-0})." >> "$GITHUB_STEP_SUMMARY"
 
       # Only on failure: a green run has nothing worth the upload time.
       - uses: actions/upload-artifact@v7

@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-03 - The Playwright image cache is keyed per shard and reports what it saves._
+
+CI only. The first main runs after the cache landed (PR #76) restored warm in all three shards, but the three shards shared one key, so only the first to finish could save (`Unable to reserve cache`) and the other two shards' images were never kept. Each shard now restores and saves its own set (`test-images-<os>-s<shard>-<run id>`), with the old shared prefix as a second restore key so the switch does not start empty. Two small steps in the `e2e` job count `misses.log` before and after the tests and print how many images the shard fetched from Sanity, in the log and the run summary, because that number (not the cache hit line) is what Sanity meters. No job or step names that gate a merge changed; `build` and `test` are untouched.
+
 > **Scope note (2026-08-27).** This file stays **narrative**: what changed here, in
 > sequence, in prose. The **machine-checkable** record of what is shared across the site
 > family now lives in `PORTS.md` at the repo root: an applied-to matrix (improvement by
