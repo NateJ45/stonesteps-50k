@@ -10,6 +10,10 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-10-03 - Resync `scripts/sync-check.mjs` with starter card 80._
+
+Tooling only, no site behaviour change, no workflow edited. The marked `scripts/sync-check.mjs` is copied byte for byte from the starter (card 80): its directory walk now skips `_worktrees/` as well as `.claude/worktrees`, so a worktree under `_worktrees/` no longer shows up as a second copy of every marked file. CI only runs the self-check (`node scripts/sync-check.mjs` in `ci.yml`), so this is safe to merge before or after the starter PR. `sync-check` against the starter went from 81 same, 4 drifted, 1 missing to 82 same, 3 drifted, 1 missing (86 marked files): the fixed drift is `scripts/sync-check.mjs` itself, and the remaining ones are the three `tests/*.spec.ts` files and the missing `src/lib/scriptAccent.ts` noted in the entry below.
+
 _2026-10-03 - Resync with starter cards 77, 78 and 79._
 
 Tooling only, no site behaviour change, no workflow edited. Five marked files copied byte for byte from starter `main`: `src/lib/preview-morph.ts` and `.test.ts` (card 77: the draft-preview morph keeps the reveal-state classes `is-visible`, `is-drawn`, `is-revealed`, `is-staggered`), `src/lib/preview-stega.ts` (card 78: exports `RUN_SOURCE`) and `src/lib/redirects.ts` and `.test.ts` (card 79: redirect destinations keep `?query` and `#fragment`; the self-redirect guard compares paths). `astro.config.mjs` only calls `buildRedirectMap`, whose signature is unchanged, so no site-side edit. `sync-check` went from 8 drifted to 3 drifted: the remaining ones (`tests/a11y.spec.ts`, `tests/reflow.spec.ts`, `tests/smoke.spec.ts`, which import `@playwright/test` instead of the starter's `./fixtures`) and one file missing in the starter (`src/lib/scriptAccent.ts`) predate this resync.
