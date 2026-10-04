@@ -20,9 +20,11 @@
 
 import SectionHeading from '@/components/SectionHeading.astro';
 import Topo from '@/components/race/Topo.astro';
+import WeatherIcon from '@/components/race/WeatherIcon.astro';
 import raw from '@/data/raceDayWeather.json';
 import {
   conditionLabel,
+  iconKind,
   summarise,
   summarySentence,
   tempScale,
@@ -80,7 +82,7 @@ const fmtDate = (iso: string) =>
           one absolutely-positioned bar. Heights and offsets are percentages of
           the shared scale, so every bar is comparable by eye and the whole
           thing is plain CSS: nothing to hydrate, nothing to animate. */}
-        <figure class="mt-10" data-reveal>
+        <figure class="mt-16" data-reveal>
           <div class="wx" style={`--wx-cols:${days.length}`}>
             <div class="wx__axis" aria-hidden="true">
               {ticks.map((t) => (
@@ -109,6 +111,9 @@ const fmtDate = (iso: string) =>
                         style={`bottom:${((d.startTemp - d.low) / Math.max(d.high - d.low, 1)) * 100}%`}
                       />
                     )}
+                  </span>
+                  <span class="wx__icon">
+                    <WeatherIcon kind={iconKind(d.code)} />
                   </span>
                   <span class="wx__foot" />
                   <span class="wx__year">{String(d.year).slice(2)}</span>

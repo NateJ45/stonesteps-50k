@@ -1,0 +1,275 @@
+---
+// Safe to edit by hand
+//
+// One small animated weather glyph per race-day bar, chosen from the day's WMO
+// code (iconKind() in src/lib/raceWeather.ts). Inline SVG with CSS keyframes:
+// no JS, no image requests, nothing to hydrate.
+//
+// Motion is deliberately slow and small (a drifting cloud, rays turning, drops
+// falling) so two dozen of them across the strip read as weather, not as a
+// slot machine. Every loop is transform/opacity only. They pause until the
+// strip has been revealed (the figure's data-reveal / .is-visible pair) and
+// stop entirely under prefers-reduced-motion, leaving the still glyph.
+//
+// Colours are the strip's own tokens (--wx-dry for cloud, --wx-rain for drops,
+// --wx-sun for the sun, all in globals.css), so both themes follow for free.
+
+import type { IconKind } from '@/lib/raceWeather';
+
+type Props = { kind: IconKind };
+const { kind } = Astro.props as Props;
+
+// Eight rays, drawn once and reused by the two sun glyphs.
+const rays = Array.from({ length: 8 }, (_, i) => i * 45);
+---
+
+<svg class={`wxi wxi--${kind}`} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+  {
+    (kind === 'sun' || kind === 'partly') && (
+      <g class="wxi__sun" transform={kind === 'partly' ? 'translate(7 -6) scale(0.8)' : undefined}>
+        <g class="wxi__rays">
+          {rays.map((a) => (
+            <line x1="16" y1="3.5" x2="16" y2="7" transform={`rotate(${a} 16 16)`} />
+          ))}
+        </g>
+        <circle class="wxi__core" cx="16" cy="16" r="6" />
+      </g>
+    )
+  }
+
+  {
+    (kind === 'partly' ||
+      kind === 'cloud' ||
+      kind === 'drizzle' ||
+      kind === 'rain' ||
+      kind === 'snow' ||
+      kind === 'storm') && (
+      <g
+        transform={
+          kind === 'partly'
+            ? 'translate(-1 5)'
+            : kind === 'cloud'
+              ? 'translate(0 2)'
+              : 'translate(0 -4)'
+        }
+      >
+        <g class="wxi__cloud">
+          <circle cx="10" cy="19" r="5" />
+          <circle cx="17" cy="16" r="7" />
+          <circle cx="23" cy="20" r="4" />
+          <rect x="10" y="19" width="13" height="5" />
+        </g>
+      </g>
+    )
+  }
+
+  {
+    kind === 'fog' && (
+      <g class="wxi__fog">
+        <line x1="6" y1="11" x2="22" y2="11" />
+        <line x1="10" y1="17" x2="27" y2="17" />
+        <line x1="5" y1="23" x2="20" y2="23" />
+      </g>
+    )
+  }
+
+  {
+    kind === 'rain' && (
+      <g class="wxi__drops">
+        <line class="wxi__drop" x1="11" y1="23" x2="9.5" y2="27" style="--d:0s" />
+        <line class="wxi__drop" x1="16.5" y1="23" x2="15" y2="27" style="--d:0.35s" />
+        <line class="wxi__drop" x1="22" y1="23" x2="20.5" y2="27" style="--d:0.7s" />
+      </g>
+    )
+  }
+
+  {
+    kind === 'drizzle' && (
+      <g class="wxi__drops wxi__drops--slow">
+        <line class="wxi__drop" x1="13" y1="23" x2="12" y2="26" style="--d:0s" />
+        <line class="wxi__drop" x1="20" y1="23" x2="19" y2="26" style="--d:0.9s" />
+      </g>
+    )
+  }
+
+  {
+    kind === 'snow' && (
+      <g class="wxi__flakes">
+        <circle class="wxi__flake" cx="11" cy="25" r="1.4" style="--d:0s" />
+        <circle class="wxi__flake" cx="16.5" cy="25" r="1.4" style="--d:0.6s" />
+        <circle class="wxi__flake" cx="22" cy="25" r="1.4" style="--d:1.2s" />
+      </g>
+    )
+  }
+
+  {
+    kind === 'storm' && (
+      <polygon class="wxi__bolt" points="17.5,21 12.5,28.5 16,28.5 14.5,33 21,25 17,25 19,21" />
+    )
+  }
+</svg>
+
+<style>
+  .wxi {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* SVG transforms need an origin that is the shape's own centre. */
+  /* Only on the elements that animate. A blanket `*` rule also caught each
+     ray's own rotate(a 16 16) attribute and the placement transforms on the
+     wrapper groups, and spun every ray about its own middle. */
+  .wxi__core,
+  .wxi__rays,
+  .wxi__cloud,
+  .wxi__drop,
+  .wxi__flake,
+  .wxi__fog line {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  /* ---- Sun: the disc breathes, the rays turn ----------------------------- */
+  .wxi__core {
+    fill: var(--wx-sun);
+    animation: wxi-breathe 4s ease-in-out infinite;
+  }
+  .wxi__rays {
+    stroke: var(--wx-sun);
+    stroke-width: 2;
+    stroke-linecap: round;
+    animation: wxi-turn 24s linear infinite;
+  }
+  /* The rays group needs the glyph's centre, not its own box's, or the turn
+     would wobble: its box is the ring of rays, which IS centred on the disc. */
+
+  /* ---- Cloud: a slow sideways drift --------------------------------------- */
+  .wxi__cloud {
+    fill: var(--wx-dry);
+    animation: wxi-drift 7s ease-in-out infinite alternate;
+  }
+  .wxi--storm .wxi__cloud {
+    fill: color-mix(in srgb, var(--wx-dry) 70%, var(--wx-rain));
+  }
+
+  /* ---- Rain, drizzle: drops fall and fade, staggered ---------------------- */
+  .wxi__drops {
+    stroke: var(--wx-rain);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .wxi__drop {
+    animation: wxi-fall 1.1s ease-in infinite;
+    animation-delay: var(--d, 0s);
+    opacity: 0;
+  }
+  .wxi__drops--slow .wxi__drop {
+    animation-duration: 1.8s;
+  }
+
+  /* ---- Snow --------------------------------------------------------------- */
+  .wxi__flake {
+    fill: var(--wx-dry);
+    animation: wxi-snow 2.4s ease-in infinite;
+    animation-delay: var(--d, 0s);
+    opacity: 0;
+  }
+
+  /* ---- Storm: a flash, then a long dark ----------------------------------- */
+  .wxi__bolt {
+    fill: var(--wx-sun);
+    animation: wxi-flash 3.2s steps(1, end) infinite;
+  }
+
+  /* ---- Fog: bands slide past each other ----------------------------------- */
+  .wxi__fog {
+    stroke: var(--wx-dry);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+  }
+  .wxi__fog line:nth-child(odd) {
+    animation: wxi-drift 6s ease-in-out infinite alternate;
+  }
+  .wxi__fog line:nth-child(even) {
+    animation: wxi-drift 8s ease-in-out infinite alternate-reverse;
+  }
+
+  @keyframes wxi-turn {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes wxi-breathe {
+    50% {
+      transform: scale(1.08);
+    }
+  }
+  @keyframes wxi-drift {
+    from {
+      transform: translateX(-1.6px);
+    }
+    to {
+      transform: translateX(1.6px);
+    }
+  }
+  @keyframes wxi-fall {
+    0% {
+      transform: translateY(-1px);
+      opacity: 0;
+    }
+    25% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(5px);
+      opacity: 0;
+    }
+  }
+  @keyframes wxi-snow {
+    0% {
+      transform: translate(0, -1px);
+      opacity: 0;
+    }
+    25% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(1.5px, 5px);
+      opacity: 0;
+    }
+  }
+  @keyframes wxi-flash {
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    8%,
+    14% {
+      opacity: 1;
+    }
+    11% {
+      opacity: 0.25;
+    }
+  }
+
+  /* Hold still until the strip has been revealed: 23 looping glyphs have no
+     business running off-screen. The class is on the figure (BaseLayout's
+     reveal observer adds it). */
+  :global([data-reveal]:not(.is-visible)) .wxi * {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wxi * {
+      animation: none !important;
+    }
+    /* Drops and flakes start invisible so they can fall in; with no fall they
+       would never show. Leave them as a still mark. */
+    .wxi__drop,
+    .wxi__flake {
+      opacity: 1;
+    }
+  }
+</style>

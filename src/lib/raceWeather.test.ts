@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   conditionLabel,
   decadeWords,
+  iconKind,
   summarise,
   summarySentence,
   tempScale,
@@ -96,4 +97,15 @@ test('scale rounds out to tens with headroom', () => {
     min: 30,
     max: 80,
   });
+});
+
+test('iconKind draws the same bands conditionLabel names', () => {
+  assert.equal(iconKind(0), 'sun');
+  assert.equal(iconKind(1), 'partly');
+  assert.equal(iconKind(3), 'cloud');
+  assert.equal(iconKind(53), 'drizzle');
+  assert.equal(iconKind(63), 'rain');
+  assert.equal(iconKind(81), 'rain');
+  assert.equal(iconKind(73), 'snow');
+  assert.equal(iconKind(95), 'storm');
 });

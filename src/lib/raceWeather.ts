@@ -41,6 +41,22 @@ export function conditionLabel(code: number): string {
   return 'Storms';
 }
 
+/** Which glyph draws a WMO code. Same bands as conditionLabel, so the icon and the tooltip agree. */
+export type IconKind = 'sun' | 'partly' | 'cloud' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'storm';
+
+export function iconKind(code: number): IconKind {
+  if (code === 0) return 'sun';
+  if (code <= 2) return 'partly';
+  if (code === 3) return 'cloud';
+  if (code <= 48) return 'fog';
+  if (code <= 57) return 'drizzle';
+  if (code <= 67) return 'rain';
+  if (code <= 77) return 'snow';
+  if (code <= 82) return 'rain';
+  if (code <= 86) return 'snow';
+  return 'storm';
+}
+
 const median = (xs: number[]) => {
   const s = [...xs].sort((a, b) => a - b);
   const m = Math.floor(s.length / 2);
