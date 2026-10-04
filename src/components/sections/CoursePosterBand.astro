@@ -37,7 +37,7 @@
  * beside it does.
  */
 import Topo from '@/components/race/Topo.astro';
-import { buildCourseTeaser, sparkPath } from '@/lib/courseTeaser';
+import { buildCourseTeaser } from '@/lib/courseTeaser';
 import profile from '../../../scripts/data/course-profile.json';
 import courseMap from '../../../scripts/data/course-map.json';
 import grade from '../../../scripts/data/course-grade.json';
@@ -54,7 +54,7 @@ interface Props {
 const {
   eyebrow = 'The map',
   headline = 'See where it actually goes',
-  intro = 'Seven laps out of The Oval, run long, short, long, short, long, short, long. Watch the race, pick a lap, then fly the full 3D map.',
+  intro = 'Two loops out of The Oval: the long one four times, the short one three, long first and long last. Pick a loop, then fly the full 3D map.',
   surface = 'background',
   headingId,
 } = Astro.props as Props;
@@ -67,24 +67,19 @@ const t = buildCourseTeaser({ profile, courseMap, grade, miles } as Parameters<
   typeof buildCourseTeaser
 >[0]);
 
-// One elevation range for every lap, so a long lap's plunge to the creek and a
-// short lap's stay on the ridge can be compared at a glance.
-const chipSpark = (samples: [number, number][]) =>
-  sparkPath(
-    samples.filter((_, i) => i % 2 === 0 || i === samples.length - 1),
-    t.lowFt,
-    t.highFt,
-    64,
-    26,
-  );
+// TWO LOOPS, NOT SEVEN LAPS (2026-10-03, Nathan). Laps of one kind are the same
+// run again, so the plate shows one run of each: the first long lap and the
+// first short lap, with a count of how many times the race runs it.
+const loops = [t.laps.find((l) => l.kind === 'long')!, t.laps.find((l) => l.kind === 'short')!].map(
+  (l) => ({ ...l, times: t.laps.filter((x) => x.kind === l.kind).length }),
+);
 
-// Everything the script needs, as one attribute: seven laps of 48 samples.
 const plateData = JSON.stringify({
   w: t.width,
   h: t.height,
   low: t.lowFt,
   high: t.highFt,
-  laps: t.laps.map((l) => ({
+  laps: loops.map((l) => ({
     n: l.index,
     kind: l.kind,
     mi: l.miles,
@@ -207,26 +202,21 @@ const mileBar = t.mileUnits * 0.5;
     </div>
 
     <div class="ctease__ctrl" data-reveal>
-      <p class="ctease__kicker" data-kicker>Running the race</p>
-      <div class="ctease__laps" role="group" aria-label="Pick a lap">
+      <p class="ctease__kicker" data-kicker>Running the long loop</p>
+      <div class="ctease__laps" role="group" aria-label="Pick a loop">
         {
-          t.laps.map((l) => (
+          loops.map((l) => (
             <button
               type="button"
               class={`ctease__lap ctease__lap--${l.kind}`}
               data-lap={l.index}
               aria-pressed="false"
             >
-              <span class="ctease__lap-n">
-                <span class="sr-only">Lap </span>
-                {l.index}
-              </span>
-              <svg viewBox="0 -2 64 30" aria-hidden="true" focusable="false">
-                <path d={chipSpark(l.samples)} />
-              </svg>
-              <span class="ctease__lap-mi">
-                {l.miles}
-                <span class="sr-only"> miles, {l.kind} loop</span>
+              <span class="ctease__lap-n">{l.kind === 'long' ? 'Long loop' : 'Short loop'}</span>
+              <span class="ctease__lap-mi">{l.miles} mi</span>
+              <span class="ctease__lap-meta">Run {l.times} times</span>
+              <span class="ctease__lap-meta">
+                {l.lowFt} to {l.highFt} ft
               </span>
             </button>
           ))
@@ -235,7 +225,7 @@ const mileBar = t.mileUnits * 0.5;
 
       <div class="ctease__strip" aria-hidden="true">
         <div class="ctease__strip-head">
-          <span data-strip-title>Lap 1 &middot; Long loop</span>
+          <span data-strip-title>Long loop</span>
           <span data-strip-range>531 to 868 ft</span>
         </div>
         <div class="ctease__chart">
@@ -247,21 +237,6 @@ const mileBar = t.mileUnits * 0.5;
           <span class="ctease__mdot" data-mdot></span>
         </div>
       </div>
-
-      <dl class="ctease__stats">
-        <div>
-          <dt data-stat-kind>Long loop</dt>
-          <dd data-stat-mi>5.3 mi</dd>
-        </div>
-        <div>
-          <dt>Low point</dt>
-          <dd data-stat-lo>531 ft</dd>
-        </div>
-        <div>
-          <dt>High point</dt>
-          <dd data-stat-hi>868 ft</dd>
-        </div>
-      </dl>
 
       <div class="ctease__actions">
         <a class="btn-plate" href="/course" data-cta>
@@ -780,19 +755,20 @@ const mileBar = t.mileUnits * 0.5;
 
   .ctease__laps {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 0.4rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
   }
 
   .ctease__lap {
     position: relative;
     display: grid;
-    justify-items: center;
-    gap: 0.2rem;
-    padding: 0.5rem 0.2rem 0.4rem;
+    justify-items: start;
+    gap: 0.25rem;
+    padding: 0.85rem 1rem 0.9rem;
     min-height: 44px;
+    text-align: left;
     border: 1px solid color-mix(in srgb, var(--color-foreground) 22%, transparent);
-    border-top: 4px solid var(--lap-color);
+    border-top: 5px solid var(--lap-color);
     background: transparent;
     color: var(--color-foreground);
     cursor: pointer;
@@ -818,53 +794,20 @@ const mileBar = t.mileUnits * 0.5;
     background: var(--color-foreground);
     color: var(--color-background);
   }
-  /* Laps already run in this pass of the race keep a tint of their colour. */
-  .ctease__lap[data-done] {
-    background: color-mix(in srgb, var(--lap-color) 18%, transparent);
-  }
-  .ctease__lap[aria-pressed='true'][data-done] {
-    background: var(--color-foreground);
-  }
   .ctease__lap-n {
-    font-family: var(--font-display);
-    font-size: 1.15rem;
-    line-height: 1;
-  }
-  .ctease__lap svg {
-    width: 100%;
-    height: 1.35rem;
-    overflow: visible;
-  }
-  .ctease__lap svg path {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2.4;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+    font: 600 0.6875rem/1 var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
   .ctease__lap-mi {
-    font: 600 0.6875rem/1 var(--font-mono);
-    letter-spacing: 0.04em;
-  }
-
-  .ctease__stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, auto));
-    justify-content: start;
-    gap: 0.5rem 2rem;
-    margin: 1.4rem 0 0;
-  }
-  .ctease__stats dt {
-    font: 600 0.6875rem/1 var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-muted-foreground);
-  }
-  .ctease__stats dd {
-    margin: 0.3rem 0 0;
     font-family: var(--font-display);
-    font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.3rem);
+    font-size: clamp(1.9rem, 1.4rem + 1.6vw, 2.6rem);
     line-height: 1;
+  }
+  .ctease__lap-meta {
+    font: 500 0.75rem/1.2 var(--font-mono);
+    letter-spacing: 0.04em;
+    opacity: 0.85;
   }
 
   .ctease__actions {
@@ -931,7 +874,7 @@ const mileBar = t.mileUnits * 0.5;
   type Data = { w: number; h: number; low: number; high: number; laps: Lap[] };
   type Kind = 'long' | 'short';
 
-  const LAP_MS: Record<Kind, number> = { long: 5200, short: 3300 };
+  const LAP_MS: Record<Kind, number> = { long: 6500, short: 4200 };
   const TOUR_DELAY = 1700;
   const SNAP = 0.14; // how close (fraction of the plate width) the mouse must be to the route
 
@@ -1049,20 +992,12 @@ const mileBar = t.mileUnits * 0.5;
       });
       const kind = L.kind === 'long' ? 'Long loop' : 'Short loop';
       const title = el('[data-strip-title]');
-      if (title) title.textContent = `Lap ${L.n} · ${kind}`;
+      if (title) title.textContent = `${kind} · ${L.mi} mi`;
       const rng = el('[data-strip-range]');
       if (rng) rng.textContent = `${L.lo} to ${L.hi} ft`;
-      const sk = el('[data-stat-kind]');
-      if (sk) sk.textContent = `${kind}, lap ${L.n}`;
-      const smi = el('[data-stat-mi]');
-      if (smi) smi.textContent = `${L.mi} mi`;
-      const slo = el('[data-stat-lo]');
-      if (slo) slo.textContent = `${L.lo} ft`;
-      const shi = el('[data-stat-hi]');
-      if (shi) shi.textContent = `${L.hi} ft`;
       if (kicker) {
         kicker.textContent =
-          mode === 'tour' ? `Running the race, lap ${L.n} of 7` : `Lap ${L.n} on repeat`;
+          mode === 'tour' ? `Running the ${kind.toLowerCase()}` : `${kind} on repeat`;
       }
     };
 
@@ -1075,7 +1010,7 @@ const mileBar = t.mileUnits * 0.5;
       trailGlow.style.strokeDashoffset = off;
 
       const ele = Math.round(lerpSamples(L.s, t));
-      const mile = L.start + t * L.span;
+      const mile = t * L.mi;
       tag.textContent = `Mile ${mile.toFixed(1)} · ${ele} ft`;
       const rect = stage.getBoundingClientRect();
       const px = (p.x / data.w) * rect.width;

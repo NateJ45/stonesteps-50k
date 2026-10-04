@@ -10,6 +10,15 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-10-03 (later) — Home map plate shows two loops, not seven laps._
+
+Laps of one kind are the same run again, so the lap chips are replaced by two loop cards (long
+5.3 mi, run four times; short 3.2 mi, run three times). The runner alternates between the two
+loops, and the elevation strip, mile tag and `/course?loop=` link follow the active loop. The
+lap data in `src/lib/courseTeaser.ts` is unchanged; the band uses the first long and first
+short lap. The intro copy lives in Sanity (Home Page, "Course map poster" block) and still
+says "Seven loops"; the code default was updated, the dataset text was not.
+
 _2026-10-03 — Home page: the course map band is a live plate, and three bands stop hugging the left edge._
 
 **`CoursePosterBand` is rebuilt.** The screenshot of the 3D map (busy, low contrast, nothing to do)
