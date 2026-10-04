@@ -1232,7 +1232,7 @@ body::before {
 
 /* ---------- Reduced motion -------------------------------------------- */
 /* Disables animations, transitions, and smooth scroll for users who
-   prefer reduced motion. Lenis init must also check this flag.
+   prefer reduced motion.
 
    Transitions are ZERO, duration AND delay, never the usual 0.01ms (starter
    PORTS.md card 61, 2026-09-30). `transition-property` defaults to `all`, so

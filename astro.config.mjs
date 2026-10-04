@@ -303,7 +303,6 @@ export default defineConfig({
             'astro/virtual-modules/transitions-router.js',
             'astro/virtual-modules/transitions-swap-functions.js',
             'astro/virtual-modules/transitions-types.js',
-            'lenis',
           ],
         },
       },

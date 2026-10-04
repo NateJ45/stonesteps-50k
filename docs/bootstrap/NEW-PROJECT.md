@@ -342,7 +342,7 @@ taxonomy in `.claude/rules/foundation-files.md`. Key files to route through a pl
 
 - `src/styles/globals.css` beyond the design-seam tokens (polish-layer utilities,
   shadcn overrides, base resets)
-- `src/layouts/BaseLayout.astro` (anti-FOUC script, scroll wiring, Lenis init)
+- `src/layouts/BaseLayout.astro` (anti-FOUC script, scroll wiring)
 - `src/lib/sanity.ts` (the `isSanityUnconfigured` guard is load-bearing)
 - `src/sanity/schemaTypes/*.ts` (field changes can break existing Sanity content)
 - `src/lib/queries.ts` and `src/lib/sanity.types.ts`

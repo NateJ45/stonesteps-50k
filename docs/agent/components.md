@@ -34,7 +34,7 @@ The core component set, by role. All in `src/components/` unless noted.
 - `Header.astro` -- two-row desktop (eyebrow strip + main nav), single-row mobile. Sticky-with-hide-on-scroll-down behavior wired via `.site-header`. The eyebrow strip carries availability status, email, and phone; on mobile the availability shows a compact pill.
 - `Footer.astro` -- a responsive link grid, brand logo, auto-year copyright, and "Site by..." credit on a thin bottom bar.
 - `MobileNav.tsx` -- the phone menu as a trail-sign board, a shadcn Sheet underneath (`client:idle` since 2026-09-18; the trigger is server-rendered and the portal mounts on open).
-- `BaseLayout.astro` -- anti-FOUC theme bootstrap, View Transitions, Lenis init, scroll-reveal observer, sticky-header scroll listener.
+- `BaseLayout.astro` -- anti-FOUC theme bootstrap, View Transitions, scroll-reveal observer, sticky-header scroll listener.
 
 **Hero + page-top:**
 

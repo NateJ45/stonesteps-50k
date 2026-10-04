@@ -108,7 +108,7 @@ Flat, with ONE exception: the hard offset shadow, down and right only, no blur.
 
 ## 6. Do's and Don'ts
 
-Motion: default interaction easing is `cubic-bezier(0.16, 1, 0.3, 1)` at 440ms; plates use 0.16s on transform and shadow. Kinetic moments are the hero slideshow, the headline's arrival, the elevation profile and punch card drawing themselves, and the course route draw-on (it ends on any interaction). Smooth scroll uses Lenis (rule 5). A global reset zeroes transitions under `prefers-reduced-motion`.
+Motion: default interaction easing is `cubic-bezier(0.16, 1, 0.3, 1)` at 440ms; plates use 0.16s on transform and shadow. Kinetic moments are the hero slideshow, the headline's arrival, the elevation profile and punch card drawing themselves, and the course route draw-on (it ends on any interaction). Scrolling is native (no smooth-scroll library; rule 5). A global reset zeroes transitions under `prefers-reduced-motion`.
 
 **Do**
 
