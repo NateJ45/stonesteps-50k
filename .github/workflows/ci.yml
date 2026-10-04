@@ -260,7 +260,7 @@ jobs:
       # node_modules and the cache inside it. The key moves every run so new
       # images are saved; the prefix restores the last set.
       - name: Restore the test images
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules/.cache/test-images
           key: test-images-${{ runner.os }}-${{ github.run_id }}
