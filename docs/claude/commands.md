@@ -1,6 +1,6 @@
 # Commands reference (moved from CLAUDE.md "Build pipeline")
 
-Read when you need the detail behind an npm script, the build/typegen chain, parity, tests or CI. The baked-asset scripts (mud, map-poster, map-region, weather:sync) are in `.claude/rules/baked-assets-and-scripts.md`.
+Read when you need the detail behind an npm script, the build/typegen chain, parity, tests or CI. The baked-asset scripts (mud, map-region, weather:sync) are in `.claude/rules/baked-assets-and-scripts.md`.
 
 `npm run build` runs `node scripts/with-workerd.mjs astro build` (the Windows workerd shim, a no-op elsewhere). It does NOT chain typegen.
 

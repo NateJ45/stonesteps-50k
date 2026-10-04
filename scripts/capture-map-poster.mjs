@@ -1,6 +1,12 @@
 // =============================================================================
-// capture-map-poster.mjs - bake the home page's still of the course map
+// capture-map-poster.mjs - bake a still of the course map
 // =============================================================================
+// NOTE (2026-10-03): the home page no longer uses this script's default output
+// (it draws a live SVG plate instead, see src/lib/courseTeaser.ts), and the
+// `map-poster` npm script is gone. Its only caller is `npm run map-region`
+// (scripts/capture-region-poster.mjs), which sets POSTER_NAME and friends.
+// The home-page text below describes what it was written for.
+//
 // The home page shows a PHOTOGRAPH of the terrain map with the course drawn
 // over it in SVG, rather than the map itself: MapLibre is ~250KB before a
 // single tile, and the home page is the one most likely to be opened on a phone
