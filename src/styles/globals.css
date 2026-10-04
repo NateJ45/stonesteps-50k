@@ -3814,8 +3814,12 @@ main > .band-torn:first-child::before {
   /* Measured by eye at 4x on the deployed bars: 0.3 read as static and lifted
      the rust a whole step paler. This is texture in the stock, not weather. */
   --wx-grain-strength: 0.16;
+  /* The sun in the weather glyphs above each bar. Amber, darkened a step on the
+     cream page so it keeps its edge there. */
+  --wx-sun: #d68f0c;
 }
 .dark {
+  --wx-sun: #f0b13a;
   /* The page ground carried toward the cream stock, exactly the move
      --lift-ground-ink makes, at the weight a filled rectangle needs. */
   --wx-dry: #bfae8b;
@@ -3931,6 +3935,29 @@ main > .band-torn:first-child::before {
 .wx__col.is-rain .wx__start {
   box-shadow: 0 0 0 1px var(--wx-rain);
 }
+/* THE DAY'S WEATHER, drawn above its bar. It hangs over the top of the track
+   (the 80 degree line), so it never competes with a tall bar for space and
+   every glyph sits on one baseline, which reads as a row. The glyph itself and
+   its motion live in components/race/WeatherIcon.astro. */
+.wx__icon {
+  position: absolute;
+  top: -2.1rem;
+  left: 50%;
+  translate: -50% 0;
+  width: 100%;
+  max-width: 1.75rem;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+/* On a phone the columns are about 12px wide: the glyph is allowed to be a
+   little wider than its column (neighbours are drawn small enough not to
+   touch) and the row stays a row. */
+@media (max-width: 40rem) {
+  .wx__icon {
+    width: 1rem;
+    top: -1.5rem;
+  }
+}
 /* The foot sits just under the axis line and says wet or dry. */
 .wx__foot {
   position: absolute;
@@ -3983,6 +4010,7 @@ main > .band-torn:first-child::before {
 }
 [data-reveal] .wx__start,
 [data-reveal] .wx__foot,
+[data-reveal] .wx__icon,
 [data-reveal] .wx__year {
   opacity: 0;
   transition: opacity 400ms ease calc(var(--i, 0) * 55ms + 450ms);
@@ -3992,6 +4020,7 @@ main > .band-torn:first-child::before {
 }
 [data-reveal].is-visible .wx__start,
 [data-reveal].is-visible .wx__foot,
+[data-reveal].is-visible .wx__icon,
 [data-reveal].is-visible .wx__year {
   opacity: 1;
 }
@@ -4010,6 +4039,7 @@ main > .band-torn:first-child::before {
   }
   [data-reveal] .wx__start,
   [data-reveal] .wx__foot,
+  [data-reveal] .wx__icon,
   [data-reveal] .wx__year {
     opacity: 1;
     transition: none;
