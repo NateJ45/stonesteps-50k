@@ -53,6 +53,8 @@ _2026-10-03 - Playwright Sanity images come from a disk cache (starter PORTS.md 
 `Restore the test images` `actions/cache` step after `npm ci` so the shards share the folder between runs. Test
 tooling only, no site behaviour change. The three specs and `fixtures.ts` are now `SAME` in `sync-check`.
 
+`/course`'s strip: on a phone the weather glyphs now sit over every other bar (the same columns the year labels show) at 1.5rem, because 23 at 12px pitch read as a smear. Desktop is unchanged; every year is still in the tooltip and the sr-only table.
+
 _2026-10-03 (live forecast) — Race week shows a real forecast for race morning._
 
 `/api/forecast?date=` (SSR, `src/pages/api/forecast.ts`) has the Worker fetch Open-Meteo's forecast for The Oval
