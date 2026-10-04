@@ -10,6 +10,10 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-10-03 - Resync with starter cards 77, 78 and 79._
+
+Tooling only, no site behaviour change, no workflow edited. Five marked files copied byte for byte from starter `main`: `src/lib/preview-morph.ts` and `.test.ts` (card 77: the draft-preview morph keeps the reveal-state classes `is-visible`, `is-drawn`, `is-revealed`, `is-staggered`), `src/lib/preview-stega.ts` (card 78: exports `RUN_SOURCE`) and `src/lib/redirects.ts` and `.test.ts` (card 79: redirect destinations keep `?query` and `#fragment`; the self-redirect guard compares paths). `astro.config.mjs` only calls `buildRedirectMap`, whose signature is unchanged, so no site-side edit. `sync-check` went from 8 drifted to 3 drifted: the remaining ones (`tests/a11y.spec.ts`, `tests/reflow.spec.ts`, `tests/smoke.spec.ts`, which import `@playwright/test` instead of the starter's `./fixtures`) and one file missing in the starter (`src/lib/scriptAccent.ts`) predate this resync.
+
 _2026-10-03 - Scripts tests run in CI (starter PR #68 wiring)._
 
 Tooling only, no site behaviour change, no workflow edited. `ci.yml` and `deploy.yml` call `npm run test:unit`, never `check:full`, so the `test:scripts` specs added in PR #70 ran only locally. `test:unit` now ends with `&& npm run test:scripts` and `check:full` no longer chains it, so the specs run exactly once and in CI.
