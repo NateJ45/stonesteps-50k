@@ -9,6 +9,9 @@
 > site's canonical copies have not drifted. Something that needs to be _checked_ belongs
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
+> _2026-10-03 - Resync `generate-llms-full` with starter card 81 (site identity from `brand.config.json`)._
+
+Tooling only, no site behaviour change, no workflow edited, and `public/llms-full.txt` is NOT regenerated here. Three marked files copied byte for byte from the starter (card 81, part 1): `scripts/generate-llms-full.mjs` and the new `scripts/lib/site-identity.mjs` and `scripts/lib/site-identity.test.mjs`. The script now resolves the site name and URL from env, then `brand/brand.config.json` (`Stone Steps 50K`, `stonesteps50k.com`, already real), then the old placeholders, so it no longer writes `Studio Starter` and `example.com`. Part 2 of card 81 (`audit-studio` shared field consts) is not adopted yet. Open problem: the live `public/llms-full.txt` and `public/llms.txt` are still the 6,118-byte starter placeholder text, and a regenerate run only produced a 327-byte stub because the script queries starter content types (`service`, `processStep`, `project`, `leadMagnet`) that hold no Stone Steps content; the committed file was left untouched until the script gets a Stone Steps content query. `sync-check` against the starter went from 85 same, 1 drifted, 1 missing to 88 same, 0 drifted, 1 missing (89 marked files): the only remaining one is `src/lib/scriptAccent.ts`, missing in the starter.
 
 _2026-10-03 - Impeccable audit polish: text floor, tap floor, sponsor grid, map arrow._
 
