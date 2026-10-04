@@ -26,7 +26,7 @@
 ## Highlights
 
 - **Results archive, 2003 to 2025.** Recovered from the Wayback Machine and RunSignUp, with a page per year, per-runner history pages and a records page.
-- **Hands-off results.** A nightly GitHub Actions workflow imports new results from RunSignUp into Sanity and bakes race-day weather, so nobody has to remember a yearly chore.
+- **Hands-off results.** A scheduled GitHub Actions workflow (daily in October and November, weekly the rest of the year) imports new results from RunSignUp into Sanity, and the deploy bakes in race-day weather, so nobody has to remember a yearly chore.
 - **Edit on the page.** Sanity Studio is embedded at `/studio` with live draft preview and click-to-edit, so the race director can change copy without touching code.
 - **Contact form without a third party.** Cloudflare Email Sending plus a D1 database that stores every submission before any email is attempted.
 - **Backups.** Daily encrypted Sanity exports to a GitHub artifact and to Cloudflare R2.
@@ -118,7 +118,7 @@ Chromium and a real WebKit iPhone profile, because that is where a Tailwind focu
 on a `<select>` turns out to be invisible.
 
 Two more workflows ship dormant, gated on repo secrets and variables that do not exist
-in the template: `sanity-backup.yml` (nightly encrypted dataset export) and `uptime.yml`
+in the template: `sanity-backup.yml` (daily encrypted dataset export) and `uptime.yml`
 (hourly 200 check on four key pages). Set the secrets and uncomment the schedule to turn
 either on. `publish-due.yml` works the same way.
 
