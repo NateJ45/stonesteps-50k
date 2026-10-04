@@ -16,7 +16,9 @@ alongside `CLAUDE.md`.
 _One sentence. What does this brand sound like? Who is the reader and what do
 they feel after reading a page?_
 
-> (fill in)
+_Proposed 2026-10-03, drafted by Claude on Nathan's delegation from repo evidence; edit if wrong._
+
+> A plain-spoken race director talking to a runner at the start line: warm, a little dry, and exact about what it costs, when it starts and how hard the trail is, so the reader knows what they are signing up for and feels ready, not sold to.
 
 ---
 
@@ -25,11 +27,13 @@ they feel after reading a page?_
 _Five pairs. Each pair is a specific, actionable contrast, not a vague
 preference._
 
-1. **Do:** (fill in) / **Not:** (fill in)
-2. **Do:** (fill in) / **Not:** (fill in)
-3. **Do:** (fill in) / **Not:** (fill in)
-4. **Do:** (fill in) / **Not:** (fill in)
-5. **Do:** (fill in) / **Not:** (fill in)
+_Proposed 2026-10-03, drafted by Claude on Nathan's delegation from repo evidence; edit if wrong._ The examples are the site's real seeded copy in `scripts/seed-race.mjs` and the copy fixes in `docs/agent/changelog.md`.
+
+1. **Do:** State cost, date and time as numbers. "Through January 31" at $35, start at 8:00 am, course closes about 4:30 pm. / **Not:** Soften them. "Affordable early-bird rates" or "register soon to save" with no figure.
+2. **Do:** Say how hard it is, bluntly. "Nothing about this course is flat, and very little of it is forgiving." / **Not:** Sell it as a journey. "A challenging yet rewarding experience for every runner."
+3. **Do:** Name the place and the thing. Aid at The Oval, Area 13, seven times on the 50K; drop bags stay in one place all day. / **Not:** Reach for scenery adjectives. "A breathtaking, world-class course."
+4. **Do:** Flag what Dave has not confirmed. Awards and packet pickup carry no time and wear the "not confirmed" marker. / **Not:** Fill the gap with a plausible guess, or state an unconfirmed fact as settled.
+5. **Do:** Give the source or the dates the data covers, then stop. Rain fell in 2021 and 2023 (2022 was dry); the 5.3 and 3.2 mile loops are the race's own figures. / **Not:** Round up or generalise ("it often rains"), or add a closing line that restates the point.
 
 ---
 
@@ -65,7 +69,7 @@ these and replace them with plain language.
 _Add words or phrases that are specific to this client or industry and should
 never appear in their copy:_
 
-- (fill in)
+- journey, breathtaking, world-class (the "Not" examples above; no client-specific banned list was ever recorded, so this is a proposal, Proposed 2026-10-03, drafted by Claude on Nathan's delegation from repo evidence; edit if wrong)
 
 ---
 

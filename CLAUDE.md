@@ -4,7 +4,7 @@ Always-loaded rules for this repo, kept short on purpose. Anything file-specific
 
 The site is stonesteps50k.com for the Stone Steps 50K / 27K race (Mt. Airy Forest, Cincinnati). Astro 7 + Sanity (project 7iynvqq6, dataset production, Studio embedded at `/studio`) on a Cloudflare Worker, forked from `ncs-astro-sanity-starter`.
 
-**Design context.** `PRODUCT.md` (audience, purpose, tone, anti-references; open questions are `TODO(Nathan)` lines) and `DESIGN.md` (the visual system as built) sit at the repo root; read them before any design work and update them in the same change when the system moves.
+**Design context.** `PRODUCT.md` (audience, purpose, tone, anti-references; the answers tagged "Proposed ... edit if wrong" are drafts Nathan has not confirmed) and `DESIGN.md` (the visual system as built) sit at the repo root; read them before any design work and update them in the same change when the system moves.
 
 **Read `docs/PENDING.md` early in a session.** It is the live registry of open loops: queued work, known gaps, and waiting-on-a-human items. If you finish or discover one, update it in the same commit.
 

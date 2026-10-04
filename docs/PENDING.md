@@ -16,6 +16,14 @@ sequence).
 
 ## Waiting on a human
 
+### 1n. DONE 2026-10-03. The brand palette is final, taken from the live site
+
+Nathan decided the palette of record is what stonesteps50k.com serves, not a wait for Dave's logo
+files. The built CSS was compared with `src/styles/globals.css`: every brand token matched, so no hex
+changed and the PROVISIONAL markers were removed. Revisit only if Dave's logo files differ (then
+update `globals.css` and `brand/brand.config.json` together and re-run the contrast gates). Hex
+table: `PRODUCT.md`, "Palette status".
+
 ### 1m. DONE 2026-09-18. The weather strip records its own new year
 
 Nathan asked for the yearly weather bake to be automatic. `scripts/weather-sync.mjs`

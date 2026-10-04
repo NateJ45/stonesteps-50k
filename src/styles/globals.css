@@ -145,15 +145,16 @@
   /* Brand palette — derived from the logo, a hand-painted vintage trail sign.
      Cream and gold were SAMPLED from the mark (43% and 14% of its opaque
      pixels). Bark is that near-black warmed so cream sits on it the way it
-     does on the sign. Rust and forest are eyeballed and PROVISIONAL: no asset
-     published on stonesteps50k.com contains a single red or green pixel, so
-     both must be replaced from a real brand file when one exists. */
-  --color-primary: #a83c26; /* Rust — PROVISIONAL. Button ground, carries cream at 5.35:1 */
-  --color-primary-dark: #8f3323; /* Rust Deep — PROVISIONAL. Body anchor text */
+     does on the sign. Rust and forest are FINAL (decided 2026-10-03): they are
+     the values the live site stonesteps50k.com serves, verified against its
+     built CSS. No published asset contains a red or green pixel, so the live
+     site is the palette of record. Revisit only if Dave's logo files differ. */
+  --color-primary: #a83c26; /* Rust — final, as live. Button ground, carries cream at 5.35:1 */
+  --color-primary-dark: #8f3323; /* Rust Deep — final, as live. Body anchor text */
   --color-accent: #1a1712; /* Bark — headings + body */
   --color-accent-dark: #0f0d0a; /* Bark Deep — the fixed ink band */
   --color-secondary: #8a7f66; /* Stone — borders, eyebrows */
-  --color-tertiary: #2e5738; /* Forest — PROVISIONAL. Sparingly */
+  --color-tertiary: #2e5738; /* Forest — final, as live. Sparingly */
   --color-bg: #fbf6ea; /* Paper — primary surface, a warm cream stock */
   --color-bg-soft: #f4ebd6; /* Soft Paper — the alternating band */
   --color-border-soft: #e3d6b8; /* Faint dividers */
