@@ -1,6 +1,53 @@
-# NCS Astro + Sanity Starter
+<div align="center">
 
-A reusable, production-grade starter for small-business marketing sites on **Astro + Sanity + Cloudflare Workers**, by [Nixon Creative Studio](https://nixoncreativestudio.com). It is the foundation the studio's client sites are built on, so a polished, editor-friendly site is an afternoon of setup instead of a month of plumbing.
+# Stone Steps 50K
+
+**The website for Cincinnati's longest running ultra marathon, rebuilt from WordPress into a fast, editor-friendly Astro + Sanity site on Cloudflare Workers.**
+
+[![CI](https://github.com/NateJ45/stonesteps-50k/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/NateJ45/stonesteps-50k/actions/workflows/ci.yml)
+[![Live site](https://img.shields.io/badge/live-stonesteps50k.com-a8391f)](https://stonesteps50k.com)
+![Astro 7](https://img.shields.io/badge/Astro-7-ff5d01?logo=astro&logoColor=white)
+![Sanity](https://img.shields.io/badge/Sanity-v6-f03e2f?logo=sanity&logoColor=white)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
+![Tailwind 4](https://img.shields.io/badge/Tailwind-4-06b6d4?logo=tailwindcss&logoColor=white)
+
+[Live site](https://stonesteps50k.com) | [Built by Nixon Creative Studio](https://nixoncreativestudio.com)
+
+<img src="docs/screenshots/home-desktop.webp" alt="Stone Steps 50K home page on desktop: race date, headline and a runner on a wooded trail" width="760">
+<img src="docs/screenshots/home-mobile.webp" alt="Stone Steps 50K home page on a phone" width="190">
+
+</div>
+
+## What it is
+
+[stonesteps50k.com](https://stonesteps50k.com) is the public site for the Stone Steps 50K and 27K, run in Mt. Airy Forest, Cincinnati. It replaced a WordPress site. Its job is to get a runner to the right registration page, answer the practical questions plainly, and carry the race's history. Registration and timing stay on RunSignUp; this site pulls the results back in so the archive keeps itself current.
+
+## Highlights
+
+- **Results archive, 2003 to 2025.** Recovered from the Wayback Machine and RunSignUp, with a page per year, per-runner history pages and a records page.
+- **Hands-off results.** A nightly GitHub Actions workflow imports new results from RunSignUp into Sanity and bakes race-day weather, so nobody has to remember a yearly chore.
+- **Edit on the page.** Sanity Studio is embedded at `/studio` with live draft preview and click-to-edit, so the race director can change copy without touching code.
+- **Contact form without a third party.** Cloudflare Email Sending plus a D1 database that stores every submission before any email is attempted.
+- **Backups.** Daily encrypted Sanity exports to a GitHub artifact and to Cloudflare R2.
+- **Gated releases.** `main` is protected: a PR plus green CI (type check, lint, format, unit tests, link check, Playwright accessibility and reflow suites on Chromium and a WebKit iPhone profile) before anything deploys. Lighthouse and visual-regression workflows run alongside.
+- **Light and dark themes**, a hand-made trail look, and an accessibility score gated at 100.
+
+## Stack
+
+Astro 7 (static output, a few SSR routes) and TypeScript strict, Sanity v6, Tailwind 4, React 19 islands, Cloudflare Workers (with D1, Email Sending and R2), Playwright, Lighthouse CI, GitHub Actions.
+
+## More screenshots
+
+<img src="docs/screenshots/records-desktop.webp" alt="Records page, desktop" width="640">
+
+## Developing
+
+Everything below is the working documentation for the codebase, inherited from the starter this site was forked from. Start with [`CLAUDE.md`](./CLAUDE.md) for the rules and [`OPERATIONS.md`](./OPERATIONS.md) for the playbook. Open work is tracked in [`docs/PENDING.md`](docs/PENDING.md). Security reports: see [`SECURITY.md`](./SECURITY.md).
+
+## The starter underneath
+
+This site is a fork of a reusable, production-grade starter for small-business marketing sites on **Astro + Sanity + Cloudflare Workers**, by [Nixon Creative Studio](https://nixoncreativestudio.com). It is the foundation the studio's client sites are built on, so a polished, editor-friendly site is an afternoon of setup instead of a month of plumbing.
 
 ---
 
