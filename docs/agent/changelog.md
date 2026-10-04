@@ -53,6 +53,16 @@ _2026-10-03 - Playwright Sanity images come from a disk cache (starter PORTS.md 
 `Restore the test images` `actions/cache` step after `npm ci` so the shards share the folder between runs. Test
 tooling only, no site behaviour change. The three specs and `fixtures.ts` are now `SAME` in `sync-check`.
 
+_2026-10-03 (weather icons) — Each race-day bar wears an animated weather glyph._
+
+`/course`'s weather strip draws a small SVG above every bar, picked from that day's WMO code by
+`iconKind()` in `src/lib/raceWeather.ts` (same bands as `conditionLabel`, unit-tested): sun, partly
+cloudy, overcast, drizzle, rain, snow, storm, fog. Component: `src/components/race/WeatherIcon.astro`
+(CSS keyframes only, no JS: turning rays, drifting cloud, falling drops, storm flash). Placement and the
+reveal fade live beside the other `.wx__*` rules in `globals.css`; `--wx-sun` is the one new token.
+Loops pause until the strip is revealed and stop under reduced motion. The glyphs are decorative
+(`aria-hidden`); the sr-only table still carries the conditions. Data and the `/course` reveal are unchanged.
+
 _2026-10-03 (cleanup) — The old home-page map still is deleted._
 
 `public/course-poster*.{avif,webp}`, `scripts/data/course-poster.json` and the `map-poster` npm script are gone;
