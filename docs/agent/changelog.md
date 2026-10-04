@@ -14,6 +14,15 @@ _2026-10-04 - Parity files resynced with the starter (starter PORTS.md card 74).
 
 Tooling only, no site behaviour change. `scripts/page-parity.mjs` was replaced with the starter copy (it gains an optional `--exclude` / `PARITY_EXCLUDE`; no flag means nothing is excluded) and `scripts/lib/parity-glob.mjs` plus its spec `scripts/lib/parity-glob.test.mjs` were added, all byte-for-byte PORTABLE copies. New `test:scripts` npm script (`node --test scripts/lib/*.test.mjs`), chained at the end of `check:full`; `test:unit` and every workflow are untouched. `sync-check` against the starter: 82 same, 1 drifted (`page-parity.mjs`) before, 85 same, 0 drifted after. The remaining `MISSING-IN-STARTER` on `src/lib/scriptAccent.ts` is unrelated and was left alone.
 
+_2026-10-03 (later) — Home map plate shows two loops, not seven laps._
+
+Laps of one kind are the same run again, so the lap chips are replaced by two loop cards (long
+5.3 mi, run four times; short 3.2 mi, run three times). The runner alternates between the two
+loops, and the elevation strip, mile tag and `/course?loop=` link follow the active loop. The
+lap data in `src/lib/courseTeaser.ts` is unchanged; the band uses the first long and first
+short lap. The intro copy lives in Sanity (Home Page, block `course-poster-1`); it was updated and
+published to the two-loop wording the same day.
+
 _2026-10-03 — Home page: the course map band is a live plate, and three bands stop hugging the left edge._
 
 **`CoursePosterBand` is rebuilt.** The screenshot of the 3D map (busy, low contrast, nothing to do)
