@@ -80,7 +80,7 @@ Any change to `src/sanity/schemaTypes/` must follow this sequence before committ
 1. Edit the schema file in `src/sanity/schemaTypes/`.
 2. Run the gate. `npm run check` is the fast half (`astro check` + eslint) and
    `npm run check:full` is typegen, the build (which includes the embedded Studio), the
-   432 unit tests and the `test:scripts` helper specs. Add `npm run format:check`, `npm run check:links` and `npm test`
+   432 unit tests (`test:unit` also runs the `test:scripts` helper specs). Add `npm run format:check`, `npm run check:links` and `npm test`
    (the Playwright suites: smoke, axe light, axe dark, reflow, on chromium and WebKit)
    for the whole thing, which is exactly what CI runs. Fix any failures before
    continuing. If the change could alter rendered markup, also run

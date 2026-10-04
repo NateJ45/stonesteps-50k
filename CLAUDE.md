@@ -37,8 +37,8 @@ Full stack notes and the `astro.config.mjs` landmines are in `docs/agent/stack-a
 
 - `npm run dev`: dev server; the Studio is at `/studio` (no separate studio server).
 - `npm run typegen`: regenerate Sanity types after any schema change, BEFORE `npm run build`. `npm run build:full` chains both.
-- `npm run check` (`astro check` + lint): the fast gate. `npm run check:full`: typegen, build, unit tests, `test:scripts` (node --test over `scripts/lib/*.test.mjs`). Also `npm run format:check`, `npm run check:links`, `npm test` (Playwright).
-- `npm run test:unit`: node --test over `src/lib/*.test.ts`; three of them are gates (`theme-tokens`, `layout-variants`, `section-fields`).
+- `npm run check` (`astro check` + lint): the fast gate. `npm run check:full`: typegen, build, unit tests (which include `test:scripts`). Also `npm run format:check`, `npm run check:links`, `npm test` (Playwright).
+- `npm run test:unit`: node --test over `src/lib/*.test.ts`, then `npm run test:scripts` (node --test over `scripts/lib/*.test.mjs`), so CI and deploy run both; three of them are gates (`theme-tokens`, `layout-variants`, `section-fields`).
 - `npm run parity compare`: rendered-HTML parity gate for render-neutral changes. Build with `PUBLIC_GA_ID=` blank first or every page fails (`PUBLIC_GA_ID= npm run build && npm run parity compare`).
 - `npm run preview`: `wrangler dev -c dist/server/wrangler.json`; the only way to exercise the SSR routes and real response headers locally.
 - `npm run deploy`: build, then `wrangler deploy -c dist/server/wrangler.json`. Never a bare `wrangler deploy` (it reads the root `wrangler.jsonc`, every sub-route 404s).

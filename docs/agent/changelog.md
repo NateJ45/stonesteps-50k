@@ -10,6 +10,10 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-10-03 - Scripts tests run in CI (starter PR #68 wiring)._
+
+Tooling only, no site behaviour change, no workflow edited. `ci.yml` and `deploy.yml` call `npm run test:unit`, never `check:full`, so the `test:scripts` specs added in PR #70 ran only locally. `test:unit` now ends with `&& npm run test:scripts` and `check:full` no longer chains it, so the specs run exactly once and in CI.
+
 _2026-10-03 (cleanup) — The old home-page map still is deleted._
 
 `public/course-poster*.{avif,webp}`, `scripts/data/course-poster.json` and the `map-poster` npm script are gone;
