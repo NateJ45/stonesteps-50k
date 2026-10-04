@@ -645,36 +645,53 @@ export default function CourseMapLibre() {
           'bottom-right',
         );
 
+        // THE ARROW IS DRAWN, NOT A FONT GLYPH. A text symbol would need the
+        // style to carry a glyphs endpoint and would depend on the arrow
+        // existing in whatever font got substituted; a canvas image is
+        // guaranteed and is 24 lines.
+        //
+        // IT IS REGISTERED BEFORE 'load' AND AGAIN ON DEMAND. The style, and so
+        // the 'course-arrows' layer that names this image, is parsed before the
+        // 'load' event fires, so adding the image only inside 'load' made
+        // MapLibre log `Image "course-arrow" could not be loaded` on every page
+        // view (found by the 2026-10-03 impeccable audit). `setMissingStyleImageResolver`
+        // is MapLibre's own hook for exactly this (the `styleimagemissing` EVENT
+        // fires too late in 6.x and cannot supply the image): it runs when a
+        // layer asks for an image that is not there yet, and the image added in
+        // the resolver is used for that very render. The `hasImage` guard keeps the later
+        // call at 'load' (and any style reload) a no-op.
+        const addArrowImage = () => {
+          if (m.hasImage('course-arrow')) return;
+          const S = 24;
+          const c = document.createElement('canvas');
+          c.width = S;
+          c.height = S;
+          const ctx = c.getContext('2d');
+          if (ctx) {
+            ctx.translate(S / 2, S / 2);
+            // Point along +x: MapLibre rotates a line symbol so the image's
+            // right edge follows the direction of the line.
+            ctx.beginPath();
+            ctx.moveTo(7, 0);
+            ctx.lineTo(-4, -5.5);
+            ctx.lineTo(-4, 5.5);
+            ctx.closePath();
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = 'rgba(26,23,18,0.75)';
+            ctx.lineWidth = 1.5;
+            ctx.fill();
+            ctx.stroke();
+            m.addImage('course-arrow', ctx.getImageData(0, 0, S, S), { pixelRatio: 2 });
+          }
+        };
+        m.setMissingStyleImageResolver((id) => {
+          if (id === 'course-arrow') addArrowImage();
+        });
+
         m.on('load', () => {
           if (cancelled) return;
 
-          // THE ARROW IS DRAWN, NOT A FONT GLYPH. A text symbol would need the
-          // style to carry a glyphs endpoint and would depend on the arrow
-          // existing in whatever font got substituted; a canvas image is
-          // guaranteed and is 24 lines.
-          if (!m.hasImage('course-arrow')) {
-            const S = 24;
-            const c = document.createElement('canvas');
-            c.width = S;
-            c.height = S;
-            const ctx = c.getContext('2d');
-            if (ctx) {
-              ctx.translate(S / 2, S / 2);
-              // Point along +x: MapLibre rotates a line symbol so the image's
-              // right edge follows the direction of the line.
-              ctx.beginPath();
-              ctx.moveTo(7, 0);
-              ctx.lineTo(-4, -5.5);
-              ctx.lineTo(-4, 5.5);
-              ctx.closePath();
-              ctx.fillStyle = '#ffffff';
-              ctx.strokeStyle = 'rgba(26,23,18,0.75)';
-              ctx.lineWidth = 1.5;
-              ctx.fill();
-              ctx.stroke();
-              m.addImage('course-arrow', ctx.getImageData(0, 0, S, S), { pixelRatio: 2 });
-            }
-          }
+          addArrowImage();
 
           // READY FIRST, TERRAIN SECOND. Doing these the other way round meant a
           // throw from setTerrain aborted the whole handler: no terrain, and the

@@ -505,6 +505,43 @@ const shortMiles = meta.loops.find((l) => l.kind === 'short')?.publishedMiles ??
     }
   }
 
+  /* 44px TAP FLOOR ON A PHONE (PRODUCT.md; the 2026-10-03 impeccable audit found
+     these at 28 to 31px, the zoom stack at 29, the scrubber at 16). The frame is
+     3:4 here, so there is room for taller controls. The attribution toggle is
+     MapLibre's own 24px icon: it keeps its look and gets a 44px hit area from an
+     invisible pseudo-element, because a bigger circle would cover the credit it
+     opens. */
+  @media (max-width: 640px) {
+    :global(.cmapbar__btn) {
+      min-height: 44px;
+      min-width: 44px;
+      justify-content: center;
+    }
+    :global(.cmaploops__chip) {
+      min-height: 44px;
+      align-items: center;
+      padding-inline: 0.8rem;
+    }
+    :global(.cprof__slider) {
+      height: 44px;
+      margin-block: 0;
+    }
+    :global(.cmap__frame .maplibregl-ctrl-group button) {
+      width: 44px;
+      height: 44px;
+    }
+    :global(.cmap__frame .maplibregl-ctrl-attrib-button::after) {
+      content: '';
+      position: absolute;
+      inset: -10px;
+    }
+  }
+
+  /* MapLibre's scale bar is 10px; the project floor is 11px. */
+  :global(.cmap__frame .maplibregl-ctrl-scale) {
+    font-size: 11px;
+  }
+
   /* ---- the profile strip / flyover scrubber ----------------------------- */
 
   :global(.cprof) {

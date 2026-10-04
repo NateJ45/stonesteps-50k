@@ -353,7 +353,7 @@ const rowClass = (label: string) =>
           }
           {
             !email && !phone && (
-              <a class="text-link underline-offset-2 hover:underline" href="/contact">
+              <a class="tap-pad-lg text-link underline-offset-2 hover:underline" href="/contact">
                 Ask the race director
               </a>
             )
@@ -451,14 +451,16 @@ const rowClass = (label: string) =>
             require a policy disclosing them. Any further legal links still come
             from Site settings and render after it. */
         }
-        <a href="/privacy" class="underline underline-offset-2 transition-colors hover:text-link"
+        <a
+          href="/privacy"
+          class="tap-pad-lg underline underline-offset-2 transition-colors hover:text-link"
           >Privacy</a
         >
         {
           LEGAL_LINKS.map((l) => (
             <a
               href={l.href}
-              class="underline underline-offset-2 transition-colors hover:text-link"
+              class="tap-pad-lg underline underline-offset-2 transition-colors hover:text-link"
               {...externalLinkAttrs(l.href)}
             >
               {l.label}
@@ -474,7 +476,7 @@ const rowClass = (label: string) =>
                   href={siteCreditUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="underline underline-offset-2 transition-colors hover:text-link"
+                  class="tap-pad-lg underline underline-offset-2 transition-colors hover:text-link"
                 >
                   {siteCredit}
                 </a>
