@@ -471,14 +471,13 @@ export const courseMapSection = defineType({
 });
 
 /**
- * The home page's link through to the course map: a baked still of the real
- * map with the route drawing itself over it.
+ * The home page's link through to the course map: a live SVG plate drawn from
+ * the recorded GPS run (src/lib/courseTeaser.ts).
  *
- * NO IMAGE FIELD, ON PURPOSE. The picture is not editorial, it is generated
- * from the map by `npm run map-poster` and committed, exactly like the OG image
- * and the hero mud. An editor who could swap it could put a photograph of
- * anywhere behind a line drawn from this course's own coordinates, and the two
- * would silently disagree.
+ * NO IMAGE FIELD, ON PURPOSE. The plate is not editorial, it is drawn from the
+ * same recorded run the real map uses. An editor who could swap in a picture
+ * could put a photograph of anywhere behind a route drawn from this course's own
+ * coordinates, and the two would silently disagree.
  */
 export const coursePosterSection = defineType({
   name: 'coursePosterSection',
