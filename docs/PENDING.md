@@ -319,14 +319,6 @@ box in the Studio each year.
 
 ## Known gaps, deliberately open
 
-### 0e. The old home-page map still is unused and can be deleted
-
-2026-10-03. `CoursePosterBand` no longer shows `public/course-poster*.{avif,webp}` or reads
-`scripts/data/course-poster.json`; nothing else imports them. They are kept for one release
-in case the plate needs rolling back. When it has settled, delete those files and the
-home-poster half of `scripts/capture-map-poster.mjs` (`npm run map-region` still uses the
-rest of that script) and the `map-poster` script entry.
-
 ### 0c. A field-level "Take me there" focuses the field but does not scroll to it
 
 **Cosmetic, Sanity's own behaviour, low priority.**

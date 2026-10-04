@@ -10,6 +10,12 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-10-03 (cleanup) — The old home-page map still is deleted._
+
+`public/course-poster*.{avif,webp}`, `scripts/data/course-poster.json` and the `map-poster` npm script are gone;
+nothing imported them since the live plate replaced the picture. `scripts/capture-map-poster.mjs` stays, because
+`npm run map-region` runs it. To bring the old still back, restore those files from git history (7464486^).
+
 _2026-10-03 (later) — Home map plate shows two loops, not seven laps._
 
 Laps of one kind are the same run again, so the lap chips are replaced by two loop cards (long

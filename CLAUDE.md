@@ -42,7 +42,7 @@ Full stack notes and the `astro.config.mjs` landmines are in `docs/agent/stack-a
 - `npm run parity compare`: rendered-HTML parity gate for render-neutral changes. Build with `PUBLIC_GA_ID=` blank first or every page fails (`PUBLIC_GA_ID= npm run build && npm run parity compare`).
 - `npm run preview`: `wrangler dev -c dist/server/wrangler.json`; the only way to exercise the SSR routes and real response headers locally.
 - `npm run deploy`: build, then `wrangler deploy -c dist/server/wrangler.json`. Never a bare `wrangler deploy` (it reads the root `wrangler.jsonc`, every sub-route 404s).
-- `npm run apply-brand`, `npm run og`, `npm run seed`, `npm run sync-check`, `npm run free-dist` (Windows EPERM on `dist/`). Baked assets (`mud`, `map-poster`, `map-region`, `weather:sync`): see `.claude/rules/baked-assets-and-scripts.md`.
+- `npm run apply-brand`, `npm run og`, `npm run seed`, `npm run sync-check`, `npm run free-dist` (Windows EPERM on `dist/`). Baked assets (`mud`, `map-region`, `weather:sync`): see `.claude/rules/baked-assets-and-scripts.md`.
 - **There is no separate studio dev server or deploy.** `npm run dev` serves the Studio at `/studio`, and deploying the site deploys the Studio. For CLI work (`sanity dataset`, `sanity cors`, typegen) run `npx sanity ...` from the repo root; `sanity.cli.ts` configures it. Do **not** run `npx sanity deploy`: it would publish a separate hosted Studio that silently falls behind the embedded one.
 - `npm run preview` runs `wrangler dev -c dist/server/wrangler.json` against the last build. This is the only way to exercise the SSR routes (`/preview/**`, `/api/draft-mode/*`) and the real response headers locally; a static file server proves nothing about them.
 
