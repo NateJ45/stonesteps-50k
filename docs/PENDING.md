@@ -16,6 +16,15 @@ sequence).
 
 ## Waiting on a human
 
+### 1n. The brand palette is PROVISIONAL until Dave sends a logo file
+
+2026-10-03. Rust (`#A83C26`), rust deep (`#8F3323`) and forest (`#2E5738`) in `src/styles/globals.css`
+were eyeballed: no asset published on stonesteps50k.com contains a red or green pixel. Blocked on
+Dave supplying a real brand file. When it arrives: sample the red and green, update `globals.css`
+and `brand/brand.config.json` together, re-run the contrast gates, drop the PROVISIONAL markers, and
+update `PRODUCT.md` (Palette status) and `DESIGN.md`. Proposed 2026-10-03, drafted by Claude on
+Nathan's delegation from repo evidence; edit if wrong.
+
 ### 1m. DONE 2026-09-18. The weather strip records its own new year
 
 Nathan asked for the yearly weather bake to be automatic. `scripts/weather-sync.mjs`

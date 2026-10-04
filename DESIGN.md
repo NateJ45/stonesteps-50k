@@ -67,7 +67,7 @@ Tokens live in `src/styles/globals.css` (`@theme`, `:root`, `.dark`) and are mir
 - **Two themes, both first-class.** Dark is bark with cream objects; light is a cream "kraft paper" ground where the plates INVERT to charcoal and forest (cream objects on a cream page measured 1.09:1 and collapsed). Both are checked on every UI change.
 - **One grammar** (changelog 2026-09-17): one heading system, one button family, one ground.
 - **Texture is spent carefully.** Mud is home-hero only; contours, grain and prints are baked or cheap and measured against LCP and the stylesheet size.
-- The palette's rust, forest and rust-deep are marked PROVISIONAL in the CSS. TODO(Nathan): confirm they are final (see `PRODUCT.md`).
+- The palette's rust, forest and rust-deep are marked PROVISIONAL in the CSS. Not final: they wait on Dave's logo files, a tracked dependency (Proposed 2026-10-03, drafted by Claude on Nathan's delegation from repo evidence; edit if wrong. See "Palette status" in `PRODUCT.md`). Keep the markers until a real brand file replaces them.
 
 ## 2. Colors
 
