@@ -22,6 +22,15 @@ _2026-10-03 - Scripts tests run in CI (starter PR #68 wiring)._
 
 Tooling only, no site behaviour change, no workflow edited. `ci.yml` and `deploy.yml` call `npm run test:unit`, never `check:full`, so the `test:scripts` specs added in PR #70 ran only locally. `test:unit` now ends with `&& npm run test:scripts` and `check:full` no longer chains it, so the specs run exactly once and in CI.
 
+_2026-10-03 - Playwright Sanity images come from a disk cache (starter PORTS.md card 75)._
+
+`tests/fixtures.ts` is new (marked, byte for byte from the starter) and `a11y`, `reflow` and `smoke` now import
+`test` and `expect` from it, so `cdn.sanity.io` images are fetched once and then served from
+`node_modules/.cache/test-images/`; the three specs differ from before only by that import line, and
+`reduced-motion`, `a11y-dark`, `contrast` and `rebind` are untouched. The `e2e` job in `ci.yml` gains one
+`Restore the test images` `actions/cache` step after `npm ci` so the shards share the folder between runs. Test
+tooling only, no site behaviour change. The three specs and `fixtures.ts` are now `SAME` in `sync-check`.
+
 _2026-10-03 (cleanup) — The old home-page map still is deleted._
 
 `public/course-poster*.{avif,webp}`, `scripts/data/course-poster.json` and the `map-poster` npm script are gone;
