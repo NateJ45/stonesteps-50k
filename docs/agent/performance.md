@@ -21,7 +21,7 @@ Performance is a UX feature, not a vanity score. Lighthouse 100 on Performance i
 | Total CSS (compressed)                          | < 30KB  |
 | Hero image (any viewport)                       | < 200KB |
 
-If a new dependency pushes a budget, that's a discussion before merging. Some are worth it (Lenis adds smooth scroll, motion is the interaction language); some aren't (a 60KB icon library when three lucide-react icons would cover it).
+If a new dependency pushes a budget, that's a discussion before merging. Some are worth it (motion is the interaction language); some aren't (a 60KB icon library when three lucide-react icons would cover it).
 
 ### Image weight by slot
 
@@ -50,7 +50,6 @@ Target: 100 on all four categories (Performance, Accessibility, Best Practices, 
 **Levers that achieve this -- preserve unless you have a stronger reason than "I want to simplify":**
 
 - All islands hydrate at `client:idle` or `client:visible`, including `MobileNav` since 2026-09-18 (it was `client:only="react"`, which hydrates at load; see MobileNav.tsx for why that cost the home page 750ms of modelled LCP)
-- Lenis init wrapped in `requestIdleCallback`
 - Logo PNGs moved from `public/` to `src/assets/` so Astro emits WebPs
 - Single-img theme-aware logo (one fetch per page load instead of two)
 - SanityImage emits real width-descriptor srcset with 8 breakpoints (400-2400)

@@ -1,27 +1,16 @@
 # Animation layer
 
-> Lenis smooth scroll, scroll reset on navigation, Motion integration, scroll-triggered reveals, hero entry stagger, Ken Burns slideshow, view-transition cross-fade, and the opt-in script accent.
+> Native smooth scroll, scroll reset on navigation, Motion integration, scroll-triggered reveals, hero entry stagger, Ken Burns slideshow, view-transition cross-fade, and the opt-in script accent.
 
 Non-animation polish (brand stripe, card-lift, surface-warm, reading-progress, sticky-header, paper-grain, print stylesheet) is covered in `polish-layer.md`.
 
-## Lenis smooth scroll
+## Smooth scroll (native; Lenis removed 2026-10-04)
 
-Lenis is initialized once in `BaseLayout.astro` and exposed as `window.lenis`. The instance persists across View Transitions navigations -- it is NOT re-created on `astro:page-load`. This is intentional: re-creating Lenis on every navigation causes a flash of native scroll before the new instance takes over.
+Lenis was removed on 2026-10-04 (Nathan's call). Scrolling is the browser's own, and so is its feel. Programmatic scrolls (home hero scroll cue, case-study TOC) use native `scrollTo({ behavior: 'smooth' })` / `scrollIntoView`, which honor `scroll-mt-*` on heading targets, so TOC targets clear the sticky header without a manual offset (don't add one, it double-applies). The global `prefers-reduced-motion` reset in `globals.css` already forces `scroll-behavior: auto`, and the TOC picks `behavior: 'auto'` itself.
 
-Lenis init is wrapped in `requestIdleCallback` so it doesn't compete with first-paint work.
+### Scroll reset on navigation
 
-In-page anchor navigation routes through the persistent `window.lenis` instance so it glides instead of snapping. Controls that need programmatic scroll (home hero scroll cue, case-study TOC) call `window.lenis.scrollTo(target)` and fall back to native `scrollTo` when Lenis hasn't loaded or the user prefers reduced motion. Lenis honors `scroll-mt-*` values on heading targets, so TOC targets clear the sticky header without a manual offset -- don't add one (it double-applies).
-
-`prefers-reduced-motion` is respected: when the OS prefers reduced motion, Lenis is initialized with its `lerp: 1` (instant) or not initialized at all, depending on implementation. Verify the current behavior in `BaseLayout.astro` before changing.
-
-### Scroll reset on navigation (do not remove)
-
-Because the single Lenis instance persists, any in-flight scroll momentum carries across a View Transitions swap. While Lenis is actively smoothing it ignores the router's scroll-to-top reset, so a link clicked mid-scroll would open the next page partway down (the stale scroll target clamps to the new, often shorter, page's maximum).
-
-The fix lives in the Lenis init block:
-
-- An `astro:after-swap` listener calls `lenis.scrollTo(0, { immediate: true, force: true })` (cancels momentum and resets to top) plus `lenis.resize()`.
-- It runs on **forward navigations only**: the listener reads `navigationType` off the `astro:before-swap` event and skips the reset when that is `traverse`, so browser back/forward keeps Astro's built-in scroll restoration.
+Astro's ClientRouter resets to the top on forward navigations and restores position on back/forward, natively. There is no custom reset code any more (it only existed to cancel Lenis momentum). If a page ever opens partway down after a link click, look at the router, not at a scroll library.
 
 **Caveat for testing:** Astro dev full-reloads on back/forward, so the traverse (restore-position) behavior can only be verified against the production build via `npm run preview`, not `npm run dev`.
 
