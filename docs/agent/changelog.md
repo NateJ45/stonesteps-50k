@@ -10,6 +10,10 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-10-03 - Rewrite `public/llms.txt` and `public/llms-full.txt` for the race._
+
+Content only, no code or workflow change. Both files still carried the starter's interior-design text (`# Studio Starter`, example.com links, a consultation price), which is false for a trail-run site and was being served to AI crawlers. Replaced with the Stone Steps 50K and 27K Trail Run, written only from the live pages (home, course, records, results, contact, privacy) and linking only URLs that return 200. `llms:full` is not safe to run on this site (see `docs/agent/seo.md`), so both files are hand-maintained.
+
 _2026-10-03 - Resync `scripts/sync-check.mjs` with starter card 80._
 
 Tooling only, no site behaviour change, no workflow edited. The marked `scripts/sync-check.mjs` is copied byte for byte from the starter (card 80): its directory walk now skips `_worktrees/` as well as `.claude/worktrees`, so a worktree under `_worktrees/` no longer shows up as a second copy of every marked file. CI only runs the self-check (`node scripts/sync-check.mjs` in `ci.yml`), so this is safe to merge before or after the starter PR. `sync-check` against the starter went from 81 same, 4 drifted, 1 missing to 82 same, 3 drifted, 1 missing (86 marked files): the fixed drift is `scripts/sync-check.mjs` itself, and the remaining ones are the three `tests/*.spec.ts` files and the missing `src/lib/scriptAccent.ts` noted in the entry below.
