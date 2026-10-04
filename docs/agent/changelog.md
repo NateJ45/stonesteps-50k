@@ -16,6 +16,10 @@ _2026-10-03 (cleanup) — The old home-page map still is deleted._
 nothing imported them since the live plate replaced the picture. `scripts/capture-map-poster.mjs` stays, because
 `npm run map-region` runs it. To bring the old still back, restore those files from git history (7464486^).
 
+_2026-10-04 - Parity files resynced with the starter (starter PORTS.md card 74)._
+
+Tooling only, no site behaviour change. `scripts/page-parity.mjs` was replaced with the starter copy (it gains an optional `--exclude` / `PARITY_EXCLUDE`; no flag means nothing is excluded) and `scripts/lib/parity-glob.mjs` plus its spec `scripts/lib/parity-glob.test.mjs` were added, all byte-for-byte PORTABLE copies. New `test:scripts` npm script (`node --test scripts/lib/*.test.mjs`), chained at the end of `check:full`; `test:unit` and every workflow are untouched. `sync-check` against the starter: 82 same, 1 drifted (`page-parity.mjs`) before, 85 same, 0 drifted after. The remaining `MISSING-IN-STARTER` on `src/lib/scriptAccent.ts` is unrelated and was left alone.
+
 _2026-10-03 (later) — Home map plate shows two loops, not seven laps._
 
 Laps of one kind are the same run again, so the lap chips are replaced by two loop cards (long
