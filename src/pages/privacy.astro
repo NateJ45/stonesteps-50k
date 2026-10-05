@@ -172,9 +172,11 @@ const lastReviewed = 'September 2026';
                     It does set cookies on your device, named <code>_ga</code> and <code>_ga_</code>
                     followed by a stream id, so a return visit is recognised as the same person
                     rather than a new one. It records which pages get opened, roughly what part of
-                    the world the visit came from, and what kind of device was used. It is used to
-                    see whether people can find the course description and the results, nothing
-                    more.
+                    the world the visit came from, and what kind of device was used. It also counts
+                    two actions: following a link through to RunSignUp, and a contact message being
+                    sent. It records that the action happened, never your name, email address or
+                    anything you wrote. It is used to see whether people can find the course
+                    description, the results and the registration page, nothing more.
                   </p>
                 )}
                 {hasGa && (
