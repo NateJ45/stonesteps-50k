@@ -20,7 +20,9 @@
 // Do not add a path on a hunch. Check the Wayback Machine CDX index or GA4
 // landing pages first; a forward nobody needs is one more thing to maintain.
 // Keys are the canonical shape (leading slash, no trailing slash): Astro's
-// adapter matches the trailing-slash form too.
+// adapter matches the trailing-slash form too. DESTINATIONS keep the trailing
+// slash on purpose: the host answers a slash-less page address with a 307 to the
+// slash form, so pointing straight at it saves a hop (301 then 307 then 200).
 // =============================================================================
 
 export interface LaunchRedirect {
@@ -29,7 +31,7 @@ export interface LaunchRedirect {
 }
 
 export const launchRedirects: Record<string, LaunchRedirect> = {
-  '/all-time-records': { status: 301, destination: '/records' },
-  '/the-course': { status: 301, destination: '/course' },
-  '/dev/wordpress/course': { status: 301, destination: '/course' },
+  '/all-time-records': { status: 301, destination: '/records/' },
+  '/the-course': { status: 301, destination: '/course/' },
+  '/dev/wordpress/course': { status: 301, destination: '/course/' },
 };

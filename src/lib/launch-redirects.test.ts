@@ -7,11 +7,11 @@ import { launchRedirects } from './launch-redirects.ts';
 import { normalizeRedirectPath } from './redirects.ts';
 
 test('the old WordPress addresses forward to the right pages with a 301', () => {
-  assert.deepEqual(launchRedirects['/all-time-records'], { status: 301, destination: '/records' });
-  assert.deepEqual(launchRedirects['/the-course'], { status: 301, destination: '/course' });
+  assert.deepEqual(launchRedirects['/all-time-records'], { status: 301, destination: '/records/' });
+  assert.deepEqual(launchRedirects['/the-course'], { status: 301, destination: '/course/' });
   assert.deepEqual(launchRedirects['/dev/wordpress/course'], {
     status: 301,
-    destination: '/course',
+    destination: '/course/',
   });
 });
 
@@ -29,6 +29,10 @@ test('no forward points at another forward, at itself, or off the site', () => {
       undefined,
       `${from} -> ${destination} is a chain`,
     );
-    assert.match(destination, /^\/[a-z0-9-]*$/, `${from} destination should be a local path`);
+    assert.match(
+      destination,
+      /^\/[a-z0-9-]+\/$/,
+      `${from} destination should be a local page path ending in a slash`,
+    );
   }
 });

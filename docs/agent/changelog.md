@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-05 - Fix: the old-address redirects go straight to the slash form (one hop, not two)._
+
+The three launch redirects pointed at `/course` and `/records`, which the host answers with a 307 to `/course/` and `/records/`, so a visitor on an old address took 301, 307, 200. Their destinations now end in a slash (301, 200). Behaviour for visitors is unchanged; it saves a hop and keeps the permanent signal on the final address. `/all-time-records` is included although it predates this work, because it is the same double hop on the most linked address. The unit test pins the slash form. The 307 itself is the host's trailing-slash handling for every page and was left alone.
+
 _2026-10-05 - Fix: two old WordPress addresses forward to /course instead of the 404._
 
 The September analytics report showed visitors landing on `/the-course` (8) and `/dev/wordpress/course` (4) and getting the 404 page. `/the-course` was a live WordPress page (Wayback Machine 200 in March 2024); the other is a 2010 development address old links still use. Both now 301 to `/course`. The hand-written launch redirects moved out of `astro.config.mjs` into `src/lib/launch-redirects.ts` (with the existing `/all-time-records` -> `/records`, unchanged) and a unit test pins all three. No Sanity change, no CI change. Docs: `docs/agent/seo.md`.
