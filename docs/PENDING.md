@@ -18,7 +18,7 @@ sequence).
 
 ### 1o. Decide where `/registered-runners` should forward
 
-The old WordPress site had this page (Wayback Machine: 200 captures from 2012 to August 2022, a RunSignUp "Find a runner" list for race 15282), and it 404s today. GA4 shows 3 landings on 2026-09-15, which was before the 18 September cutover, so those visits may have reached the old site rather than the 404. The evidence rule in `docs/agent/seo.md` is met for existence but not for a destination: nothing on this site lists registered entrants, and `/results` (finishers) is a different thing. Candidates are `/` (where the registration buttons are) or `/results`. Add the chosen one to `src/lib/launch-redirects.ts` with its test line; check GA4 for fresh 404 landings first.
+The old WordPress site had this page (Wayback Machine: 200 captures from 2012 to August 2022, a RunSignUp "Find a runner" list for race 15282), and it 404s today. GA4 shows 3 landings on 2026-09-15, which was before the 18 September cutover, so those visits may have reached the old site rather than the 404. The evidence rule in `docs/agent/seo.md` is met for existence but not for a destination: nothing on this site lists registered entrants, and `/results` (finishers) is a different thing. Candidates are `/` (where the registration buttons are) or `/results/`. Add the chosen one to `src/lib/launch-redirects.ts` with its test line (destinations use the trailing-slash form, see the 2026-10-05 changelog entry); check GA4 for fresh 404 landings first.
 
 ### 1n. DONE 2026-10-03. The brand palette is final, taken from the live site
 
