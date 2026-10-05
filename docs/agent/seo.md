@@ -111,8 +111,10 @@ normalization rules are shared with the build and unit-tested in `src/lib/redire
 
 **Old WordPress addresses** are hand-written in `src/lib/launch-redirects.ts` (spread into the
 redirects map before the Studio ones, so an editor can still override one). Today:
-`/all-time-records` -> `/records`, `/the-course` -> `/course`, `/dev/wordpress/course` -> `/course`,
-all 301. Add one only with evidence the old address is in use (Wayback Machine CDX index for
+`/all-time-records` -> `/records/`, `/the-course` -> `/course/`, `/dev/wordpress/course` -> `/course/`,
+all 301. Destinations keep the trailing slash on purpose: the host answers a slash-less page
+address with a 307 to the slash form, so pointing straight at it saves a hop (301 then 307 then 200
+becomes 301 then 200). Add one only with evidence the old address is in use (Wayback Machine CDX index for
 whether it existed, GA4 landing pages for whether anyone arrives on it); the last two were added
 on 2026-10-05 because September GA4 showed 12 visitors landing on the 404 page. A unit test
 (`launch-redirects.test.ts`) pins all three so none can be dropped by accident.
