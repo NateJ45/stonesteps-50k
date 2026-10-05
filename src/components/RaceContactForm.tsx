@@ -16,6 +16,7 @@
 
 import { useRef, useState, type FormEvent } from 'react';
 import { sendContactSubmission } from '@/lib/contact-transport';
+import { trackContactSent } from '@/lib/ga-events';
 
 const ACCESS_KEY = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
 
@@ -95,6 +96,10 @@ export default function RaceContactForm({ subjects, fallbackUrl }: Props) {
       );
       if (!result.ok) throw new Error(result.error ?? 'Submission failed');
       setStatus('sent');
+      // The goal event (src/lib/ga-events.ts): only here, after the send was
+      // confirmed, never on a submit attempt or a validation error. Carries no
+      // field content. A no-op off the production hostname.
+      trackContactSent();
     } catch (err) {
       // Say what went wrong and leave the typed message on screen. Clearing a
       // form someone just wrote into is the cruellest possible failure mode.

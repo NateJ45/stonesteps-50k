@@ -81,7 +81,8 @@ Content-Security-Policy is intentionally not included; doing it right requires t
 The starter ships in an effectively zero-cookie posture. The current baseline:
 
 - **Cloudflare Web Analytics** uses no cookies and stores no personal data.
-- **No Google Analytics, no Facebook/Meta Pixel.** No ad-tracking or retargeting pixels by default. If you add one, design a full consent management platform in BEFORE adding the tracker -- don't bolt it on.
+- **Google Analytics 4 is OFF in the starter and ON on stonesteps50k.com** (set `PUBLIC_GA_ID`; it sets `_ga` cookies and `src/pages/privacy.astro` derives its copy from the same flag). It fires only on the site's own production hostname, so a local or `*.workers.dev` build never files a hit. Details: `docs/agent/analytics.md`.
+- **No Facebook/Meta Pixel.** No ad-tracking or retargeting pixels by default. If you add one, design a full consent management platform in BEFORE adding the tracker -- don't bolt it on.
 - **Sanity client** reads public published content, no auth cookies.
 - **Web3Forms** contact-form submissions go server-side via `fetch`; no cookies set.
 
