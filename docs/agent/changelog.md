@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-05 - Fix: two old WordPress addresses forward to /course instead of the 404._
+
+The September analytics report showed visitors landing on `/the-course` (8) and `/dev/wordpress/course` (4) and getting the 404 page. `/the-course` was a live WordPress page (Wayback Machine 200 in March 2024); the other is a 2010 development address old links still use. Both now 301 to `/course`. The hand-written launch redirects moved out of `astro.config.mjs` into `src/lib/launch-redirects.ts` (with the existing `/all-time-records` -> `/records`, unchanged) and a unit test pins all three. No Sanity change, no CI change. Docs: `docs/agent/seo.md`.
+
 _2026-10-03 - Fix: the image-count report step could fail a shard._
 
 CI only. The "Report the test images fetched from Sanity" step added in the entry below counted cached images with `grep -c`, which exits 1 when the count is zero, and Actions runs steps under `bash -e`, so a shard with no cached images (a cancelled run, a cold folder) failed that step and so could fail the job and block the required `test` check. Warm runs were unaffected, which is why the first runs passed. Reproduced locally under `bash -e` (exit 1, no output) before the fix; the counts now end in `|| true`, and all four fake-folder scenarios exit 0 and print. A reporting step must never fail a job.
