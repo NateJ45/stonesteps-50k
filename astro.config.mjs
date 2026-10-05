@@ -10,6 +10,7 @@ import react from '@astrojs/react';
 import sanity from '@sanity/astro';
 
 import { buildRedirectMap } from './src/lib/redirects.ts';
+import { launchRedirects } from './src/lib/launch-redirects.ts';
 import { fixSanityDedupeAlias } from './src/lib/sanity-dedupe-alias.ts';
 
 // The Sanity project id is PUBLIC by design: it ships in every client bundle.
@@ -130,19 +131,21 @@ export default defineConfig({
   // 301/302s. A repo that also needs hand-written launch redirects puts them
   // BEFORE the spread, so an editor entry can correct one without a code change.
   redirects: {
-    // LAUNCH REDIRECTS, declared BEFORE the CMS spread so an editor can still
-    // override one from the Studio without a code change.
+    // LAUNCH REDIRECTS (src/lib/launch-redirects.ts), declared BEFORE the CMS spread
+    // so an editor can still override one from the Studio without a code change.
     //
     // /all-time-records is the single highest-risk item in this migration. It
     // is one of only three real URLs on the WordPress site it replaces, and it
     // has twenty years of inbound links from running forums pointing at it.
-    // Losing it loses the audience that already knows this race exists.
+    // Losing it loses the audience that already knows this race exists. Two more
+    // old addresses (/the-course, /dev/wordpress/course) were added on 2026-10-05
+    // after GA4 showed visitors landing on the 404 page.
     //
-    // It lives here rather than only in Sanity because a code redirect survives
+    // They live in code rather than only in Sanity because a code redirect survives
     // an empty dataset: a restore, a bad deploy or a dataset swap must not
-    // silently drop it. normalizeRedirectPath strips the trailing slash, so
-    // this one entry covers both /all-time-records and /all-time-records/.
-    '/all-time-records': { status: 301, destination: '/records' },
+    // silently drop them. normalizeRedirectPath strips the trailing slash, so
+    // each entry covers both the bare and the trailing-slash form.
+    ...launchRedirects,
     ...cmsRedirects,
   },
   integrations: [
