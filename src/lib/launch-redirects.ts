@@ -34,4 +34,5 @@ export const launchRedirects: Record<string, LaunchRedirect> = {
   '/all-time-records': { status: 301, destination: '/records/' },
   '/the-course': { status: 301, destination: '/course/' },
   '/dev/wordpress/course': { status: 301, destination: '/course/' },
+  '/registered-runners': { status: 301, destination: '/results/' },
 };

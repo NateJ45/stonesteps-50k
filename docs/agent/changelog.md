@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-05 - Fix: `/registered-runners` forwards to `/results/`._
+
+The old WordPress site had a RunSignUp "Find a runner" page at this address (Wayback Machine: 200 captures from 2012 to August 2022) and it returned the 404 page here. Nathan chose `/results/` as its destination. One line in `src/lib/launch-redirects.ts` plus a test line in `launch-redirects.test.ts`; docs: `docs/agent/seo.md`, `docs/PENDING.md`.
+
 _2026-10-05 - GA4 only fires on the production hostname, plus two goal events._
 
 September's GA4 property held 347 sessions with hostName `localhost` (our own Playwright and Lighthouse runs, built with a developer `.env` that carries `PUBLIC_GA_ID`) against 735 real ones. `src/components/analytics/GoogleAnalytics.astro` is now the starter's PORTABLE copy (PORTS.md card 58, md5 530459bb): the snippet fires only when `location.hostname` is the host of `site` (`stonesteps50k.com` or `www`), and off it defines no `dataLayer`, no `gtag` and requests nothing. The card 58 localhost test was already in `tests/smoke.spec.ts`. The report had promised RunSignUp clicks and contact messages as goals, so two events are new (Stone Steps only): `registration_click` (`link_url`, no query or fragment) from one delegated listener (`src/lib/ga-events-listener.js`, printed inline by `GoogleAnalyticsEvents.astro`), and `generate_lead` (`form_name: 'contact'`) from `RaceContactForm` once a send is confirmed. Both are no-ops without `window.gtag`, send no form content, and add no network request. `privacy.astro` now names both actions. Docs: new `docs/agent/analytics.md`, `deployment.md` (it still said "no Google Analytics"), `.env.example`, `CLAUDE.md`, `topic-index.md`. Tests: `src/lib/ga-events.test.ts`, `tests/ga-events.spec.ts` (the click tests skip on a build without the id, as in CI).

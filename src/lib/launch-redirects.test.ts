@@ -13,6 +13,10 @@ test('the old WordPress addresses forward to the right pages with a 301', () => 
     status: 301,
     destination: '/course/',
   });
+  assert.deepEqual(launchRedirects['/registered-runners'], {
+    status: 301,
+    destination: '/results/',
+  });
 });
 
 test('every key is already in the canonical shape the redirect map uses', () => {
