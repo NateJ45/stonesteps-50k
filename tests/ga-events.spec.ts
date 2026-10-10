@@ -113,7 +113,7 @@ test.describe('GA4 goal: registration_click', () => {
     await page.route(/notrunsignup\.com|evil\.example/i, (route) => route.abort());
     await addLink(page, 'https://notrunsignup.com/', 'a');
     await addLink(page, 'https://runsignup.com.evil.example/', 'b');
-    await addLink(page, '/results', 'c');
+    await addLink(page, '/results/', 'c');
     for (const id of ['a', 'b', 'c']) await page.locator(`#${id}`).click();
     await page.waitForTimeout(300);
     expect(await calls(page)).toEqual([]);
@@ -151,11 +151,11 @@ test.describe('GA4 goal: generate_lead', () => {
     await stubGtag(page);
     let posts = 0;
     // The real endpoint is never reached.
-    await page.route('**/api/contact', async (route) => {
+    await page.route('**/api/contact/', async (route) => {
       posts += 1;
       await route.fulfill({ json: { ok: true } });
     });
-    await page.goto('/contact', { waitUntil: 'load' });
+    await page.goto('/contact/', { waitUntil: 'load' });
     await fill(page);
     await page.getByRole('button', { name: /^Send/ }).click();
     await expect(page.getByText('Message sent')).toBeVisible();
@@ -167,10 +167,10 @@ test.describe('GA4 goal: generate_lead', () => {
 
   test('a failed send fires nothing', async ({ page }) => {
     await stubGtag(page);
-    await page.route('**/api/contact', (route) =>
+    await page.route('**/api/contact/', (route) =>
       route.fulfill({ status: 422, json: { ok: false, error: 'Nope.' } }),
     );
-    await page.goto('/contact', { waitUntil: 'load' });
+    await page.goto('/contact/', { waitUntil: 'load' });
     await fill(page);
     await page.getByRole('button', { name: /^Send/ }).click();
     await expect(page.getByRole('alert')).toBeVisible();

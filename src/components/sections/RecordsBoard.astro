@@ -253,7 +253,7 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
                                     row.athleteSlug ? (
                                       <a
                                         class="tap-pad underline-offset-2 hover:text-link hover:underline"
-                                        href={`/runners/${row.athleteSlug}`}
+                                        href={`/runners/${row.athleteSlug}/`}
                                       >
                                         {row.athlete}
                                       </a>
@@ -329,7 +329,7 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
                                     {row.athlete?.slug ? (
                                       <a
                                         class="tap-pad underline-offset-2 hover:text-link hover:underline"
-                                        href={`/runners/${row.athlete.slug}`}
+                                        href={`/runners/${row.athlete.slug}/`}
                                       >
                                         {row.athlete.name}
                                       </a>

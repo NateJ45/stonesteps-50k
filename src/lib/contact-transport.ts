@@ -50,7 +50,7 @@ const GENERIC = "Couldn't send right now. Try again in a minute, or contact us d
 async function postToOwnEndpoint(payload: ContactPayload): Promise<ContactResult | null> {
   let res: Response;
   try {
-    res = await fetch('/api/contact', {
+    res = await fetch('/api/contact/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(payload),

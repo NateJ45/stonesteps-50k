@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-09 - Fix: internal links now end in a slash (`trailingSlash: 'always'`)._
+
+Canonicals and the sitemap used `/course/` while every internal link was `/course`, which the host answers with a 307, so Search Console reported "Page with redirect" and "Google chose different canonical". Config sets `trailingSlash: 'always'`; hand-written links, seed scripts and Playwright routes carry the slash; Sanity-driven links go through `withSlash()` (`src/lib/links.ts`, unit-tested). API fetches use the slash form. Docs: `docs/agent/seo.md`.
+
 _2026-10-05 - Fix: `/registered-runners` forwards to `/results/`._
 
 The old WordPress site had a RunSignUp "Find a runner" page at this address (Wayback Machine: 200 captures from 2012 to August 2022) and it returned the 404 page here. Nathan chose `/results/` as its destination. One line in `src/lib/launch-redirects.ts` plus a test line in `launch-redirects.test.ts`; docs: `docs/agent/seo.md`, `docs/PENDING.md`.
