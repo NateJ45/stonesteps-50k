@@ -37,6 +37,13 @@ and the deploy bakes before every build. First live run: the mornings after 2026
 If it has not produced a 2026 bar on /course by early November, run the import workflow
 by hand and read its "Bake race-day weather" step.
 
+### 1p. The map poster pipeline has no caller
+
+2026-10-09. The contact map became drawn SVG, so `npm run map-region` and its baked files were
+removed. `scripts/capture-map-poster.mjs` and the `?poster=1` / `region=1` mode in
+`CourseMapLibre.tsx` now have nothing that runs them. Decide whether to delete both (a
+foundation-file change) or keep them for a future still. No deadline.
+
 ### 1l. The numbers row can wear a label, and nobody has typed one
 
 2026-09-17 (Tier 3). `statSection` has always had an optional `heading` field and
@@ -56,14 +63,14 @@ it. Nothing in the code has to change either way, and there is no deadline on it
 
 2026-09-17. `/contact`'s "Stay downtown or near CVG" band is an `imageTextSection` whose
 image in Sanity is a screenshot of Google Maps (the 1742x757 PNG). The page no longer
-SHOWS it: `src/lib/local-poster.ts` swaps in `public/region-poster.*`, the still this site
-bakes from its own map with The Oval, downtown and CVG pinned. That is a code rule, chosen
+SHOWS it: `src/lib/local-poster.ts` swaps in `RegionPoster.astro`, the map this site
+draws itself with The Oval, downtown and CVG pinned. That is a code rule, chosen
 over a schema field precisely so the fix did not have to wait on anybody.
 
 What is left is a content edit only Dave or Nathan can make, and it is tidiness rather
 than a bug: open the block in the Studio and CLEAR its image, so the uploaded screenshot
 is gone from the dataset as well as from the page. The rule in `src/lib/local-poster.ts`
-STAYS after that: it is what puts the baked region poster on the page, with or without an
+STAYS after that: it is what puts the drawn region map on the page, with or without an
 image on the block, so deleting it would leave the band with no map at all. (An earlier
 version of this note said the rule could go once the image was cleared; that was wrong.)
 

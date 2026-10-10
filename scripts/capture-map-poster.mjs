@@ -3,8 +3,9 @@
 // =============================================================================
 // NOTE (2026-10-03): the home page no longer uses this script's default output
 // (it draws a live SVG plate instead, see src/lib/courseTeaser.ts), and the
-// `map-poster` npm script is gone. Its only caller is `npm run map-region`
-// (scripts/capture-region-poster.mjs), which sets POSTER_NAME and friends.
+// `map-poster` npm script is gone. Its last caller, `npm run map-region`, went
+// on 2026-10-09 when the contact map became drawn SVG; nothing runs this now
+// (docs/PENDING.md tracks whether to delete it).
 // The home-page text below describes what it was written for.
 //
 // The home page shows a PHOTOGRAPH of the terrain map with the course drawn
@@ -83,7 +84,7 @@ const PORT = Number(process.env.POSTER_PORT ?? 4477);
 // can pick. 1200x750 is the band's widest rendered size, 8:5 because the course
 // is wider than it is tall once the camera is pitched into it.
 const [W, H] = (process.env.POSTER_SIZE ?? '1200x750').split('x').map(Number);
-const SCALE = Number(process.env.POSTER_SCALE ?? 2);
+const SCALE = 2;
 // An absolute path prefix, no extension. Set, it takes over the whole output
 // half of this script; unset, everything below writes the home band as before.
 const OUT_PREFIX = process.env.POSTER_OUT ?? '';
@@ -232,7 +233,7 @@ async function main() {
     // blurrier file. Unchanged for the home band, whose capture is 2400 wide.
     for (const [name, width] of [
       [NAME, oneX],
-      [`${NAME}@1_5x`, Math.min(Number(process.env.POSTER_WIDE ?? 1400), meta.width)],
+      [`${NAME}@1_5x`, Math.min(1400, meta.width)],
     ]) {
       // AVIF FIRST, WEBP AS THE FALLBACK. On this picture AVIF is worth about
       // half the bytes at the same quality, and the browsers that lack it are
