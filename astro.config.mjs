@@ -90,6 +90,8 @@ const hiddenPagePaths = new Set(
 export default defineConfig({
   site: 'https://stonesteps50k.com',
   output: 'static',
+  // Canonicals and the sitemap use the slash form; every internal link matches (src/lib/links.ts withSlash).
+  trailingSlash: 'always',
   // 2026-08-28: no sessions anywhere in this template (there is no gated area
   // or login), so opt out. Left on, @astrojs/cloudflare v14 auto-declares a
   // "SESSION" KV binding in the generated dist/server/wrangler.json, and a KV

@@ -20,6 +20,8 @@
 // worse than a missing one.
 
 /** Live route per path-mapped singleton. Mirrors SINGLETON_PREVIEW_PATHS. */
+import { withSlash } from './links.ts';
+
 export const SINGLETON_LIVE_PATHS: Record<string, string> = {
   homePage: '/',
   aboutPage: '/about',
@@ -72,10 +74,10 @@ export function navHref(link?: RawNavLink | null): string | undefined {
   if (!link) return undefined;
 
   const typed = plain(link.href);
-  if (typed) return typed;
+  if (typed) return withSlash(typed);
 
   if (plain(link.linkType) === 'external') {
-    return plain(link.externalUrl) || undefined;
+    return withSlash(plain(link.externalUrl)) || undefined;
   }
 
   const docType = plain(link.docType);
@@ -85,9 +87,9 @@ export function navHref(link?: RawNavLink | null): string | undefined {
   if (link.pageArchived === true) return undefined;
   if (docType === 'page') {
     const slug = plain(link.slug);
-    return slug ? `/${slug}` : undefined;
+    return slug ? `/${slug}/` : undefined;
   }
-  return SINGLETON_LIVE_PATHS[docType];
+  return withSlash(SINGLETON_LIVE_PATHS[docType]);
 }
 
 /**

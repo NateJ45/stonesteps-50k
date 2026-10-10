@@ -293,12 +293,12 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       "items": select(
         source == "journal" => *[_type == "journalEntry"] | order(publishedAt desc)[0...12]{
           _id, "title": title, "meta": publishedAt, "summary": excerpt,
-          "href": "/journal/" + slug.current,
+          "href": "/journal/" + slug.current + "/",
           "coverImage": coverImage${IMAGE_PROJECTION}
         },
         source == "services" => *[_type == "service"] | order(orderRank asc, displayOrder asc)[0...12]{
           _id, "title": name, "meta": price, "summary": shortDescription,
-          "href": "/services#" + slug.current
+          "href": "/services/#" + slug.current
         },
         source == "testimonials" => *[_type == "testimonial"] | order(_createdAt desc)[0...12]{
           _id, "title": attribution, "meta": detail, "summary": quote, "href": null

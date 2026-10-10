@@ -53,6 +53,10 @@ Source the values from `siteSettings`. The `address`, `telephone`, and any Googl
 
 Test every schema with Google's Rich Results Test (https://search.google.com/test/rich-results) before launch. Errors at scale will suppress rich results without loud failures.
 
+### Trailing slashes (every internal link ends in `/`)
+
+`astro.config.mjs` sets `trailingSlash: 'always'`. Canonicals and the sitemap use the slash form (`/course/`), and the host answers a slash-less page address with a redirect, so every internal page link is written with the slash too (otherwise Search Console reports "Page with redirect"). Hand-written paths carry the slash; anything that comes from Sanity (nav and footer links, CTA blocks, rich-text links, the announcement bar, `/journal/<slug>` queries) goes through `withSlash()` in `src/lib/links.ts`, which leaves external URLs, `#anchors`, `mailto:`/`tel:` and file paths (`.pdf`, `.xml`, images) alone. GET calls to our own routes use the slash form (`/api/forecast/?date=`, `/preview/live/`); the shared PORTABLE files (`contact-transport.ts`, `shareDraftLink.tsx`) keep slash-less API URLs, which is fine because Astro answers a slash-less POST with a 308 that keeps method and body (verified with `wrangler dev`). Proof after a build: grep `dist/client` for `href="/..."` values that end without `/` and have no file extension; the count must be 0.
+
 ### Sitemap and robots
 
 `@astrojs/sitemap` generates `sitemap-index.xml` + `sitemap-0.xml` automatically from every prerendered page on `astro build`. The default `<priority>` and `<changefreq>` values are fine for a marketing site of this size.

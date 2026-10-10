@@ -233,7 +233,7 @@ const lede =
                                     {l.row.slug ? (
                                       <a
                                         class="underline-offset-2 hover:text-link hover:underline"
-                                        href={`/runners/${l.row.slug}`}
+                                        href={`/runners/${l.row.slug}/`}
                                       >
                                         {l.row.name}
                                       </a>
@@ -319,7 +319,7 @@ const lede =
                             {row.slug ? (
                               <a
                                 class="underline-offset-2 hover:text-link hover:underline"
-                                href={`/runners/${row.slug}`}
+                                href={`/runners/${row.slug}/`}
                               >
                                 {row.name}
                               </a>
@@ -365,15 +365,15 @@ const lede =
       <nav class="mt-12 flex flex-wrap items-center gap-4" aria-label="Other years">
         {
           older && (
-            <a class="btn-plate btn-plate--cream" href={`/results/${older}`}>
+            <a class="btn-plate btn-plate--cream" href={`/results/${older}/`}>
               <span aria-hidden="true">&larr;</span> {older}
             </a>
           )
         }
-        <a class="btn-plate btn-plate--cream" href="/results">All years</a>
+        <a class="btn-plate btn-plate--cream" href="/results/">All years</a>
         {
           newer && (
-            <a class="btn-plate btn-plate--cream" href={`/results/${newer}`}>
+            <a class="btn-plate btn-plate--cream" href={`/results/${newer}/`}>
               {newer}{' '}
               <span class="btn-plate__arrow" aria-hidden="true">
                 &rarr;

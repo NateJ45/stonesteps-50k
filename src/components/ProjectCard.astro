@@ -20,7 +20,7 @@ interface Props {
 }
 
 const { project } = Astro.props as Props;
-const href = project.slug?.current ? `/portfolio/${project.slug.current}` : '#';
+const href = project.slug?.current ? `/portfolio/${project.slug.current}/` : '#';
 
 // Humanize the camelCase room-type enum value ("modernCoastal" → "Modern coastal").
 // Matches the helper the PortfolioFilterChips already uses so the labels stay

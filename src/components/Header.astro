@@ -121,7 +121,7 @@ const mobileNavSettings = siteSettings
 // built-in button. An island's props are serialized into the page, so passing
 // the default every time would rewrite the markup of every page for no change.
 const mobileCtaProps =
-  headerCta.show && headerCta.label === 'Book a consultation' && headerCta.href === '/contact'
+  headerCta.show && headerCta.label === 'Book a consultation' && headerCta.href === '/contact/'
     ? {}
     : { cta: headerCta };
 
@@ -213,7 +213,7 @@ function isGroupActive(items: { href: string }[]) {
     {
       availability && (
         <a
-          href="/contact"
+          href="/contact/"
           class="absolute top-1/2 left-m inline-flex h-9 -translate-y-1/2 items-center gap-1.5 rounded-full border border-border-soft bg-muted pr-2.5 pl-2 text-foreground transition-colors hover:border-primary hover:text-primary-dark lg:hidden"
           aria-label={`${availability}. Tap to start a conversation.`}
         >

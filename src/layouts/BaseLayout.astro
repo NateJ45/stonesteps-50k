@@ -124,6 +124,7 @@ const allSchemas = siteSettings ? [localBusinessSchema(siteSettings), ...schemas
 // eventually tell visitors the opposite of what the site is doing, which is the
 // near-miss written up in that module and in PORTS.md card 54.
 import { cfAnalyticsToken as cfToken, gaId, hasCfAnalytics, hasGa } from '@/lib/analytics-config';
+import { withSlash } from '@/lib/links';
 
 // Notes on the two values, kept here because this is where they are used.
 //
@@ -381,7 +382,7 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
         <span>{announcement!.message}</span>
         {announcement?.link?.url && announcement?.link?.label && (
           <a
-            href={announcement.link.url}
+            href={withSlash(announcement.link.url)}
             class:list={['ml-2', announcementStyle.link]}
           >
             {announcement.link.label}

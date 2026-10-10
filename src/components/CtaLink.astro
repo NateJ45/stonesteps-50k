@@ -1,4 +1,5 @@
 ---
+import { withSlash } from '@/lib/links';
 // Safe to edit by hand
 // Resolves a Sanity ctaBlock to the right <a href>:
 //   - internal: maps the referenced page _type to its route (homePage → /, etc.)
@@ -63,7 +64,7 @@ const {
   cta,
   variant = 'primary',
   onDark = false,
-  fallbackHref = '/contact',
+  fallbackHref = '/contact/',
   fallbackLabel = 'Get in touch',
   class: extraClass = '',
 } = Astro.props as Props;
@@ -82,6 +83,10 @@ const TYPE_TO_PATH: Record<string, string> = {
 };
 
 function resolveHref(c?: CtaBlock | null): string {
+  return withSlash(resolveRawHref(c));
+}
+
+function resolveRawHref(c?: CtaBlock | null): string {
   if (!c?.linkType) return fallbackHref;
   switch (c.linkType) {
     case 'internal': {
@@ -91,11 +96,11 @@ function resolveHref(c?: CtaBlock | null): string {
       if (!t) return c.internalPath || fallbackHref;
       // Slug-based types need the slug appended. Singletons use a fixed path.
       if (t === 'journalEntry' && c.internalLink?.slug) {
-        return `/journal/${c.internalLink.slug}`;
+        return `/journal/${c.internalLink.slug}/`;
       }
       // Custom pages (type 'page') route via /[slug].astro.
       if (t === 'page' && c.internalLink?.slug) {
-        return `/${c.internalLink.slug}`;
+        return `/${c.internalLink.slug}/`;
       }
       return TYPE_TO_PATH[t] ?? c.internalPath ?? fallbackHref;
     }

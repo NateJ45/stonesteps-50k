@@ -136,7 +136,7 @@ docs.push({
       claim: "Cincinnati's longest running ultra marathon",
       showCountdown: true,
       primaryCta: cta('Register', REGISTER),
-      secondaryCta: cta('See the course', '/course'),
+      secondaryCta: cta('See the course', '/course/'),
     },
     {
       _type: 'tickerSection',
@@ -214,7 +214,7 @@ docs.push({
       caption:
         'Hilly trails with roots and rocks and occasional tree blow downs. Pictured are Jon ' +
         'Hastings, one of two sub-4 hour finishers, and Backyard champion Harvey Lewis.',
-      cta: cta('The full course', '/course'),
+      cta: cta('The full course', '/course/'),
     },
     {
       _type: 'raceScheduleSection',
@@ -229,7 +229,7 @@ docs.push({
       _key: key(),
       eyebrow: 'The fast ones',
       headline: 'The names on the board',
-      cta: cta('All-time records', '/records'),
+      cta: cta('All-time records', '/records/'),
     },
     {
       _type: 'parksSection',
@@ -301,7 +301,7 @@ docs.push({
       // a required Link type nobody had set. It still worked on the page only
       // because CtaLink falls back to /contact when it cannot resolve a link,
       // which is the same address this one wanted (2026-09-12).
-      cta: cta('Ask David a question', '/contact'),
+      cta: cta('Ask David a question', '/contact/'),
     },
     {
       _type: 'sponsorPatchesSection',
@@ -594,7 +594,7 @@ docs.push({
         },
       ],
       // See the note on the home page's version of this button.
-      cta: cta('Ask a question', '/contact'),
+      cta: cta('Ask a question', '/contact/'),
     },
     {
       _type: 'distanceTicketsSection',
@@ -813,10 +813,10 @@ docs.push({
   title: 'Stone Steps 50K',
   navItems: [
     { _type: 'navLink', _key: key(), label: 'The Race', linkType: 'internal', href: '/' },
-    { _type: 'navLink', _key: key(), label: 'Course', linkType: 'internal', href: '/course' },
-    { _type: 'navLink', _key: key(), label: 'Records', linkType: 'internal', href: '/records' },
-    { _type: 'navLink', _key: key(), label: 'Results', linkType: 'internal', href: '/results' },
-    { _type: 'navLink', _key: key(), label: 'Contact', linkType: 'internal', href: '/contact' },
+    { _type: 'navLink', _key: key(), label: 'Course', linkType: 'internal', href: '/course/' },
+    { _type: 'navLink', _key: key(), label: 'Records', linkType: 'internal', href: '/records/' },
+    { _type: 'navLink', _key: key(), label: 'Results', linkType: 'internal', href: '/results/' },
+    { _type: 'navLink', _key: key(), label: 'Contact', linkType: 'internal', href: '/contact/' },
     // The RunSignUp link used to sit here too, also labelled "Results", which
     // put the word in the header twice, side by side. The archive at /results is
     // the better destination and RunSignUp is still one click away in the
@@ -836,9 +836,9 @@ docs.push({
       title: 'The race',
       links: [
         { _type: 'footerLink', _key: key(), label: 'The Race', href: '/' },
-        { _type: 'footerLink', _key: key(), label: 'Course', href: '/course' },
-        { _type: 'footerLink', _key: key(), label: 'Records', href: '/records' },
-        { _type: 'footerLink', _key: key(), label: 'Results archive', href: '/results' },
+        { _type: 'footerLink', _key: key(), label: 'Course', href: '/course/' },
+        { _type: 'footerLink', _key: key(), label: 'Records', href: '/records/' },
+        { _type: 'footerLink', _key: key(), label: 'Results archive', href: '/results/' },
       ],
     },
     {
