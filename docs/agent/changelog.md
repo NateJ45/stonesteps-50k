@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-09 - FAQ cards start open; the /contact region map is baked at 3x._
+
+`FaqKiosk` renders every `<details class="qa">` with `open`, so the answers read at a glance (a reader can still fold one). The region poster (`npm run map-region`) was soft on dense screens: 700px and 1400px files for a ~555px slot, and the 1.5x label on the wide one was wrong. `capture-map-poster.mjs` now takes `POSTER_SCALE` and `POSTER_WIDE`; the region wrapper captures the same 1000x750 frame at 3x and writes 700w and 1650w files, and `RegionPoster.astro` uses `w` descriptors with `sizes`. Composition is unchanged.
+
 _2026-10-09 - Fix: internal links now end in a slash (`trailingSlash: 'always'`)._
 
 Canonicals and the sitemap used `/course/` while every internal link was `/course`, which the host answers with a 307, so Search Console reported "Page with redirect" and "Google chose different canonical". Config sets `trailingSlash: 'always'`; hand-written links, seed scripts and Playwright routes carry the slash; Sanity-driven links go through `withSlash()` (`src/lib/links.ts`, unit-tested). API fetches use the slash form. Docs: `docs/agent/seo.md`.
