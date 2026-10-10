@@ -107,7 +107,11 @@ const alt = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where the 
     width: 100%;
     height: auto;
   }
+  /* Text is painted with currentColor and coloured with `color`, so what a
+     contrast checker reads (the CSS colour) is what the eye sees (the fill).
+     Left to inherit, `color` is the page's cream in dark mode. */
   .rposter__svg text {
+    fill: currentColor;
     font-family: var(--font-display);
     text-transform: uppercase;
   }
@@ -120,7 +124,7 @@ const alt = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where the 
   .rposter__svg .rp-river-label {
     font-size: 20px;
     letter-spacing: 0.3em;
-    fill: #2e5738;
+    color: #2e5738;
   }
   .rp-pin {
     fill: #1a1712;
@@ -133,16 +137,16 @@ const alt = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where the 
   }
   .rposter__svg .rp-name {
     font-size: 42px;
-    fill: #1a1712;
+    color: #1a1712;
   }
   .rposter__svg .rp-name--race {
     font-size: 50px;
-    fill: #a83c26;
+    color: #a83c26;
   }
   .rposter__svg .rp-sub {
     font-family: var(--font-mono);
     font-size: 26px;
     letter-spacing: 0.1em;
-    fill: #5c513b;
+    color: #5c513b;
   }
 </style>
