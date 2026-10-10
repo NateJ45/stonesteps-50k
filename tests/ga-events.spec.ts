@@ -151,7 +151,7 @@ test.describe('GA4 goal: generate_lead', () => {
     await stubGtag(page);
     let posts = 0;
     // The real endpoint is never reached.
-    await page.route('**/api/contact/', async (route) => {
+    await page.route('**/api/contact', async (route) => {
       posts += 1;
       await route.fulfill({ json: { ok: true } });
     });
@@ -167,7 +167,7 @@ test.describe('GA4 goal: generate_lead', () => {
 
   test('a failed send fires nothing', async ({ page }) => {
     await stubGtag(page);
-    await page.route('**/api/contact/', (route) =>
+    await page.route('**/api/contact', (route) =>
       route.fulfill({ status: 422, json: { ok: false, error: 'Nope.' } }),
     );
     await page.goto('/contact/', { waitUntil: 'load' });
