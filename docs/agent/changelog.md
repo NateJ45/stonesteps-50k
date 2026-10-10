@@ -6,6 +6,26 @@ _2026-10-09 - FAQ cards start open; the /contact region map is baked at 3x._
 
 `FaqKiosk` renders every `<details class="qa">` with `open`, so the answers read at a glance (a reader can still fold one). The region poster (`npm run map-region`) was soft on dense screens: 700px and 1400px files for a ~555px slot, and the 1.5x label on the wide one was wrong. `capture-map-poster.mjs` now takes `POSTER_SCALE` and `POSTER_WIDE`; the region wrapper captures the same 1000x750 frame at 3x and writes 700w and 1650w files, and `RegionPoster.astro` uses `w` descriptors with `sizes`. Composition is unchanged.
 
+_2026-10-09 - Fix: internal links now end in a slash (`trailingSlash: 'always'`)._
+
+Canonicals and the sitemap used `/course/` while every internal link was `/course`, which the host answers with a 307, so Search Console reported "Page with redirect" and "Google chose different canonical". Config sets `trailingSlash: 'always'`; hand-written links, seed scripts and Playwright routes carry the slash; Sanity-driven links go through `withSlash()` (`src/lib/links.ts`, unit-tested). API fetches use the slash form. Docs: `docs/agent/seo.md`.
+
+_2026-10-05 - Fix: `/registered-runners` forwards to `/results/`._
+
+The old WordPress site had a RunSignUp "Find a runner" page at this address (Wayback Machine: 200 captures from 2012 to August 2022) and it returned the 404 page here. Nathan chose `/results/` as its destination. One line in `src/lib/launch-redirects.ts` plus a test line in `launch-redirects.test.ts`; docs: `docs/agent/seo.md`, `docs/PENDING.md`.
+
+_2026-10-05 - GA4 only fires on the production hostname, plus two goal events._
+
+September's GA4 property held 347 sessions with hostName `localhost` (our own Playwright and Lighthouse runs, built with a developer `.env` that carries `PUBLIC_GA_ID`) against 735 real ones. `src/components/analytics/GoogleAnalytics.astro` is now the starter's PORTABLE copy (PORTS.md card 58, md5 530459bb): the snippet fires only when `location.hostname` is the host of `site` (`stonesteps50k.com` or `www`), and off it defines no `dataLayer`, no `gtag` and requests nothing. The card 58 localhost test was already in `tests/smoke.spec.ts`. The report had promised RunSignUp clicks and contact messages as goals, so two events are new (Stone Steps only): `registration_click` (`link_url`, no query or fragment) from one delegated listener (`src/lib/ga-events-listener.js`, printed inline by `GoogleAnalyticsEvents.astro`), and `generate_lead` (`form_name: 'contact'`) from `RaceContactForm` once a send is confirmed. Both are no-ops without `window.gtag`, send no form content, and add no network request. `privacy.astro` now names both actions. Docs: new `docs/agent/analytics.md`, `deployment.md` (it still said "no Google Analytics"), `.env.example`, `CLAUDE.md`, `topic-index.md`. Tests: `src/lib/ga-events.test.ts`, `tests/ga-events.spec.ts` (the click tests skip on a build without the id, as in CI).
+
+_2026-10-05 - Fix: the old-address redirects go straight to the slash form (one hop, not two)._
+
+The three launch redirects pointed at `/course` and `/records`, which the host answers with a 307 to `/course/` and `/records/`, so a visitor on an old address took 301, 307, 200. Their destinations now end in a slash (301, 200). Behaviour for visitors is unchanged; it saves a hop and keeps the permanent signal on the final address. `/all-time-records` is included although it predates this work, because it is the same double hop on the most linked address. The unit test pins the slash form. The 307 itself is the host's trailing-slash handling for every page and was left alone.
+
+_2026-10-05 - Fix: two old WordPress addresses forward to /course instead of the 404._
+
+The September analytics report showed visitors landing on `/the-course` (8) and `/dev/wordpress/course` (4) and getting the 404 page. `/the-course` was a live WordPress page (Wayback Machine 200 in March 2024); the other is a 2010 development address old links still use. Both now 301 to `/course`. The hand-written launch redirects moved out of `astro.config.mjs` into `src/lib/launch-redirects.ts` (with the existing `/all-time-records` -> `/records`, unchanged) and a unit test pins all three. No Sanity change, no CI change. Docs: `docs/agent/seo.md`.
+
 _2026-10-03 - Fix: the image-count report step could fail a shard._
 
 CI only. The "Report the test images fetched from Sanity" step added in the entry below counted cached images with `grep -c`, which exits 1 when the count is zero, and Actions runs steps under `bash -e`, so a shard with no cached images (a cancelled run, a cold folder) failed that step and so could fail the job and block the required `test` check. Warm runs were unaffected, which is why the first runs passed. Reproduced locally under `bash -e` (exit 1, no output) before the fix; the counts now end in `|| true`, and all four fake-folder scenarios exit 0 and print. A reporting step must never fail a job.

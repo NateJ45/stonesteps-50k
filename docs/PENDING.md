@@ -16,6 +16,10 @@ sequence).
 
 ## Waiting on a human
 
+### 1o. DONE 2026-10-05. `/registered-runners` forwards to `/results/`
+
+The old WordPress page was a RunSignUp "Find a runner" list (Wayback: 200 captures 2012 to August 2022; 3 GA4 landings on 2026-09-15). Nathan chose `/results/` as the destination. It is in `src/lib/launch-redirects.ts` with its test line.
+
 ### 1n. DONE 2026-10-03. The brand palette is final, taken from the live site
 
 Nathan decided the palette of record is what stonesteps50k.com serves, not a wait for Dave's logo

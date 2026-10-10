@@ -21,7 +21,7 @@ interface Props {
 
 const SESSION_KEY = 'sticky-cta-dismissed';
 
-export default function StickyCTAChip({ label, href = '/contact', threshold = 0.5 }: Props) {
+export default function StickyCTAChip({ label, href = '/contact/', threshold = 0.5 }: Props) {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 

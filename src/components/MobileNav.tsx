@@ -92,7 +92,7 @@ interface Props {
 }
 
 /** Built-in plate button, matching the header's own default. */
-const DEFAULT_CTA = { show: true, label: 'Book a consultation', href: '/contact' };
+const DEFAULT_CTA = { show: true, label: 'Book a consultation', href: '/contact/' };
 
 // ---- The contours ----------------------------------------------------------
 // The same seeded ridge lines Topo.astro draws, in a portrait viewBox so they

@@ -174,10 +174,10 @@ const BUILT_IN_COLUMNS = [
     title: 'The race',
     links: [
       { label: 'The Race', href: '/' },
-      { label: 'Course', href: '/course' },
-      { label: 'Records', href: '/records' },
-      { label: 'Results', href: '/results' },
-      { label: 'Contact', href: '/contact' },
+      { label: 'Course', href: '/course/' },
+      { label: 'Records', href: '/records/' },
+      { label: 'Results', href: '/results/' },
+      { label: 'Contact', href: '/contact/' },
     ],
   },
 ];
@@ -353,7 +353,7 @@ const rowClass = (label: string) =>
           }
           {
             !email && !phone && (
-              <a class="tap-pad-lg text-link underline-offset-2 hover:underline" href="/contact">
+              <a class="tap-pad-lg text-link underline-offset-2 hover:underline" href="/contact/">
                 Ask the race director
               </a>
             )
@@ -452,7 +452,7 @@ const rowClass = (label: string) =>
             from Site settings and render after it. */
         }
         <a
-          href="/privacy"
+          href="/privacy/"
           class="tap-pad-lg underline underline-offset-2 transition-colors hover:text-link"
           >Privacy</a
         >

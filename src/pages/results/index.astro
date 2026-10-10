@@ -160,7 +160,7 @@ const lede =
                       offset echo is left to `.display`, which switches it on
                       only in the theme where an offset is a shadow rather than
                       a smear. See `.arch-row__link` in globals.css. */}
-                    <a class="arch-row__link" href={`/results/${e.year}`}>
+                    <a class="arch-row__link" href={`/results/${e.year}/`}>
                       {e.year}
                     </a>
                   </span>
@@ -192,7 +192,7 @@ const lede =
                                 {w?.row.slug ? (
                                   <a
                                     class="underline-offset-2 hover:text-link hover:underline"
-                                    href={`/runners/${w.row.slug}`}
+                                    href={`/runners/${w.row.slug}/`}
                                   >
                                     {w.row.name}
                                   </a>
@@ -217,7 +217,7 @@ const lede =
       </ul>
 
       <div class="mt-10 flex flex-wrap gap-4">
-        <a class="btn-plate btn-plate--cream" href="/records">
+        <a class="btn-plate btn-plate--cream" href="/records/">
           All-time records
           <span class="btn-plate__arrow" aria-hidden="true">&rarr;</span>
         </a>

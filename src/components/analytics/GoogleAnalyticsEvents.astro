@@ -1,0 +1,13 @@
+---
+// Stone Steps only (not PORTABLE). The RunSignUp half of the goal events; the
+// contact-form half lives in RaceContactForm.tsx (src/lib/ga-events.ts).
+//
+// Rendered by BaseLayout next to GoogleAnalytics, so it exists only when
+// PUBLIC_GA_ID is set. The listener is printed INLINE from
+// src/lib/ga-events-listener.js, so it adds no network request. What it does,
+// why it is inert off the production hostname, and why it binds once, are in
+// that file's header.
+import listener from '@/lib/ga-events-listener.js?raw';
+---
+
+<script is:inline set:html={listener} />

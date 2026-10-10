@@ -163,8 +163,8 @@ docs.push({
   heroHeadline: 'Design That Feels Like You.',
   heroSubhead:
     'We help people create spaces that work as hard as they do and feel good to come home to.',
-  heroPrimaryCta: cta('Start a Conversation', '/contact'),
-  heroSecondaryCta: cta('See Our Work', '/portfolio'),
+  heroPrimaryCta: cta('Start a Conversation', '/contact/'),
+  heroSecondaryCta: cta('See Our Work', '/portfolio/'),
 
   meetFounderEyebrow: 'Meet the Founder.',
   meetFounderHeadline: 'Good design starts with a real conversation.',
@@ -176,25 +176,25 @@ docs.push({
       'Replace this placeholder with your own story. Tell visitors who you are, what drives your work, and why they should trust you with their home.',
     ),
   ],
-  meetFounderCta: cta('Learn More About the Studio', '/about'),
+  meetFounderCta: cta('Learn More About the Studio', '/about/'),
 
   featuredWorkEyebrow: 'Recent Work.',
   featuredWorkHeadline: 'Rooms that feel finished.',
   featuredWorkSubhead:
     'A look at recent projects. Each one starts with a conversation about how the space actually needs to function, then the design follows from there.',
-  featuredWorkCta: cta('See All Work', '/portfolio'),
+  featuredWorkCta: cta('See All Work', '/portfolio/'),
 
   featuredJournalEyebrow: 'From the Journal.',
   featuredJournalHeadline: 'How we think about design.',
   featuredJournalSubhead:
     'Posts on the design moves that change a room, source roundups behind specific projects, and the occasional honest note about process.',
-  featuredJournalCta: cta('Read the Journal', '/journal'),
+  featuredJournalCta: cta('Read the Journal', '/journal/'),
 
   processPreviewEyebrow: 'How It Works.',
   processPreviewHeadline: 'A clear process, start to finish.',
   processPreviewSubhead:
     'No guesswork and no pressure. From your first inquiry to the day everything comes together, you will always know exactly where things stand and what happens next.',
-  processPreviewCta: cta('See the Full Process', '/services'),
+  processPreviewCta: cta('See the Full Process', '/services/'),
 
   testimonialsEyebrow: 'Kind Words.',
   testimonialsHeadline: 'Words from real homes.',
@@ -210,7 +210,7 @@ docs.push({
   servicesGridHeadline: 'Design Services for Every Space.',
   servicesGridSubhead:
     'Whether you need a fresh set of eyes or a full room overhaul, there is a tier designed for where you are.',
-  servicesGridCta: cta('See All Services', '/services'),
+  servicesGridCta: cta('See All Services', '/services/'),
   servicesGridFootnote: 'Final pricing is always discussed before any work begins.',
 
   serviceAreaCue: 'Serving the greater metro area and surrounding region.',
@@ -218,7 +218,7 @@ docs.push({
   finalCtaHeadline: 'Ready to Love Your Space?',
   finalCtaSubhead:
     "Let's start with a conversation. Fill out the form and we'll be in touch within two business days.",
-  finalCta: cta('Start a Conversation', '/contact'),
+  finalCta: cta('Start a Conversation', '/contact/'),
 
   // ── pageBuilder (section-driven layout, Phase B) ─────────────────────────
   // NOTE: This content mirrors DEFAULT_HOME_SECTIONS in src/data/defaultSections.ts.
@@ -235,8 +235,8 @@ docs.push({
       subhead:
         'We help people create spaces that work as hard as they do and feel good to come home to.',
       size: 'tall',
-      primaryCta: cta('Start a Conversation', '/contact'),
-      secondaryCta: cta('See Our Work', '/portfolio'),
+      primaryCta: cta('Start a Conversation', '/contact/'),
+      secondaryCta: cta('See Our Work', '/portfolio/'),
     },
     {
       _type: 'founderSection',
@@ -251,7 +251,7 @@ docs.push({
           'Replace this placeholder with your own story. Tell visitors who you are, what drives your work, and why they should trust you with their home.',
         ),
       ],
-      cta: cta('Learn More About the Studio', '/about'),
+      cta: cta('Learn More About the Studio', '/about/'),
     },
     {
       _type: 'testimonialsSection',
@@ -272,7 +272,7 @@ docs.push({
       headline: 'A clear process, start to finish.',
       subhead: 'No guesswork and no pressure. You will always know exactly where things stand.',
       variant: 'preview',
-      cta: cta('See the Full Process', '/process'),
+      cta: cta('See the Full Process', '/process/'),
     },
     {
       _type: 'servicesGridSection',
@@ -281,7 +281,7 @@ docs.push({
       headline: 'Design Services for Every Space.',
       subhead:
         'Whether you need a fresh set of eyes or a full room overhaul, there is a tier for you.',
-      cta: cta('See All Services', '/services'),
+      cta: cta('See All Services', '/services/'),
       footnote: 'Final pricing is always discussed before any work begins.',
       variant: 'grid',
     },
@@ -300,7 +300,7 @@ docs.push({
       eyebrow: 'Ready to Begin?',
       headline: 'Ready to Love Your Space?',
       subhead: "Let's start with a conversation.",
-      cta: cta('Start a Conversation', '/contact'),
+      cta: cta('Start a Conversation', '/contact/'),
     },
   ],
 });
@@ -407,7 +407,7 @@ docs.push({
   finalCtaEyebrow: "Let's Work Together.",
   finalCtaHeadline: 'Ready to Start?',
   finalCtaSubhead: 'Send a message and we will be back in touch within two business days.',
-  finalCta: cta('Get in Touch', '/contact'),
+  finalCta: cta('Get in Touch', '/contact/'),
 
   // ── pageBuilder (section-driven layout, Phase B) ─────────────────────────
   // NOTE: Mirrors DEFAULT_ABOUT_SECTIONS in src/data/defaultSections.ts.
@@ -458,7 +458,7 @@ docs.push({
       eyebrow: "Let's Work Together.",
       headline: 'Ready to Start?',
       subhead: 'Send a message and we will be back in touch within two business days.',
-      cta: cta('Get in Touch', '/contact'),
+      cta: cta('Get in Touch', '/contact/'),
     },
   ],
 });
@@ -498,7 +498,7 @@ docs.push({
   finalCtaHeadline: 'Not sure which service is right?',
   finalCtaSubhead:
     'Send a message with a few details about your space. We will point you toward the best fit, no pressure.',
-  finalCta: cta('Start a Conversation', '/contact'),
+  finalCta: cta('Start a Conversation', '/contact/'),
 
   // ── pageBuilder (section-driven layout, Phase B) ─────────────────────────
   // NOTE: Mirrors DEFAULT_SERVICES_SECTIONS in src/data/defaultSections.ts.
@@ -542,7 +542,7 @@ docs.push({
       headline: 'Not sure which service is right?',
       subhead:
         'Send a message with a few details about your space. We will point you toward the best fit.',
-      cta: cta('Start a Conversation', '/contact'),
+      cta: cta('Start a Conversation', '/contact/'),
     },
   ],
 });
@@ -659,7 +659,7 @@ docs.push({
       eyebrow: 'Ready to Begin?',
       headline: 'Start the Conversation.',
       subhead: 'Fill out the contact form with a few details about your space.',
-      cta: cta('Get in Touch', '/contact'),
+      cta: cta('Get in Touch', '/contact/'),
     },
   ],
 });
@@ -752,7 +752,7 @@ docs.push({
   finalCtaEyebrow: 'Not Finding Your Answer?',
   finalCtaHeadline: 'Just ask.',
   finalCtaSubhead: 'Send a message and we will get back to you within two business days.',
-  finalCta: cta('Send a Message', '/contact'),
+  finalCta: cta('Send a Message', '/contact/'),
 });
 
 // ── 10. faqItem docs (4 items) ───────────────────────────────────────────
@@ -1032,7 +1032,7 @@ docs.push({
 
   finalCtaHeadline: 'Got a project of your own?',
   finalCtaSubhead: "Let's talk about it.",
-  finalCta: cta('Start a Conversation', '/contact'),
+  finalCta: cta('Start a Conversation', '/contact/'),
 });
 
 // ── 16. journalEntry docs (2 items) ──────────────────────────────────────
@@ -1570,7 +1570,7 @@ docs.push({
   internalTitle: 'Example announcement (disabled)',
   message: 'Welcome to our new website. Reach out any time if you have questions.',
   style: 'info',
-  link: { label: 'Contact us', url: '/contact' },
+  link: { label: 'Contact us', url: '/contact/' },
   enabled: false,
 });
 

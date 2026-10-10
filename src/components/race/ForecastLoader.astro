@@ -101,7 +101,7 @@ const kinds: IconKind[] = ['sun', 'partly', 'cloud', 'fog', 'drizzle', 'rain', '
     }
 
     try {
-      const res = await fetch(`/api/forecast?date=${date}`);
+      const res = await fetch(`/api/forecast/?date=${date}`);
       if (!res.ok) return;
       const body = (await res.json()) as Answer;
       if (!body.summary) return;

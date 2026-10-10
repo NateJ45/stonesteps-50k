@@ -53,6 +53,10 @@ Source the values from `siteSettings`. The `address`, `telephone`, and any Googl
 
 Test every schema with Google's Rich Results Test (https://search.google.com/test/rich-results) before launch. Errors at scale will suppress rich results without loud failures.
 
+### Trailing slashes (every internal link ends in `/`)
+
+`astro.config.mjs` sets `trailingSlash: 'always'`. Canonicals and the sitemap use the slash form (`/course/`), and the host answers a slash-less page address with a redirect, so every internal page link is written with the slash too (otherwise Search Console reports "Page with redirect"). Hand-written paths carry the slash; anything that comes from Sanity (nav and footer links, CTA blocks, rich-text links, the announcement bar, `/journal/<slug>` queries) goes through `withSlash()` in `src/lib/links.ts`, which leaves external URLs, `#anchors`, `mailto:`/`tel:` and file paths (`.pdf`, `.xml`, images) alone. GET calls to our own routes use the slash form (`/api/forecast/?date=`, `/preview/live/`); the shared PORTABLE files (`contact-transport.ts`, `shareDraftLink.tsx`) keep slash-less API URLs, which is fine because Astro answers a slash-less POST with a 308 that keeps method and body (verified with `wrangler dev`). Proof after a build: grep `dist/client` for `href="/..."` values that end without `/` and have no file extension; the count must be 0.
+
 ### Sitemap and robots
 
 `@astrojs/sitemap` generates `sitemap-index.xml` + `sitemap-0.xml` automatically from every prerendered page on `astro build`. The default `<priority>` and `<changefreq>` values are fine for a marketing site of this size.
@@ -108,6 +112,17 @@ redirects are read at build time in `astro.config.mjs` and folded into Astro's `
 map, which the Cloudflare adapter emits as real 301/302s. The editor can also add one by
 hand under Pages -> Redirects for an address that never existed on this site. The path
 normalization rules are shared with the build and unit-tested in `src/lib/redirects.ts`.
+
+**Old WordPress addresses** are hand-written in `src/lib/launch-redirects.ts` (spread into the
+redirects map before the Studio ones, so an editor can still override one). Today:
+`/all-time-records` -> `/records/`, `/the-course` -> `/course/`, `/dev/wordpress/course` -> `/course/`,
+`/registered-runners` -> `/results/`, all 301. Destinations keep the trailing slash on purpose: the host answers a slash-less page
+address with a 307 to the slash form, so pointing straight at it saves a hop (301 then 307 then 200
+becomes 301 then 200). Add one only with evidence the old address is in use (Wayback Machine CDX index for
+whether it existed, GA4 landing pages for whether anyone arrives on it); the last three were added
+on 2026-10-05 (September GA4 showed 12 visitors landing on the 404 page on the first two; `/registered-runners`
+had 3 landings and 200 Wayback captures, and Nathan chose `/results/` as its destination). A unit test
+(`launch-redirects.test.ts`) pins all four so none can be dropped by accident.
 
 An **archived** page is not built at all, so its URL 404s, it drops out of the menus, and
 it never reaches the sitemap.

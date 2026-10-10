@@ -22,18 +22,18 @@ export const routes: string[] = [
   // listed anyway because they are the site's real content and must pass every
   // check; if the dataset ever stops producing them the suite should fail
   // loudly rather than quietly testing one page.
-  '/course',
-  '/records',
-  '/contact',
+  '/course/',
+  '/records/',
+  '/contact/',
   // The results archive. `/results/2025` stands in for the 22 year pages, which
   // are all one template; listing every year would slow the suite to prove the
   // same thing 22 times.
-  '/results',
-  '/results/2025',
+  '/results/',
+  '/results/2025/',
   // A code page rather than a Sanity document, because it describes what the
   // software does and has to change with it. Listed so axe and the reflow
   // checks cover it like any other page a visitor can reach from the footer.
-  '/privacy',
+  '/privacy/',
 ];
 
 /**
@@ -57,4 +57,4 @@ export const allRoutes: string[] = [...routes, ...hiddenRoutes];
  * enables the lead-magnet module gets a form on /guides/[slug]; add it here
  * once a guide is published and that route builds.
  */
-export const FORM_ROUTES: string[] = ['/contact'];
+export const FORM_ROUTES: string[] = ['/contact/'];
