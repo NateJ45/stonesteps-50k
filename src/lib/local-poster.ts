@@ -5,9 +5,9 @@
  * an `imageTextSection` whose picture is a screenshot of Google Maps, uploaded
  * to the CMS. This site draws its own terrain map of the course, bakes a still
  * of it for the home page, and then, two pages later, shows a visitor somebody
- * else's picture of the same city. `npm run map-region` now bakes the same view
- * from our own map, with The Oval, downtown and CVG pinned in the map's own
- * marker style. What was left was getting the page to use it.
+ * else's picture of the same city. `RegionPoster.astro` draws this site's own
+ * map of the area instead (a baked still until 2026-10-09, a simple drawn plate
+ * of three pins since). What was left was getting the page to use it.
  *
  * WHY THIS IS A RULE AND NOT A FIELD. Three options were on the table.
  *   - Key the override off the block's `_key`. Rejected outright: a key is
@@ -33,13 +33,13 @@
  * changes.
  *
  * WHEN TO DELETE THIS. When the screenshot is removed from the block in the
- * Studio and replaced with nothing (the baked poster is in the code, not in the
+ * Studio and replaced with nothing (the drawn map is in the code, not in the
  * CMS), this rule and the branch in ImageText.astro can both go and the block
  * can render the poster as its only image. That is a content edit nobody has
  * made yet; see docs/PENDING.md.
  */
 
-/** The baked posters this site can put in place of a CMS image. */
+/** The local pictures this site can put in place of a CMS image. */
 export type LocalPosterKey = 'region';
 
 /**
@@ -63,7 +63,7 @@ function isGoogleMapsUrl(href: string): boolean {
 }
 
 /**
- * Which baked poster, if any, an image-and-text block should show instead of
+ * Which local picture, if any, an image-and-text block should show instead of
  * its CMS image.
  *
  * Takes the CTA's href and nothing else on purpose: the whole point is that the

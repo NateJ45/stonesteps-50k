@@ -1,137 +1,152 @@
 ---
 // Foundation, edit with care
 /**
- * The still of the wider area: the park, downtown and the airport, on this
- * site's own map.
+ * The "where to stay" map on /contact: three pins on a dark board, drawn as
+ * inline SVG.
  *
- * WHY IT EXISTS (2026-09-17). The band it sits in used to carry a screenshot of
- * Google Maps uploaded to the CMS. A site that draws its own terrain map of the
- * course, bakes a still of it for the home page and animates the route over it
- * cannot then show a visitor somebody else's picture of the same city two pages
- * later. It is the same map, pulled back, with three pins on it.
+ * WHY IT CHANGED (2026-10-09). The first version was a baked screenshot of the
+ * site's own terrain map pulled back to show the park, downtown and the airport.
+ * It was honest and it was dull: a pale basemap full of town names nobody needs
+ * and three small pins. A visitor asking "where do I sleep" needs three places,
+ * how far apart they are, and which side of the river. So that is all this
+ * draws. A busier drawn version (contours, interstates, a course inset) was tried
+ * and rejected on the same day for doing too much: keep it to the pins.
  *
- * WHY A PICTURE AND NOT THE MAP. Exactly the home band's argument, which is
- * written out in CoursePosterBand.astro: MapLibre is about 250KB before a
- * single tile, this is below the fold on a page somebody is reading on a phone,
- * and there is nothing to explore here anyway. This one is not even a link,
- * because there is no map of the region to go to. It is a picture, and it says
- * what it is in its alt text.
+ * WHAT IS EXACT. The pins sit at their real coordinates (The Oval is the first
+ * point of the recorded course, read at build time), and the miles are
+ * straight-line distances computed from those same coordinates, so they cannot
+ * drift from the pins. The river is a hand-drawn band for orientation only.
  *
- * WHY IT IS HONEST. `npm run map-region` drives the BUILT site's own map
- * through Playwright and photographs it. The camera lives in the map's poster
- * block, the pins are the map's own marker layers, and The Oval's pin is the
- * first point of the recorded course rather than a coordinate typed in here.
- * Re-run the command after any change to the map and commit the output.
- *
- * THE RIDGE CUT. Top and bottom, the same `--ridge-mask` the real map, the home
- * poster and every band boundary on the site are cut with. It carries its own
- * copy of the two spans rather than sharing the home band's, because that one
- * is welded to a caption scrim, a hover push and a pointer tilt that a picture
- * in half a column has no business doing. The mask itself, which is the part
- * that has to agree, is the one shared token.
+ * IT IS A PLATE (cream stock, black edge, hard shadow), not a ridge-cut picture:
+ * a dark board vanished into the dark band, and the plate language is what the
+ * tickets and FAQ cards already speak in both themes.
  */
-import poster from '../../../scripts/data/region-poster.json';
+import courseGeo from '../../../scripts/data/course-geo.json';
 
 interface Props {
-  /** The band's own ground, so the cut reads as the page closing over it. */
+  /** Accepted for the caller's sake; a plate does not need the band colour. */
   bandBg?: 'background' | 'muted';
   class?: string;
 }
+const { class: extraClass = '' } = Astro.props as Props;
 
-const { bandBg = 'background', class: extraClass = '' } = Astro.props as Props;
+// Real coordinates, projected flat at this latitude.
+const W = 800;
+const H = 600;
+const CENTER = { lon: -84.59, lat: 39.111 };
+const PX_PER_KM = 23;
+const KM_LAT = 111.2;
+const KM_LON = 111.2 * Math.cos((CENTER.lat * Math.PI) / 180);
+type LL = [number, number];
+const project = (ll: LL): LL => [
+  W / 2 + (ll[0] - CENTER.lon) * KM_LON * PX_PER_KM,
+  H / 2 - (ll[1] - CENTER.lat) * KM_LAT * PX_PER_KM,
+];
+const miles = (a: LL, b: LL) =>
+  Math.round(Math.hypot((a[0] - b[0]) * KM_LON, (a[1] - b[1]) * KM_LAT) * 0.621371);
 
-const W = poster.width;
-const H = poster.height;
+type Feature = { geometry: { type: string; coordinates: number[][] } };
+const firstLine = (courseGeo as { features: Feature[] }).features.find(
+  (f) => f.geometry.type === 'LineString',
+);
+const OVAL_LL: LL = firstLine
+  ? [firstLine.geometry.coordinates[0][0], firstLine.geometry.coordinates[0][1]]
+  : [-84.568564, 39.172935];
+const DOWNTOWN_LL: LL = [-84.512, 39.1031];
+const CVG_LL: LL = [-84.6678, 39.0489];
+
+const oval = project(OVAL_LL);
+const downtown = project(DOWNTOWN_LL);
+const cvg = project(CVG_LL);
+const toDowntown = miles(OVAL_LL, DOWNTOWN_LL);
+const toCvg = miles(OVAL_LL, CVG_LL);
+
+// One soft band, roughly where the Ohio runs: between downtown and CVG.
+const RIVER = 'M-20,412 C200,382 380,432 560,398 S760,382 820,362';
+
+const alt = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where the race starts, is at the top. Downtown Cincinnati is about ${toDowntown} miles south east of it, and the CVG airport is about ${toCvg} miles south west, across the Ohio River in Kentucky.`;
 ---
 
-<figure
-  class={`rposter ${extraClass}`}
-  style={`--poster-ratio:${W} / ${H}; --poster-band-bg: var(${
-    bandBg === 'muted' ? '--color-muted' : '--color-background'
-  })`}
->
-  <picture>
-    <source
-      type="image/avif"
-      srcset="/region-poster.avif 700w, /region-poster@1_5x.avif 1650w"
-      sizes="(min-width: 64rem) 560px, 100vw"
-    />
-    {
-      /* Sized exactly the way the home poster is: the intrinsic width and
-        height are on the tag, so the box exists before the picture lands and
-        nothing below it moves, and it is lazy because it is never the first
-        thing on the page it appears on. */
-    }
-    <img
-      class="rposter__img"
-      src="/region-poster.webp"
-      srcset="/region-poster.webp 700w, /region-poster@1_5x.webp 1650w"
-      sizes="(min-width: 64rem) 560px, 100vw"
-      width={W}
-      height={H}
-      loading="lazy"
-      decoding="async"
-      alt="A topographic map of the Cincinnati area with three places marked: The Oval in Mt. Airy Forest where the race starts, downtown Cincinnati to the south east, and the CVG airport to the south west."
-    />
-  </picture>
-  <span class="rposter__ridge rposter__ridge--top" aria-hidden="true"></span>
-  <span class="rposter__ridge rposter__ridge--bottom" aria-hidden="true"></span>
+<figure class={`rposter ${extraClass}`}>
+  <svg class="rposter__svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={alt}>
+    <path d={RIVER} class="rp-river"></path>
+    <text x="40" y="414" class="rp-river-label" transform="rotate(-4 40 414)">Ohio River</text>
+
+    <circle cx={oval[0]} cy={oval[1]} r="16" class="rp-pin rp-pin--race"></circle>
+    <text x={oval[0]} y={oval[1] - 34} text-anchor="middle" class="rp-name rp-name--race"
+      >The Oval</text
+    >
+    <text x={oval[0]} y={oval[1] + 54} text-anchor="middle" class="rp-sub">Start and finish</text>
+
+    <circle cx={downtown[0]} cy={downtown[1]} r="12" class="rp-pin"></circle>
+    <text x={downtown[0]} y={downtown[1] - 28} text-anchor="middle" class="rp-name">Downtown</text>
+    <text x={downtown[0]} y={downtown[1] + 48} text-anchor="middle" class="rp-sub"
+      >{toDowntown} miles</text
+    >
+
+    <circle cx={cvg[0]} cy={cvg[1]} r="12" class="rp-pin"></circle>
+    <text x={cvg[0]} y={cvg[1] + 50} text-anchor="middle" class="rp-name">CVG airport</text>
+    <text x={cvg[0]} y={cvg[1] + 84} text-anchor="middle" class="rp-sub">{toCvg} miles</text>
+  </svg>
 </figure>
 
 <style>
+  /* A plate, like the tickets and the FAQ cards: cream stock, black edge, hard
+     offset shadow. It reads in both themes because the edge and the shadow
+     carry it, not the ground around it. */
   .rposter {
-    position: relative;
     margin: 0;
     overflow: hidden;
-    /* NO RADIUS, same as the home poster: a rounded rectangle is what makes a
-       map read as an embedded thumbnail. The edge is the cut. */
-    background: var(--color-muted);
-    aspect-ratio: var(--poster-ratio);
-    --poster-ridge-h: 28px;
+    background: #f4ebd6;
+    border: 2px solid #000;
+    border-radius: 12px;
+    box-shadow: var(--lift-ground);
   }
-
-  .rposter__img {
+  .rposter__svg {
     display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
   }
-
-  /* The band closing over the picture. Painted in the band's own colour, passed
-     down by the section, so the cut is the page rather than a line drawn on the
-     image. */
-  .rposter__ridge {
-    position: absolute;
-    inset-inline: 0;
-    height: var(--poster-ridge-h);
-    z-index: 2;
-    pointer-events: none;
-    background-color: var(--poster-band-bg, var(--color-background));
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-image: var(--ridge-mask);
-    mask-image: var(--ridge-mask);
+  /* Text is painted with currentColor and coloured with `color`, so what a
+     contrast checker reads (the CSS colour) is what the eye sees (the fill).
+     Left to inherit, `color` is the page's cream in dark mode. */
+  .rposter__svg text {
+    fill: currentColor;
+    font-family: var(--font-display);
+    text-transform: uppercase;
   }
-
-  .rposter__ridge--top {
-    top: 0;
-    /* The mask draws its solid half BELOW the contour, so the top edge wears it
-       flipped. Same trick as `.cmap__ridge.is-top` and the home poster's. */
-    transform: scaleY(-1);
+  .rp-river {
+    fill: none;
+    stroke: #c3d1bd;
+    stroke-width: 34;
+    stroke-linecap: round;
   }
-
-  .rposter__ridge--bottom {
-    bottom: 0;
+  .rposter__svg .rp-river-label {
+    font-size: 20px;
+    letter-spacing: 0.3em;
+    color: #2e5738;
   }
-
-  /* Shallower where the picture is short, for the reason `.band-torn` and the
-     home poster both give: a 28px cut top and bottom of a 200px picture is a
-     quarter of the picture. */
-  @media (width < 48rem) {
-    .rposter {
-      --poster-ridge-h: 18px;
-    }
+  .rp-pin {
+    fill: #1a1712;
+    stroke: #f4ebd6;
+    stroke-width: 4;
+  }
+  .rp-pin--race {
+    fill: #a83c26;
+    stroke: #000;
+  }
+  .rposter__svg .rp-name {
+    font-size: 42px;
+    color: #1a1712;
+  }
+  .rposter__svg .rp-name--race {
+    font-size: 50px;
+    color: #a83c26;
+  }
+  .rposter__svg .rp-sub {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    letter-spacing: 0.1em;
+    color: #5c513b;
   }
 </style>

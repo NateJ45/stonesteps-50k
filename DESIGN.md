@@ -103,7 +103,7 @@ Flat, with ONE exception: the hard offset shadow, down and right only, no blur.
 - **Hero (`RaceHero.astro`).** Topographic backdrop, the display wordmark split per letter so `.hand` can rotate each a fraction of a degree, the race clock, a claim stamp, a cross-fading photo slideshow, and the baked mud field (`MudField.astro`, alpha-mask PNGs painted with `currentcolor`, so one asset serves both themes). Home hero only.
 - **Objects.** Distance tickets (`DistanceTickets`; the 50K ticket is forest with gold lettering, notches punched through the card using `--ground`), the punch card, the schedule clipboard, the record board (`RecordBoard`: bark stock, contours, prints, nail heads, rows of label, name, time, year), sponsor patches (two to a row on a phone, a centred row from `sm` up), the ticker strip, the parks band, the FAQ kiosk.
 - **Band boundaries.** Every band draws a contour ridge above itself (`--ridge-mask`, one token shared with the photograph band).
-- **Course map.** MapLibre course map with a baked region poster, an elevation profile that draws itself, and a gradient key (`docs/agent/course-map-sources.md`).
+- **Course map.** MapLibre course map, a drawn region plate on /contact (three pins on cream stock), an elevation profile that draws itself, and a gradient key (`docs/agent/course-map-sources.md`).
 - **Unconfirmed values.** `Provisional.astro` shows a "not confirmed" tag driven by a `confirmed` field.
 
 ## 6. Do's and Don'ts

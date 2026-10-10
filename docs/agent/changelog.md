@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-09 - The /contact region map is a drawn plate, not a baked still._
+
+Nathan found the re-baked map no different on a 1x screen and asked for something simpler and better looking. `RegionPoster.astro` now draws a cream plate (black edge, hard shadow, like the tickets and FAQ cards) with three pins at their real coordinates, The Oval taken from the first point of `course-geo.json`, straight-line miles computed from the same numbers, and one flat band for the Ohio. A busier version with contours, interstates and a course inset was tried and dropped as too much. `npm run map-region`, `scripts/capture-region-poster.mjs` and `public/region-poster*` are gone; the capture pipeline it used is now orphaned (PENDING 1p).
+
 _2026-10-09 - FAQ cards start open; the /contact region map is baked at 3x._
 
 `FaqKiosk` renders every `<details class="qa">` with `open`, so the answers read at a glance (a reader can still fold one). The region poster (`npm run map-region`) was soft on dense screens: 700px and 1400px files for a ~555px slot, and the 1.5x label on the wide one was wrong. `capture-map-poster.mjs` now takes `POSTER_SCALE` and `POSTER_WIDE`; the region wrapper captures the same 1000x750 frame at 3x and writes 700w and 1650w files, and `RegionPoster.astro` uses `w` descriptors with `sizes`. Composition is unchanged.
