@@ -51,7 +51,11 @@ const H = poster.height;
   })`}
 >
   <picture>
-    <source type="image/avif" srcset="/region-poster.avif 1x, /region-poster@1_5x.avif 1.5x" />
+    <source
+      type="image/avif"
+      srcset="/region-poster.avif 700w, /region-poster@1_5x.avif 1650w"
+      sizes="(min-width: 64rem) 560px, 100vw"
+    />
     {
       /* Sized exactly the way the home poster is: the intrinsic width and
         height are on the tag, so the box exists before the picture lands and
@@ -61,7 +65,8 @@ const H = poster.height;
     <img
       class="rposter__img"
       src="/region-poster.webp"
-      srcset="/region-poster.webp 1x, /region-poster@1_5x.webp 1.5x"
+      srcset="/region-poster.webp 700w, /region-poster@1_5x.webp 1650w"
+      sizes="(min-width: 64rem) 560px, 100vw"
       width={W}
       height={H}
       loading="lazy"

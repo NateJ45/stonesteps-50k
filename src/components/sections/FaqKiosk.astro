@@ -8,7 +8,8 @@
 // The board is RECESSED (an inset shadow, not a raised one), so it reads as
 // something you look into rather than a card sitting on the page. The notices
 // pinned to it are index cards, each at its own slight angle, straightening on
-// hover and when opened. The <details>/<summary> semantics are untouched: the
+// hover and when opened. Every card STARTS OPEN (2026-10-09, Nathan: answers
+// scannable at a glance, nothing to click); a reader can still fold one shut. The <details>/<summary> semantics are untouched: the
 // whole thing is native disclosure with decoration on top, so it keeps working
 // with no JavaScript at all.
 //
@@ -83,7 +84,7 @@ const answerFor = (item: { answer?: string; derived?: string }) =>
                   {items
                     .filter((_, i) => i % 2 === col)
                     .map((item) => (
-                      <details class="qa">
+                      <details class="qa" open>
                         <summary class="flex items-start gap-3">
                           <span class="qa__pin" aria-hidden="true" />
                           <span class="display on-light flex-1 text-[1.05rem]">

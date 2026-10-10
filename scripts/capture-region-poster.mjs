@@ -38,6 +38,11 @@
 
 process.env.POSTER_NAME ??= 'region-poster';
 process.env.POSTER_SIZE ??= '1000x750';
+process.env.POSTER_SCALE ??= '3';
+// The band shows this picture about 555px wide, so a 2x screen wants ~1100px and a
+// 3x phone ~1650px. The old 700px / 1400px pair looked soft on both. The frame stays
+// 1000x750 (a 700x525 map canvas) so the composition is unchanged; only the pixel density goes up.
+process.env.POSTER_WIDE ??= '1650';
 // Appended rather than assigned, so an audition camera passed in from the
 // command line survives and simply lands after the region flag.
 process.env.POSTER_CAMERA = ['region=1', process.env.POSTER_CAMERA].filter(Boolean).join('&');

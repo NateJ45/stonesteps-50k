@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-09 - FAQ cards start open; the /contact region map is baked at 3x._
+
+`FaqKiosk` renders every `<details class="qa">` with `open`, so the answers read at a glance (a reader can still fold one). The region poster (`npm run map-region`) was soft on dense screens: 700px and 1400px files for a ~555px slot, and the 1.5x label on the wide one was wrong. `capture-map-poster.mjs` now takes `POSTER_SCALE` and `POSTER_WIDE`; the region wrapper captures the same 1000x750 frame at 3x and writes 700w and 1650w files, and `RegionPoster.astro` uses `w` descriptors with `sizes`. Composition is unchanged.
+
 _2026-10-03 - Fix: the image-count report step could fail a shard._
 
 CI only. The "Report the test images fetched from Sanity" step added in the entry below counted cached images with `grep -c`, which exits 1 when the count is zero, and Actions runs steps under `bash -e`, so a shard with no cached images (a cancelled run, a cold folder) failed that step and so could fail the job and block the required `test` check. Warm runs were unaffected, which is why the first runs passed. Reproduced locally under `bash -e` (exit 1, no output) before the fix; the counts now end in `|| true`, and all four fake-folder scenarios exit 0 and print. A reporting step must never fail a job.
