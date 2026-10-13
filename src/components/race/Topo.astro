@@ -97,5 +97,7 @@ const paths = Array.from({ length: lines }, (_, i) => {
   aria-hidden="true"
   focusable="false"
 >
-  {paths.map((d) => <path d={d} />)}
+  {paths.map((d) => (
+    <path d={d} />
+  ))}
 </svg>

@@ -42,59 +42,57 @@ const {
 } = Astro.props as Props;
 ---
 
-{
-  sponsors.length > 0 && (
-    <section class="band-torn bg-background py-section-md" aria-labelledby={headingId}>
-      <div class="mob-center mx-auto w-full max-w-content px-6">
-        {eyebrow && (
-          <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-            {eyebrow}
-          </p>
-        )}
-        <h2 id={headingId} class="display text-h3">
-          {headline}
-        </h2>
+{sponsors.length > 0 && (
+  <section class="band-torn bg-background py-section-md" aria-labelledby={headingId}>
+    <div class="mob-center mx-auto w-full max-w-content px-6">
+      {eyebrow && (
+        <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+          {eyebrow}
+        </p>
+      )}
+      <h2 id={headingId} class="display text-h3">
+        {headline}
+      </h2>
 
-        <ul class="mt-8 grid grid-cols-2 justify-items-center gap-4 sm:flex sm:flex-wrap sm:items-stretch sm:justify-center sm:gap-6">
-          {sponsors.map((s) => (
-            <li class="patch min-h-[8.5rem] w-full max-w-[16rem] px-3 py-5 sm:min-h-[9.5rem] sm:px-6 sm:py-7">
-              {/* A patch with a url is a link to the sponsor's own site, in a
+      <ul class="mt-8 grid grid-cols-2 justify-items-center gap-4 sm:flex sm:flex-wrap sm:items-stretch sm:justify-center sm:gap-6">
+        {sponsors.map((s) => (
+          <li class="patch min-h-[8.5rem] w-full max-w-[16rem] px-3 py-5 sm:min-h-[9.5rem] sm:px-6 sm:py-7">
+            {/* A patch with a url is a link to the sponsor's own site, in a
                 new tab; without one it is just a patch. The anchor fills the
                 patch so the whole object is the target, not only the mark. */}
-              {s.url ? (
-                <a
-                  href={s.url}
-                  class="patch__link"
-                  aria-label={`${s.name ?? 'Sponsor'} website`}
-                  {...externalLinkAttrs(s.url)}
-                >
-                  {s.logo?.asset ? (
-                    <SanityImage
-                      source={s.logo}
-                      width={512}
-                      sizes="256px"
-                      alt={s.logo.alt ?? s.name ?? ''}
-                      class="h-[6rem] max-w-full object-contain"
-                    />
-                  ) : (
-                    <span class="display on-light text-center text-[1.05rem]">{s.name}</span>
-                  )}
-                </a>
-              ) : s.logo?.asset ? (
-                <SanityImage
-                  source={s.logo}
-                  width={512}
-                  sizes="256px"
-                  alt={s.logo.alt ?? s.name ?? ''}
-                  class="h-[6rem] max-w-full object-contain"
-                />
-              ) : (
-                <span class="display on-light text-center text-[1.05rem]">{s.name}</span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  )
-}
+            {s.url ? (
+              <a
+                href={s.url}
+                class="patch__link"
+                aria-label={`${s.name ?? 'Sponsor'} website`}
+                {...externalLinkAttrs(s.url)}
+              >
+                {s.logo?.asset ? (
+                  <SanityImage
+                    source={s.logo}
+                    width={512}
+                    sizes="256px"
+                    alt={s.logo.alt ?? s.name ?? ''}
+                    class="h-[6rem] max-w-full object-contain"
+                  />
+                ) : (
+                  <span class="display on-light text-center text-[1.05rem]">{s.name}</span>
+                )}
+              </a>
+            ) : s.logo?.asset ? (
+              <SanityImage
+                source={s.logo}
+                width={512}
+                sizes="256px"
+                alt={s.logo.alt ?? s.name ?? ''}
+                class="h-[6rem] max-w-full object-contain"
+              />
+            ) : (
+              <span class="display on-light text-center text-[1.05rem]">{s.name}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}

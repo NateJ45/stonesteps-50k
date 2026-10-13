@@ -53,13 +53,15 @@ const repeat = (phrase: string) => Array.from({ length: 18 }, () => phrase).join
     <Topo seed={67} lines={14} class="opacity-40" />
 
     <!-- Flagging tape, the way an off-course turn actually gets marked. -->
-    <div class="tape tape--a" aria-hidden="true"><span>{repeat('Wrong way')}</span></div>
-    <div class="tape tape--b" aria-hidden="true"><span>{repeat('Not the course')}</span></div>
+    <div class="tape tape--a" aria-hidden="true">
+      <span>{repeat('Wrong way')}</span>
+    </div>
+    <div class="tape tape--b" aria-hidden="true">
+      <span>{repeat('Not the course')}</span>
+    </div>
 
     <div class="relative z-10 mx-auto mt-24 w-full max-w-content px-6 pb-16">
-      <p
-        class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase"
-      >
+      <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
         {eyebrow}
       </p>
 
@@ -68,16 +70,14 @@ const repeat = (phrase: string) => Array.from({ length: 18 }, () => phrase).join
       <p class="mt-6 max-w-[46ch] text-lg text-muted-foreground">{body}</p>
 
       <nav class="mt-8 flex flex-wrap gap-x-6 gap-y-2" aria-label="Back to the course">
-        {
-          links.map((item) => (
-            <a
-              class="display border-b-2 border-transparent text-lg transition-colors hover:border-[color:var(--heading-accent)]"
-              href={item.href}
-            >
-              {item.label}
-            </a>
-          ))
-        }
+        {links.map((item) => (
+          <a
+            class="display border-b-2 border-transparent text-lg transition-colors hover:border-[color:var(--heading-accent)]"
+            href={item.href}
+          >
+            {item.label}
+          </a>
+        ))}
       </nav>
 
       <a class="btn-plate mt-10" href="/">

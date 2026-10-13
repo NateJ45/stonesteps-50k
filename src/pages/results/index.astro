@@ -73,8 +73,7 @@ const lede =
 ---
 
 <BaseLayout {title} {description} {siteSettings}>
-  {
-    /* THE SAME HEADER BAND EVERY OTHER INNER PAGE GETS (2026-09-17). The
+  {/* THE SAME HEADER BAND EVERY OTHER INNER PAGE GETS (2026-09-17). The
       archive used to open with a bare eyebrow and a title on flat background:
       no walk of prints, no rule under the band, a smaller headline than
       /course or /records. It was the one stretch of the site that could have
@@ -86,37 +85,30 @@ const lede =
       pages stand on is the walk in the header and the page's own paper grain;
       the records boards on /records sit on plain surface for the same reason
       this list does. Forty rows of times have to stay scannable, and
-      decorating the page whose entire job is data would wreck it. */
-  }
+      decorating the page whose entire job is data would wreck it. */}
   <PageHeader eyebrow="Results" headline="Every running" {lede} headingId="results-heading" />
 
-  {
-    /* NO aria-labelledby ON THIS SECTION. The header band above is already a
+  {/* NO aria-labelledby ON THIS SECTION. The header band above is already a
       region labelled by the page's h1, and repeating the same label here gives
       two landmarks the same accessible name, which axe fails as
       `landmark-unique` and a screen-reader user hears as the same place twice.
       A section with no accessible name is not a landmark at all, which is what
-      this one wants to be: the page has one region, at the top. */
-  }
+      this one wants to be: the page has one region, at the top. */}
   <section class="bg-background py-section-lg">
     <div class="mx-auto w-full max-w-content px-6">
-      {
-        editions.length === 0 && (
-          <p class="mb-6 max-w-[60ch] text-muted-foreground">
-            No results are on file yet. Run <code>node scripts/import-results.mjs</code> to pull
-            them from RunSignUp.
-          </p>
-        )
-      }
+      {editions.length === 0 && (
+        <p class="mb-6 max-w-[60ch] text-muted-foreground">
+          No results are on file yet. Run <code>node scripts/import-results.mjs</code> to pull them
+          from RunSignUp.
+        </p>
+      )}
 
-      {
-        /* THE COLUMN HEADS. They exist once, at the top, instead of the words
+      {/* THE COLUMN HEADS. They exist once, at the top, instead of the words
           "Men's win" and "Women's win" being repeated forty-six times down the
           page. aria-hidden because this is a decorative alignment rail, not a
           table header: every winner cell below carries its own label, visible
           on a phone and screen-reader-only from 56rem where this rail takes
-          over the explaining. */
-      }
+          over the explaining. */}
       <div
         class="arch-head arch-tracks border-b border-border pb-2 font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase"
         aria-hidden="true"
@@ -131,21 +123,20 @@ const lede =
       </div>
 
       <ul class="grid list-none gap-0 p-0">
-        {
-          editions.map((e) => (
-            <li class="border-b border-border py-5">
-              {/* The missing-year row carries NO opacity utility.
+        {editions.map((e) => (
+          <li class="border-b border-border py-5">
+            {/* The missing-year row carries NO opacity utility.
                   `text-muted-foreground` already sits near the AA floor and
                   diluting it puts the row under, which is how this exact line
                   failed axe the first time. It is set apart by not being a
                   link and by carrying its own sentence, not by being faded. */}
-              {e.missing ? (
-                <div class="flex flex-wrap items-baseline gap-x-5 gap-y-2">
-                  <span class="display tabular text-h3 text-muted-foreground">{e.year}</span>
-                  <span class="text-sm text-muted-foreground">Run, but no results on file.</span>
-                </div>
-              ) : (
-                /* THE ROW IS NO LONGER ONE BIG LINK (2026-09-17), and it had to
+            {e.missing ? (
+              <div class="flex flex-wrap items-baseline gap-x-5 gap-y-2">
+                <span class="display tabular text-h3 text-muted-foreground">{e.year}</span>
+                <span class="text-sm text-muted-foreground">Run, but no results on file.</span>
+              </div>
+            ) : (
+              /* THE ROW IS NO LONGER ONE BIG LINK (2026-09-17), and it had to
                   stop being one. A link cannot contain another link, so while
                   the whole row went to /results/<year> the two winners' names
                   on it could not go anywhere, which made this the only page on
@@ -153,73 +144,72 @@ const lede =
                   click it. The year keeps the job: it is the loudest thing on
                   the row, it is set in the accent, and it is what a reader
                   reaches for anyway. */
-                <div class="arch-row arch-tracks">
-                  <span class="arch-row__year display tabular text-heading-accent text-h3">
-                    {/* The numeral keeps the display face and the accent it
+              <div class="arch-row arch-tracks">
+                <span class="arch-row__year display tabular text-heading-accent text-h3">
+                  {/* The numeral keeps the display face and the accent it
                       always had; what is new is that it is the link. Its
                       offset echo is left to `.display`, which switches it on
                       only in the theme where an offset is a shadow rather than
                       a smear. See `.arch-row__link` in globals.css. */}
-                    <a class="arch-row__link" href={`/results/${e.year}/`}>
-                      {e.year}
-                    </a>
-                  </span>
+                  <a class="arch-row__link" href={`/results/${e.year}/`}>
+                    {e.year}
+                  </a>
+                </span>
 
-                  {e.distances.map((d, di) => (
-                    <span class="arch-dist">
-                      {/* The first distance in the Studio's own order is the
+                {e.distances.map((d, di) => (
+                  <span class="arch-dist">
+                    {/* The first distance in the Studio's own order is the
                         headline race and gets the filled chip. See the note on
                         .dist-chip--lead in globals.css. */}
-                      <span class:list={['dist-chip', di === 0 && 'dist-chip--lead']}>
-                        {d.name}
+                    <span class:list={['dist-chip', di === 0 && 'dist-chip--lead']}>{d.name}</span>
+                    <span class="arch-count tabular text-sm text-muted-foreground">
+                      {d.finishers}{' '}
+                      <span class="arch-count__word">
+                        {d.finishers === 1 ? 'finisher' : 'finishers'}
                       </span>
-                      <span class="arch-count tabular text-sm text-muted-foreground">
-                        {d.finishers}{' '}
-                        <span class="arch-count__word">
-                          {d.finishers === 1 ? 'finisher' : 'finishers'}
-                        </span>
-                      </span>
-
-                      {(['M', 'F'] as const).map((g) => {
-                        const w = winnerOf(d, g);
-                        return (
-                          <>
-                            <span class="arch-win text-sm">
-                              <span class="arch-win__label font-mono text-[0.6875rem] tracking-[0.16em] text-muted-foreground uppercase">
-                                {g === 'F' ? 'Women' : 'Men'}
-                              </span>
-                              <span class="text-foreground">
-                                {w?.row.slug ? (
-                                  <a
-                                    class="underline-offset-2 hover:text-link hover:underline"
-                                    href={`/runners/${w.row.slug}/`}
-                                  >
-                                    {w.row.name}
-                                  </a>
-                                ) : (
-                                  (w?.row.name ?? '—')
-                                )}
-                              </span>
-                            </span>
-                            <span class="arch-time tabular text-sm text-muted-foreground">
-                              {w ? formatRaceTime(w.row.timeSeconds) : ''}
-                            </span>
-                          </>
-                        );
-                      })}
                     </span>
-                  ))}
-                </div>
-              )}
-            </li>
-          ))
-        }
+
+                    {(['M', 'F'] as const).map((g) => {
+                      const w = winnerOf(d, g);
+                      return (
+                        <>
+                          <span class="arch-win text-sm">
+                            <span class="arch-win__label font-mono text-[0.6875rem] tracking-[0.16em] text-muted-foreground uppercase">
+                              {g === 'F' ? 'Women' : 'Men'}
+                            </span>
+                            <span class="text-foreground">
+                              {w?.row.slug ? (
+                                <a
+                                  class="underline-offset-2 hover:text-link hover:underline"
+                                  href={`/runners/${w.row.slug}/`}
+                                >
+                                  {w.row.name}
+                                </a>
+                              ) : (
+                                (w?.row.name ?? '—')
+                              )}
+                            </span>
+                          </span>
+                          <span class="arch-time tabular text-sm text-muted-foreground">
+                            {w ? formatRaceTime(w.row.timeSeconds) : ''}
+                          </span>
+                        </>
+                      );
+                    })}
+                  </span>
+                ))}
+              </div>
+            )}
+          </li>
+        ))}
       </ul>
 
       <div class="mt-10 flex flex-wrap gap-4">
         <a class="btn-plate btn-plate--cream" href="/records/">
           All-time records
-          <span class="btn-plate__arrow" aria-hidden="true">&rarr;</span>
+          <span class="btn-plate__arrow" aria-hidden="true">
+            &rarr;
+          </span>
         </a>
       </div>
     </div>

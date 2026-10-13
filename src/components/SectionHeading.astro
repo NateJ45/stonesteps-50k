@@ -153,85 +153,79 @@ const toneSub = tone === 'inverse' ? 'text-bg/80' : 'text-foreground/80';
 ---
 
 <div class:list={[wrapperAlign, 'max-w-3xl', extraClass]}>
-  {
-    eyebrow &&
-      (eyebrowStyle === 'blaze' ? (
-        /* The blaze carries its own rule, so there is no separate hairline
+  {eyebrow &&
+    (eyebrowStyle === 'blaze' ? (
+      /* The blaze carries its own rule, so there is no separate hairline
           element here. `text-heading-accent` colours the lettering; the painted
           rectangle and the rule are drawn by `.blaze` from the same token. */
-        <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-          {eyebrow}
-        </p>
-      ) : (
-        /* The outlined word carries no hairline either: it is already large
+      <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+        {eyebrow}
+      </p>
+    ) : (
+      /* The outlined word carries no hairline either: it is already large
           enough to read as a label, and a rule under it would be a second
           marker for the same job. */
-        <p class:list={['section-label', toneEyebrow]}>{eyebrow}</p>
-      ))
-  }
-  {
-    headline &&
-      (level === 'h1' ? (
-        <h1 id={headingId} class:list={[headingClass, toneHeadline]}>
-          {scriptFound ? (
-            <>
-              {scriptBefore}
-              <span class="font-script">{scriptWord}</span>
-              {scriptAfter}
-            </>
-          ) : colour.found ? (
-            <>
-              {colour.before}
-              <span class="heading-accent">{colour.word}</span>
-              {colour.after}
-            </>
-          ) : (
-            headline
-          )}
-        </h1>
-      ) : level === 'h2' ? (
-        <h2 id={headingId} class:list={[headingClass, toneHeadline]}>
-          {scriptFound ? (
-            <>
-              {scriptBefore}
-              <span class="font-script">{scriptWord}</span>
-              {scriptAfter}
-            </>
-          ) : colour.found ? (
-            <>
-              {colour.before}
-              <span class="heading-accent">{colour.word}</span>
-              {colour.after}
-            </>
-          ) : (
-            headline
-          )}
-        </h2>
-      ) : (
-        <h3 id={headingId} class:list={[headingClass, toneHeadline]}>
-          {scriptFound ? (
-            <>
-              {scriptBefore}
-              <span class="font-script">{scriptWord}</span>
-              {scriptAfter}
-            </>
-          ) : colour.found ? (
-            <>
-              {colour.before}
-              <span class="heading-accent">{colour.word}</span>
-              {colour.after}
-            </>
-          ) : (
-            headline
-          )}
-        </h3>
-      ))
-  }
-  {
-    (subhead || richSubhead) && (
-      <p class:list={['mt-m text-lg', toneSub]}>
-        {richSubhead ? <InlineRich value={subheadRich} /> : subhead}
-      </p>
-    )
-  }
+      <p class:list={['section-label', toneEyebrow]}>{eyebrow}</p>
+    ))}
+  {headline &&
+    (level === 'h1' ? (
+      <h1 id={headingId} class:list={[headingClass, toneHeadline]}>
+        {scriptFound ? (
+          <>
+            {scriptBefore}
+            <span class="font-script">{scriptWord}</span>
+            {scriptAfter}
+          </>
+        ) : colour.found ? (
+          <>
+            {colour.before}
+            <span class="heading-accent">{colour.word}</span>
+            {colour.after}
+          </>
+        ) : (
+          headline
+        )}
+      </h1>
+    ) : level === 'h2' ? (
+      <h2 id={headingId} class:list={[headingClass, toneHeadline]}>
+        {scriptFound ? (
+          <>
+            {scriptBefore}
+            <span class="font-script">{scriptWord}</span>
+            {scriptAfter}
+          </>
+        ) : colour.found ? (
+          <>
+            {colour.before}
+            <span class="heading-accent">{colour.word}</span>
+            {colour.after}
+          </>
+        ) : (
+          headline
+        )}
+      </h2>
+    ) : (
+      <h3 id={headingId} class:list={[headingClass, toneHeadline]}>
+        {scriptFound ? (
+          <>
+            {scriptBefore}
+            <span class="font-script">{scriptWord}</span>
+            {scriptAfter}
+          </>
+        ) : colour.found ? (
+          <>
+            {colour.before}
+            <span class="heading-accent">{colour.word}</span>
+            {colour.after}
+          </>
+        ) : (
+          headline
+        )}
+      </h3>
+    ))}
+  {(subhead || richSubhead) && (
+    <p class:list={['mt-m text-lg', toneSub]}>
+      {richSubhead ? <InlineRich value={subheadRich} /> : subhead}
+    </p>
+  )}
 </div>

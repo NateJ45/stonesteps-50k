@@ -44,21 +44,19 @@ type Props = {
 const { image, caption, height = 'standard' } = Astro.props as Props;
 ---
 
-{
-  image?.asset && (
-    <section class:list={['photo-band', height === 'tall' && 'photo-band--tall']}>
-      <SanityImage
-        source={image}
-        width={2000}
-        sizes="100vw"
-        alt={image.alt ?? ''}
-        loading="lazy"
-        quality={72}
-      />
-      {caption && <p class="photo-band__cap">{caption}</p>}
-    </section>
-  )
-}
+{image?.asset && (
+  <section class:list={['photo-band', height === 'tall' && 'photo-band--tall']}>
+    <SanityImage
+      source={image}
+      width={2000}
+      sizes="100vw"
+      alt={image.alt ?? ''}
+      loading="lazy"
+      quality={72}
+    />
+    {caption && <p class="photo-band__cap">{caption}</p>}
+  </section>
+)}
 
 <style>
   .photo-band {

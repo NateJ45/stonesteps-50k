@@ -102,102 +102,95 @@ const lede =
 ---
 
 <BaseLayout {title} {description} {siteSettings} noindex>
-  {
-    /* THE SAME HEADER BAND EVERY OTHER INNER PAGE GETS (2026-09-17). A runner
+  {/* THE SAME HEADER BAND EVERY OTHER INNER PAGE GETS (2026-09-17). A runner
       page is reached from a results table, which is exactly why it should not
       look like a different site when you land on it. PageHeader brings the
       walk of prints, the rule under the band and the headline size the rest of
       the site opens with. Everything below is left alone: this page is a
-      person's record and it stays plain. */
-  }
+      person's record and it stays plain. */}
   <PageHeader eyebrow="Runner" headline={runner.name} {lede} headingId="runner-heading" />
 
   {/* No aria-labelledby here: see the note on /results. One region per page. */}
   <section class="bg-background py-section-lg">
     <div class="mx-auto w-full max-w-content px-6">
-      {
-        bests.size > 0 && (
-          <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[...bests.values()].map((b) => (
-              <li class="border-l-[3px] border-[color:var(--heading-accent)] pl-5">
-                <p class="font-mono text-[0.6875rem] tracking-[0.2em] text-muted-foreground uppercase">
-                  Best <span class="lc">{b.distance}</span>
-                </p>
-                <p class="tabular text-heading-accent mt-2 text-2xl font-bold">
-                  {formatRaceTime(b.timeSeconds)}
-                </p>
-                {b.year && <p class="mt-1 text-sm text-muted-foreground">{b.year}</p>}
+      {bests.size > 0 && (
+        <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {[...bests.values()].map((b) => (
+            <li class="border-l-[3px] border-[color:var(--heading-accent)] pl-5">
+              <p class="font-mono text-[0.6875rem] tracking-[0.2em] text-muted-foreground uppercase">
+                Best <span class="lc">{b.distance}</span>
+              </p>
+              <p class="tabular text-heading-accent mt-2 text-2xl font-bold">
+                {formatRaceTime(b.timeSeconds)}
+              </p>
+              {b.year && <p class="mt-1 text-sm text-muted-foreground">{b.year}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {records.length > 0 && (
+        <div class="mt-12">
+          <h2 class="display text-h4">Records held</h2>
+          <ul class="mt-4 grid gap-2">
+            {records.map((r) => (
+              <li class="flex flex-wrap items-baseline gap-x-3 border-b border-border py-2 text-sm">
+                <span class="tabular text-heading-accent font-bold">
+                  {formatRaceTime(r.timeSeconds)}
+                </span>
+                <span class="lc">{r.distance}</span>
+                <span class="text-muted-foreground">
+                  {r.bracket ? BRACKET_BY_ID[r.bracket]?.label : ''}
+                  {r.year ? `, ${r.year}` : ''}
+                </span>
               </li>
             ))}
           </ul>
-        )
-      }
+        </div>
+      )}
 
-      {
-        records.length > 0 && (
-          <div class="mt-12">
-            <h2 class="display text-h4">Records held</h2>
-            <ul class="mt-4 grid gap-2">
-              {records.map((r) => (
-                <li class="flex flex-wrap items-baseline gap-x-3 border-b border-border py-2 text-sm">
-                  <span class="tabular text-heading-accent font-bold">
-                    {formatRaceTime(r.timeSeconds)}
-                  </span>
-                  <span class="lc">{r.distance}</span>
-                  <span class="text-muted-foreground">
-                    {r.bracket ? BRACKET_BY_ID[r.bracket]?.label : ''}
-                    {r.year ? `, ${r.year}` : ''}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
-      }
-
-      {
-        results.length > 0 && (
-          <div class="mt-12 overflow-x-auto">
-            <table class="w-full border-collapse text-sm">
-              <caption class="sr-only">Every Stone Steps finish on file for {runner.name}</caption>
-              <thead>
-                <tr class="border-b border-primary/30">
-                  <th
-                    scope="col"
-                    class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                  >
-                    Year
+      {results.length > 0 && (
+        <div class="mt-12 overflow-x-auto">
+          <table class="w-full border-collapse text-sm">
+            <caption class="sr-only">Every Stone Steps finish on file for {runner.name}</caption>
+            <thead>
+              <tr class="border-b border-primary/30">
+                <th
+                  scope="col"
+                  class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                >
+                  Year
+                </th>
+                <th
+                  scope="col"
+                  class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                >
+                  Distance
+                </th>
+                <th
+                  scope="col"
+                  class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                >
+                  Place
+                </th>
+                <th
+                  scope="col"
+                  class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                >
+                  Time
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {results.map((r) => (
+                <tr class="border-b border-border/60">
+                  <th scope="row" class="tabular py-2 text-left font-normal">
+                    {r.year}
                   </th>
-                  <th
-                    scope="col"
-                    class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                  >
-                    Distance
-                  </th>
-                  <th
-                    scope="col"
-                    class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                  >
-                    Place
-                  </th>
-                  <th
-                    scope="col"
-                    class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                  >
-                    Time
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.map((r) => (
-                  <tr class="border-b border-border/60">
-                    <th scope="row" class="tabular py-2 text-left font-normal">
-                      {r.year}
-                    </th>
-                    <td class="py-2">
-                      <span class="lc">{r.distance}</span>
-                    </td>
-                    {/* A DASH, NOT A BLANK. Three years publish no finishing
+                  <td class="py-2">
+                    <span class="lc">{r.distance}</span>
+                  </td>
+                  {/* A DASH, NOT A BLANK. Three years publish no finishing
                       place at all: 2003 and 2004 lead their table with a bib
                       rather than a placing, and 2014 starts at the name. An
                       empty cell reads as a rendering fault on a row that
@@ -206,35 +199,36 @@ const lede =
                       The value is never derived from finishing order, because
                       trekkers start an hour early and their order is not their
                       placing. */}
-                    <td class="tabular py-2 text-right">
-                      {r.place ?? <span class="text-muted-foreground">&mdash;</span>}
-                    </td>
-                    <td class="tabular py-2 text-right font-bold whitespace-nowrap">
-                      {formatRaceTime(r.timeSeconds)}
-                      {/* Gun time until the race started publishing chip times
+                  <td class="tabular py-2 text-right">
+                    {r.place ?? <span class="text-muted-foreground">&mdash;</span>}
+                  </td>
+                  <td class="tabular py-2 text-right font-bold whitespace-nowrap">
+                    {formatRaceTime(r.timeSeconds)}
+                    {/* Gun time until the race started publishing chip times
                           in 2024. Marking it stops the column implying a
                           precision the earlier years do not have. */}
-                      {r.timeSource === 'gun' && (
-                        <abbr
-                          class="source-flag text-muted-foreground"
-                          title="Gun time, not chip time"
-                        >
-                          g
-                        </abbr>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )
-      }
+                    {r.timeSource === 'gun' && (
+                      <abbr
+                        class="source-flag text-muted-foreground"
+                        title="Gun time, not chip time"
+                      >
+                        g
+                      </abbr>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div class="mt-12 flex flex-wrap gap-4">
         <a class="btn-plate btn-plate--cream" href="/records/">
           All-time records
-          <span class="btn-plate__arrow" aria-hidden="true">&rarr;</span>
+          <span class="btn-plate__arrow" aria-hidden="true">
+            &rarr;
+          </span>
         </a>
       </div>
     </div>

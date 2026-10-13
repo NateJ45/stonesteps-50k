@@ -55,13 +55,11 @@ const resolved = resolveStats(stats, {
 });
 ---
 
-{
-  resolved.length > 0 && (
-    <section class="bg-background" aria-label="Race numbers">
-      <div class="mob-center mx-auto max-w-content px-6 py-section-md">
-        {heading && <p class="section-label mb-6 text-foreground/80">{heading}</p>}
-        <StatsCounter stats={resolved} client:visible />
-      </div>
-    </section>
-  )
-}
+{resolved.length > 0 && (
+  <section class="bg-background" aria-label="Race numbers">
+    <div class="mob-center mx-auto max-w-content px-6 py-section-md">
+      {heading && <p class="section-label mb-6 text-foreground/80">{heading}</p>}
+      <StatsCounter stats={resolved} client:visible />
+    </div>
+  </section>
+)}

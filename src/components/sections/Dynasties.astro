@@ -76,13 +76,12 @@ const wide = holders.length === 4;
 const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 ---
 
-{
-  holders.length > 0 && (
-    <section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
-      <div class="mob-center mx-auto w-full max-w-content px-6">
-        <SectionHeading {eyebrow} {headline} {headingId} />
+{holders.length > 0 && (
+  <section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+    <div class="mob-center mx-auto w-full max-w-content px-6">
+      <SectionHeading {eyebrow} {headline} {headingId} />
 
-        {/* ONE BOARD, FOUR ROWS, NOT A GRID OF FOUR. The callouts were two
+      {/* ONE BOARD, FOUR ROWS, NOT A GRID OF FOUR. The callouts were two
             across from the narrowest phone, which was the right answer for
             four stacks of small type and the wrong one for an object: a sign
             with four rows on it is read straight down, and the four times line
@@ -90,24 +89,23 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
             short of the content column: past about 54rem the rail pulls so far
             from the names that a row stops reading as one line, which is the
             same failure the results tables were rebuilt to fix. */}
-        <RecordBoard
-          class:list={['mob-left mt-10', wide ? 'board--wide' : 'max-w-[54rem]']}
-          label="Course record holders"
-          rows={holders.map((h) => ({
-            label: `${h.gender} ${h.distance}`,
-            name: h.athlete as string,
-            slug: h.athleteSlug,
-            time: formatRaceTime(h.timeSeconds),
-            year: h.year,
-          }))}
-        />
+      <RecordBoard
+        class:list={['mob-left mt-10', wide ? 'board--wide' : 'max-w-[54rem]']}
+        label="Course record holders"
+        rows={holders.map((h) => ({
+          label: `${h.gender} ${h.distance}`,
+          name: h.athlete as string,
+          slug: h.athleteSlug,
+          time: formatRaceTime(h.timeSeconds),
+          year: h.year,
+        }))}
+      />
 
-        {cta && (
-          <div class="mt-10">
-            <CtaLink {cta} class="btn-plate btn-plate--cream" />
-          </div>
-        )}
-      </div>
-    </section>
-  )
-}
+      {cta && (
+        <div class="mt-10">
+          <CtaLink {cta} class="btn-plate btn-plate--cream" />
+        </div>
+      )}
+    </div>
+  </section>
+)}

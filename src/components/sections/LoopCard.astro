@@ -53,151 +53,149 @@ const {
 } = Astro.props as Props;
 ---
 
-{
-  loops.length > 0 && (
-    <section class="band-torn relative bg-muted py-section-lg" aria-labelledby={headingId}>
-      {/* How many loops there are, taken from the loops themselves rather than
+{loops.length > 0 && (
+  <section class="band-torn relative bg-muted py-section-lg" aria-labelledby={headingId}>
+    {/* How many loops there are, taken from the loops themselves rather than
         typed, so it cannot drift from the card below it. Clipped by a wrapper,
         because the section's ridge lives above its own box. */}
-      <div class="pointer-events-none absolute inset-0 overflow-hidden">
-        <DataMark text={loops.length} align="right" position="inset" />
-      </div>
-      <div class="mob-center mx-auto w-full max-w-content px-6">
-        {eyebrow && (
-          <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-            {eyebrow}
-          </p>
-        )}
-        <h2 id={headingId} class="display text-h2">
-          {headline}
-        </h2>
+    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <DataMark text={loops.length} align="right" position="inset" />
+    </div>
+    <div class="mob-center mx-auto w-full max-w-content px-6">
+      {eyebrow && (
+        <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+          {eyebrow}
+        </p>
+      )}
+      <h2 id={headingId} class="display text-h2">
+        {headline}
+      </h2>
 
-        {/* THE SHARED SPLIT (2026-09-18). 1.15fr/0.85fr is within a few pixels
+      {/* THE SHARED SPLIT (2026-09-18). 1.15fr/0.85fr is within a few pixels
           of the site's shared ratio and was still enough to put this band's
           second column at x=749 while the page header above it started its own
           at 720. A reader scrolling one page does not measure the difference,
           they just feel the column moving. `.split` is the one definition now;
           the punch card itself is capped at 38rem and sits at the column's left
           edge either way, so only the aside beside it moves. */}
-        <div class="split mt-12 lg:items-start">
-          <div class="punch mob-left mx-auto w-full max-w-[38rem] p-5 sm:p-8 lg:mx-0" data-reveal>
+      <div class="split mt-12 lg:items-start">
+        <div class="punch mob-left mx-auto w-full max-w-[38rem] p-5 sm:p-8 lg:mx-0" data-reveal>
+          <div
+            class="punch__rows"
+            role="table"
+            aria-label="Loop order for the 50K, and which loops the 27K covers"
+          >
             <div
-              class="punch__rows"
-              role="table"
-              aria-label="Loop order for the 50K, and which loops the 27K covers"
+              class="grid grid-cols-[22px_2.5rem_1fr_auto] items-center gap-3 border-b-2 border-dashed border-black/35 pb-2"
+              role="row"
             >
-              <div
-                class="grid grid-cols-[22px_2.5rem_1fr_auto] items-center gap-3 border-b-2 border-dashed border-black/35 pb-2"
-                role="row"
-              >
-                {/* The visually hidden header is WRAPPED so the wrapper still
+              {/* The visually hidden header is WRAPPED so the wrapper still
                     takes its grid cell: `sr-only` is position:absolute, and an
                     absolute child leaves the grid, which shoved every header
                     one column left ("LOOP" over the holes, "TYPE" over the
                     numbers). */}
-                <span role="columnheader">
-                  <span class="sr-only">Included in the 27K</span>
-                </span>
-                <span
-                  class="font-mono text-[0.6875rem] tracking-[0.18em] text-[color:var(--plate-ink-soft)] uppercase"
-                  role="columnheader"
-                >
-                  Loop
-                </span>
-                <span
-                  class="font-mono text-[0.6875rem] tracking-[0.18em] text-[color:var(--plate-ink-soft)] uppercase"
-                  role="columnheader"
-                >
-                  Type
-                </span>
-                <span
-                  class="text-right font-mono text-[0.6875rem] tracking-[0.18em] text-[color:var(--plate-ink-soft)] uppercase"
-                  role="columnheader"
-                >
-                  Miles
-                  <span class="sr-only">, and the total when you come back through The Oval</span>
-                </span>
-              </div>
+              <span role="columnheader">
+                <span class="sr-only">Included in the 27K</span>
+              </span>
+              <span
+                class="font-mono text-[0.6875rem] tracking-[0.18em] text-[color:var(--plate-ink-soft)] uppercase"
+                role="columnheader"
+              >
+                Loop
+              </span>
+              <span
+                class="font-mono text-[0.6875rem] tracking-[0.18em] text-[color:var(--plate-ink-soft)] uppercase"
+                role="columnheader"
+              >
+                Type
+              </span>
+              <span
+                class="text-right font-mono text-[0.6875rem] tracking-[0.18em] text-[color:var(--plate-ink-soft)] uppercase"
+                role="columnheader"
+              >
+                Miles
+                <span class="sr-only">, and the total when you come back through The Oval</span>
+              </span>
+            </div>
 
-              {loops.map((loop, i) => (
-                <div
-                  class="grid grid-cols-[22px_2.5rem_1fr_auto] items-center gap-3 border-b border-black/10 py-2.5 last:border-b-0"
-                  role="row"
+            {loops.map((loop, i) => (
+              <div
+                class="grid grid-cols-[22px_2.5rem_1fr_auto] items-center gap-3 border-b border-black/10 py-2.5 last:border-b-0"
+                role="row"
+              >
+                <span
+                  class={`punch__hole ${loop.inShortDistance ? 'is-punched' : ''}`}
+                  style={`--i:${i}`}
+                  role="cell"
+                  aria-label={loop.inShortDistance ? 'Included in the 27K' : '50K only'}
+                />
+                <span
+                  class={`tabular text-lg ${loop.kind === 'long' ? 'font-bold' : 'text-[color:var(--plate-ink-soft)]'}`}
+                  role="cell"
                 >
-                  <span
-                    class={`punch__hole ${loop.inShortDistance ? 'is-punched' : ''}`}
-                    style={`--i:${i}`}
-                    role="cell"
-                    aria-label={loop.inShortDistance ? 'Included in the 27K' : '50K only'}
-                  />
-                  <span
-                    class={`tabular text-lg ${loop.kind === 'long' ? 'font-bold' : 'text-[color:var(--plate-ink-soft)]'}`}
-                    role="cell"
-                  >
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span
-                    class={`text-sm ${loop.kind === 'long' ? 'text-[color:var(--plate-accent)]' : 'text-[color:var(--plate-ink-soft)]'}`}
-                    role="cell"
-                  >
-                    {loop.kind === 'short' ? 'Short' : 'Long'}
-                  </span>
-                  <span class="text-right" role="cell">
-                    <span class="tabular text-sm">{loop.miles}</span>
-                    {/* The cumulative figure is the one a runner uses on the
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span
+                  class={`text-sm ${loop.kind === 'long' ? 'text-[color:var(--plate-accent)]' : 'text-[color:var(--plate-ink-soft)]'}`}
+                  role="cell"
+                >
+                  {loop.kind === 'short' ? 'Short' : 'Long'}
+                </span>
+                <span class="text-right" role="cell">
+                  <span class="tabular text-sm">{loop.miles}</span>
+                  {/* The cumulative figure is the one a runner uses on the
                         day: it answers "how far in am I" at the only point on
                         the course where they can be told. */}
-                    {loop.throughMiles && (
-                      <span class="tabular block text-[0.75rem] whitespace-nowrap text-[color:var(--plate-ink-soft)]">
-                        {/* "8.5 mi so far", spelled out. It shipped as "8.5 in"
+                  {loop.throughMiles && (
+                    <span class="tabular block text-[0.75rem] whitespace-nowrap text-[color:var(--plate-ink-soft)]">
+                      {/* "8.5 mi so far", spelled out. It shipped as "8.5 in"
                             for "8.5 miles in", and beside a bare "5.3" that
                             read as inches. The final loop carries the race's
                             own label for that column, "50K", which is not a
                             mileage and takes no suffix. */}
-                        {/^[\d.]+$/.test(loop.throughMiles)
-                          ? `${loop.throughMiles} mi so far`
-                          : loop.throughMiles}
-                      </span>
-                    )}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {legend && (
-              <p class="mt-6 flex items-start gap-3 border-t border-dashed border-black/30 pt-4 text-sm opacity-75">
-                <span class="punch__hole is-punched mt-0.5 shrink-0" aria-hidden="true" />
-                <span>{legend}</span>
-              </p>
-            )}
-
-            {/* Where the mileages came from. The card claims a tenth of a mile
-                and the race's own website does not, so it has to show its
-                working or it reads as invented. */}
-            {sourceNote && (
-              <p class="mt-4 border-t border-dashed border-black/20 pt-3 text-[0.75rem] leading-relaxed text-[color:var(--plate-ink-soft)]">
-                {sourceNote}
-              </p>
-            )}
+                      {/^[\d.]+$/.test(loop.throughMiles)
+                        ? `${loop.throughMiles} mi so far`
+                        : loop.throughMiles}
+                    </span>
+                  )}
+                </span>
+              </div>
+            ))}
           </div>
 
-          {aside.length > 0 && (
-            <aside class="mob-left grid gap-6">
-              {aside.map((note) => (
-                <div class="border-t border-border pt-5 first:border-t-0 first:pt-0">
-                  <h3 class="display text-h4">{note.title}</h3>
-                  {note.body && <p class="mt-2 text-muted-foreground">{note.body}</p>}
-                  <Provisional
-                    confirmed={note.confirmed}
-                    what="The race does not publish this anywhere yet."
-                    class="mt-3"
-                  />
-                </div>
-              ))}
-            </aside>
+          {legend && (
+            <p class="mt-6 flex items-start gap-3 border-t border-dashed border-black/30 pt-4 text-sm opacity-75">
+              <span class="punch__hole is-punched mt-0.5 shrink-0" aria-hidden="true" />
+              <span>{legend}</span>
+            </p>
+          )}
+
+          {/* Where the mileages came from. The card claims a tenth of a mile
+                and the race's own website does not, so it has to show its
+                working or it reads as invented. */}
+          {sourceNote && (
+            <p class="mt-4 border-t border-dashed border-black/20 pt-3 text-[0.75rem] leading-relaxed text-[color:var(--plate-ink-soft)]">
+              {sourceNote}
+            </p>
           )}
         </div>
+
+        {aside.length > 0 && (
+          <aside class="mob-left grid gap-6">
+            {aside.map((note) => (
+              <div class="border-t border-border pt-5 first:border-t-0 first:pt-0">
+                <h3 class="display text-h4">{note.title}</h3>
+                {note.body && <p class="mt-2 text-muted-foreground">{note.body}</p>}
+                <Provisional
+                  confirmed={note.confirmed}
+                  what="The race does not publish this anywhere yet."
+                  class="mt-3"
+                />
+              </div>
+            ))}
+          </aside>
+        )}
       </div>
-    </section>
-  )
-}
+    </div>
+  </section>
+)}

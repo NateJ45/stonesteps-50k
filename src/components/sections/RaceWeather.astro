@@ -70,139 +70,137 @@ const fmtDate = (iso: string) =>
   });
 ---
 
-{
-  summary && (
-    <section class={`relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
-      <div class="pointer-events-none absolute inset-0 overflow-hidden">
-        <Topo seed={41} lines={9} opacity={0.3} />
-      </div>
-      <div class="mob-center relative z-10 mx-auto w-full max-w-content px-6">
-        <SectionHeading {eyebrow} {headline} {headingId} />
-        <p class="mt-4 max-w-[60ch] text-lg text-foreground">{intro || summarySentence(summary)}</p>
+{summary && (
+  <section class={`relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
+    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <Topo seed={41} lines={9} opacity={0.3} />
+    </div>
+    <div class="mob-center relative z-10 mx-auto w-full max-w-content px-6">
+      <SectionHeading {eyebrow} {headline} {headingId} />
+      <p class="mt-4 max-w-[60ch] text-lg text-foreground">{intro || summarySentence(summary)}</p>
 
-        {/* THE STRIP. A track with 10° gridlines; each year is a column holding
+      {/* THE STRIP. A track with 10° gridlines; each year is a column holding
           one absolutely-positioned bar. Heights and offsets are percentages of
           the shared scale, so every bar is comparable by eye and the whole
           thing is plain CSS: nothing to hydrate, nothing to animate. */}
-        <figure class="mt-16" data-reveal>
-          <div class="wx" style={`--wx-cols:${days.length}`}>
-            <div class="wx__axis" aria-hidden="true">
-              {ticks.map((t) => (
-                <span class="wx__tick" style={`bottom:${pct(t)}%`}>
-                  {t}°
-                </span>
-              ))}
-            </div>
-            <div class="wx__track" aria-hidden="true">
-              {ticks.map((t) => (
-                <span class="wx__grid" style={`bottom:${pct(t)}%`} />
-              ))}
-              {days.map((d, i) => (
-                <div
-                  class:list={['wx__col', wasWetUnderfoot(d) && 'is-wet', wasWet(d) && 'is-rain']}
-                  style={`--i:${i}`}
-                  title={`${d.year}: ${d.low}° to ${d.high}°F, ${conditionLabel(d.code).toLowerCase()}${wasWet(d) ? `, ${d.rainIn} in of rain` : wasWetUnderfoot(d) ? ', wet from the night before' : ''}`}
-                >
-                  <span
-                    class="wx__bar"
-                    style={`bottom:${pct(d.low)}%;height:${pct(d.high) - pct(d.low)}%`}
-                  >
-                    {d.startTemp != null && (
-                      <span
-                        class="wx__start"
-                        style={`bottom:${((d.startTemp - d.low) / Math.max(d.high - d.low, 1)) * 100}%`}
-                      />
-                    )}
-                  </span>
-                  <span class="wx__icon">
-                    <WeatherIcon kind={iconKind(d.code, wasWet(d))} />
-                  </span>
-                  <span class="wx__foot" />
-                  <span class="wx__year">{String(d.year).slice(2)}</span>
-                </div>
-              ))}
-            </div>
+      <figure class="mt-16" data-reveal>
+        <div class="wx" style={`--wx-cols:${days.length}`}>
+          <div class="wx__axis" aria-hidden="true">
+            {ticks.map((t) => (
+              <span class="wx__tick" style={`bottom:${pct(t)}%`}>
+                {t}°
+              </span>
+            ))}
           </div>
-          {/* A KEY, not a caption. The strip explains itself once the three
+          <div class="wx__track" aria-hidden="true">
+            {ticks.map((t) => (
+              <span class="wx__grid" style={`bottom:${pct(t)}%`} />
+            ))}
+            {days.map((d, i) => (
+              <div
+                class:list={['wx__col', wasWetUnderfoot(d) && 'is-wet', wasWet(d) && 'is-rain']}
+                style={`--i:${i}`}
+                title={`${d.year}: ${d.low}° to ${d.high}°F, ${conditionLabel(d.code).toLowerCase()}${wasWet(d) ? `, ${d.rainIn} in of rain` : wasWetUnderfoot(d) ? ', wet from the night before' : ''}`}
+              >
+                <span
+                  class="wx__bar"
+                  style={`bottom:${pct(d.low)}%;height:${pct(d.high) - pct(d.low)}%`}
+                >
+                  {d.startTemp != null && (
+                    <span
+                      class="wx__start"
+                      style={`bottom:${((d.startTemp - d.low) / Math.max(d.high - d.low, 1)) * 100}%`}
+                    />
+                  )}
+                </span>
+                <span class="wx__icon">
+                  <WeatherIcon kind={iconKind(d.code, wasWet(d))} />
+                </span>
+                <span class="wx__foot" />
+                <span class="wx__year">{String(d.year).slice(2)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* A KEY, not a caption. The strip explains itself once the three
             marks are named; where the numbers came from is in the source of
             this component and in scripts/build-weather.mjs, not on the page. */}
-          <figcaption class="wx__key mt-8 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[0.6875rem] tracking-wide text-muted-foreground uppercase">
-            <span class="wx__k">
-              <span class="wx__k-bar" aria-hidden="true" /> Low to high
-            </span>
-            <span class="wx__k">
-              <span class="wx__k-notch" aria-hidden="true" /> 8 am start
-            </span>
-            <span class="wx__k">
-              <span class="wx__k-foot is-rain" aria-hidden="true" /> Rain on the day
-            </span>
-            <span class="wx__k">
-              <span class="wx__k-foot is-wet" aria-hidden="true" /> Wet from the night before
-            </span>
-          </figcaption>
-        </figure>
+        <figcaption class="wx__key mt-8 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[0.6875rem] tracking-wide text-muted-foreground uppercase">
+          <span class="wx__k">
+            <span class="wx__k-bar" aria-hidden="true" /> Low to high
+          </span>
+          <span class="wx__k">
+            <span class="wx__k-notch" aria-hidden="true" /> 8 am start
+          </span>
+          <span class="wx__k">
+            <span class="wx__k-foot is-rain" aria-hidden="true" /> Rain on the day
+          </span>
+          <span class="wx__k">
+            <span class="wx__k-foot is-wet" aria-hidden="true" /> Wet from the night before
+          </span>
+        </figcaption>
+      </figure>
 
-        {/* WHAT TO PACK. Computed from the same record as the strip (packList in
+      {/* WHAT TO PACK. Computed from the same record as the strip (packList in
           src/lib/raceWeather.ts), so it moves when a new year is baked. The id is
           the target of the race-week link on the hero clock (Countdown.astro). */}
-        {pack.length > 0 && (
-          <div id="pack" class="mt-16 scroll-mt-28" data-reveal>
-            <h3 class="font-mono text-[0.75rem] tracking-[0.18em] text-muted-foreground uppercase">
-              What to pack, going by the record
-            </h3>
-            {/* Race week only: filled by ForecastLoader with the live forecast. */}
-            <p class="mt-4 max-w-[70ch] text-foreground" data-forecast="full" hidden />
-            <dl class="mt-5 grid gap-x-10 gap-y-6 md:grid-cols-3">
-              {pack.map((item) => (
-                <div class="border-t-2 border-dashed border-foreground/25 pt-4">
-                  <dt class="font-mono text-[0.6875rem] tracking-wide text-(--heading-accent) uppercase">
-                    {item.label}
-                  </dt>
-                  <dd class="mt-2 max-w-[38ch] text-foreground">{item.text}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        )}
+      {pack.length > 0 && (
+        <div id="pack" class="mt-16 scroll-mt-28" data-reveal>
+          <h3 class="font-mono text-[0.75rem] tracking-[0.18em] text-muted-foreground uppercase">
+            What to pack, going by the record
+          </h3>
+          {/* Race week only: filled by ForecastLoader with the live forecast. */}
+          <p class="mt-4 max-w-[70ch] text-foreground" data-forecast="full" hidden />
+          <dl class="mt-5 grid gap-x-10 gap-y-6 md:grid-cols-3">
+            {pack.map((item) => (
+              <div class="border-t-2 border-dashed border-foreground/25 pt-4">
+                <dt class="font-mono text-[0.6875rem] tracking-wide text-(--heading-accent) uppercase">
+                  {item.label}
+                </dt>
+                <dd class="mt-2 max-w-[38ch] text-foreground">{item.text}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
 
-        {/* The same record as a table, for a screen reader or anyone who wants
+      {/* The same record as a table, for a screen reader or anyone who wants
           the numbers. Visually hidden, not display:none, so it is read. The
           sr-only class goes on a wrapping div, not the table: on a
           display:table element its width:1px is only a minimum, the table
           grows to its content, and a hidden 10px of it hung past the phone's
           viewport as a horizontal scroll. */}
-        <div class="sr-only">
-          <table>
-            <caption>Race-day weather by year</caption>
-            <thead>
+      <div class="sr-only">
+        <table>
+          <caption>Race-day weather by year</caption>
+          <thead>
+            <tr>
+              <th scope="col">Year</th>
+              <th scope="col">Date</th>
+              <th scope="col">Start</th>
+              <th scope="col">Low</th>
+              <th scope="col">High</th>
+              <th scope="col">Rain</th>
+              <th scope="col">Conditions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {days.map((d) => (
               <tr>
-                <th scope="col">Year</th>
-                <th scope="col">Date</th>
-                <th scope="col">Start</th>
-                <th scope="col">Low</th>
-                <th scope="col">High</th>
-                <th scope="col">Rain</th>
-                <th scope="col">Conditions</th>
+                <th scope="row">{d.year}</th>
+                <td>{fmtDate(d.date)}</td>
+                <td>{d.startTemp != null ? `${d.startTemp}°F` : ''}</td>
+                <td>{d.low}°F</td>
+                <td>{d.high}°F</td>
+                <td>
+                  {wasWet(d) ? `${d.rainIn} in` : wasWetUnderfoot(d) ? 'night before' : 'dry'}
+                </td>
+                <td>{conditionLabel(d.code)}</td>
               </tr>
-            </thead>
-            <tbody>
-              {days.map((d) => (
-                <tr>
-                  <th scope="row">{d.year}</th>
-                  <td>{fmtDate(d.date)}</td>
-                  <td>{d.startTemp != null ? `${d.startTemp}°F` : ''}</td>
-                  <td>{d.low}°F</td>
-                  <td>{d.high}°F</td>
-                  <td>
-                    {wasWet(d) ? `${d.rainIn} in` : wasWetUnderfoot(d) ? 'night before' : 'dry'}
-                  </td>
-                  <td>{conditionLabel(d.code)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </section>
-  )
-}
+    </div>
+  </section>
+)}

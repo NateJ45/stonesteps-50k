@@ -45,13 +45,11 @@ interface Props {
 const { image, side = 'right', class: className = '' } = Astro.props as Props;
 ---
 
-{
-  image?.asset && (
-    <div class:list={['ghost-photo', `ghost-photo--${side}`, className]} aria-hidden="true">
-      <SanityImage source={image} width={900} sizes="34vw" alt="" loading="lazy" quality={70} />
-    </div>
-  )
-}
+{image?.asset && (
+  <div class:list={['ghost-photo', `ghost-photo--${side}`, className]} aria-hidden="true">
+    <SanityImage source={image} width={900} sizes="34vw" alt="" loading="lazy" quality={70} />
+  </div>
+)}
 
 <style>
   .ghost-photo {

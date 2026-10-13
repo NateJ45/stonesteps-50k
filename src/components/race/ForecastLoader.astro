@@ -31,13 +31,11 @@ import type { IconKind } from '@/lib/raceWeather';
 const kinds: IconKind[] = ['sun', 'partly', 'cloud', 'fog', 'drizzle', 'rain', 'snow', 'storm'];
 ---
 
-{
-  kinds.map((k) => (
-    <template data-forecast-icon={k}>
-      <WeatherIcon kind={k} />
-    </template>
-  ))
-}
+{kinds.map((k) => (
+  <template data-forecast-icon={k}>
+    <WeatherIcon kind={k} />
+  </template>
+))}
 
 <script>
   const TTL_MS = 30 * 60 * 1000;
