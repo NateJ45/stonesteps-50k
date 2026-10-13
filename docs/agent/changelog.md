@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-13: SanityImage srcset ladder starts at 160w (starter PORTS card 93)._
+
+The srcset ladder in `SanityImage.astro` now comes from `src/lib/imageLadder.ts` (new, with `imageLadder.test.ts`) and runs `[160, 240, 320, 400, 600, 700, 800, 900, 1200, 1600, 2400]`. It started at 400w, so small slots downloaded 1.4 to 2x the bytes they painted. A slot that needs 400px or more picks the same candidate as before (asserted in the test). When `sizes` is passed and readable, steps below 75% of its smallest slot are dropped. `SanityImage.astro` is not `PORTABLE` (this site's copy has its own props), so this is a hand-applied three-line change from starter PORTS.md card 93. Live image bytes before and after are in the PR.
+
 _2026-10-09 - The /contact region map is a drawn plate, not a baked still._
 
 Nathan found the re-baked map no different on a 1x screen and asked for something simpler and better looking. `RegionPoster.astro` now draws a cream plate (black edge, hard shadow, like the tickets and FAQ cards) with three pins at their real coordinates, The Oval taken from the first point of `course-geo.json`, straight-line miles computed from the same numbers, and one flat band for the Ohio. A busier version with contours, interstates and a course inset was tried and dropped as too much. `npm run map-region`, `scripts/capture-region-poster.mjs` and `public/region-poster*` are gone; the capture pipeline it used is now orphaned (PENDING 1p).
