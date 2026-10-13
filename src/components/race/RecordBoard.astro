@@ -57,50 +57,48 @@ type Props = {
 const { rows, label, seed = 11, class: extraClass = '' } = Astro.props as Props;
 ---
 
-{
-  rows.length > 0 && (
-    /* `data-reveal` is what the strike hangs off. BaseLayout's observer adds
+{rows.length > 0 && (
+  /* `data-reveal` is what the strike hangs off. BaseLayout's observer adds
       `.is-visible` the moment the board crosses the viewport edge, marks
       everything visible immediately where there is no IntersectionObserver,
       and fires on sight for a board that is already on screen at load. See the
       three-part note in globals.css: no path through this leaves a row
       blank. */
-    <div class={`board ${extraClass}`} data-reveal>
-      <span class="board__topo" aria-hidden="true">
-        <Topo seed={seed} lines={7} />
-      </span>
-      <MudField field="walk" class="board__mud" />
+  <div class={`board ${extraClass}`} data-reveal>
+    <span class="board__topo" aria-hidden="true">
+      <Topo seed={seed} lines={7} />
+    </span>
+    <MudField field="walk" class="board__mud" />
 
-      {/* Four nails, one per corner. Decoration, so they are spans with no
+    {/* Four nails, one per corner. Decoration, so they are spans with no
         content rather than anything a reader has to step over. */}
-      <span class="board__nail board__nail--tl" aria-hidden="true" />
-      <span class="board__nail board__nail--tr" aria-hidden="true" />
-      <span class="board__nail board__nail--bl" aria-hidden="true" />
-      <span class="board__nail board__nail--br" aria-hidden="true" />
+    <span class="board__nail board__nail--tl" aria-hidden="true" />
+    <span class="board__nail board__nail--tr" aria-hidden="true" />
+    <span class="board__nail board__nail--bl" aria-hidden="true" />
+    <span class="board__nail board__nail--br" aria-hidden="true" />
 
-      <ol class="board__rows" aria-label={label}>
-        {rows.map((row, i) => (
-          /* The row index rides on the element as --i, so the strike follows
+    <ol class="board__rows" aria-label={label}>
+      {rows.map((row, i) => (
+        /* The row index rides on the element as --i, so the strike follows
             the order the board is read in rather than whatever order the CSS
             happens to match. Same device the punch card uses for its holes. */
-          <li class="board__row" style={`--i:${i}`}>
-            <p class="board__label">{row.label}</p>
-            <p class="board__name">
-              {row.slug ? (
-                <a class="tap-pad" href={`/runners/${row.slug}/`}>
-                  {row.name}
-                </a>
-              ) : (
-                row.name
-              )}
-            </p>
-            <p class="board__mark">
-              <span class="board__time tabular">{row.time}</span>
-              {row.year && <span class="board__year">{row.year}</span>}
-            </p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  )
-}
+        <li class="board__row" style={`--i:${i}`}>
+          <p class="board__label">{row.label}</p>
+          <p class="board__name">
+            {row.slug ? (
+              <a class="tap-pad" href={`/runners/${row.slug}/`}>
+                {row.name}
+              </a>
+            ) : (
+              row.name
+            )}
+          </p>
+          <p class="board__mark">
+            <span class="board__time tabular">{row.time}</span>
+            {row.year && <span class="board__year">{row.year}</span>}
+          </p>
+        </li>
+      ))}
+    </ol>
+  </div>
+)}

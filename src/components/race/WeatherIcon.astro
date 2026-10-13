@@ -24,89 +24,75 @@ const rays = Array.from({ length: 8 }, (_, i) => i * 45);
 ---
 
 <svg class={`wxi wxi--${kind}`} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-  {
-    (kind === 'sun' || kind === 'partly') && (
-      <g class="wxi__sun" transform={kind === 'partly' ? 'translate(7 -6) scale(0.8)' : undefined}>
-        <g class="wxi__rays">
-          {rays.map((a) => (
-            <line x1="16" y1="3.5" x2="16" y2="7" transform={`rotate(${a} 16 16)`} />
-          ))}
-        </g>
-        <circle class="wxi__core" cx="16" cy="16" r="6" />
+  {(kind === 'sun' || kind === 'partly') && (
+    <g class="wxi__sun" transform={kind === 'partly' ? 'translate(7 -6) scale(0.8)' : undefined}>
+      <g class="wxi__rays">
+        {rays.map((a) => (
+          <line x1="16" y1="3.5" x2="16" y2="7" transform={`rotate(${a} 16 16)`} />
+        ))}
       </g>
-    )
-  }
+      <circle class="wxi__core" cx="16" cy="16" r="6" />
+    </g>
+  )}
 
-  {
-    (kind === 'partly' ||
-      kind === 'cloud' ||
-      kind === 'drizzle' ||
-      kind === 'rain' ||
-      kind === 'snow' ||
-      kind === 'storm') && (
-      <g
-        transform={
-          kind === 'partly'
-            ? 'translate(-1 5)'
-            : kind === 'cloud'
-              ? 'translate(0 2)'
-              : 'translate(0 -4)'
-        }
-      >
-        <g class="wxi__cloud">
-          <circle cx="10" cy="19" r="5" />
-          <circle cx="17" cy="16" r="7" />
-          <circle cx="23" cy="20" r="4" />
-          <rect x="10" y="19" width="13" height="5" />
-        </g>
+  {(kind === 'partly' ||
+    kind === 'cloud' ||
+    kind === 'drizzle' ||
+    kind === 'rain' ||
+    kind === 'snow' ||
+    kind === 'storm') && (
+    <g
+      transform={
+        kind === 'partly'
+          ? 'translate(-1 5)'
+          : kind === 'cloud'
+            ? 'translate(0 2)'
+            : 'translate(0 -4)'
+      }
+    >
+      <g class="wxi__cloud">
+        <circle cx="10" cy="19" r="5" />
+        <circle cx="17" cy="16" r="7" />
+        <circle cx="23" cy="20" r="4" />
+        <rect x="10" y="19" width="13" height="5" />
       </g>
-    )
-  }
+    </g>
+  )}
 
-  {
-    kind === 'fog' && (
-      <g class="wxi__fog">
-        <line x1="6" y1="11" x2="22" y2="11" />
-        <line x1="10" y1="17" x2="27" y2="17" />
-        <line x1="5" y1="23" x2="20" y2="23" />
-      </g>
-    )
-  }
+  {kind === 'fog' && (
+    <g class="wxi__fog">
+      <line x1="6" y1="11" x2="22" y2="11" />
+      <line x1="10" y1="17" x2="27" y2="17" />
+      <line x1="5" y1="23" x2="20" y2="23" />
+    </g>
+  )}
 
-  {
-    kind === 'rain' && (
-      <g class="wxi__drops">
-        <line class="wxi__drop" x1="11" y1="23" x2="9.5" y2="27" style="--d:0s" />
-        <line class="wxi__drop" x1="16.5" y1="23" x2="15" y2="27" style="--d:0.35s" />
-        <line class="wxi__drop" x1="22" y1="23" x2="20.5" y2="27" style="--d:0.7s" />
-      </g>
-    )
-  }
+  {kind === 'rain' && (
+    <g class="wxi__drops">
+      <line class="wxi__drop" x1="11" y1="23" x2="9.5" y2="27" style="--d:0s" />
+      <line class="wxi__drop" x1="16.5" y1="23" x2="15" y2="27" style="--d:0.35s" />
+      <line class="wxi__drop" x1="22" y1="23" x2="20.5" y2="27" style="--d:0.7s" />
+    </g>
+  )}
 
-  {
-    kind === 'drizzle' && (
-      <g class="wxi__drops wxi__drops--slow">
-        <line class="wxi__drop" x1="13" y1="23" x2="12" y2="26" style="--d:0s" />
-        <line class="wxi__drop" x1="20" y1="23" x2="19" y2="26" style="--d:0.9s" />
-      </g>
-    )
-  }
+  {kind === 'drizzle' && (
+    <g class="wxi__drops wxi__drops--slow">
+      <line class="wxi__drop" x1="13" y1="23" x2="12" y2="26" style="--d:0s" />
+      <line class="wxi__drop" x1="20" y1="23" x2="19" y2="26" style="--d:0.9s" />
+    </g>
+  )}
 
-  {
-    kind === 'snow' && (
-      <g class="wxi__flakes">
-        <circle class="wxi__flake" cx="11" cy="25" r="1.4" style="--d:0s" />
-        <circle class="wxi__flake" cx="16.5" cy="25" r="1.4" style="--d:0.6s" />
-        <circle class="wxi__flake" cx="22" cy="25" r="1.4" style="--d:1.2s" />
-      </g>
-    )
-  }
+  {kind === 'snow' && (
+    <g class="wxi__flakes">
+      <circle class="wxi__flake" cx="11" cy="25" r="1.4" style="--d:0s" />
+      <circle class="wxi__flake" cx="16.5" cy="25" r="1.4" style="--d:0.6s" />
+      <circle class="wxi__flake" cx="22" cy="25" r="1.4" style="--d:1.2s" />
+    </g>
+  )}
 
-  {
-    kind === 'storm' && (
-      <polygon class="wxi__bolt" points="17.5,21 12.5,28.5 16,28.5 14.5,33 21,25 17,25 19,21" />
-    )
-  }
+  {kind === 'storm' && (
+    <polygon class="wxi__bolt" points="17.5,21 12.5,28.5 16,28.5 14.5,33 21,25 17,25 19,21" />
+  )}
 </svg>
 
 <style>

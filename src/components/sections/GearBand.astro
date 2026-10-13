@@ -39,21 +39,19 @@ const {
 const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 ---
 
-{
-  items.length > 0 && (
-    <section class={`py-section-md ${surfaceClass}`} aria-labelledby={headingId}>
-      <div class="mob-center mx-auto w-full max-w-content px-6">
-        <SectionHeading {eyebrow} {headline} {headingId} />
+{items.length > 0 && (
+  <section class={`py-section-md ${surfaceClass}`} aria-labelledby={headingId}>
+    <div class="mob-center mx-auto w-full max-w-content px-6">
+      <SectionHeading {eyebrow} {headline} {headingId} />
 
-        <ul class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((item) => (
-            <li class="border-l-[3px] border-primary pl-5">
-              <h3 class="display text-h4">{item.title}</h3>
-              {item.body && <p class="mt-2 text-sm text-muted-foreground">{item.body}</p>}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  )
-}
+      <ul class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map((item) => (
+          <li class="border-l-[3px] border-primary pl-5">
+            <h3 class="display text-h4">{item.title}</h3>
+            {item.body && <p class="mt-2 text-sm text-muted-foreground">{item.body}</p>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}

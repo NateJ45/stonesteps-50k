@@ -74,8 +74,7 @@ const hasImage = Boolean(image?.asset);
   class="relative overflow-hidden border-b border-border bg-background pt-8 pb-section-lg lg:pt-section-lg"
   aria-labelledby={headingId}
 >
-  {
-    /* A WALK, NOT CONTOUR LINES. The topo here was thirteen hairlines at half
+  {/* A WALK, NOT CONTOUR LINES. The topo here was thirteen hairlines at half
     opacity, which at that weight stops reading as a map and starts reading as
     stray marks on the paper: interesting enough to notice, not confident
     enough to be anything. One route of prints crossing the band says the same
@@ -83,21 +82,17 @@ const hasImage = Boolean(image?.asset);
 
     The contours are kept where they are a deliberate object rather than a
     whisper: dense behind the hero, and inside the disc behind the race
-    director, where they are enlarged into a map detail. */
-  }
-  {
-    /* THE FADE IS WHAT STOPS THE PRINTS BEING SLICED. This section clips
+    director, where they are enlarged into a map detail. */}
+  {/* THE FADE IS WHAT STOPS THE PRINTS BEING SLICED. This section clips
     (overflow-hidden, for the photograph's corner), and the walk fills it edge
     to edge, so without a mask the prints nearest the top and bottom are cut
     through the middle and read as a printing fault. Same treatment as the
     director band and the elevation band: thin the field out before the clip
-    reaches it. */
-  }
+    reaches it. */}
   <MudField field="walk" class="header-walk mud-edge-fade" />
 
   <div class="mob-center relative z-10 mx-auto w-full max-w-content px-6">
-    {
-      /* THE SHARED SPLIT (2026-09-18). This band's own 1.1fr/0.9fr grid is the
+    {/* THE SHARED SPLIT (2026-09-18). This band's own 1.1fr/0.9fr grid is the
         one the whole site now uses, so it declares it through `.split` in
         globals.css rather than keeping a private copy of the numbers. Nothing
         here moves: the same two tracks, the same 2.5rem gutter. The one
@@ -106,29 +101,24 @@ const hasImage = Boolean(image?.asset);
         track past its share; at this band's sizes nothing reaches that limit,
         and the measured geometry is identical before and after. The reason for
         the move is the four other splits the site was carrying, listed on
-        `.split` itself. */
-    }
+        `.split` itself. */}
     <div class={hasImage ? 'split lg:items-center' : ''}>
       <div>
-        {
-          eyebrow && (
-            <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-              {eyebrowHref ? (
-                <a class="hover:underline" href={eyebrowHref}>
-                  {eyebrow}
-                </a>
-              ) : (
-                eyebrow
-              )}
-            </p>
-          )
-        }
-        {
-          /* Two BLOCK spans, not a <br>. A <br> gives no word boundary, so the
+        {eyebrow && (
+          <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+            {eyebrowHref ? (
+              <a class="hover:underline" href={eyebrowHref}>
+                {eyebrow}
+              </a>
+            ) : (
+              eyebrow
+            )}
+          </p>
+        )}
+        {/* Two BLOCK spans, not a <br>. A <br> gives no word boundary, so the
             accessible name came out as "Ask therace director." run together.
             Blocks break the line visually and keep the words separate for a
-            screen reader. */
-        }
+            screen reader. */}
         <h1
           id={headingId}
           class:list={[
@@ -138,42 +128,32 @@ const hasImage = Boolean(image?.asset);
               : 'text-[clamp(2.5rem,7vw,5.5rem)]',
           ]}
         >
-          {
-            /* The stamped variant wraps the SAME string in one `.stamp-word`
+          {/* The stamped variant wraps the SAME string in one `.stamp-word`
               rather than splitting it per word the way the hero does. The hero
               splits because its mark is three words landing in sequence; a
               year is one press. No sr-only twin either, for the same reason:
               nothing here is drawn per character, so the text in the heading
-              is the text a screen reader gets. */
-          }
-          {
-            /* `inline-block`, not `block`, when it is stamped. The press opens
+              is the text a screen reader gets. */}
+          {/* `inline-block`, not `block`, when it is stamped. The press opens
               at 2.4x about the element's own centre, and a full-width block
               would swing a numeral halfway across the band (and out through
               the section's clip) on the way in. An inline-block box is the
-              width of the digits, so the press opens around them. */
-          }
+              width of the digits, so the press opens around them. */}
           <span class:list={[headlineStamp ? 'stamp-word inline-block' : 'block']}>{headline}</span>
-          {
-            /* The explicit space is load-bearing: Astro strips the whitespace
+          {/* The explicit space is load-bearing: Astro strips the whitespace
               between adjacent expressions, so without it the two lines
               concatenate into "Ask therace director." in the accessible name
-              even though they render on separate lines. */
-          }
-          {
-            headlineSecondLine && (
-              <>
-                {' '}
-                <span class="block">{headlineSecondLine}</span>
-              </>
-            )
-          }
+              even though they render on separate lines. */}
+          {headlineSecondLine && (
+            <>
+              {' '}
+              <span class="block">{headlineSecondLine}</span>
+            </>
+          )}
         </h1>
-        {
-          lede && (
-            <p class="mx-auto mt-6 max-w-[46ch] text-lg text-muted-foreground lg:mx-0">{lede}</p>
-          )
-        }
+        {lede && (
+          <p class="mx-auto mt-6 max-w-[46ch] text-lg text-muted-foreground lg:mx-0">{lede}</p>
+        )}
       </div>
 
       {

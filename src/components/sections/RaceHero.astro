@@ -90,30 +90,24 @@ const words = displayWords(headline);
 const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d+k$/i.test(w);
 ---
 
-{
-  /* NO `bg-background` HERE, deliberately. The body already paints exactly this
+{/* NO `bg-background` HERE, deliberately. The body already paints exactly this
   colour, and it also carries the paper grain and the mottle layer. A background
   on this section covers those, which was invisible while the header was solid
   and became a clear tonal step across the page the moment the header went
   transparent: grain above the line, none below. Letting the body's surface show
   through makes the top of the page one continuous ground, which is the whole
-  point of the overlay. */
-}
+  point of the overlay. */}
 <section class="hero-band relative py-section-lg" aria-labelledby={headingId}>
-  {
-    /* The topo still needs clipping to the band; the mud deliberately does not,
+  {/* The topo still needs clipping to the band; the mud deliberately does not,
     so the clip lives on this wrapper rather than on the <section>. The wrapper
     starts at the top of the PAGE, not the band (`.hero-topo`), so the lines
-    run up behind the transparent header the way the mud does. */
-  }
+    run up behind the transparent header the way the mud does. */}
   <div class="hero-topo pointer-events-none absolute inset-0 overflow-hidden">
     <Topo seed={11} lines={16} opacity={0.42} />
   </div>
 
-  {
-    /* The mud. Baked masks rather than live SVG, and home hero only: see the
-      header of MudField.astro for why, and for the two shapes it carries. */
-  }
+  {/* The mud. Baked masks rather than live SVG, and home hero only: see the
+      header of MudField.astro for why, and for the two shapes it carries. */}
   <MudField field="hero" class="hero-mud" />
 
   {
@@ -182,8 +176,7 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
     )
   }
 
-  {
-    /* THE COPY IS TWO WRAPPERS, NOT ONE, and the reason is the phone. The
+  {/* THE COPY IS TWO WRAPPERS, NOT ONE, and the reason is the phone. The
       photograph is a flex sibling of these (see `.hero-photo`, which uses
       `order` to place itself), so on a phone it can only land BETWEEN two
       wrappers, never in the middle of one. Wrapper A is the poster: eyebrow,
@@ -191,18 +184,15 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
       buttons, the clock. On a phone the picture runs between them, inside the
       first screen, with the claim stamped over its top edge. From lg the
       photo leaves the flow and the two wrappers simply stack, which is the
-      layout that shipped. */
-  }
+      layout that shipped. */}
   <div class="hero-copy hero-copy--a z-10 mx-auto w-full max-w-content px-6">
     <div class="lg:max-w-[52%]">
       <div class="relative">
-        {
-          eyebrow && (
-            <p class="blaze blaze--plain text-heading-accent mb-5 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-              {eyebrow}
-            </p>
-          )
-        }
+        {eyebrow && (
+          <p class="blaze blaze--plain text-heading-accent mb-5 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+            {eyebrow}
+          </p>
+        )}
 
         <h1
           id={headingId}
@@ -210,26 +200,24 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
         >
           <span class="sr-only">{headline}</span>
           <span class="hand" aria-hidden="true">
-            {
-              words.map((word, wi) => (
-                <>
-                  <span class="stamp-word inline-block whitespace-nowrap" style={`--wi:${wi}`}>
-                    {word.split('').map((ch, ci) => (
-                      <span
-                        class={
-                          isDistanceToken(word, wi) && ci === word.length - 1
-                            ? 'k-outline lc'
-                            : undefined
-                        }
-                      >
-                        {ch}
-                      </span>
-                    ))}
-                  </span>
-                  {wi < words.length - 1 && ' '}
-                </>
-              ))
-            }
+            {words.map((word, wi) => (
+              <>
+                <span class="stamp-word inline-block whitespace-nowrap" style={`--wi:${wi}`}>
+                  {word.split('').map((ch, ci) => (
+                    <span
+                      class={
+                        isDistanceToken(word, wi) && ci === word.length - 1
+                          ? 'k-outline lc'
+                          : undefined
+                      }
+                    >
+                      {ch}
+                    </span>
+                  ))}
+                </span>
+                {wi < words.length - 1 && ' '}
+              </>
+            ))}
           </span>
         </h1>
 

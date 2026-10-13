@@ -72,8 +72,7 @@ const button: ProjectedCommunitySection['cta'] =
 >
   <div class="mx-auto w-full max-w-content px-6">
     <div class="community__card">
-      {
-        /* THE MARK AS A WATERMARK, not as an icon. It is the one place on the
+      {/* THE MARK AS A WATERMARK, not as an icon. It is the one place on the
           site where a third party's logo belongs: the card exists to send
           people to that platform, and nominative use of a mark to point at the
           thing it names is exactly what it is for. Drawn in the CARD'S OWN INK
@@ -82,44 +81,35 @@ const button: ProjectedCommunitySection['cta'] =
           theme without a second asset.
           aria-hidden and pointer-events:none: it says nothing the button does
           not already say out loud, and a screen reader announcing "Facebook"
-          twice is noise. */
-      }
+          twice is noise. */}
       <svg class="community__mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path
-          d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
-        ></path>
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
       </svg>
       <div class="community__grid">
         <div class="community__copy">
-          {
-            eyebrow && (
-              <p class="community__eyebrow font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-                {eyebrow}
-              </p>
-            )
-          }
-          <h2 id={headingId} class="display mt-3 text-h2">{headline}</h2>
+          {eyebrow && (
+            <p class="community__eyebrow font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+              {eyebrow}
+            </p>
+          )}
+          <h2 id={headingId} class="display mt-3 text-h2">
+            {headline}
+          </h2>
           {body && <p class="community__body mt-4 max-w-[54ch]">{body}</p>}
 
-          {
-            button && (
-              <div class="mt-8">
-                <CtaLink cta={button} class="btn-plate" />
-              </div>
-            )
-          }
+          {button && (
+            <div class="mt-8">
+              <CtaLink cta={button} class="btn-plate" />
+            </div>
+          )}
         </div>
-        {
-          points.length > 0 && (
-            <ul class="community__points mt-6 grid gap-2 lg:mt-0 lg:gap-4">
-              {points.map((point) => (
-                <li class="community__point font-mono text-[0.8125rem] tracking-[0.08em]">
-                  {point}
-                </li>
-              ))}
-            </ul>
-          )
-        }
+        {points.length > 0 && (
+          <ul class="community__points mt-6 grid gap-2 lg:mt-0 lg:gap-4">
+            {points.map((point) => (
+              <li class="community__point font-mono text-[0.8125rem] tracking-[0.08em]">{point}</li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   </div>

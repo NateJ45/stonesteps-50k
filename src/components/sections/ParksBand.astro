@@ -59,85 +59,69 @@ const {
   </div>
 
   <div class="relative z-10 mx-auto w-full max-w-content px-6">
-    {
-      /* THE SHARED SPLIT (2026-09-18). Two equal halves put this band's
+    {/* THE SHARED SPLIT (2026-09-18). Two equal halves put this band's
         photograph at x=660 while the one two sections above it started at 720.
         `.split` gives the words the wide track and the picture the narrow one,
         which is what every text-and-picture band on the site does now. See
-        globals.css for the ratio and why it is that one. */
-    }
+        globals.css for the ratio and why it is that one. */}
     <div class="split lg:items-center">
       <div>
-        {
-          eyebrow && (
-            <p class="parks__label mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-              {eyebrow}
-            </p>
-          )
-        }
-        {
-          /* The explicit space matters. Astro strips whitespace between adjacent
+        {eyebrow && (
+          <p class="parks__label mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+            {eyebrow}
+          </p>
+        )}
+        {/* The explicit space matters. Astro strips whitespace between adjacent
             expressions, so without it the accessible name runs together as
-            "$2,000 a yearto Cincinnati Parks". Same trap as PageHeader. */
-        }
+            "$2,000 a yearto Cincinnati Parks". Same trap as PageHeader. */}
         <h2 id={headingId} class="display text-h2">
-          {
-            race?.parksDonation && (
-              <>
-                <span class="block">{race.parksDonation} a year</span>{' '}
-              </>
-            )
-          }
+          {race?.parksDonation && (
+            <>
+              <span class="block">{race.parksDonation} a year</span>{' '}
+            </>
+          )}
           {headline}
         </h2>
         {body && <p class="mt-5 max-w-[46ch]">{body}</p>}
 
-        {
-          /* The cream plate, as the tickets wear on this same forest ground.
+        {/* The cream plate, as the tickets wear on this same forest ground.
             CtaLink resolves the link (external, or a page on this site) and
-            the plate class carries the look. */
-        }
-        {
-          cta && (
-            <div class="mt-7">
-              <CtaLink {cta} class="btn-plate btn-plate--cream" />
-            </div>
-          )
-        }
+            the plate class carries the look. */}
+        {cta && (
+          <div class="mt-7">
+            <CtaLink {cta} class="btn-plate btn-plate--cream" />
+          </div>
+        )}
 
-        {
-          showDirector && race?.directorName && (
-            <div class="parks__rule mt-8 border-t pt-5">
-              <p class="parks__label font-mono text-[0.6875rem] tracking-[0.2em] uppercase">
-                Race director
-              </p>
-              <p class="display mt-1 text-h4">{race.directorName}</p>
-              {race.directorNote && <p class="mt-1 text-sm">{race.directorNote}</p>}
-            </div>
-          )
-        }
+        {showDirector && race?.directorName && (
+          <div class="parks__rule mt-8 border-t pt-5">
+            <p class="parks__label font-mono text-[0.6875rem] tracking-[0.2em] uppercase">
+              Race director
+            </p>
+            <p class="display mt-1 text-h4">{race.directorName}</p>
+            {race.directorNote && <p class="mt-1 text-sm">{race.directorNote}</p>}
+          </div>
+        )}
       </div>
 
-      {
-        image?.asset && (
-          <figure>
-            <div class="overflow-hidden rounded-xl border-2 border-black shadow-[var(--lift-lg)]">
-              <SanityImage
-                source={image}
-                width={1200}
-                sizes="(min-width: 1024px) 45vw, 100vw"
-                alt={image.alt ?? ''}
-                class="w-full"
-              />
-            </div>
-            {caption && (
-              <figcaption class="parks__label mt-3 font-mono text-[0.75rem] tracking-[0.14em] uppercase">
-                {caption}
-              </figcaption>
-            )}
-          </figure>
-        )
-      }
+      {image?.asset && (
+        <figure>
+          <div class="overflow-hidden rounded-xl border-2 border-black shadow-[var(--lift-lg)]">
+            <SanityImage
+              source={image}
+              width={1200}
+              sizes="(min-width: 1024px) 45vw, 100vw"
+              alt={image.alt ?? ''}
+              class="w-full"
+            />
+          </div>
+          {caption && (
+            <figcaption class="parks__label mt-3 font-mono text-[0.75rem] tracking-[0.14em] uppercase">
+              {caption}
+            </figcaption>
+          )}
+        </figure>
+      )}
     </div>
   </div>
 </section>

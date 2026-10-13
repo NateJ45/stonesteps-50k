@@ -368,9 +368,9 @@ than at startup, the optimizer re-bundles and reloads the module graph mid-fligh
 `react-dom/server` is left holding a React instance from the previous pass whose hook
 dispatcher is null. Every island then fails to server-render. That is
 withastro/astro#17834, fixed upstream in `@astrojs/cloudflare` by pre-bundling
-`astro/logger/json`; we cannot take that release while the adapter is pinned at 14.2.4
-(entry 4 below), so the same deps are listed in `vite.environments.ssr.optimizeDeps.include`
-in `astro.config.mjs` and bundled at startup instead.
+`astro/logger/json`; that fix ships in the 14.3.x adapter this repo has pinned since 2026-10-13 (card 94). The same deps
+are still listed in `vite.environments.ssr.optimizeDeps.include` in `astro.config.mjs` and bundled at startup;
+the block can be re-measured and dropped separately (entry 4 below).
 
 Also learned: the environment that RENDERS in dev is `ssr`, not `astro`. The previous fix
 was aimed at `astro`, which is why it never fully worked. Verified with a
@@ -433,8 +433,8 @@ Drop it during a slop sweep (card 16) if it is still unused then.
 
 ### 4. The adapter and wrangler pins are tighter than the bug requires
 
-`@astrojs/cloudflare` is pinned exact at 14.2.4 and `wrangler` at `~4.110.0`. Verified
-2026-08-28 that 14.2.4 does **not** emit `legacy_env` into the generated config, so card
+`@astrojs/cloudflare` is pinned exact at 14.3.4 (was 14.2.4 until 2026-10-13) and `wrangler` at
+`~4.149.0` (was `~4.110.0`). Verified 2026-08-28 that 14.2.4 does **not** emit `legacy_env` into the generated config, so card
 14's original failure does not reproduce here; the pin holds the pair together because
 14.2.5 peers `wrangler ^4.125.0`, one minor from the version that rejects the field.
 Revisit when a newer adapter's peer range and emitted config are both checked by hand

@@ -45,17 +45,15 @@ const { text, align = 'right', position = 'bleed', class: className = '' } = Ast
 const value = text == null ? '' : String(text).trim();
 ---
 
-{
-  value && (
-    <span
-      class:list={['data-mark', `data-mark--${align}`, `data-mark--${position}`, className]}
-      aria-hidden="true"
-      data-contrast-decorative
-    >
-      {value}
-    </span>
-  )
-}
+{value && (
+  <span
+    class:list={['data-mark', `data-mark--${align}`, `data-mark--${position}`, className]}
+    aria-hidden="true"
+    data-contrast-decorative
+  >
+    {value}
+  </span>
+)}
 
 <style>
   .data-mark {

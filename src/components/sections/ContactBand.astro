@@ -50,15 +50,13 @@ const dateLabel =
 
 <section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
   <div class="mx-auto w-full max-w-content px-6">
-    {
-      /* THE SHARED SPLIT (2026-09-18). 1.35fr/1fr with a 48px gutter put the
+    {/* THE SHARED SPLIT (2026-09-18). 1.35fr/1fr with a 48px gutter put the
         rail beside this form at x=752, which was the furthest right any seam on
         the site landed and 32px off the picture in the band below it. The rail
         is not a picture, but it is the same object as far as the reader's eye
         is concerned: a second column starting somewhere. It starts where all of
         them start now. The form loses about 24px of width and gains nothing it
-        needed; its fields were never measure-limited. */
-    }
+        needed; its fields were never measure-limited. */}
     <div class="split lg:items-start">
       <div>
         {
@@ -74,79 +72,75 @@ const dateLabel =
             with the label. */
           eyebrow && <p class="section-label text-foreground/80">{eyebrow}</p>
         }
-        <h2 id={headingId} class="display mb-8 text-h2">{headline}</h2>
+        <h2 id={headingId} class="display mb-8 text-h2">
+          {headline}
+        </h2>
         <RaceContactForm client:load subjects={subjects} fallbackUrl={race?.facebookUrl} />
       </div>
 
       <aside class="grid gap-8">
-        {
-          race?.directorName && (
-            <div>
-              <p class="text-heading-accent font-mono text-[0.6875rem] tracking-[0.2em] uppercase">
-                Race director
-              </p>
-              <p class="display mt-2 text-h4">{race.directorName}</p>
-              {race.directorNote && (
-                <p class="mt-2 text-sm text-muted-foreground">{race.directorNote}</p>
+        {race?.directorName && (
+          <div>
+            <p class="text-heading-accent font-mono text-[0.6875rem] tracking-[0.2em] uppercase">
+              Race director
+            </p>
+            <p class="display mt-2 text-h4">{race.directorName}</p>
+            {race.directorNote && (
+              <p class="mt-2 text-sm text-muted-foreground">{race.directorNote}</p>
+            )}
+          </div>
+        )}
+
+        {race?.facebookUrl && (
+          <div class="border-t border-border pt-8">
+            <p class="text-heading-accent font-mono text-[0.6875rem] tracking-[0.2em] uppercase">
+              The community
+            </p>
+            {communityNote && <p class="mt-2 text-sm text-muted-foreground">{communityNote}</p>}
+            <a
+              class="btn-plate btn-plate--cream mt-4 text-sm"
+              href={race.facebookUrl}
+              {...externalLinkAttrs(race.facebookUrl)}
+            >
+              Join the group
+              <span aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
+        )}
+
+        {race?.venue && (
+          <div class="border-t border-border pt-8">
+            <p class="text-heading-accent font-mono text-[0.6875rem] tracking-[0.2em] uppercase">
+              Start line
+            </p>
+            <p class="mt-2 font-mono text-sm leading-relaxed">
+              {race.startArea && (
+                <>
+                  {race.startArea}
+                  <br />
+                </>
               )}
-            </div>
-          )
-        }
-
-        {
-          race?.facebookUrl && (
-            <div class="border-t border-border pt-8">
-              <p class="text-heading-accent font-mono text-[0.6875rem] tracking-[0.2em] uppercase">
-                The community
-              </p>
-              {communityNote && <p class="mt-2 text-sm text-muted-foreground">{communityNote}</p>}
-              <a
-                class="btn-plate btn-plate--cream mt-4 text-sm"
-                href={race.facebookUrl}
-                {...externalLinkAttrs(race.facebookUrl)}
-              >
-                Join the group
-                <span aria-hidden="true">&rarr;</span>
-              </a>
-            </div>
-          )
-        }
-
-        {
-          race?.venue && (
-            <div class="border-t border-border pt-8">
-              <p class="text-heading-accent font-mono text-[0.6875rem] tracking-[0.2em] uppercase">
-                Start line
-              </p>
-              <p class="mt-2 font-mono text-sm leading-relaxed">
-                {race.startArea && (
-                  <>
-                    {race.startArea}
-                    <br />
-                  </>
-                )}
-                {race.venue}
-                <br />
-                {[race.city, race.region].filter(Boolean).join(', ')}
-              </p>
-              {dateLabel && <p class="mt-2 text-sm text-muted-foreground">{dateLabel}</p>}
-              {/* Directions from the pin, and the parking note beneath, because the
+              {race.venue}
+              <br />
+              {[race.city, race.region].filter(Boolean).join(', ')}
+            </p>
+            {dateLabel && <p class="mt-2 text-sm text-muted-foreground">{dateLabel}</p>}
+            {/* Directions from the pin, and the parking note beneath, because the
                   person reading the start line is the person about to drive there. */}
-              {directionsUrl(race.geo) && (
-                <a
-                  class="mt-3 inline-block text-sm text-link underline underline-offset-2"
-                  href={directionsUrl(race.geo)!}
-                  {...externalLinkAttrs(directionsUrl(race.geo)!)}
-                >
-                  Get directions
-                </a>
-              )}
-              {race.parkingNote && (
-                <p class="mt-3 text-sm text-muted-foreground">{race.parkingNote}</p>
-              )}
-            </div>
-          )
-        }
+            {directionsUrl(race.geo) && (
+              <a
+                class="mt-3 inline-block text-sm text-link underline underline-offset-2"
+                href={directionsUrl(race.geo)!}
+                {...externalLinkAttrs(directionsUrl(race.geo)!)}
+              >
+                Get directions
+              </a>
+            )}
+            {race.parkingNote && (
+              <p class="mt-3 text-sm text-muted-foreground">{race.parkingNote}</p>
+            )}
+          </div>
+        )}
       </aside>
     </div>
   </div>

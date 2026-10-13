@@ -137,10 +137,8 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
 ---
 
 <section class={`relative py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>
-  {
-    /* Clipped by a wrapper, never by the section: the band's ridge lives above
-    its own box. See GhostPhoto's header. */
-  }
+  {/* Clipped by a wrapper, never by the section: the band's ridge lives above
+    its own box. See GhostPhoto's header. */}
   <div class="pointer-events-none absolute inset-0 overflow-hidden">
     <GhostPhoto image={race?.atmosphere?.[1] ?? race?.atmosphere?.[0]} side="right" />
   </div>
@@ -148,67 +146,142 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
     <SectionHeading {eyebrow} {headline} {headingId} />
     {intro && <p class="mx-auto mt-4 max-w-[52ch] text-muted-foreground lg:mx-0">{intro}</p>}
 
-    {
-      boards.length > 0 && (
-        <>
-          <div class="tabs records-tabs mt-10 flex gap-2" role="tablist" aria-label="Race distance">
-            {boards.map((b, i) => (
-              <button
-                type="button"
-                role="tab"
-                id={`rtab-${b.slug}`}
-                aria-controls={`rpanel-${b.slug}`}
-                aria-selected={i === 0 ? 'true' : 'false'}
-                tabindex={i === 0 ? 0 : -1}
-                data-tab={b.slug}
-                class="display lc rounded-md border-2 border-black px-5 py-2 text-lg transition-colors aria-selected:bg-primary aria-selected:text-primary-foreground"
-              >
-                {b.name}
-              </button>
-            ))}
-          </div>
-
+    {boards.length > 0 && (
+      <>
+        <div class="tabs records-tabs mt-10 flex gap-2" role="tablist" aria-label="Race distance">
           {boards.map((b, i) => (
-            <div
-              class="panel mob-left mt-8"
-              id={`rpanel-${b.slug}`}
-              role="tabpanel"
-              aria-labelledby={`rtab-${b.slug}`}
-              hidden={i !== 0}
+            <button
+              type="button"
+              role="tab"
+              id={`rtab-${b.slug}`}
+              aria-controls={`rpanel-${b.slug}`}
+              aria-selected={i === 0 ? 'true' : 'false'}
+              tabindex={i === 0 ? 0 : -1}
+              data-tab={b.slug}
+              class="display lc rounded-md border-2 border-black px-5 py-2 text-lg transition-colors aria-selected:bg-primary aria-selected:text-primary-foreground"
             >
-              {/* The board. Same three classes the FAQ's kiosk wears, so there
+              {b.name}
+            </button>
+          ))}
+        </div>
+
+        {boards.map((b, i) => (
+          <div
+            class="panel mob-left mt-8"
+            id={`rpanel-${b.slug}`}
+            role="tabpanel"
+            aria-labelledby={`rtab-${b.slug}`}
+            hidden={i !== 0}
+          >
+            {/* The board. Same three classes the FAQ's kiosk wears, so there
                 is one recessed object on this site and not two that happen to
                 look alike; `.kiosk--records` in globals.css only adds what a
                 board holding tables needs that a board holding index cards does
                 not. The mark's wrapper is what clips it, never the board, for
                 the same reason GhostPhoto's caller clips that: a radius on the
                 clipping layer and nothing spilling onto the page. */}
-              <div class="kiosk kiosk--records rounded-2xl border-2 border-black p-5 sm:p-8">
-                <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-                  <DataMark text={b.mark} align="left" />
-                </div>
-                <div class="relative z-10 grid gap-10 lg:grid-cols-2">
-                  {b.genders.map((g) => (
-                    <div>
-                      <h3 class="display mb-3 text-h4">
-                        {g.label} <span class="lc">{b.name}</span>
-                      </h3>
+            <div class="kiosk kiosk--records rounded-2xl border-2 border-black p-5 sm:p-8">
+              <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+                <DataMark text={b.mark} align="left" />
+              </div>
+              <div class="relative z-10 grid gap-10 lg:grid-cols-2">
+                {b.genders.map((g) => (
+                  <div>
+                    <h3 class="display mb-3 text-h4">
+                      {g.label} <span class="lc">{b.name}</span>
+                    </h3>
 
-                      {g.course?.timeSeconds && (
-                        <p class="mb-4 text-sm text-muted-foreground">
-                          Course record{' '}
-                          <span class="tabular font-bold text-foreground">
-                            {formatRaceTime(g.course.timeSeconds)}
-                          </span>
-                          {g.course.athlete && <> by {g.course.athlete}</>}
-                          {g.course.year && <>, {g.course.year}</>}.
-                        </p>
-                      )}
+                    {g.course?.timeSeconds && (
+                      <p class="mb-4 text-sm text-muted-foreground">
+                        Course record{' '}
+                        <span class="tabular font-bold text-foreground">
+                          {formatRaceTime(g.course.timeSeconds)}
+                        </span>
+                        {g.course.athlete && <> by {g.course.athlete}</>}
+                        {g.course.year && <>, {g.course.year}</>}.
+                      </p>
+                    )}
 
-                      <div class="overflow-x-auto">
+                    <div class="overflow-x-auto">
+                      <table class="w-full border-collapse text-sm">
+                        <caption class="sr-only">
+                          {g.label} {b.name} records by age group
+                        </caption>
+                        <thead>
+                          <tr class="border-b border-primary/30">
+                            <th
+                              scope="col"
+                              class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                            >
+                              Bracket
+                            </th>
+                            <th
+                              scope="col"
+                              class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                            >
+                              Holder
+                            </th>
+                            <th
+                              scope="col"
+                              class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                            >
+                              Year
+                            </th>
+                            <th
+                              scope="col"
+                              class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                            >
+                              Time
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {g.brackets.map((row: RecordRow) => (
+                            <tr
+                              class={`border-b border-border/60 ${
+                                row.bracket === g.overall ? 'is-overall' : ''
+                              }`}
+                            >
+                              <th scope="row" class="rec-bracket py-2 pr-3 text-left font-normal">
+                                {row.label}
+                              </th>
+                              <td class="rec-name py-2 pr-3">
+                                {row.athlete ? (
+                                  row.athleteSlug ? (
+                                    <a
+                                      class="tap-pad underline-offset-2 hover:text-link hover:underline"
+                                      href={`/runners/${row.athleteSlug}/`}
+                                    >
+                                      {row.athlete}
+                                    </a>
+                                  ) : (
+                                    row.athlete
+                                  )
+                                ) : row.timeSeconds ? (
+                                  /* A time with no name is a record whose holder is
+                                    not on file, which is a different thing from a
+                                    bracket nobody has run. It used to say
+                                    "Unclaimed" next to a year and a time. */
+                                  <span class="text-muted-foreground">Name not on file</span>
+                                ) : (
+                                  <span class="text-muted-foreground">Unclaimed</span>
+                                )}
+                              </td>
+                              <td class="py-2 text-right whitespace-nowrap">{row.year ?? ''}</td>
+                              <td class="rec-time tabular py-2 text-right font-bold whitespace-nowrap">
+                                {formatRaceTime(row.timeSeconds) || '—'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {g.topTen.length > 0 && (
+                      <div class="mt-8 overflow-x-auto">
                         <table class="w-full border-collapse text-sm">
-                          <caption class="sr-only">
-                            {g.label} {b.name} records by age group
+                          <caption class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase">
+                            Fastest {g.topTen.length} on file
                           </caption>
                           <thead>
                             <tr class="border-b border-primary/30">
@@ -216,13 +289,13 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
                                 scope="col"
                                 class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
                               >
-                                Bracket
+                                #
                               </th>
                               <th
                                 scope="col"
                                 class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
                               >
-                                Holder
+                                {g.label}
                               </th>
                               <th
                                 scope="col"
@@ -239,125 +312,46 @@ const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-
                             </tr>
                           </thead>
                           <tbody>
-                            {g.brackets.map((row: RecordRow) => (
+                            {g.topTen.map((row, idx) => (
                               <tr
-                                class={`border-b border-border/60 ${
-                                  row.bracket === g.overall ? 'is-overall' : ''
-                                }`}
+                                class={`border-b border-border/60 ${idx === 0 ? 'is-overall' : ''}`}
                               >
-                                <th scope="row" class="rec-bracket py-2 pr-3 text-left font-normal">
-                                  {row.label}
+                                <th
+                                  scope="row"
+                                  class="rec-bracket tabular py-2 pr-3 text-left font-normal"
+                                >
+                                  {String(idx + 1).padStart(2, '0')}
                                 </th>
                                 <td class="rec-name py-2 pr-3">
-                                  {row.athlete ? (
-                                    row.athleteSlug ? (
-                                      <a
-                                        class="tap-pad underline-offset-2 hover:text-link hover:underline"
-                                        href={`/runners/${row.athleteSlug}/`}
-                                      >
-                                        {row.athlete}
-                                      </a>
-                                    ) : (
-                                      row.athlete
-                                    )
-                                  ) : row.timeSeconds ? (
-                                    /* A time with no name is a record whose holder is
-                                    not on file, which is a different thing from a
-                                    bracket nobody has run. It used to say
-                                    "Unclaimed" next to a year and a time. */
-                                    <span class="text-muted-foreground">Name not on file</span>
+                                  {row.athlete?.slug ? (
+                                    <a
+                                      class="tap-pad underline-offset-2 hover:text-link hover:underline"
+                                      href={`/runners/${row.athlete.slug}/`}
+                                    >
+                                      {row.athlete.name}
+                                    </a>
                                   ) : (
-                                    <span class="text-muted-foreground">Unclaimed</span>
+                                    (row.athlete?.name ?? '')
                                   )}
                                 </td>
                                 <td class="py-2 text-right whitespace-nowrap">{row.year ?? ''}</td>
                                 <td class="rec-time tabular py-2 text-right font-bold whitespace-nowrap">
-                                  {formatRaceTime(row.timeSeconds) || '—'}
+                                  {formatRaceTime(row.timeSeconds)}
                                 </td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
                       </div>
-
-                      {g.topTen.length > 0 && (
-                        <div class="mt-8 overflow-x-auto">
-                          <table class="w-full border-collapse text-sm">
-                            <caption class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase">
-                              Fastest {g.topTen.length} on file
-                            </caption>
-                            <thead>
-                              <tr class="border-b border-primary/30">
-                                <th
-                                  scope="col"
-                                  class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                                >
-                                  #
-                                </th>
-                                <th
-                                  scope="col"
-                                  class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                                >
-                                  {g.label}
-                                </th>
-                                <th
-                                  scope="col"
-                                  class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                                >
-                                  Year
-                                </th>
-                                <th
-                                  scope="col"
-                                  class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                                >
-                                  Time
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {g.topTen.map((row, idx) => (
-                                <tr
-                                  class={`border-b border-border/60 ${idx === 0 ? 'is-overall' : ''}`}
-                                >
-                                  <th
-                                    scope="row"
-                                    class="rec-bracket tabular py-2 pr-3 text-left font-normal"
-                                  >
-                                    {String(idx + 1).padStart(2, '0')}
-                                  </th>
-                                  <td class="rec-name py-2 pr-3">
-                                    {row.athlete?.slug ? (
-                                      <a
-                                        class="tap-pad underline-offset-2 hover:text-link hover:underline"
-                                        href={`/runners/${row.athlete.slug}/`}
-                                      >
-                                        {row.athlete.name}
-                                      </a>
-                                    ) : (
-                                      (row.athlete?.name ?? '')
-                                    )}
-                                  </td>
-                                  <td class="py-2 text-right whitespace-nowrap">
-                                    {row.year ?? ''}
-                                  </td>
-                                  <td class="rec-time tabular py-2 text-right font-bold whitespace-nowrap">
-                                    {formatRaceTime(row.timeSeconds)}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </>
-      )
-    }
+          </div>
+        ))}
+      </>
+    )}
 
     {
       /* Only the pointer survives. The paragraph that used to sit here described
