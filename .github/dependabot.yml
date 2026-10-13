@@ -45,6 +45,12 @@ updates:
       # (vault gotcha typescript-not-7).
       - dependency-name: 'typescript'
         versions: ['>=7']
+      # No npm semver-major bumps from Dependabot (starter PR #57, PORTS.md card 62).
+      # Majors wait for ONE planned, starter-first stack upgrade (Astro, the adapter,
+      # Sanity, wrangler) with a real deploy test. Minors and patches still flow.
+      # The github-actions ecosystem below is exempt.
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
