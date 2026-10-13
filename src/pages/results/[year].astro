@@ -41,6 +41,9 @@ import { getAllResults, getDistanceRefs, getSiteSettings } from '@/lib/queries';
 import { editionFor, summariseEditions, type ResultRow, type DistanceRef } from '@/lib/editions';
 import { formatRaceTime } from '@/lib/race-time';
 import { fastestByBracket } from '@/lib/bracket-leaders';
+import { resultsDescription } from '@/lib/results-meta';
+import raceDays from '@/data/raceDayWeather.json';
+import type { RaceDay } from '@/lib/raceWeather';
 
 export async function getStaticPaths() {
   const [results, distances] = await Promise.all([getAllResults(), getDistanceRefs()]);
@@ -72,7 +75,24 @@ const siteSettings = await getSiteSettings();
 const anyTrekker = edition.distances.some((d) => d.rows.some((r) => r.trekker));
 
 const title = `${edition.year} results | Stone Steps 50K`;
-const description = `Every finisher of the ${edition.year} Stone Steps 50K and 27K, with times.`;
+// A distinct description per year, built from what this page already shows:
+// the race-day date and weather, the finisher count and who was placed first in
+// each distance. See src/lib/results-meta.ts (120 to 155 characters, unit-tested).
+const description = resultsDescription(
+  {
+    year: edition.year,
+    total: edition.total,
+    distances: edition.distances.map((d) => {
+      const first = d.rows.find((r) => r.place === 1 && r.name && (r.timeSeconds ?? 0) > 0);
+      return {
+        name: d.name,
+        finishers: d.finishers,
+        winner: first ? { name: first.name as string, seconds: first.timeSeconds as number } : null,
+      };
+    }),
+  },
+  (raceDays as RaceDay[]).find((d) => d.year === edition.year),
+);
 
 // Built here because PageHeader takes a plain string. Same sentence the page
 // has always opened with, assembled instead of interleaved with markup.
