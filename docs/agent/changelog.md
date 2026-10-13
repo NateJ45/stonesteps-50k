@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-13: Distinct meta descriptions for the /results/<year>/ pages._
+
+`src/lib/results-meta.ts` builds each year's description (120 to 155 characters) from the finisher count, race-day date and weather, and the first-placed runner in each distance, replacing the one shared sentence the audit flagged. Unit test: `src/lib/results-meta.test.ts`. Detail in `docs/agent/seo.md`.
+
 _2026-10-13: SanityImage srcset ladder starts at 160w (starter PORTS card 93)._
 
 The srcset ladder in `SanityImage.astro` now comes from `src/lib/imageLadder.ts` (new, with `imageLadder.test.ts`) and runs `[160, 240, 320, 400, 600, 700, 800, 900, 1200, 1600, 2400]`. It started at 400w, so small slots downloaded 1.4 to 2x the bytes they painted. A slot that needs 400px or more picks the same candidate as before (asserted in the test). When `sizes` is passed and readable, steps below 75% of its smallest slot are dropped. `SanityImage.astro` is not `PORTABLE` (this site's copy has its own props), so this is a hand-applied three-line change from starter PORTS.md card 93. Live image bytes before and after are in the PR.

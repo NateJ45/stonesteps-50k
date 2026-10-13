@@ -85,6 +85,10 @@ After DNS cutover, submit `sitemap-index.xml` to Google Search Console. Verify t
 - Description: target 150-160 characters. Speak to the reader, not the search engine. Don't restate the title.
 - If `seoTitle` is empty, BaseLayout falls back to the page's primary headline. Don't rely on the fallback for launch -- fill the field.
 
+### Per-year results descriptions (2026-10-13)
+
+The 23 `/results/<year>/` pages used to share one templated description, which the SEO audit flagged as short and near-duplicate. `src/lib/results-meta.ts` (`resultsDescription`) now builds each one from data the page already shows: finisher count, race-day date and weather (`src/data/raceDayWeather.json`) and who was placed first in each distance. It tries every combination of a few wordings and keeps the richest one that lands in 120 to 155 characters. `src/lib/results-meta.test.ts` pins that range and uniqueness across all years. Nothing is typed per year, so a newly imported year gets its own description. The sentence names winners, so a runner removed under the privacy page promise is dropped from it automatically when their row goes.
+
 ### The "Search & sharing" panel on a custom page (PORTS.md card 21)
 
 The `page` document type builds its SEO group through `seoFields()` in
