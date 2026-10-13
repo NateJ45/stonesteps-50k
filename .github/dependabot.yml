@@ -27,6 +27,10 @@ updates:
         update-types: ['minor', 'patch']
       minor-and-patch:
         update-types: ['minor', 'patch']
+        # Formatters belong to the group above. A refresh of an older bundle
+        # ignores group order and pulls them back in, so exclude them here too
+        # (starter PORTS.md card 92).
+        exclude-patterns: ['prettier', 'prettier-plugin-*']
     open-pull-requests-limit: 5
     # The Sanity stack (sanity, @sanity/*, react, react-dom) is pinned to exact
     # versions on purpose and moves BY HAND, TOGETHER. Dependabot bumping one
