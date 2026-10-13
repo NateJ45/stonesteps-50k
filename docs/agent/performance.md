@@ -52,7 +52,7 @@ Target: 100 on all four categories (Performance, Accessibility, Best Practices, 
 - All islands hydrate at `client:idle` or `client:visible`, including `MobileNav` since 2026-09-18 (it was `client:only="react"`, which hydrates at load; see MobileNav.tsx for why that cost the home page 750ms of modelled LCP)
 - Logo PNGs moved from `public/` to `src/assets/` so Astro emits WebPs
 - Single-img theme-aware logo (one fetch per page load instead of two)
-- SanityImage emits real width-descriptor srcset with 8 breakpoints (400-2400)
+- SanityImage emits real width-descriptor srcset with 11 breakpoints (160-2400; small steps added 2026-10-13, see images.md)
 - AVIF as default format (`'auto'`) -- Sanity picks AVIF on supporting browsers
 - `fetchpriority="high"` on hero LCP image
 - Portrait inline images capped to `max-w-[600px]` (smaller files at the smaller cap)
