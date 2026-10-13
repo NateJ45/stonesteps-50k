@@ -531,6 +531,27 @@ is the Lantern model charging the inlined stylesheet as described below. So: the
 straddles the budget, the site did not move, and the lever remains the one in this item.
 Merged on that reading.
 
+2026-10-13 addendum (a studio-wide site audit flagged home TBT 150ms and the 113KiB image
+note; both re-measured, nothing changed). Mobile Lighthouse, three runs each on a quiet
+machine: live stonesteps50k.com performance 84 to 86, LCP 3.8 to 4.0s, TBT 11 to 28ms;
+a local build of `main` (wrangler dev, no gtag because GA is production-hostname only)
+performance 90 to 91, LCP 3.2 to 3.3s, TBT 18 to 23ms. The audit's TBT 150ms was a run taken
+while another job loaded the machine (the same page read 107 and 310ms in two runs during an
+`npm ci`, then 21ms once it finished), so it is noise, not a regression. The home page has no
+map or chart island to defer: its islands are the theme toggle, mobile nav, back-to-top and
+toaster (all `client:idle`) and the stats counter (`client:visible`); the map is
+`client:visible` on `/course/` only. The only long tasks on a quiet run are the HTML parse
+(about 190ms), and the idle-loaded Google tag (two tasks of 52 and 70ms). The "forced reflow"
+insight is Astro's ClientRouter reading `scrollX`/`scrollY` once at start-up, plus the
+countdown's per-tick `offsetWidth` and the ticket perforation's `offsetTop`; the router is
+framework code and the layout it forces would run before first paint anyway. The LCP element
+is still the wordmark text (render delay, not load time), the first hero slide is already
+eager, `fetchpriority="high"`, AVIF q45, and the other two are parked until a second after
+load. The 113KiB image estimate is the same cover-crop and DPR arithmetic settled on
+2026-09-13 below; the only remaining lever is the phone art-direction in the list at the end
+of this item, which edits `SanityImage.astro` or `RaceHero.astro` (both Foundation files)
+and changes which part of the photograph survives, so it is a design call.
+
 Things that were measured and are NOT the problem, so nobody repeats them:
 
 - The mud masks, the paper grain and the topo SVG each cost nothing measurable
