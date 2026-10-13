@@ -16,7 +16,15 @@ updates:
       day: monday
       time: '07:00'
       timezone: America/New_York
+    # Groups are matched in order, so `formatters` must stay above the
+    # catch-all bundle.
     groups:
+      # A formatter bump can reformat files and fail format:check (starter
+      # PORTS.md card 90). Kept apart so only this small PR goes red, not the
+      # whole bundle; fix it with `npm run format` on the branch and push.
+      formatters:
+        patterns: ['prettier', 'prettier-plugin-*']
+        update-types: ['minor', 'patch']
       minor-and-patch:
         update-types: ['minor', 'patch']
     open-pull-requests-limit: 5
@@ -41,6 +49,10 @@ updates:
       # `astro build` and still break `wrangler deploy` (starter dependabot.yml).
       - dependency-name: '@astrojs/cloudflare'
       - dependency-name: 'wrangler'
+      # Astro moves only with its adapter, by hand (starter PORTS.md card 90).
+      # The adapter imports Astro internals: astro 7.3 dropped an export that
+      # @astrojs/cloudflare 14.2.4 imports, so a lone astro bump failed the build.
+      - dependency-name: 'astro'
       # TypeScript 7 (the native compiler) breaks Astro's tooling; majors only, 6.x flows
       # (vault gotcha typescript-not-7).
       - dependency-name: 'typescript'
