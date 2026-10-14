@@ -87,8 +87,8 @@ export function decideWrite({
     write: false,
     refusal: [
       `Refusing to write: ${flag} targets the production dataset, and ${flag} alone is not enough.`,
-      `Set ${FACTOR_VAR}=yes in the same command, and only with Nathan present`,
-      `(bash: ${FACTOR_VAR}=yes node <script> ${flag}). A delegated agent never sets it.`,
+      `Set ${FACTOR_VAR}=yes in the same command, after a backup and a dry run`,
+      `(bash: ${FACTOR_VAR}=yes node <script> ${flag}). A delegated agent may set it only under the write protocol (backup, dry run, apply, verify).`,
       `Run without ${flag} to see the plan. PORTS.md card 86.`,
     ].join('\n'),
   };
