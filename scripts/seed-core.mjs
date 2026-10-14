@@ -14,6 +14,7 @@
 // Module types (service modules, etc.) have their own per-module seed.mjs.
 // Run ONLY this file for the core pages.
 
+import { writeGate, gateClient } from './lib/write-gate.mjs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
@@ -36,13 +37,19 @@ if (!token) {
   process.exit(0);
 }
 
-const client = createClient({
-  projectId,
-  dataset,
-  token,
-  apiVersion: '2026-05-01',
-  useCdn: false,
-});
+// Dry by default: a bare run prints every write it would make. Writing needs
+// --apply AND, on production, NCS_PRODUCTION_WRITE=yes in the same command
+// (scripts/lib/write-gate.mjs, PORTS.md card 86).
+const client = gateClient(
+  createClient({
+    projectId,
+    dataset,
+    token,
+    apiVersion: '2026-05-01',
+    useCdn: false,
+  }),
+  writeGate({ dataset }),
+);
 
 // ── Helper: portable-text paragraph block ────────────────────────────────
 

@@ -16,6 +16,7 @@
 // makes a terrible alt text and an accessibility audit will not catch it,
 // because "trail-runners-wide.jpg" is a non-empty string.
 
+import { writeGate, gateClient } from './lib/write-gate.mjs';
 import { resolve, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readFileSync, existsSync } from 'node:fs';
@@ -39,7 +40,13 @@ if (!token) {
   process.exit(0);
 }
 
-const client = createClient({ projectId, dataset, token, apiVersion: '2026-05-01', useCdn: false });
+// Dry by default: a bare run prints every write it would make. Writing needs
+// --apply AND, on production, NCS_PRODUCTION_WRITE=yes in the same command
+// (scripts/lib/write-gate.mjs, PORTS.md card 86).
+const client = gateClient(
+  createClient({ projectId, dataset, token, apiVersion: '2026-05-01', useCdn: false }),
+  writeGate({ dataset }),
+);
 
 // Sourced from the race's own WordPress media library via the design mockup.
 const SRC = resolve(root, '..', 'stonesteps-astro', 'public', 'img');

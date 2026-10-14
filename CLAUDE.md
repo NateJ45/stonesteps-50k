@@ -42,7 +42,8 @@ Full stack notes and the `astro.config.mjs` landmines are in `docs/agent/stack-a
 - `npm run parity compare`: rendered-HTML parity gate for render-neutral changes. Build with `PUBLIC_GA_ID=` blank first or every page fails (`PUBLIC_GA_ID= npm run build && npm run parity compare`).
 - `npm run preview`: `wrangler dev -c dist/server/wrangler.json`; the only way to exercise the SSR routes and real response headers locally.
 - `npm run deploy`: build, then `wrangler deploy -c dist/server/wrangler.json`. Never a bare `wrangler deploy` (it reads the root `wrangler.jsonc`, every sub-route 404s).
-- `npm run apply-brand`, `npm run og`, `npm run seed`, `npm run sync-check`, `npm run free-dist` (Windows EPERM on `dist/`). Baked assets (`mud`, `weather:sync`): see `.claude/rules/baked-assets-and-scripts.md`.
+- `npm run apply-brand`, `npm run og`, `npm run seed`, `npm run sync-check`, `npm run free-dist` (Windows EPERM on `dist/`). `npm run audit:data` checks the live data against the compiled schema, read only. Baked assets (`mud`, `weather:sync`): see `.claude/rules/baked-assets-and-scripts.md`.
+- **Every script that writes to Sanity is a dry run unless it gets `--apply` (or its own write flag) AND `NCS_PRODUCTION_WRITE=yes` in the same command.** A delegated agent never sets the variable. Detail, the CI allowance and the backtick rule: `.claude/rules/data-scripts.md`.
 - **There is no separate studio dev server or deploy.** `npm run dev` serves the Studio at `/studio`, and deploying the site deploys the Studio. For CLI work (`sanity dataset`, `sanity cors`, typegen) run `npx sanity ...` from the repo root; `sanity.cli.ts` configures it. Do **not** run `npx sanity deploy`: it would publish a separate hosted Studio that silently falls behind the embedded one.
 - `npm run preview` runs `wrangler dev -c dist/server/wrangler.json` against the last build. This is the only way to exercise the SSR routes (`/preview/**`, `/api/draft-mode/*`) and the real response headers locally; a static file server proves nothing about them.
 
@@ -129,6 +130,6 @@ Stone Steps specifics on top of the shared text:
 | New-project setup                                                       | `docs/bootstrap/NEW-PROJECT.md`                  |
 | Change history                                                          | `docs/agent/changelog.md`                        |
 
-Path-scoped rules (load automatically in `.claude/rules/`): `live-preview.md`, `dependencies-and-deploy.md`, `sanity-schema.md`, `brand-reskin.md`, `baked-assets-and-scripts.md`, `foundation-files.md`, `ui-verification.md`, `copy-and-voice.md`.
+Path-scoped rules (load automatically in `.claude/rules/`): `live-preview.md`, `dependencies-and-deploy.md`, `sanity-schema.md`, `brand-reskin.md`, `baked-assets-and-scripts.md`, `data-scripts.md`, `foundation-files.md`, `ui-verification.md`, `copy-and-voice.md`.
 
 See `OPERATIONS.md` for the tactical playbook (deploy, patch content, run audits, common gotchas).
