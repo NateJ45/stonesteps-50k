@@ -33,14 +33,17 @@
 // `result-2020-50k-361`. Re-running updates in place and can never duplicate.
 // The 2020 ids are unchanged from the script this replaces.
 //
-//   node scripts/import-results-html.mjs --dry-run
-//   node scripts/import-results-html.mjs
+//   node scripts/import-results-html.mjs                                   # dry run
+//   NCS_PRODUCTION_WRITE=yes node scripts/import-results-html.mjs --apply  # write
+//   (dry by default; a write needs --apply AND NCS_PRODUCTION_WRITE=yes,
+//    scripts/lib/write-gate.mjs, PORTS.md card 86)
 //   node scripts/import-results-html.mjs --year=2021
 //
 // If RunSignUp ever migrates one of these onto a real event, remove its entry
 // here and run the normal importer: the ids will differ, so unset the old ones
 // first.
 
+import { writeGate } from './lib/write-gate.mjs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
@@ -53,8 +56,8 @@ const root = resolve(__dirname, '..');
 const env = loadEnv(root);
 const projectId = env.PUBLIC_SANITY_PROJECT_ID;
 const dataset = env.PUBLIC_SANITY_DATASET ?? 'production';
+const DRY_RUN = !writeGate({ dataset });
 const token = env.SANITY_API_WRITE_TOKEN;
-const DRY_RUN = process.argv.includes('--dry-run');
 const ONLY_YEAR = Number(process.argv.find((a) => a.startsWith('--year='))?.split('=')[1]);
 
 if (!projectId || !token) {

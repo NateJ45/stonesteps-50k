@@ -22,10 +22,13 @@
 //
 // Every delete is guarded: a record is only removed if it is a 27K entry dated
 // before 2015, and an athlete only if nothing outside those records points at
-// them. Run with --dry-run to see the plan without writing anything.
+// them. A bare run (or --dry-run) prints the plan and writes nothing; the
+// deletes need --apply AND NCS_PRODUCTION_WRITE=yes (scripts/lib/write-gate.mjs,
+// PORTS.md card 86). Until 2026-10-13 a bare run deleted.
 //
 // Prerequisites: PUBLIC_SANITY_PROJECT_ID and SANITY_API_WRITE_TOKEN in .env.
 
+import { writeGate } from './lib/write-gate.mjs';
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createClient } from '@sanity/client';
@@ -39,7 +42,7 @@ if (!projectId || !token) {
   process.exit(1);
 }
 
-const dryRun = process.argv.includes('--dry-run');
+const dryRun = !writeGate({ dataset });
 const client = createClient({ projectId, dataset, apiVersion: '2024-10-01', token, useCdn: false });
 
 const FIRST_27K_YEAR = 2015;

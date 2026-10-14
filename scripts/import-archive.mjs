@@ -3,8 +3,10 @@
 // Imports the recovered 2003 to 2016 results from scripts/data/archive-results.json.
 //
 // Usage:
-//   node scripts/import-archive.mjs --dry-run
-//   node scripts/import-archive.mjs
+//   node scripts/import-archive.mjs                                   # dry run
+//   NCS_PRODUCTION_WRITE=yes node scripts/import-archive.mjs --apply  # write
+//   (dry by default; a write needs --apply AND NCS_PRODUCTION_WRITE=yes,
+//    scripts/lib/write-gate.mjs, PORTS.md card 86)
 //
 // Idempotent: deterministic _id values with createOrReplace.
 //
@@ -107,6 +109,7 @@
 // produce a duplicate of the other.
 // ---------------------------------------------------------------------------
 
+import { writeGate } from './lib/write-gate.mjs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
@@ -120,9 +123,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 const env = loadEnv(root);
 
-const DRY_RUN = process.argv.includes('--dry-run');
 const projectId = env.PUBLIC_SANITY_PROJECT_ID;
 const dataset = env.PUBLIC_SANITY_DATASET ?? 'production';
+const DRY_RUN = !writeGate({ dataset });
 const token = env.SANITY_API_WRITE_TOKEN;
 
 if (!projectId) {

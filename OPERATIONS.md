@@ -65,7 +65,7 @@ The four core pages (home, about, services, process) and any custom `page` docum
 
 **On a fresh clone with no Sanity project configured:** the site renders from code-defined defaults in `src/data/defaultSections.ts`. These defaults look like a real site, not blank pages.
 
-**Once a Sanity project is connected:** seed the pages with `npm run seed`, then edit sections in Studio → the relevant page singleton → the "Sections" tab.
+**Once a Sanity project is connected:** seed the pages with `NCS_PRODUCTION_WRITE=yes npm run seed -- --apply` (a bare `npm run seed` is a dry run; `.claude/rules/data-scripts.md`), then edit sections in Studio → the relevant page singleton → the "Sections" tab.
 
 **Available block types:** the eleven general blocks (heroSection, richTextSection, imageTextSection, gallerySection, quoteSection, statSection, ctaBandSection, videoSection, spacerSection, logoStripSection, embedSection) plus the page-specific rich blocks (founderSection, servicesGridSection, testimonialsSection, processSection, faqSection, teamSection on Home; storySection, valuesSection, faqSection, teamSection on About; servicesGridSection, serviceAreaSection, guaranteeSection, faqSection on Services; processSection, faqSection on Process).
 

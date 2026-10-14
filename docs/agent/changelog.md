@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-13: Every Sanity write script is dry by default and needs a second factor on production; `audit:data` ported (starter PORTS cards 86 and 95)._
+
+The 25 scripts that write without `sanity-lib` now go through `scripts/lib/write-gate.mjs`: a bare run prints what it would write, and a write needs `--apply` (or the script's own `--write` / `--record`) plus `NCS_PRODUCTION_WRITE=yes` in the same command, read from `process.env` as it was before any `dotenv` call. Five of them used to write on a bare run with `--dry-run` as the opt-in (`retire-27k-records`, `import-archive`, `import-results`, `import-results-html`, `repair-athletes`), and the three seeds, `upload-images`, `apply-asset-patches` and the twelve module seeds wrote with no flag at all (those now wrap their client in `gateClient()`, which logs every write instead of sending it). `build-elevation`, `weather-sync --record` and `publish-due` already had one flag and gained the variable. `import-results`, `weather-sync --record` and `publish-due` keep writing inside GitHub Actions, since their workflows were not edited (PENDING 1q). `scripts/lib/write-gate.test.mjs` runs every gated script with its flag and no variable (exit 2, no request) and proves the open gate writes to `https://example.invalid`. The starter's `audit:data` and `backfill-array-types` came across unchanged; the first read-only run over 3,580 documents found 0 typeless array items and one orphan field (PENDING 1r). Rules: `.claude/rules/data-scripts.md`.
+
 _2026-10-13: Distinct meta descriptions for the /results/<year>/ pages._
 
 `src/lib/results-meta.ts` builds each year's description (120 to 155 characters) from the finisher count, race-day date and weather, and the first-placed runner in each distance, replacing the one shared sentence the audit flagged. Unit test: `src/lib/results-meta.test.ts`. Detail in `docs/agent/seo.md`.

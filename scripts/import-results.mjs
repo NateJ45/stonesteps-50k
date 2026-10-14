@@ -9,8 +9,10 @@
 //   - The two `distance` documents must already exist (npm run seed:race)
 //
 // Usage:
-//   node scripts/import-results.mjs             # import everything available
-//   node scripts/import-results.mjs --dry-run   # fetch and report, write nothing
+//   node scripts/import-results.mjs             # fetch and report, write nothing
+//   NCS_PRODUCTION_WRITE=yes node scripts/import-results.mjs --apply  # import
+//   (results-import.yml still runs it bare: in GitHub Actions a bare run
+//    writes, the CI allowance in scripts/lib/write-gate.mjs, PORTS.md card 86)
 //   node scripts/import-results.mjs --year 2025 # one year only
 //
 // Idempotent: deterministic _id values with createOrReplace, so re-running
@@ -35,6 +37,7 @@
 // RunSignUp for the full record.
 // ---------------------------------------------------------------------------
 
+import { writeGate } from './lib/write-gate.mjs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
@@ -48,10 +51,10 @@ const root = resolve(__dirname, '..');
 const env = loadEnv(root);
 const projectId = env.PUBLIC_SANITY_PROJECT_ID;
 const dataset = env.PUBLIC_SANITY_DATASET ?? 'production';
+const DRY_RUN = !writeGate({ dataset, ci: true, ciBare: true });
 const token = env.SANITY_API_WRITE_TOKEN;
 
 const args = process.argv.slice(2);
-const DRY_RUN = args.includes('--dry-run');
 const yearArg = args.indexOf('--year');
 const ONLY_YEAR = yearArg !== -1 ? Number(args[yearArg + 1]) : null;
 
