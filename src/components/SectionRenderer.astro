@@ -371,13 +371,13 @@ const wrapAttrs = (key: string | undefined) =>
           headingId={headingId}
           race={s.race}
         />
-      ) : /* THE STUDIO'S CAPTION FIELD LIVES ON THE IMAGE, not on the block.
-             courseFeaturesSection declares `caption` inside its image object,
-             the way every other image field on this site does, and this read
-             `s.caption`, which no schema anywhere writes. So an editor could
-             fill in "Photo caption", publish, and watch nothing appear. The
-             block-level fallback stays because the projected type has carried
-             it since the section was written. */
+      ) : /* TWO CAPTION FIELDS, ONE CAPTION. courseFeaturesSection declares
+             `caption` on the block (the box editors see, and where the home
+             page's live caption has always been stored) and inside its image
+             object (hidden in the Studio unless something is stored there).
+             The image's own caption wins when both are set. Before 2026-10-13
+             only the image one was declared, so the stored block caption
+             showed as "Unknown fields" (PENDING 1r). */
       s._type === 'courseFeaturesSection' ? (
         <CourseFeatures
           eyebrow={s.eyebrow}

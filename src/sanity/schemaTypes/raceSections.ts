@@ -248,13 +248,29 @@ export const courseFeaturesSection = defineType({
           type: 'string',
           validation: (Rule) => Rule.required(),
         }),
+        // The block-level `caption` below is the one editors fill in. This one is
+        // kept because SectionRenderer reads it first (`s.image?.caption ??
+        // s.caption`); it stays hidden unless something is already stored here,
+        // so the block never shows two caption boxes.
         defineField({
           name: 'caption',
           title: 'Photo caption (optional)',
           type: 'string',
           description: 'One line under the photograph: what the trail is like, who is pictured.',
+          hidden: ({ value }) => !value,
         }),
       ],
+    }),
+    // 2026-10-13: the home page's live caption has always been stored on the
+    // block (audit:data, PENDING 1r), and the renderer falls back to it, so it
+    // is declared here rather than moved, and the Studio stops calling it unknown.
+    defineField({
+      name: 'caption',
+      title: 'Photo caption (optional)',
+      type: 'string',
+      description:
+        'One line under the photograph: what the trail is like, who is pictured. Shows only ' +
+        'when there is a photograph.',
     }),
   ],
   preview: {

@@ -37,24 +37,6 @@ and the deploy bakes before every build. First live run: the mornings after 2026
 If it has not produced a 2026 bar on /course by early November, run the import workflow
 by hand and read its "Bake race-day weather" step.
 
-### 1r. One orphan field in production: the course-features caption sits on the block
-
-2026-10-13, `npm run audit:data` (PORTS.md card 95), read only. The whole dataset (3,580
-documents) has 0 array items missing `_type` or `_key` and exactly one orphan value:
-
-| Document   | Field                    | Block                                     | Value                                                                                                                                                               |
-| ---------- | ------------------------ | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `homePage` | `pageBuilder[6].caption` | `courseFeaturesSection`, `_key` `seed-10` | "Hilly trails with roots and rocks and occasional tree blow downs. Pictured are Jon Hastings, one of two sub-4 hour finishers, and Backyard champion Harvey Lewis." |
-
-The schema declares `caption` inside the block's `image` object (`image.caption`, which is
-empty here), not on the block, so the Studio shows "Unknown fields" on this block. Do NOT
-unset it: the caption is LIVE, because `SectionRenderer.astro` reads
-`s.image?.caption ?? s.caption`, so unsetting would take it off the home page. The fix is a
-data move, apply only after Nathan approves: back up, set `pageBuilder[_key=="seed-10"].image.caption`
-to this text, unset the block-level `caption` in the same patch, re-run `npm run audit:data`
-(expect 0), rebuild. No `drafts.homePage` exists. Saved audit output:
-`_backups/stonesteps-50k-2026-10-13/` at the Projects root.
-
 ### 1q. Two scheduled workflows write without the production second factor
 
 2026-10-13 (PORTS.md card 86). Every write script now needs its write flag plus

@@ -1421,6 +1421,7 @@ export type CourseFeaturesSection = {
     caption?: string;
     _type: 'image';
   };
+  caption?: string;
 };
 
 export type RaceScheduleSection = {
