@@ -2,6 +2,8 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-15: GA4 skips automated browsers (starter PORTS card 96)._ `GoogleAnalytics.astro` is re-synced from the starter (rule 4): the tag does nothing when `navigator.webdriver` is true or the user agent matches `HeadlessChrome|Lighthouse|PTST|GTmetrix|Speed Insights`. Our own Playwright and Lighthouse runs against production were being counted as visitors (194 in one day on another site). Real browsers are unaffected. Starter PORTS card 96. `tests/ga-events.spec.ts` stubs `window.gtag` itself, so it is unaffected.
+
 _2026-10-13: The course-features caption is declared on the block (PENDING 1r closed)._
 
 `courseFeaturesSection` now declares `caption` on the block, the box editors see, because that is where the home page's live caption ("Hilly trails with roots and rocks...", `homePage.pageBuilder[_key=="seed-10"]`) has always been stored and where `SectionRenderer.astro` falls back to (`s.image?.caption ?? s.caption`). The caption inside the image object stays declared, hidden unless something is stored there, so no stored value becomes unknown and the block never shows two caption boxes. No dataset write: the data was right, the schema was missing a field. `npm run audit:data` over 3,580 documents now reports 0 findings, and the home page renders the same caption.
