@@ -6,6 +6,7 @@ Cloudflare Web Analytics is cookieless; GA4 is the second, richer tag and is the
 
 `src/components/analytics/GoogleAnalytics.astro` is PORTABLE (canonical in the starter). It compares `location.hostname` with the host of `site` in `astro.config.mjs` (`stonesteps50k.com`, apex and `www`) and off those hosts does nothing: no `dataLayer`, no `window.gtag`, no request to Google. Why: in September 2026 the property held 347 sessions with hostName `localhost` (our own Playwright and Lighthouse runs, built with a developer `.env` that carries `PUBLIC_GA_ID`) against 735 real ones. CI never had the id; a developer's `.env` did.
 
+- It also does nothing in automated browsers (`navigator.webdriver`, or a HeadlessChrome / Lighthouse / PTST / GTmetrix / Speed Insights user agent), so our own sweeps against production are not counted (card 96). The goal events below are unaffected: `tests/ga-events.spec.ts` stubs `window.gtag`.
 - It fails OPEN when `site` is unset (the tag runs everywhere), so a misconfigured fork goes loud in the data rather than silently dark.
 - A second domain or a `*.workers.dev` address that serves real visitors will record nothing. That is intended; serve the real domain instead of widening the list.
 - `tests/smoke.spec.ts` carries the localhost test (no Google request, no `dataLayer`). It passes trivially in CI (no id) and bites on a local build that has one.
