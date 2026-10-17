@@ -24,23 +24,21 @@
 // contents are derived and must not be retyped. See src/lib/queries.ts.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
-import {
-  ActivityIcon,
-  ArrowRightIcon,
-  BlockElementIcon,
-  EnvelopeIcon,
-  HelpCircleIcon,
-  CalendarIcon,
-  ClockIcon,
-  ComponentIcon,
-  HeartIcon,
-  SunIcon,
-  ImageIcon,
-  PinIcon,
-  StarFilledIcon,
-  UsersIcon,
-  TrendUpwardIcon,
-} from '@sanity/icons';
+import { ActivityIcon } from '@sanity/icons/Activity';
+import { ArrowRightIcon } from '@sanity/icons/ArrowRight';
+import { BlockElementIcon } from '@sanity/icons/BlockElement';
+import { EnvelopeIcon } from '@sanity/icons/Envelope';
+import { HelpCircleIcon } from '@sanity/icons/HelpCircle';
+import { CalendarIcon } from '@sanity/icons/Calendar';
+import { ClockIcon } from '@sanity/icons/Clock';
+import { ComponentIcon } from '@sanity/icons/Component';
+import { HeartIcon } from '@sanity/icons/Heart';
+import { SunIcon } from '@sanity/icons/Sun';
+import { ImageIcon } from '@sanity/icons/Image';
+import { PinIcon } from '@sanity/icons/Pin';
+import { StarFilledIcon } from '@sanity/icons/StarFilled';
+import { UsersIcon } from '@sanity/icons/Users';
+import { TrendUpwardIcon } from '@sanity/icons/TrendUpward';
 
 /* ---------- Hero ---------------------------------------------------------- */
 

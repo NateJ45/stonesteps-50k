@@ -14,19 +14,17 @@
 
 import { defineType, defineField, defineArrayMember, type ArrayOptions } from 'sanity';
 import { raceSectionSchemas } from './raceSections';
-import {
-  BlockElementIcon,
-  ImageIcon,
-  ImagesIcon,
-  BulbOutlineIcon,
-  StarIcon,
-  ComponentIcon,
-  RemoveIcon,
-  PlayIcon,
-  ThLargeIcon,
-  EarthGlobeIcon,
-  CodeBlockIcon,
-} from '@sanity/icons';
+import { BlockElementIcon } from '@sanity/icons/BlockElement';
+import { ImageIcon } from '@sanity/icons/Image';
+import { ImagesIcon } from '@sanity/icons/Images';
+import { BulbOutlineIcon } from '@sanity/icons/BulbOutline';
+import { StarIcon } from '@sanity/icons/Star';
+import { ComponentIcon } from '@sanity/icons/Component';
+import { RemoveIcon } from '@sanity/icons/Remove';
+import { PlayIcon } from '@sanity/icons/Play';
+import { ThLargeIcon } from '@sanity/icons/ThLarge';
+import { EarthGlobeIcon } from '@sanity/icons/EarthGlobe';
+import { CodeBlockIcon } from '@sanity/icons/CodeBlock';
 import { columnsField, headingAccentField, hideWhenRich, richTwin } from './_appearanceFields';
 import { sideOptions } from '../../lib/layout-variants';
 

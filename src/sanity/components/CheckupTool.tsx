@@ -281,8 +281,8 @@ export function CheckupTool() {
 
   return (
     <Box padding={4}>
-      <Stack space={5} style={{ maxWidth: 640, margin: '0 auto' }}>
-        <Stack space={3}>
+      <Stack gap={5} style={{ maxWidth: 640, margin: '0 auto' }}>
+        <Stack gap={3}>
           <ToolHeading emoji="🩺">Checkup</ToolHeading>
           <Text size={2} muted style={{ lineHeight: 1.5 }}>
             A look for things worth fixing: a date that has passed, prices that are last
@@ -317,12 +317,12 @@ export function CheckupTool() {
             </Flex>
           </Card>
         ) : (
-          <Stack space={3}>
+          <Stack gap={3}>
             {results.map((r) => {
               const b = SEV[r.severity];
               return (
                 <Card key={r.id} padding={4} radius={3} border tone={b.tone}>
-                  <Stack space={3}>
+                  <Stack gap={3}>
                     <Flex align="center" gap={3}>
                       <Badge tone={b.tone} padding={2} fontSize={1}>
                         {b.text}

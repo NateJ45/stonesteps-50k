@@ -44,7 +44,7 @@ function StepCard({ step, snap }: { step: Step; snap: Snapshot }) {
       onClick={link.onClick}
       style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
     >
-      <Stack space={3}>
+      <Stack gap={3}>
         <Flex align="center" gap={3}>
           <Badge tone={badge.tone} padding={2} fontSize={1}>
             {badge.text}
@@ -103,8 +103,8 @@ export function RaceYearTool() {
 
   return (
     <Box padding={4}>
-      <Stack space={5} style={{ maxWidth: 680, margin: '0 auto' }}>
-        <Stack space={3}>
+      <Stack gap={5} style={{ maxWidth: 680, margin: '0 auto' }}>
+        <Stack gap={3}>
           <ToolHeading emoji="🗓️">Start a new race year</ToolHeading>
           <Text size={2} muted style={{ lineHeight: 1.5 }}>
             Everything that needs a human once a year, in the order it comes up, with whatever is
@@ -129,7 +129,7 @@ export function RaceYearTool() {
             </Text>
           </Flex>
         ) : (
-          <Stack space={3}>
+          <Stack gap={3}>
             {STEPS.map((s) => (
               <StepCard key={s.id} step={s} snap={snap} />
             ))}
@@ -137,7 +137,7 @@ export function RaceYearTool() {
         )}
 
         <Card padding={4} radius={3} tone="caution" border>
-          <Stack space={2}>
+          <Stack gap={2}>
             {/* NO COUNT IN THIS SENTENCE. It read "Two things are marked
                 'Worth checking'" and there are six: it was written when there
                 were two and went stale the day a card was added, which is a bad

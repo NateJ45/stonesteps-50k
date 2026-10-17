@@ -217,22 +217,22 @@ carry a verified-in-anger note rather than an installed-and-gated one.
 
 ---
 
-### 1a. Sign in to a Studio built on the phase-1 Sanity set
+### 1a. Sign in to a Studio built on the phase-2 Sanity set
 
 **Blocker: no agent can do this, and this template has no Sanity project.**
 
-2026-09-06 moved this repo onto the family's phase-1 Sanity set (`sanity` 6.9.1,
-`@sanity/ui` 3.5.4, `@sanity/client` 7.26.2, `@sanity/visual-editing` 5.7.3). Every
+2026-09-06 moved this repo onto the family's phase-1 Sanity set, and 2026-10-17 onto the
+phase-2 set (`sanity` 6.19.0, `@sanity/ui` 4.4.9, `@sanity/client` 8.9.0,
+`@sanity/visual-editing` 6.1.3; PORTS.md card 103). Every
 automated gate is green and the single-instance invariant holds on disk and in the
 lockfile, but the login screen is core code and renders fine even when the
-styled-components theme context is broken. The set is already human-verified on
-presacademy, reid-design-site and mas-monograms, so the risk here is low; what is
-unverified is this repo's own custom Studio panes and the in-canvas overlay against it.
+styled-components theme context is broken. The Studio code was migrated to `@sanity/ui` 4 (gap, subpath icons) and every gate is
+green; what is unverified is this repo's own custom Studio panes and the in-canvas overlay against it.
 Whoever forks this next should sign in, open the desk, and drive the Presentation tool
 until an in-canvas control draws and writes back, then note it here.
 
-Do NOT take `sanity` 6.9.2: that PATCH release crosses to `@sanity/ui` 4, which is a real
-migration (PORTS.md card 10, phase 2).
+The phase-2 migration is done; see `.claude/rules/dependencies-and-deploy.md` for the pins
+and the one-copy invariants.
 
 ---
 
