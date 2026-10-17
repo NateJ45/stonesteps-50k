@@ -113,7 +113,7 @@ function PathCard({ items, link }: { items: string[]; link?: PathLink }) {
       >
         🧭
       </span>
-      <Stack space={2} style={{ paddingTop: 4, flex: 1 }}>
+      <Stack gap={2} style={{ paddingTop: 4, flex: 1 }}>
         <Flex align="center" gap={2}>
           <Text size={1} weight="semibold" style={{ flex: 1 }}>
             Where in the Studio
@@ -188,7 +188,7 @@ function BlockView({ block }: { block: GuideBlock }) {
     // reset-proof, and the numbered disc reads better anyway.
     case 'steps':
       return (
-        <Stack as="ol" space={3} style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        <Stack as="ol" gap={3} style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {block.items.map((item, i) => (
             <Flex as="li" key={i} gap={3} align="flex-start">
               <span
@@ -219,7 +219,7 @@ function BlockView({ block }: { block: GuideBlock }) {
       );
     case 'bullets':
       return (
-        <Stack as="ul" space={3} style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        <Stack as="ul" gap={3} style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {block.items.map((item, i) => (
             <Flex as="li" key={i} gap={3} align="flex-start">
               <span
@@ -245,7 +245,7 @@ function BlockView({ block }: { block: GuideBlock }) {
     case 'callout':
       return (
         <Card tone={block.tone ?? 'default'} padding={4} radius={3} border>
-          <Stack space={3}>
+          <Stack gap={3}>
             {block.title && (
               <Text size={1} weight="semibold">
                 {block.title}
@@ -311,7 +311,7 @@ export function makeGuideView(slug: string): ComponentType {
               {guide.lead}
             </Text>
           </Box>
-          <Stack space={4} marginTop={5}>
+          <Stack gap={4} marginTop={5}>
             {guide.body.map((block, i) => (
               <BlockView key={i} block={block} />
             ))}

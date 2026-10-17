@@ -231,13 +231,19 @@ export default defineConfig({
       // init, surfacing as "TypeError: Cannot read properties of undefined
       // (reading 'v2')" from inside styled-components' generateAndInjectStyles.
       // Leave the bundler's default chunking alone.
+      //
+      // `react/compiler-runtime` has to be INCLUDED because of that exclusion
+      // (Sanity phase 2, PORTS.md card 103). @sanity/ui 4 is compiled with the
+      // React Compiler and imports React's own CommonJS `react/compiler-runtime`.
+      // An excluded package's imports are served raw, so without this the dev
+      // Studio fails to hydrate with "react/compiler-runtime.js does not provide
+      // an export named 'c'". @sanity/astro only includes the older
+      // `react-compiler-runtime` package. Dev only; `astro build` is unaffected.
+      // (An earlier attempt on the phase-1 set, reverted because the SSR
+      // environment ran two React instances, predates fixSanityDedupeAlias and
+      // the phase-2 set; re-check "Invalid hook call" in the dev console.)
       exclude: ['@sanity/ui', 'styled-components'],
-      // Tried and reverted: `include: ['react/compiler-runtime']`, meant to
-      // give the unbundled Studio an ESM copy of that CJS entry. It did not get
-      // the Studio hydrating (the sanity self-reference fails in the browser
-      // regardless), and a pre-bundled entry inlines its own copy of react, so
-      // the SSR environment ran two React instances and every island render
-      // logged "Invalid hook call" from react-dom/server. Do not add it back.
+      include: ['react/compiler-runtime'],
     },
     // THE DEV SERVER HAS THREE ENVIRONMENTS AND THEY ALL NEED WORK HERE:
     // `astro` (the workerd module runner), `ssr` and `client`. Measured with a

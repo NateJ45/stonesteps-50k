@@ -101,7 +101,7 @@ function TaskCard({ task }: { task: Task }) {
         >
           {task.emoji}
         </span>
-        <Stack space={2} style={{ flex: 1 }}>
+        <Stack gap={2} style={{ flex: 1 }}>
           <Text size={2} weight="semibold">
             {task.title}
           </Text>
@@ -117,8 +117,8 @@ function TaskCard({ task }: { task: Task }) {
 export function WelcomePane() {
   return (
     <Box padding={4}>
-      <Stack space={5} style={{ maxWidth: 720, margin: '0 auto' }}>
-        <Stack space={3}>
+      <Stack gap={5} style={{ maxWidth: 720, margin: '0 auto' }}>
+        <Stack gap={3}>
           <ToolHeading emoji="👋">Welcome</ToolHeading>
           <Text size={2} muted style={{ lineHeight: 1.6 }}>
             This is the control room for the Stone Steps 50K website. Nothing you do here reaches
@@ -127,14 +127,14 @@ export function WelcomePane() {
           </Text>
         </Stack>
 
-        <Stack space={3}>
+        <Stack gap={3}>
           {TASKS.map((t) => (
             <TaskCard key={t.title} task={t} />
           ))}
         </Stack>
 
         <Card padding={4} radius={3} tone="primary" border>
-          <Stack space={2}>
+          <Stack gap={2}>
             <Text size={1} weight="semibold">
               The results look after themselves.
             </Text>

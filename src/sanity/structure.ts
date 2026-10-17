@@ -19,26 +19,24 @@
 
 import type { StructureBuilder, StructureResolverContext } from 'sanity/structure';
 import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list';
-import {
-  BellIcon,
-  BlockElementIcon,
-  CogIcon,
-  ColorWheelIcon,
-  HomeIcon,
-  InfoOutlineIcon,
-  EnvelopeIcon,
-  DocumentTextIcon,
-  DocumentsIcon,
-  HeartIcon,
-  ThListIcon,
-  PinIcon,
-  ArrowRightIcon,
-  StarFilledIcon,
-  CalendarIcon,
-  ClockIcon,
-  UsersIcon,
-  ActivityIcon,
-} from '@sanity/icons';
+import { BellIcon } from '@sanity/icons/Bell';
+import { BlockElementIcon } from '@sanity/icons/BlockElement';
+import { CogIcon } from '@sanity/icons/Cog';
+import { ColorWheelIcon } from '@sanity/icons/ColorWheel';
+import { HomeIcon } from '@sanity/icons/Home';
+import { InfoOutlineIcon } from '@sanity/icons/InfoOutline';
+import { EnvelopeIcon } from '@sanity/icons/Envelope';
+import { DocumentTextIcon } from '@sanity/icons/DocumentText';
+import { DocumentsIcon } from '@sanity/icons/Documents';
+import { HeartIcon } from '@sanity/icons/Heart';
+import { ThListIcon } from '@sanity/icons/ThList';
+import { PinIcon } from '@sanity/icons/Pin';
+import { ArrowRightIcon } from '@sanity/icons/ArrowRight';
+import { StarFilledIcon } from '@sanity/icons/StarFilled';
+import { CalendarIcon } from '@sanity/icons/Calendar';
+import { ClockIcon } from '@sanity/icons/Clock';
+import { UsersIcon } from '@sanity/icons/Users';
+import { ActivityIcon } from '@sanity/icons/Activity';
 import { makeGuideView } from './components/GuideView';
 import { guides, GUIDE_CATEGORIES } from './guides/content';
 import { WelcomePane } from './components/WelcomePane';

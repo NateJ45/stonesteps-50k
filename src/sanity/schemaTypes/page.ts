@@ -12,7 +12,7 @@
 // error and the site never builds a colliding page.
 
 import { defineType, defineField } from 'sanity';
-import { DocumentsIcon } from '@sanity/icons';
+import { DocumentsIcon } from '@sanity/icons/Documents';
 import { SECTION_TYPES, sectionArrayOptions } from './sections';
 import { RESERVED_SLUGS } from '../../lib/reservedSlugs';
 import { PUBLISH_AT_GROUP, publishAtField } from './_publishAt';
