@@ -2,6 +2,8 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-17: The header logo shows with JavaScript off (starter PORTS card 108)._ The theme-aware header img ships with no `src` so the inline script fetches only one variant, which left no-JS visitors with alt text. `Header.astro` now adds a `<noscript>` copy with the light logo and a scoped rule hiding the src-less img, which is only src-less when that script never ran. With JS on nothing changes.
+
 _2026-10-15: GA4 skips automated browsers (starter PORTS card 96)._ `GoogleAnalytics.astro` is re-synced from the starter (rule 4): the tag does nothing when `navigator.webdriver` is true or the user agent matches `HeadlessChrome|Lighthouse|PTST|GTmetrix|Speed Insights`. Our own Playwright and Lighthouse runs against production were being counted as visitors (194 in one day on another site). Real browsers are unaffected. Starter PORTS card 96. `tests/ga-events.spec.ts` stubs `window.gtag` itself, so it is unaffected.
 
 _2026-10-13: The course-features caption is declared on the block (PENDING 1r closed)._
