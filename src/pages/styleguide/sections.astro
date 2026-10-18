@@ -1,0 +1,292 @@
+---
+// Foundation, edit with care
+//
+// THE SECTIONS WALL: one of every page-builder block, rendered through the real
+// SectionRenderer (the authoring kit, PORTS.md card 109).
+//
+// WHAT IT IS FOR. `npm run thumbnails` (scripts/shoot-section-thumbnails.mjs)
+// shoots each `[data-section-type]` box below into
+// public/section-thumbnails/<type>.jpg, and those pictures are what the
+// "+ Add item" menu's grid view shows in the Studio. So the picture the race
+// director picks from is the block as this site actually draws it.
+//
+// STONE STEPS (2026-10-18): THE RACE'S OWN BLOCKS USE THE RACE'S OWN DATA. The
+// first copy of each block on Home, The Course, Records and Contact is fetched
+// at build time, so the tickets carry the real prices, the board the real
+// records and the bands their real photos. A block that is on no page yet (and
+// every block, in a build with no Sanity project) falls back to the fixed
+// fixture below, which is also what src/lib/authoring.test.ts looks for: every
+// block type in sections.ts and raceSections.ts needs a `_type: '<name>'`
+// fixture here and a picture on disk.
+//
+// The fixture images are fake Sanity references; the thumbnail script answers
+// those CDN requests with a local photo. Real images load from the CDN. NOT
+// shot by the visual suite (styleguide.astro is): noindex, out of the sitemap
+// ('/styleguide' is filtered in astro.config.mjs) and under a reserved slug.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SectionRenderer from '@/components/SectionRenderer.astro';
+import { getHomePage, getPage, getSiteSettings } from '@/lib/queries';
+
+const siteSettings = await getSiteSettings();
+
+const image = (alt = 'Fixture image') => ({
+  _type: 'image',
+  alt,
+  asset: {
+    _type: 'reference',
+    _ref: 'image-0123456789abcdef0123456789abcdef01234567-1600x900-jpg',
+  },
+});
+
+const para = (key: string, text: string) => ({
+  _type: 'block',
+  _key: key,
+  style: 'normal',
+  markDefs: [],
+  children: [{ _type: 'span', _key: `${key}-s`, marks: [], text }],
+});
+
+const cta = (label: string) => ({
+  _type: 'ctaBlock',
+  label,
+  linkType: 'external',
+  externalUrl: '#',
+});
+
+/** Fixed stand-ins, in menu order: the general blocks, then the race's. */
+const FIXTURES: Record<string, unknown>[] = [
+  {
+    _type: 'heroSection',
+    _key: 'hero',
+    eyebrow: 'Race week',
+    headline: 'Everything you need for Saturday',
+    subhead: 'Bib pickup, parking and the start, in one place.',
+    size: 'short',
+    backgroundImage: image(),
+    primaryCta: cta('Register'),
+    secondaryCta: cta('See the course'),
+  },
+  {
+    _type: 'richTextSection',
+    _key: 'text',
+    eyebrow: 'Race week',
+    heading: 'Bib pickup',
+    body: [
+      para(
+        't1',
+        'Bibs are at the shelter by the Oval from 6:00 to 7:30 on race morning. Bring photo ID.',
+      ),
+      para('t2', 'Someone collecting a bib for you? Send their name to the race first.'),
+    ],
+  },
+  {
+    _type: 'imageTextSection',
+    _key: 'imagetext',
+    imageSide: 'right',
+    eyebrow: 'Volunteers',
+    heading: 'Help run the aid station',
+    body: [para('i1', 'Fill bottles, hand out food and cheer every runner through the Oval.')],
+    image: image(),
+    cta: cta('Volunteer'),
+  },
+  {
+    _type: 'gallerySection',
+    _key: 'gallery',
+    heading: 'Photos from the trail',
+    columns: 3,
+    images: [image('One'), image('Two'), image('Three')].map((img, i) => ({
+      ...img,
+      _key: `g${i}`,
+    })),
+  },
+  {
+    _type: 'quoteSection',
+    _key: 'quote',
+    quote: 'The steps on the last loop are the hardest thing I have ever loved.',
+    attribution: 'A 50K finisher',
+    detail: 'Since 2020',
+  },
+  {
+    _type: 'statSection',
+    _key: 'stats',
+    heading: 'The day in numbers',
+    stats: [
+      { _key: 's1', _type: 'statItem', number: 23, label: 'runnings' },
+      { _key: 's2', _type: 'statItem', number: 300, label: 'runners' },
+      { _key: 's3', _type: 'statItem', number: 7, label: 'loops in the 50K' },
+    ],
+  },
+  {
+    _type: 'ctaBandSection',
+    _key: 'ctaband',
+    eyebrow: 'Registration',
+    headline: 'Registration is open',
+    subhead: 'The 50K and the 27K are on RunSignUp. Places are capped.',
+    cta: cta('Register on RunSignUp'),
+  },
+  {
+    _type: 'videoSection',
+    _key: 'video',
+    heading: 'One loop, from the trail',
+    url: 'https://www.youtube.com/watch?v=aaaaaaaaaaa',
+    caption: 'Filmed on the 5.3 mile loop.',
+  },
+  { _type: 'spacerSection', _key: 'spacer', variant: 'ornament' },
+  {
+    _type: 'logoStripSection',
+    _key: 'logos',
+    eyebrow: 'With thanks',
+    headline: 'The race’s partners',
+    layout: 'row',
+    logos: [
+      image('Partner one'),
+      image('Partner two'),
+      image('Partner three'),
+      image('Partner four'),
+    ].map((img, i) => ({ ...img, _key: `l${i}` })),
+  },
+  {
+    _type: 'embedSection',
+    _key: 'embed',
+    eyebrow: 'Embed',
+    headline: 'A sign-up sheet or a map from another site',
+    subhead: 'Paste a link or a snippet and it shows here.',
+    heightHint: 'short',
+    embedUrl: 'https://embed.example.com/map',
+  },
+  {
+    _type: 'photoBandSection',
+    _key: 'photoband',
+    image: image('Runners on the single track'),
+    caption: 'The single track above the Oval.',
+    height: 'standard',
+  },
+  {
+    _type: 'raceHeroSection',
+    _key: 'racehero',
+    eyebrow: 'Mt. Airy Forest',
+    headline: 'Stone Steps 50K',
+  },
+  {
+    _type: 'pageHeaderSection',
+    _key: 'pageheader',
+    eyebrow: 'The course',
+    headline: 'Seven loops of single track',
+    lede: 'Roots, rocks and the stone steps the race is named for.',
+  },
+  {
+    _type: 'distanceTicketsSection',
+    _key: 'tickets',
+    eyebrow: 'Pick your distance',
+    headline: 'The 50K and the 27K',
+  },
+  {
+    _type: 'recordsBoardSection',
+    _key: 'records',
+    eyebrow: 'The records',
+    headline: 'All-time bests',
+  },
+  { _type: 'raceScheduleSection', _key: 'schedule', eyebrow: 'Race day', headline: 'The schedule' },
+  {
+    _type: 'courseFeaturesSection',
+    _key: 'features',
+    eyebrow: 'On the trail',
+    headline: 'What the course is like',
+  },
+  {
+    _type: 'loopCardSection',
+    _key: 'loops',
+    eyebrow: 'The loops',
+    headline: 'How the course is laid out',
+  },
+  {
+    _type: 'elevationSection',
+    _key: 'elevation',
+    eyebrow: 'Up and down',
+    headline: 'The climbing',
+  },
+  { _type: 'courseMapSection', _key: 'map', eyebrow: 'The map', headline: 'Where it goes' },
+  {
+    _type: 'coursePosterSection',
+    _key: 'poster',
+    eyebrow: 'The course',
+    headline: 'One loop, on paper',
+  },
+  {
+    _type: 'sponsorPatchesSection',
+    _key: 'sponsors',
+    eyebrow: 'With thanks',
+    headline: 'Our sponsors',
+  },
+  { _type: 'contactSection', _key: 'contact', eyebrow: 'Contact', headline: 'Ask the race' },
+  { _type: 'faqKioskSection', _key: 'faq', eyebrow: 'Questions', headline: 'Before you ask' },
+  {
+    _type: 'tickerSection',
+    _key: 'ticker',
+    items: ['50K', '27K', 'Mt. Airy Forest', 'Since 2003'],
+  },
+  {
+    _type: 'parksSection',
+    _key: 'parks',
+    eyebrow: 'Cincinnati Parks',
+    headline: 'The race gives back',
+  },
+  {
+    _type: 'communitySection',
+    _key: 'community',
+    eyebrow: 'The people',
+    headline: 'A trail family',
+  },
+  {
+    _type: 'raceWeatherSection',
+    _key: 'weather',
+    eyebrow: 'The weather',
+    headline: 'Race day, every year',
+  },
+  {
+    _type: 'dynastiesSection',
+    _key: 'dynasties',
+    eyebrow: 'The regulars',
+    headline: 'Who keeps coming back',
+  },
+  { _type: 'gearSection', _key: 'gear', eyebrow: 'What to bring', headline: 'Gear for the trail' },
+];
+
+// The race's pages, for the real copy of each block. Missing pages (no Sanity
+// project) come back null, and every block uses its fixture.
+const home = (await getHomePage()) as {
+  pageBuilder?: Record<string, unknown>[];
+  results?: unknown[];
+  historical?: unknown[];
+} | null;
+const pages = (await Promise.all(
+  ['course', 'records', 'contact'].map((slug) => getPage(slug)),
+)) as Array<{ pageBuilder?: Record<string, unknown>[] } | null>;
+const real = new Map<string, Record<string, unknown>>();
+for (const doc of [home, ...pages]) {
+  for (const section of doc?.pageBuilder ?? []) {
+    const type = String(section?._type ?? '');
+    if (type && !real.has(type)) real.set(type, section);
+  }
+}
+const SECTIONS = FIXTURES.map((fixture) => real.get(String(fixture._type)) ?? fixture);
+---
+
+<BaseLayout
+  title="Sections wall | Stone Steps 50K"
+  description="Wall of every page-builder section. Not for visitors."
+  {siteSettings}
+  noindex
+>
+  {SECTIONS.map((section, i) => (
+    <div data-section-type={String(section._type)}>
+      <SectionRenderer
+        sections={[section]}
+        idPrefix={`fx-${i}`}
+        results={(home?.results ?? []) as never}
+        historical={(home?.historical ?? []) as never}
+      />
+    </div>
+  ))}
+</BaseLayout>

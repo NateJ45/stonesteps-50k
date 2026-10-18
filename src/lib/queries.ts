@@ -69,9 +69,9 @@ export const ARCHIVE_PROJECTION = `
     "athlete": { "name": athlete->name, "slug": athlete->slug.current }
   }, [])`;
 
-export function sectionsProjection(field = 'pageBuilder'): string {
-  return `${field}[]{
-    ...,
+// The per-type arms, shared by a page's own sections and by the sections a
+// synced section shows (below), so a block renders the same either way.
+const SECTION_ARMS = `
     _type == "heroSection" => {
       ...,
       backgroundImage${IMAGE_PROJECTION},
@@ -308,6 +308,25 @@ export function sectionsProjection(field = 'pageBuilder'): string {
           "answer": answer
         }
       )
+    }`;
+
+// Synced sections (the authoring kit, PORTS.md card 109). The block holds only
+// a reference to a saved section; resolve it here into `sections`, run through
+// the SAME arms, and SectionRenderer swaps the block for them in place
+// (expandSyncedSections in src/lib/authoring.ts). One level only: a saved
+// section cannot hold a synced section, so there is nothing deeper to resolve.
+// A missing or deleted saved section resolves to null and renders nothing.
+export function sectionsProjection(field = 'pageBuilder'): string {
+  return `${field}[]{
+    ...,
+    ${SECTION_ARMS},
+    _type == "syncedSection" => {
+      ...,
+      "presetTitle": preset->title,
+      "sections": preset->section[]{
+        ...,
+        ${SECTION_ARMS}
+      }
     }
   }`;
 }

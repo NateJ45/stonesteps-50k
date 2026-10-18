@@ -72,7 +72,7 @@ export const notFoundPage = defineType({
       type: 'image',
       group: 'content',
       description:
-        'Image shown to the right of the text (stacks above on mobile). On-brand vignette that grounds the page in the studio identity.',
+        'A photo beside the words (above them on a phone): the trail, the steps, the forest.',
       options: { hotspot: true },
       fields: [
         defineField({
@@ -85,7 +85,7 @@ export const notFoundPage = defineType({
           name: 'caption',
           title: 'Caption (optional)',
           type: 'string',
-          initialValue: 'From the studio',
+          initialValue: 'Mt. Airy Forest',
         }),
       ],
     }),

@@ -218,3 +218,58 @@ The `page` document type carries three verbs and one extra field beyond its cont
 
 Page SINGLETONS deliberately get none of this: one-per-site means duplicating or archiving
 one would leave the site with a route and no document.
+
+## The authoring kit: templates, the picture picker, patterns, synced sections, guardrails (PORTS.md card 109)
+
+What a WordPress block-editor handover gives a client, built on the page builder that is already here. Five parts:
+
+1. **Page templates.** `src/sanity/pageTemplates.ts` (the site's OWN file, not PORTABLE) lists the starting points
+   offered when a page is made. Stone Steps follows the race year: Simple page, Race week: what to know, Volunteer
+   call, Course notes and aid stations, Race recap and photos, Sponsor thank-you, Save the date, Blank page.
+   `sanity.config.ts` registers each as an initial value template on `page` (`value` is a function, so every new page
+   gets fresh `_key`s from `freshKeys()` in `src/lib/authoring.ts`) and `newDocumentOptions` hides the stock `page`
+   template, which stays registered so intents that name it keep working. Every example line starts `Example:`.
+   `src/lib/authoring.test.ts` fails if a template uses a block a custom page does not accept, leaves an array member
+   without a `_key`, repeats keys between two pages, or forgets the marker.
+2. **The picture picker.** `SECTION_INSERT_MENU` in `schemaTypes/sections.ts` carries
+   `views: [grid, list]`; the grid's `previewImageUrl` is `/section-thumbnails/<type>.jpg`, served by the site (the
+   Studio's own origin). The pictures are shot by `npm run thumbnails` (`scripts/shoot-section-thumbnails.mjs`, build
+   first) from `/styleguide/sections/`, a fixed-data wall of every block rendered by the real `SectionRenderer`, so the
+   pictures are in the site's brand. Re-run it after a reskin. A type with no picture falls back to its icon. The
+   authoring test fails if a block in `sections.ts` or `raceSections.ts` has no fixture on the wall or no picture.
+   Stone Steps: the wall takes the first real copy of each race block from Home and the custom pages (real prices,
+   records and photos) and falls back to its fixture, so shoot from a build made with the Sanity project set.
+3. **Patterns.** A `sectionPreset` (Saved section) can hold up to 12 sections now (it was capped at one; one-section
+   presets stay valid). Every `pageBuilder` field spreads `pageBuilderAuthoring` (`src/sanity/pageBuilderAuthoring.ts`),
+   whose input (`components/PageBuilderInput.tsx`) adds **Insert a saved section** under Sanity's own list: **Add a copy**
+   (deep copy, fresh keys, the page's own from then on) or **Add synced**. A preset holding a block the list does not
+   accept is shown greyed out with the reason. The Presentation navigator's Saved sections panel adds every section of
+   a pattern, in order. The "Save a section as preset..." action still saves one section; make a pattern by opening the
+   saved section and adding more.
+4. **Synced sections.** `syncedSection` (in `sections.ts`, in `SECTION_TYPES`, NOT in `pageSectionSchemas` or
+   `LIBRARY_SECTION_TYPES`) holds one reference to a `sectionPreset`. `sectionsProjection()` in `src/lib/queries.ts`
+   resolves it into `sections` through the same per-type arms (`SECTION_ARMS`), and `SectionRenderer` swaps it for
+   those sections before the cadence runs (`expandSyncedSections()`), so the surfaces alternate as if they were typed
+   in (rule 9: the block has no colour field and the section-fields gate scans it). Expanded sections carry
+   `_editKey`, the synced block's own key, so the preview's in-canvas controls act on the synced block. A saved section
+   cannot hold a synced section, so no loop can be built. Publishing a preset triggers the normal rebuild webhook, which
+   is how "edit once, everywhere" reaches the live site. Studio preview: "Synced: <name>". Not a scaffold capability:
+   it belongs to no removable feature, so it carries no markers.
+5. **Guardrails.** `pageBuilderAuthoring.validation` returns WARNINGS only (never errors, so nothing can stop a Publish
+   that worked before): an empty section, `Example:` text left in, a synced section with nothing picked, and the
+   site's `pageRules` from `kit.config.ts` (`appliesTo`, `mustStartWith`, `atMostOnce`, `maxSections`; the starter
+   applies "open with a hero, one hero, nudge past 20" to custom pages only). Logic and tests:
+   `src/lib/page-guardrails.ts`. Self-filling sections (`selfFillingSections` in `pageBuilderConfig.ts`, which now
+   includes `syncedSection`) are never called empty.
+
+The Site Guide has a guide for each: "Start a page from a template", "Reuse a section on other pages", "Keep a section
+the same on every page" (`src/sanity/guides/content.ts`).
+
+**Stone Steps (2026-10-18).** The insert menu offers the race's blocks and the general ones only: the starter's
+business blocks (services grid, process, story, values, founder, team, service area, testimonials, guarantee, FAQ
+list, dynamic list) fill from collections this race does not keep, were on no page, and are no longer offered (their
+types stay registered). Twelve race-year saved sections (registration open, the price going up, the race full,
+volunteers wanted, race week, weather watch, a course change, results up, new records, photos up, sponsor thanks,
+save the date) live in `src/sanity/sectionPatterns.ts` and are seeded as drafts by `npm run seed:patterns` (dry by
+default; never overwrites). The page rule is "open with the page heading, once" on custom pages. The race blocks that
+draw from the race's own data are in `selfFillingSections`, so an empty heading on one is not an empty section.
