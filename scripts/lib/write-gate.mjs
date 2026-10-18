@@ -1,15 +1,17 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
 // write-gate.mjs - dry by default, and a second factor on production writes
 // =============================================================================
 // For the scripts that build their own Sanity client instead of importing
-// scripts/lib/sanity-lib.mjs (which carries the same guard; PORTS.md card 86).
-// Added 2026-10-13. Site-specific, not PORTABLE: the CI allowance below exists
-// because this site's scheduled workflows run three of these scripts.
+// scripts/lib/sanity-lib.mjs (which carries the same guard; PORTS.md card 86),
+// above all scripts/publish-due.mjs, which must stay dependency-free because
+// its workflow runs without `npm ci`. This module imports node builtins only.
+// From stonesteps-50k (2026-10-13), adopted in the starter by PORTS.md card 114.
 //
 // THE RULE. A script that can write to Sanity writes only when the run carries
-// its write flag (`--apply`, or the script's older flag: `--write` for
-// build-elevation, `--record` for weather-sync) AND, on the `production`
-// dataset, NCS_PRODUCTION_WRITE=yes is in the real process environment:
+// its write flag (`--apply`, or a script's own older flag such as `--write`)
+// AND, on the `production` dataset, NCS_PRODUCTION_WRITE=yes is in the real
+// process environment:
 //
 //   node scripts/x.mjs                                   # dry run, prints the plan
 //   NCS_PRODUCTION_WRITE=yes node scripts/x.mjs --apply  # writes to production
@@ -26,14 +28,12 @@
 // is refused outright: if `.env` could hold it, it would be set once and the
 // guard would be open for good. Import this module BEFORE `dotenv/config`.
 //
-// THE CI ALLOWANCE. results-import.yml runs `import-results.mjs` bare and
-// `weather-sync.mjs --record`; publish-due.yml runs `publish-due.mjs --apply`.
-// Those unattended jobs cannot have a person present, and their workflow files
-// are reviewed code holding the token as a repo secret. So a script that opts in
-// with `ci: true` may write in GitHub Actions without the variable, and
-// `ciBare: true` (import-results only) keeps its bare run writing there. Off
-// Actions the full rule applies. docs/PENDING.md tracks giving those workflows
-// the explicit flag and variable so the allowance can go.
+// THE CI ALLOWANCE. An unattended scheduled job (publish-due.yml runs
+// `publish-due.mjs --apply`) cannot have a person present, and its workflow
+// file is reviewed code holding the token as a repo secret. So a script that
+// opts in with `ci: true` may write in GitHub Actions without the variable, and
+// `ciBare: true` keeps a bare run writing there too (for a site whose workflow
+// predates the flag). Off Actions the full rule applies.
 // =============================================================================
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
