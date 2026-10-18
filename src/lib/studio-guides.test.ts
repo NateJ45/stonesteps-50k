@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Gate on the Studio's Help & Guide content.
 //
 // The guides are prose, so nothing else can check them. These are the mistakes

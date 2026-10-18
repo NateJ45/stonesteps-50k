@@ -126,6 +126,26 @@
     "fonts": {
       "display": "\"Staatliches\", \"Arial Narrow\", system-ui, sans-serif",
       "body": "\"Archivo Variable\", system-ui, -apple-system, sans-serif"
+    },
+    "chrome": "#24462D",
+    "icons": {
+      "types": {
+        "race": "event",
+        "raceDay": "event",
+        "distance": "service",
+        "scheduleItem": "times",
+        "courseFeature": "place",
+        "sponsor": "give",
+        "athlete": "person",
+        "raceResult": "document",
+        "recordEntry": "value"
+      },
+      "tools": {
+        "structure": "pages"
+      },
+      "tile": {
+        "dark": "#D3C6AA"
+      }
     }
   }
 }

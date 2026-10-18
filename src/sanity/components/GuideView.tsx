@@ -3,14 +3,86 @@ import type { ComponentType } from 'react';
 import { useWorkspace } from 'sanity';
 import { useRouter } from 'sanity/router';
 import { guides, SITE, type DiyLevel, type GuideBlock, type PathLink } from '../guides/content';
+import { InfoOutlineIcon } from '@sanity/icons/InfoOutline';
+import { DocumentTextIcon } from '@sanity/icons/DocumentText';
+import { AddIcon } from '@sanity/icons/Add';
+import { ThLargeIcon } from '@sanity/icons/ThLarge';
+import { CopyIcon } from '@sanity/icons/Copy';
+import { SyncIcon } from '@sanity/icons/Sync';
+import { ArrowRightIcon } from '@sanity/icons/ArrowRight';
+import { ImageIcon } from '@sanity/icons/Image';
+import { MenuIcon } from '@sanity/icons/Menu';
+import { HomeIcon } from '@sanity/icons/Home';
+import { ClockIcon } from '@sanity/icons/Clock';
+import { PlayIcon } from '@sanity/icons/Play';
+import { SearchIcon } from '@sanity/icons/Search';
+import { CheckmarkCircleIcon } from '@sanity/icons/CheckmarkCircle';
+import { ActivityIcon } from '@sanity/icons/Activity';
+import { BulbOutlineIcon } from '@sanity/icons/BulbOutline';
+import { BoltIcon } from '@sanity/icons/Bolt';
+import { RestoreIcon } from '@sanity/icons/Restore';
+import { CalendarIcon } from '@sanity/icons/Calendar';
+import { TagIcon } from '@sanity/icons/Tag';
+import { HeartIcon } from '@sanity/icons/Heart';
+import { ThListIcon } from '@sanity/icons/ThList';
+import { EditIcon } from '@sanity/icons/Edit';
+import { UserIcon } from '@sanity/icons/User';
+import { BellIcon } from '@sanity/icons/Bell';
+import { EnvelopeIcon } from '@sanity/icons/Envelope';
+import { PinIcon } from '@sanity/icons/Pin';
+import { StarIcon } from '@sanity/icons/Star';
+import { UsersIcon } from '@sanity/icons/Users';
+
+/**
+ * A guide's `icon` is a name from this list (FBC Auburn, 2026-10-18: the
+ * guides used emoji, which read as clip art beside Sanity's own icons). An
+ * unknown name falls back to the info icon, so a typo never breaks a guide.
+ */
+export const GUIDE_ICONS: Record<string, ComponentType> = {
+  info: InfoOutlineIcon,
+  document: DocumentTextIcon,
+  add: AddIcon,
+  blocks: ThLargeIcon,
+  copy: CopyIcon,
+  sync: SyncIcon,
+  arrow: ArrowRightIcon,
+  image: ImageIcon,
+  menu: MenuIcon,
+  home: HomeIcon,
+  clock: ClockIcon,
+  play: PlayIcon,
+  search: SearchIcon,
+  check: CheckmarkCircleIcon,
+  activity: ActivityIcon,
+  bulb: BulbOutlineIcon,
+  // Card 111 (2026-10-18): Quick update and "Undo a change from earlier in the week".
+  bolt: BoltIcon,
+  restore: RestoreIcon,
+  // Stone Steps (2026-10-18): the race guides' icons, replacing their emoji.
+  calendar: CalendarIcon,
+  tag: TagIcon,
+  heart: HeartIcon,
+  list: ThListIcon,
+  edit: EditIcon,
+  user: UserIcon,
+  bell: BellIcon,
+  envelope: EnvelopeIcon,
+  pin: PinIcon,
+  star: StarIcon,
+  users: UsersIcon,
+};
 
 // =============================================================================
 // GuideView — read-only Help pane rendered inside the Studio structure
 // =============================================================================
-// Ported from west-chester-preschool on 2026-09-07, which is where this pattern
-// was worked out over a lot of sessions with a non-technical volunteer. Two
-// adaptations: this Studio has ONE workspace, so the workspace-swapping in
-// PathCard is gone, and the chips carry the race's rust instead of WCP's blue.
+// PORTS.md card 41. The pattern was worked out in wcp-website over many
+// sessions with a non-technical volunteer, and generalised here via
+// stonesteps-50k. This copy assumes ONE workspace (wcp has two and swaps the
+// path segment; there is nothing to swap to in a single-workspace Studio).
+//
+// The chip colors read Sanity UI's own theme variables with a neutral
+// fallback, so a fork inherits something sane and can hardcode its brand if it
+// wants the guides to feel like the site.
 //
 // The guides themselves are DATA in ../guides/content.ts, held in the repo
 // rather than in Sanity, so they can never be deleted by accident and a future
@@ -87,7 +159,7 @@ function DiyBadge({ level }: { level?: DiyLevel }) {
 
 // The "Where in the Studio" breadcrumb card. With a `link` it is a real door:
 // the whole card navigates to the target pane/document/tool. Same router rule
-// as WelcomePane's TaskCard: the deployed embedded Studio is HASH-routed, so
+// as the kit's Home cards: the deployed embedded Studio is HASH-routed, so
 // clicks must go through router.navigateUrl (a raw <a href="/public/..">
 // leaves the Studio and 404s); the href is a best-effort real URL so
 // middle-click / open-in-new-tab still works.
@@ -99,8 +171,8 @@ function PathCard({ items, link }: { items: string[]; link?: PathLink }) {
       <span
         aria-hidden
         style={{
-          background: '#f6e7e2',
-          color: '#8f3323',
+          background: 'var(--card-badge-primary-bg-color, #e8eaee)',
+          color: 'var(--card-link-fg-color, #586577)',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -119,7 +191,11 @@ function PathCard({ items, link }: { items: string[]; link?: PathLink }) {
             Where in the Studio
           </Text>
           {link && (
-            <Text size={1} weight="semibold" style={{ color: '#8f3323' }}>
+            <Text
+              size={1}
+              weight="semibold"
+              style={{ color: 'var(--card-link-fg-color, #586577)' }}
+            >
               Take me there →
             </Text>
           )}
@@ -194,8 +270,8 @@ function BlockView({ block }: { block: GuideBlock }) {
               <span
                 aria-hidden
                 style={{
-                  background: '#f6e7e2',
-                  color: '#8f3323',
+                  background: 'var(--card-badge-primary-bg-color, #e8eaee)',
+                  color: 'var(--card-link-fg-color, #586577)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -269,6 +345,12 @@ function BlockView({ block }: { block: GuideBlock }) {
 }
 
 // Returns a component bound to one guide slug (used by structure.ts).
+/** The guide's icon, looked up by name in GUIDE_ICONS. */
+function GuideIcon({ name }: { name: string }) {
+  const Icon = GUIDE_ICONS[name] ?? InfoOutlineIcon;
+  return <Icon />;
+}
+
 export function makeGuideView(slug: string): ComponentType {
   return function GuideView() {
     const guide = guides.find((g) => g.slug === slug);
@@ -283,23 +365,23 @@ export function makeGuideView(slug: string): ComponentType {
       <Box padding={4}>
         <Box style={{ maxWidth: 680, margin: '0 auto' }}>
           <Flex align="center" gap={3} style={{ flexWrap: 'wrap' }}>
-            {/* The hub-style icon chip: soft sky tint behind the guide's emoji. */}
+            {/* The hub-style icon chip: soft sky tint behind the guide's icon. */}
             <span
               aria-hidden
               style={{
-                background: '#f6e7e2',
-                color: '#8f3323',
+                background: 'var(--card-badge-primary-bg-color, #e8eaee)',
+                color: 'var(--card-link-fg-color, #586577)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: 40,
                 height: 40,
                 borderRadius: 12,
-                fontSize: 20,
+                fontSize: 24,
                 flexShrink: 0,
               }}
             >
-              {guide.icon}
+              <GuideIcon name={guide.icon} />
             </span>
             <Heading as="h1" size={4}>
               {guide.title}

@@ -38,6 +38,8 @@
     "test:ui": "playwright test --ui",
     "audit:studio": "node scripts/audit-studio.mjs",
     "audit:data": "node scripts/audit-data-vs-schema.mjs",
+    "restore:doc": "node scripts/restore-doc.mjs",
+    "gen:studio-banner": "node scripts/gen-studio-banner.mjs",
     "test:unit": "node --experimental-strip-types --test src/lib/*.test.ts && npm run test:scripts",
     "test:scripts": "node --test scripts/lib/*.test.mjs",
     "serve:dist": "node scripts/serve-dist.mjs --port 4321",

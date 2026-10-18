@@ -146,7 +146,7 @@ If a content change isn't appearing on the live site after a few minutes:
 The webhook lives at manage.sanity.io → API → Webhooks. The recommended GROQ filter is a deny-list:
 
 ```
-!(_id in path("drafts.**")) && !(_type in ["media.tag", "sanity.imageAsset", "sanity.fileAsset", "sanity.assetSourceData"])
+!(_id in path("drafts.**")) && !(_type in ["media.tag", "sanity.imageAsset", "sanity.fileAsset", "sanity.assetSourceData", "studioWeek", "previewShare"])
 ```
 
 This filter skips rebuilds triggered by draft saves and internal Sanity asset-management events (tagging an uploaded photo, rotating an image, etc.), which don't affect live HTML. New content types are covered automatically because the filter excludes only the named system types and lets everything else through. The old hand-maintained allow-list approach (explicitly listing every `_type` that should trigger a rebuild) silently dropped new types until a developer remembered to add them. The deny-list is safer: add a new schema type and it triggers rebuilds out of the box.
@@ -177,19 +177,55 @@ The site has a section visibility system that lets you launch now and finish sec
 
 ### Scheduled publishing
 
-Sanity supports scheduling a document to go live at a future date and time.
+The Studio has no Sanity "Schedule publish" (that is a Growth-plan feature). Instead a page carries **Publish
+automatically at** under its Publishing tab: the editor sets a time and leaves the page as a draft, and
+`.github/workflows/publish-due.yml` publishes it within the half hour, then starts `deploy.yml` so the change goes
+live. Home's **Coming up** card lists what is waiting.
 
-**How to schedule a publish:**
+The workflow's schedule is commented out until it has its token. To switch it on: set the `SANITY_API_WRITE_TOKEN`
+repo secret (a Sanity token with the Editor role; not `SANITY_AUTH_TOKEN`, which the backup reads with), check the
+`SANITY_PROJECT_ID` repo variable, then uncomment `schedule:` in `publish-due.yml`. By hand:
+`NCS_PRODUCTION_WRITE=yes node scripts/publish-due.mjs --apply` (card 114's write gate).
 
-1. Open the document you want to schedule.
-2. Click the small arrow (chevron) to the right of the blue Publish button in the bottom bar.
-3. Choose "Schedule publish" from the menu.
-4. Pick the date and time. Times are local to your browser.
-5. Click "Schedule." The document moves to a "Scheduled" state.
+### The Studio kit (PORTS.md cards 106 to 120)
 
-The live site rebuilds automatically when the scheduled publish fires. You can see, edit, or cancel scheduled items by going back to that document before the time fires.
+The Studio is the race's own admin: Home (the race checklist, Is it live?, the Fix-it list, Visitors, Your pages),
+Quick update (a race-week notice from a phone), Content, Live preview, Messages (the contact form inbox), Site Guide
+and Checkup, in the race's paper, rust and forest green. Everything site-specific is in `src/sanity/kit.config.ts`
+(Home, the checklist, Quick update, the tour), `src/sanity/raceCheckup.ts` (the race's Checkup rules),
+`src/sanity/structure.ts` (the desk), `src/sanity/brandIconArt.tsx` (the plate icons in `src/assets/brand/`),
+`src/sanity/studioEdges.config.ts` (the sign-in line) and `brand/brand.config.json` `studio` (forest chrome, icon
+meanings). Full detail: `docs/agent/studio-kit.md`.
 
-**Note:** as of May 2026, the `@sanity/scheduled-publishing` plugin is incompatible with this Studio's React 19 dependency. Use the built-in document actions scheduling path above until the plugin is updated.
+Each piece that needs a setting says so in the Studio and keeps working without it. The settings, once each:
+
+| Setting                                                                  | Where                                                          | Unlocks                                                          |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `GITHUB_DEPLOY_TOKEN` (fine-grained, this repo, Actions: Read and write) | `npx wrangler secret put GITHUB_DEPLOY_TOKEN`                  | "The last update didn't go through" and Try again (card 111)     |
+| `SHARE_PREVIEW_SECRET` (48 random characters)                            | `npx wrangler secret put SHARE_PREVIEW_SECRET`                 | Share a preview links (card 117)                                 |
+| `CF_ANALYTICS_TOKEN`, `CF_ACCOUNT_ID`, `CF_WEB_ANALYTICS_SITE_TAG`       | secret, and `wrangler.jsonc` `vars`                            | Home's Visitors card (card 115), see below                       |
+| `PUBLIC_CF_ANALYTICS_TOKEN` (the beacon token)                           | repo variable, read by `deploy.yml`                            | The Cloudflare beacon, if the zone does not inject it itself     |
+| `message_status` table                                                   | `npx wrangler d1 migrations apply stonesteps-contact --remote` | Messages remembers New / Replied / Spam (card 117)               |
+| `SANITY_API_WRITE_TOKEN`, then uncomment the schedule                    | repo secret, `publish-due.yml`                                 | Publish automatically at (above)                                 |
+| Uncomment the schedule                                                   | `change-note.yml` (uses `SANITY_AUTH_TOKEN`)                   | The morning "What changed" issue (card 117)                      |
+| Add `"studioWeek"` and `"previewShare"` to the deny-list                 | the publish webhook's filter (above)                           | A checklist tick or a new preview link does not rebuild the site |
+| The race director's Sanity user id                                       | `staff` in `src/sanity/kit.config.ts`                          | His staff view, even though he is an administrator               |
+
+### Visitor numbers (Home's Visitors card, PORTS.md card 115)
+
+Home's Visitors card reads Cloudflare Web Analytics through `/api/studio/visitors/` (signed-in Studio members only).
+Until the Worker has three settings, the card says "Not set up yet". Once:
+
+1. **Turn on Web Analytics** for stonesteps50k.com if it is not already (Cloudflare dashboard, Analytics & Logs, Web
+   Analytics). The zone is proxied, so automatic setup injects the beacon; otherwise put the beacon token in the
+   `PUBLIC_CF_ANALYTICS_TOKEN` repo variable. The beacon token is NOT the site tag. Then add Cloudflare Web Analytics
+   to the privacy page's list.
+2. **Find the site tag.** Open the site in Web Analytics: the address bar ends in `siteTag~in=<32 characters>`.
+3. **Create the read-only token.** My Profile, API Tokens, Create Custom Token: one permission row, **Account**,
+   **Account Analytics**, **Read**, on this account. Copy it (shown once).
+4. `npx wrangler secret put CF_ANALYTICS_TOKEN` and paste it at the prompt. Keep a copy in 1Password.
+5. Add `"CF_ACCOUNT_ID"` (from `npx wrangler whoami`) and `"CF_WEB_ANALYTICS_SITE_TAG"` to `wrangler.jsonc` `vars`,
+   beside `GITHUB_REPO`. Deploy, open `/studio`, and check the card shows numbers (cached ten minutes).
 
 ### Field comments
 

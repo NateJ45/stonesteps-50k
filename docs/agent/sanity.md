@@ -150,7 +150,7 @@ All GROQ queries live in `src/lib/queries.ts`. Each page has a typed query funct
 
 **All-fields default.** The `default: true` property is removed from every schema field group definition. Without it, Studio opens documents on the "All fields" tab instead of a single group, so editors see everything without needing to know which group a field lives in.
 
-**Studio branding.** `sanity.config.ts` (repo root) configures the Studio title (shown in the browser tab), the theme, and a custom logo component wired via `studio.components.logo`. The theme is @sanity/ui's `buildTheme` with the brand font stacks swapped in, so the Studio has a real light AND dark mode; `npm run apply-brand` rewrites the two font stacks. Replace the placeholder title and logo asset for each project.
+**Studio branding.** Since 2026-10-18 the Studio kit owns it (starter cards 110, 116, 118 to 120; `docs/agent/studio-kit.md`): the title is `brand.config.json` `name`, the mark is `public/favicon.svg` (the steps), the theme is `src/sanity/studioTheme.ts` (paper, the rust accent, forest chrome from `studio.chrome`, light by default, both schemes), the fonts load from `src/sanity/studioFonts.css` (written by `npm run apply-brand`), list icons are the race's plates (`src/sanity/brandIconArt.tsx`), and `/studio/` is the site's own page (`src/pages/studio/index.astro`). The old `studio.components.logo` wordmark was never drawn by Sanity 6 and is gone.
 
 **SEO length warnings.** `.warning()` validations on `seoTitle` (warns around 60 characters) and `seoDescription` (warns around 160 characters) across all page singletons and `journalEntry`. Editors see an amber warning if the text is getting too long for Google to show in full. A warning, not an error, so it does not block publishing.
 

@@ -16,6 +16,25 @@ sequence).
 
 ## Waiting on a human
 
+### 1s. The Studio kit: its settings, and the signed-in checks
+
+2026-10-18 (starter cards 106 to 120). The kit is in and works without any of its settings: each piece that needs
+one says "not set up yet" or keeps its old behaviour. The settings, each once, are the table in OPERATIONS.md "The
+Studio kit": `GITHUB_DEPLOY_TOKEN` (failed-deploy line and Try again), Cloudflare Web Analytics and its three Worker
+settings (Visitors), the `message_status` migration on `stonesteps-contact` (Messages statuses), the
+`SANITY_API_WRITE_TOKEN` repo secret and the `publish-due.yml` schedule (Publish automatically at), the
+`change-note.yml` schedule (morning change note), `"studioWeek"` and `"previewShare"` in the publish webhook's
+deny-list, and the race director's Sanity user id in `staff` (`src/sanity/kit.config.ts`).
+
+Checked signed out only (Playwright): `/studio/` serves the race's own page and splash, the sign-in card, the
+`/api/studio/*` routes refuse without a session. Still to see signed in: Home (banner, checklist ticks, Fix-it
+list names, Your pages links), Quick update publishing a notice, the forest top bar and status line, the plate icons
+in the desk and list rows at 16 to 24px in light and dark, Help for this page, Messages, Share a preview, Trash and
+Bring it back, the tour, and the staff view.
+
+Dave's logo is still awaited: the Studio uses the steps mark (`public/favicon.svg`) and shows no wordmark beside
+it (`src/sanity/studioEdges.config.ts`). When the logo arrives, it goes in `homeBanner` and the wordmark there.
+
 ### 1o. DONE 2026-10-05. `/registered-runners` forwards to `/results/`
 
 The old WordPress page was a RunSignUp "Find a runner" list (Wayback: 200 captures 2012 to August 2022; 3 GA4 landings on 2026-09-15). Nathan chose `/results/` as the destination. It is in `src/lib/launch-redirects.ts` with its test line.
@@ -354,7 +373,7 @@ box in the Studio each year.
 **Cosmetic, Sanity's own behaviour, low priority.**
 
 A guide link can name a field (`{ doc: 'race', field: 'raceDate' }` in
-`src/sanity/components/studioLink.ts`), which becomes Sanity's `path=` intent
+`src/lib/studio-kit.ts`, `studioTargetPath`), which becomes Sanity's `path=` intent
 parameter. Verified in the deployed Studio on 2026-09-12: it opens the right
 document, selects the right field group tab, and puts the cursor in the field.
 It does NOT scroll the field into view, so on the race document the focused

@@ -40,6 +40,30 @@
     },
   ],
   "send_email": [{ "name": "EMAIL" }],
+  // The Studio's Messages tool (PORTS.md card 117) reads CONTACT_DB too, and
+  // keeps each message's status in the message_status table
+  // (migrations/0002_message_status.sql, applied with
+  // npx wrangler d1 migrations apply stonesteps-contact --remote).
+
+  // ── The Studio's plain settings (PORTS.md cards 111 and 115) ──────────────
+  // GITHUB_REPO: the repo whose deploy workflow the Studio's status line reads
+  // (/api/studio/deploy-status/). It also needs the Worker secret
+  // GITHUB_DEPLOY_TOKEN (a fine-grained token on this one repo, "Actions: Read
+  // and write" only): npx wrangler secret put GITHUB_DEPLOY_TOKEN. Without the
+  // secret the route says configured: false and the status line keeps its old
+  // behaviour.
+  //
+  // Home's Visitors card (/api/studio/visitors/) needs CF_ACCOUNT_ID and
+  // CF_WEB_ANALYTICS_SITE_TAG here (the site tag, NOT the beacon token) plus
+  // the secret CF_ANALYTICS_TOKEN (Account Analytics: Read only). Until all
+  // three exist the card says "not set up yet". Steps: OPERATIONS.md,
+  // "Visitor numbers".
+  //
+  // "Share a preview" (card 117) needs one secret, 32+ random characters:
+  // npx wrangler secret put SHARE_PREVIEW_SECRET
+  "vars": {
+    "GITHUB_REPO": "NateJ45/stonesteps-50k",
+  },
 
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {

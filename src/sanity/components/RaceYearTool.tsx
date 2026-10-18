@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useClient } from 'sanity';
 import { Badge, Box, Button, Card, Flex, Spinner, Stack, Text } from '@sanity/ui';
-import { ToolHeading } from './ToolHeading';
-import { useStudioLink } from './studioLink';
+import { CalendarIcon } from '@sanity/icons/Calendar';
+import { ToolHeading, useStudioLink } from '../kit/shared';
 // The rules themselves are pure and live in src/lib, where the unit tests can
 // reach them. See the header of that file.
 import { STEPS, type Snapshot, type State, type Step } from '@/lib/raceYearSteps';
@@ -105,7 +105,7 @@ export function RaceYearTool() {
     <Box padding={4}>
       <Stack gap={5} style={{ maxWidth: 680, margin: '0 auto' }}>
         <Stack gap={3}>
-          <ToolHeading emoji="🗓️">Start a new race year</ToolHeading>
+          <ToolHeading icon={CalendarIcon}>Start a new race year</ToolHeading>
           <Text size={2} muted style={{ lineHeight: 1.5 }}>
             Everything that needs a human once a year, in the order it comes up, with whatever is
             already done ticked off. Each one is a door: click it to go straight there.
