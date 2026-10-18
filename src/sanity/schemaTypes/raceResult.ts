@@ -11,8 +11,14 @@
 // TypeScript. Nothing is hand-maintained, so nothing can disagree with itself.
 // Add a year of results and every table on the site updates itself.
 //
-// Registered in index.ts, listed under "The Race" in structure.ts.
+// Registered in index.ts, listed under "Results and records" in structure.ts.
 // Populated by scripts/import-results.mjs from the RunSignUp public API.
+//
+// READ-ONLY IN THE STUDIO, BUT FOR TWO FIELDS (2026-10-18). Everything RunSignUp
+// sends is set again by the nightly import, so a hand edit to a time or a place
+// would quietly come undone; those boxes are read-only. The two fields the race
+// director owns, "Ran as a trekker" and "Note on the source", stay editable,
+// and the import never touches them (scripts/lib/import-merge.mjs).
 
 import { defineType, defineField } from 'sanity';
 
@@ -25,6 +31,8 @@ export const raceResult = defineType({
       name: 'athlete',
       title: 'Athlete',
       type: 'reference',
+      // From RunSignUp: the nightly import owns it (scripts/lib/import-merge.mjs).
+      readOnly: true,
       to: [{ type: 'athlete' }],
       description: 'Never retype a name here. Point at the athlete document.',
       validation: (Rule) => Rule.required(),
@@ -33,6 +41,8 @@ export const raceResult = defineType({
       name: 'distance',
       title: 'Distance',
       type: 'reference',
+      // From RunSignUp: the nightly import owns it (scripts/lib/import-merge.mjs).
+      readOnly: true,
       to: [{ type: 'distance' }],
       validation: (Rule) => Rule.required(),
     }),
@@ -40,12 +50,16 @@ export const raceResult = defineType({
       name: 'year',
       title: 'Year',
       type: 'number',
+      // From RunSignUp: the nightly import owns it (scripts/lib/import-merge.mjs).
+      readOnly: true,
       validation: (Rule) => Rule.required().integer().min(2000).max(2100),
     }),
     defineField({
       name: 'timeSeconds',
       title: 'Finish time (seconds)',
       type: 'number',
+      // From RunSignUp: the nightly import owns it (scripts/lib/import-merge.mjs).
+      readOnly: true,
       // Read the file header before changing this to a string: every record on the
       // site is derived by ordering on this number.
       description: 'Whole seconds, not a clock time. 3:40:56 is 13256.',
@@ -55,6 +69,8 @@ export const raceResult = defineType({
       name: 'gender',
       title: 'Gender',
       type: 'string',
+      // From RunSignUp: the nightly import owns it (scripts/lib/import-merge.mjs).
+      readOnly: true,
       description: 'As recorded by the timer. Splits the records tables.',
       options: {
         list: [
@@ -70,6 +86,8 @@ export const raceResult = defineType({
       name: 'age',
       title: 'Age on race day',
       type: 'number',
+      // From RunSignUp: the nightly import owns it (scripts/lib/import-merge.mjs).
+      readOnly: true,
       // Brackets are defined in code, in src/lib/age-brackets.ts, so they can be unit
       // tested rather than typed per row.
       description: "The runner's age on race day. Sorts them into a bracket on the records page.",
@@ -78,11 +96,15 @@ export const raceResult = defineType({
       name: 'place',
       title: 'Overall place',
       type: 'number',
+      // From RunSignUp: the nightly import owns it (scripts/lib/import-merge.mjs).
+      readOnly: true,
     }),
     defineField({
       name: 'timeSource',
       title: 'Where the time came from',
       type: 'string',
+      // From RunSignUp: the nightly import owns it (scripts/lib/import-merge.mjs).
+      readOnly: true,
       // RunSignUp only populates chip time from 2024 on. Earlier years carry gun time,
       // and the results table says so rather than implying a precision it does not have.
       description:
