@@ -204,7 +204,7 @@ Each piece that needs a setting says so in the Studio and keeps working without 
 | `GITHUB_DEPLOY_TOKEN` (fine-grained, this repo, Actions: Read and write) | `npx wrangler secret put GITHUB_DEPLOY_TOKEN`                  | "The last update didn't go through" and Try again (card 111)     |
 | `SHARE_PREVIEW_SECRET` (48 random characters)                            | `npx wrangler secret put SHARE_PREVIEW_SECRET`                 | Share a preview links (card 117)                                 |
 | `CF_ANALYTICS_TOKEN`, `CF_ACCOUNT_ID`, `CF_WEB_ANALYTICS_SITE_TAG`       | secret, and `wrangler.jsonc` `vars`                            | Home's Visitors card (card 115), see below                       |
-| `PUBLIC_CF_ANALYTICS_TOKEN` (the beacon token)                           | repo variable, read by `deploy.yml`                            | The Cloudflare beacon, if the zone does not inject it itself     |
+| `PUBLIC_CF_ANALYTICS_TOKEN` (the beacon token)                           | repo variable, read by `deploy.yml`                            | The Cloudflare beacon, and its line on the privacy page          |
 | `message_status` table                                                   | `npx wrangler d1 migrations apply stonesteps-contact --remote` | Messages remembers New / Replied / Spam (card 117)               |
 | `SANITY_API_WRITE_TOKEN`, then uncomment the schedule                    | repo secret, `publish-due.yml`                                 | Publish automatically at (above)                                 |
 | Uncomment the schedule                                                   | `change-note.yml` (uses `SANITY_AUTH_TOKEN`)                   | The morning "What changed" issue (card 117)                      |
@@ -217,9 +217,9 @@ Home's Visitors card reads Cloudflare Web Analytics through `/api/studio/visitor
 Until the Worker has three settings, the card says "Not set up yet". Once:
 
 1. **Turn on Web Analytics** for stonesteps50k.com if it is not already (Cloudflare dashboard, Analytics & Logs, Web
-   Analytics). The zone is proxied, so automatic setup injects the beacon; otherwise put the beacon token in the
-   `PUBLIC_CF_ANALYTICS_TOKEN` repo variable. The beacon token is NOT the site tag. Then add Cloudflare Web Analytics
-   to the privacy page's list.
+   Analytics). Choose the manual beacon (not automatic setup) and put its token in the `PUBLIC_CF_ANALYTICS_TOKEN`
+   repo variable: the site then adds the beacon itself, and the privacy page names Cloudflare Web Analytics only when
+   that variable is set, so the two always agree. The beacon token is NOT the site tag.
 2. **Find the site tag.** Open the site in Web Analytics: the address bar ends in `siteTag~in=<32 characters>`.
 3. **Create the read-only token.** My Profile, API Tokens, Create Custom Token: one permission row, **Account**,
    **Account Analytics**, **Read**, on this account. Copy it (shown once).
