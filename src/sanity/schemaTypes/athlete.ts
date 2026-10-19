@@ -32,9 +32,10 @@ export const athlete = defineType({
       title: 'Slug',
       type: 'slug',
       description:
-        'The identity key. The results importer matches on this, so changing it can ' +
-        'split one runner into two. Change the name instead.',
+        'How the results import recognises this runner. To fix how the name reads, change the name.',
       options: { source: 'name', maxLength: 96 },
+      // The import matches on it; a hand edit splits one runner into two.
+      readOnly: true,
       validation: (Rule) => Rule.required(),
     }),
     defineField({

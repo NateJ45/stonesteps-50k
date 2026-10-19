@@ -23,7 +23,7 @@ import { useClient, useSchema } from 'sanity';
 import { Badge, Box, Button, Card, Flex, Grid, Heading, Spinner, Stack, Text } from '@sanity/ui';
 import { countBySeverity, publishedIdOf, type CheckResult } from '../../lib/studio-checkup';
 import { comingUp, fixItList, resolvePageMap, type ComingRow } from '../../lib/studio-home';
-import { weekCompare, type VisitorsReport } from '../../lib/studio-analytics';
+import { aiCompare, weekCompare, type VisitorsReport } from '../../lib/studio-analytics';
 import type { StudioTarget } from '../../lib/studio-kit';
 import { API_VERSION, studioToken, useStudioLink, useTypeTitle } from './shared';
 import { SEVERITY_TONE } from './CheckupTool';
@@ -411,6 +411,12 @@ function VisitorsBody({ report }: { report: VisitorsReport }) {
               </Flex>
             ))
           )}
+          {/* Card 123: the AI assistants trend, when there is one to tell. */}
+          {aiCompare(report.ai) && (
+            <Text size={1} muted style={{ lineHeight: 1.5 }}>
+              {aiCompare(report.ai)}
+            </Text>
+          )}
         </Stack>
       </Grid>
       <Text size={0} muted>
@@ -445,7 +451,7 @@ export function PagesMap({ groups }: { groups: PageMapGroup[] }) {
     let cancelled = false;
     client
       .fetch<MapRow[]>(
-        `*[_type in $types && !(_id in path("versions.**"))]{ _id, _type, "name": coalesce(title, name, heading, internalTitle) }`,
+        `*[_type in $types && !(_id in path("versions.**"))]{ _id, _type, "name": coalesce(title, name, heading, internalTitle) + select(hideFromSearch == true => " (hidden)", "") }`,
         { types: listTypes },
       )
       .then((r) => !cancelled && setDocs(r ?? []))
