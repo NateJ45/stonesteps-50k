@@ -4,7 +4,17 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildNotice, endOfDay, inDays, noticeName } from './quick-updates.ts';
+import {
+  buildLinkedNotice,
+  buildNotice,
+  buildSponsor,
+  endOfDay,
+  inDays,
+  noticeName,
+  NOTICE_STARTERS,
+  rankAfter,
+  RESULTS_PATH,
+} from './quick-updates.ts';
 
 describe('race notices', () => {
   it('has every required field and ends at the end of the last day', () => {
@@ -48,5 +58,46 @@ describe('inDays', () => {
   it('counts calendar days, across a month end', () => {
     assert.equal(inDays(new Date(2026, 9, 28, 15, 0), 7), '2026-11-04');
     assert.equal(inDays(new Date(2026, 9, 31, 1, 0), 0), '2026-10-31');
+  });
+});
+
+describe('the season notices and the sponsor (studio-complete)', () => {
+  it('a linked notice carries its own link words', () => {
+    const n = buildLinkedNotice({
+      message: NOTICE_STARTERS.results,
+      lastDay: '2026-11-15',
+      url: RESULTS_PATH,
+      label: 'See the results',
+    });
+    assert.equal(n._type, 'announcement');
+    assert.equal(n.style, 'info');
+    assert.deepEqual(n.link, { label: 'See the results', url: '/results/' });
+  });
+
+  it('no link means no link object', () => {
+    const n = buildLinkedNotice({ message: 'x', lastDay: '2026-11-15', label: 'Register' });
+    assert.equal(n.link, undefined);
+  });
+
+  it('every starter fits the notice limit (160) and has no em-dash', () => {
+    for (const s of Object.values(NOTICE_STARTERS)) {
+      assert.ok(s.length <= 160, s);
+      assert.ok(!s.includes('—'), s);
+    }
+  });
+
+  it('a new sponsor goes to the end of the list with a valid rank', () => {
+    assert.equal(rankAfter(undefined), '0|hzzzzz:');
+    assert.equal(rankAfter('0|i0000f:'), '0|i0000f:i');
+    assert.ok(rankAfter('0|i0000f:') > '0|i0000f:');
+    assert.ok(rankAfter('0|i0000f:x') > '0|i0000f:x');
+    const s = buildSponsor({ name: '  Trail Shop  ', url: 'https://example.org' }, '0|i0000f:');
+    assert.deepEqual(s, {
+      _type: 'sponsor',
+      name: 'Trail Shop',
+      orderRank: '0|i0000f:i',
+      url: 'https://example.org',
+    });
+    assert.equal(buildSponsor({ name: 'A' }).url, undefined);
   });
 });

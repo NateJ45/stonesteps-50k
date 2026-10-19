@@ -44,7 +44,10 @@ export type GuideBlock =
       title?: string;
       text: string;
     }
-  | { kind: 'seealso'; items: string[] };
+  | { kind: 'seealso'; items: string[] }
+  // A picture of the Studio by key (./shots.ts, PORTS.md card 130); a key with
+  // no capture yet draws the wireframe, so a guide never shows a hole.
+  | { kind: 'shot'; key: string; caption?: string };
 
 /** Site-specific names, kept in one place so the prose never hardcodes them. */
 export const SITE = {
@@ -291,11 +294,12 @@ export const guides: Guide[] = [
       {
         kind: 'steps',
         items: [
-          'Set `Race date` to the new date and start time.',
-          'Put the edition number up by one in `Edition number`. 2026 is the 23rd running, so 2027 is the 24th.',
+          'Set `Race day` to the new date and start time.',
+          'Put the edition number up by one in `Which edition is this?`. 2026 is the 23rd running, so 2027 is the 24th.',
           'Publish.',
         ],
       },
+      { kind: 'shot', key: 'race-date-field' },
       { kind: 'h', text: 'What that one change moves' },
       {
         kind: 'bullets',
@@ -382,6 +386,12 @@ export const guides: Guide[] = [
         kind: 'p',
         text: 'The 50K and the 27K each carry their own price ladder, so both need changing. Open **This year’s race**, then **Distances**, then the 50K or the 27K, and edit `Entry fee tiers`. Each row has a label, an amount and the date it stops applying, and the rows print as the ladder on that distance’s ticket.',
       },
+      { kind: 'shot', key: 'distance-fees' },
+      { kind: 'h', text: 'When a price goes up' },
+      {
+        kind: 'p',
+        text: 'Nothing to do on the day. The ticket prints the whole ladder, every step with its dates, so runners can see the next price coming. Set the steps once, when registration opens, and change RunSignUp to match.',
+      },
       { kind: 'h', text: 'The entry caps' },
       {
         kind: 'p',
@@ -419,6 +429,7 @@ export const guides: Guide[] = [
           'Publish.',
         ],
       },
+      { kind: 'shot', key: 'sponsors-list' },
       {
         kind: 'callout',
         tone: 'caution',
@@ -748,7 +759,7 @@ guides.push(
     category: 'Start here',
     title: 'Race week from your phone',
     icon: 'bolt',
-    lead: 'A race notice in three boxes, for the week the questions come in.',
+    lead: 'The jobs of the race year, each a few taps on a phone.',
     diy: 'self',
     body: [
       {
@@ -760,12 +771,18 @@ guides.push(
         items: [
           '**Put up a race-week notice**: parking, bib pickup, the weather, a course change. A short line across the top of every page, until the last day you pick.',
           '**Urgent: a change on race day**: the same line in red, for a delayed start or a closed trail. It comes down by itself two days later.',
+          '**Registration is open**: the words are written for you, and it links to the Register page you already set.',
+          '**Ask for volunteers**: a call for the aid stations, the course and bib pickup, with your sign-up link.',
+          '**Tell runners the results are in**: once this year shows under Results by year, it links runners to the results.',
+          '**Add a sponsor**: their name and website now. Add the logo later in the full editor.',
         ],
       },
+      { kind: 'shot', key: 'quick-update-tiles' },
       {
         kind: 'p',
         text: 'Fill in the boxes and press the button. It is published straight away and the website updates in a few minutes. To change or switch off a notice later, open `Race notices` in `Content`.',
       },
+      { kind: 'shot', key: 'quick-update-form' },
       {
         kind: 'callout',
         tone: 'primary',
@@ -1037,4 +1054,302 @@ GUIDES_FOR_TYPE.sectionPreset = ['reuse-sections', 'synced-sections'];
  * name (`fields`) or by schema type (`types`) once a guide section explains it.
  * src/lib/studio-guides.test.ts checks every link names a real guide and heading.
  */
-export const GUIDE_FOR_FIELD: FieldGuideMap = { fields: {}, types: {} };
+export const GUIDE_FOR_FIELD: FieldGuideMap = {
+  fields: {
+    raceDate: { guide: 'change-the-race-date', section: 'What to change' },
+    editionNumber: { guide: 'change-the-race-date', section: 'What to change' },
+    registerUrl: { guide: 'registration-opens', section: 'The Register link' },
+    feeTiers: { guide: 'entry-fees', section: 'The prices' },
+    entryCap: { guide: 'entry-fees', section: 'The entry caps' },
+    confirmed: { guide: 'the-not-confirmed-marker', section: 'How to clear it' },
+    trekker: { guide: 'mark-a-trekker' },
+    startDate: { guide: 'race-notices', section: 'Showing it later' },
+    endDate: { guide: 'race-notices', section: 'When it comes down' },
+    alt: { guide: 'change-a-photo', section: 'What alt text is' },
+  },
+  types: {},
+};
+
+// ── The race calendar, job by job (studio-complete, 2026-10-19) ─────────────
+// One guide for every job in docs/agent/studio-plan.md that had none: the day
+// registration opens, the volunteer call, race week, the notices themselves,
+// trekkers, and what the quiet months ask of you. `shot` blocks name a capture
+// in ./shots.ts; a key with no capture yet draws the wireframe.
+guides.push(
+  {
+    slug: 'registration-opens',
+    category: 'The race itself',
+    title: 'The day registration opens',
+    icon: 'service',
+    lead: 'Four things, about ten minutes, and the website is ready for sign-ups.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'Open registration on RunSignUp first. Then make the website say the same thing, in this order.',
+      },
+      { kind: 'h', text: 'The Register link' },
+      {
+        kind: 'path',
+        items: ['This year’s race', 'Race day', 'Links'],
+        link: { doc: 'race', field: 'registerUrl' },
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Paste the RunSignUp sign-up page into `Register (RunSignUp)`. Every Register button on the website reads this one address.',
+          'Check `Race day` and `Which edition is this?` are next year’s.',
+          'Publish.',
+        ],
+      },
+      { kind: 'shot', key: 'race-links' },
+      { kind: 'h', text: 'The prices and the caps' },
+      {
+        kind: 'p',
+        text: 'Open **Distances** and check the 50K and the 27K: the price ladder in `Entry fee tiers` and the `Entry cap`. They should match RunSignUp to the dollar.',
+      },
+      { kind: 'h', text: 'Tell people' },
+      {
+        kind: 'steps',
+        items: [
+          'Open `Quick update` (on your phone is fine) and press `Registration is open`.',
+          'The words are already written. Change them if you like, pick the last day to show it, and leave the link empty: it uses the Register link you just saved.',
+          'Press the button. The notice is across the top of every page in a few minutes.',
+        ],
+      },
+      { kind: 'shot', key: 'quick-update-tiles' },
+      {
+        kind: 'callout',
+        tone: 'positive',
+        title: 'The Home checklist keeps score.',
+        text: 'The race checklist on Home ticks **The Register link is on the website** and **The next race date is on the website** by itself once they are done. The RunSignUp line you tick by hand after you have compared the two.',
+      },
+      {
+        kind: 'seealso',
+        items: ['Change the entry fees or the entry cap', 'Change the race date for next year'],
+      },
+    ],
+  },
+  {
+    slug: 'ask-for-volunteers',
+    category: 'The race itself',
+    title: 'Ask for volunteers',
+    icon: 'people',
+    lead: 'A line on every page for a few weeks, and a page of its own if you want one.',
+    diy: 'self',
+    body: [
+      { kind: 'h', text: 'The quick way: a notice' },
+      {
+        kind: 'steps',
+        items: [
+          'Open `Quick update` and press `Ask for volunteers`.',
+          'The words are written for you. Paste the volunteer sign-up page (RunSignUp has one) into `Volunteer sign-up link`.',
+          'Pick the last day to show it. Three weeks is the starting choice.',
+          'Press the button.',
+        ],
+      },
+      { kind: 'h', text: 'The fuller way: a volunteer page' },
+      {
+        kind: 'steps',
+        items: [
+          'In `Content`, open `Pages`, then `Pages (course, records, contact)`, and press `+`.',
+          'Choose the **Volunteer call** template. It has the words, a place for a photo and the sign-up button.',
+          'Replace every line that starts "Example:", put your sign-up link on the button, and publish.',
+          'Point the notice at the new page: its address is the page name, like `/volunteers/`.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Only one notice shows at a time.',
+        text: 'If a race-week notice is also up, the one that ends sooner shows first, and a red one beats both. The volunteer call comes back when the shorter one ends.',
+      },
+      {
+        kind: 'seealso',
+        items: ['Start a page from a template', 'Change or switch off a race notice'],
+      },
+    ],
+  },
+  {
+    slug: 'race-week',
+    category: 'The race itself',
+    title: 'Race week, day by day',
+    icon: 'times',
+    lead: 'What runners ask that week, and the button that answers each one.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'Race week is when the website earns its keep. Everything here can be done from your phone with `Quick update`, and each change is on the website in a few minutes.',
+      },
+      { kind: 'h', text: 'A week out' },
+      {
+        kind: 'bullets',
+        items: [
+          'Put up a **race-week notice** with the thing people ask most: bib pickup, or parking at The Oval.',
+          'Open **Race-day schedule** and check every time. Tick `Confirmed by the race director` on each one you know is right.',
+          'Look at Home. The race checklist shows **Race week: a notice is up** until there is one.',
+        ],
+      },
+      { kind: 'h', text: 'The day before' },
+      {
+        kind: 'bullets',
+        items: [
+          'Change the notice if anything has moved: put up a new one, and it takes over because it ends sooner.',
+          'Glance at `Messages` for questions that came through the contact form.',
+        ],
+      },
+      { kind: 'h', text: 'Race morning' },
+      {
+        kind: 'bullets',
+        items: [
+          'Something changed? `Quick update`, then `Urgent: a change on race day`. One box, a red line on every page, and it takes itself down two days later.',
+        ],
+      },
+      { kind: 'shot', key: 'quick-update-form' },
+      { kind: 'h', text: 'The week after' },
+      {
+        kind: 'bullets',
+        items: [
+          'The results import themselves overnight from RunSignUp. Once you can see this year under **Results by year**, press `Tell runners the results are in`.',
+          'Switch on `Ran as a trekker` for any early starter who finished near the front.',
+          'Switch off anything left over under **Race notices**.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'A few minutes, not a few seconds.',
+        text: 'The website rebuilds itself after each publish. The line under the top bar says when your change is live, so there is no need to keep refreshing the website.',
+      },
+      { kind: 'seealso', items: ['Race week from your phone', 'Mark a trekker'] },
+    ],
+  },
+  {
+    slug: 'race-notices',
+    category: 'The race itself',
+    title: 'Change or switch off a race notice',
+    icon: 'notice',
+    lead: 'The line across the top of every page, and how it decides when to show.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'path',
+        items: ['Content', 'Race notices'],
+        link: { pane: 'announcement' },
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Open `Race notices` and click the notice.',
+          'Change the words, or switch `Enabled` off to take it down.',
+          'Publish.',
+        ],
+      },
+      { kind: 'shot', key: 'notices-list' },
+      { kind: 'h', text: 'Only one shows at a time' },
+      {
+        kind: 'p',
+        text: 'If several notices are switched on, the website shows the red (urgent) one first, then a highlighted one, then whichever ends soonest. That is why a short race-week notice can sit on top of a month-long registration notice, and the longer one comes back afterwards.',
+      },
+      { kind: 'h', text: 'When it comes down' },
+      {
+        kind: 'p',
+        text: 'The website is rebuilt when something is published, not every minute. A notice whose `Hide after` time has passed disappears at the next rebuild. If it must go now, switch `Enabled` off and publish: that is a rebuild.',
+      },
+      { kind: 'h', text: 'Showing it later' },
+      {
+        kind: 'p',
+        text: '`Show from` holds a notice back until a time you choose, but it only appears at the first rebuild after that time. For the day registration opens, it is simpler to put the notice up that morning with `Quick update`.',
+      },
+      {
+        kind: 'callout',
+        tone: 'positive',
+        title: 'Old notices can stay in the list.',
+        text: 'A notice that has ended is harmless. The race checklist on Home only asks you to switch off one that is still on after its last day. Move the rest to the Trash whenever the list gets long.',
+      },
+    ],
+  },
+  {
+    slug: 'mark-a-trekker',
+    category: 'Results and records',
+    title: 'Mark a trekker',
+    icon: 'value',
+    lead: 'An early starter keeps their time, and stays out of the records.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'Trekkers take the optional early start, so they are not eligible for awards. RunSignUp does not tell the website who they were, so after each race the website needs telling, once, for anyone who finished near the front.',
+      },
+      {
+        kind: 'path',
+        items: ['Content', 'Results and records', 'Results', 'Results by year'],
+        link: { pane: 'results-and-records;results' },
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Open the year, then the distance. Results are listed fastest first.',
+          'Click the runner’s result.',
+          'Switch on `Ran as a trekker`.',
+          'Publish. The records, the top tens and the age groups recalculate at the next rebuild.',
+        ],
+      },
+      { kind: 'shot', key: 'trekker-tick' },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'The overnight import leaves your tick alone.',
+        text: 'Results come in from RunSignUp every night after the race, but a tick you have made is kept.',
+      },
+      { kind: 'seealso', items: ['What happens after race day'] },
+    ],
+  },
+  {
+    slug: 'quiet-months',
+    category: 'Once a year',
+    title: 'The quiet months',
+    icon: 'event',
+    lead: 'From December to registration day the website mostly looks after itself.',
+    diy: 'self',
+    body: [
+      { kind: 'h', text: 'Once a week, if you like' },
+      {
+        kind: 'bullets',
+        items: [
+          'Open the Studio and look at Home. If the race checklist is all ticked, there is nothing to do.',
+          'Read anything new in `Messages` and mark it **Replied** once you have answered.',
+        ],
+      },
+      { kind: 'shot', key: 'home-checklist' },
+      { kind: 'h', text: 'Once in the winter' },
+      {
+        kind: 'bullets',
+        items: [
+          'Run **Start a new race year** under This year’s race. It lists what changes for the next running, with what is already done ticked off.',
+          'Swap in a photograph or two from the last race.',
+          'Thank the sponsors: add any new ones with `Quick update`, `Add a sponsor`, and the logo afterwards in the full editor.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'positive',
+        title: 'Results keep checking themselves.',
+        text: 'The import runs every Monday all year, in case RunSignUp posts a late correction. You will see it on Home as an update you did not make, and that is normal.',
+      },
+      { kind: 'seealso', items: ['The once-a-year list', 'Read messages from the website'] },
+    ],
+  },
+);
+
+GUIDES_FOR_TYPE.race = [
+  'change-the-race-date',
+  'registration-opens',
+  'the-not-confirmed-marker',
+  'yearly-checklist',
+];
+GUIDES_FOR_TYPE.announcement = ['race-notices', 'quick-update', 'race-week'];
+GUIDES_FOR_TYPE.raceResult = ['mark-a-trekker', 'results-after-race-day', 'fix-a-runners-name'];
+GUIDES_FOR_TYPE.scheduleItem = ['race-day-schedule', 'race-week', 'the-not-confirmed-marker'];
+GUIDES_FOR_TYPE.sponsor = ['sponsors', 'quiet-months'];
