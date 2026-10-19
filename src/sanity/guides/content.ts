@@ -21,6 +21,8 @@
 // singleton or a deploy is.
 // =============================================================================
 
+import type { FieldGuideMap } from '../../lib/studio-kit';
+
 export type DiyLevel = 'self' | 'ask' | 'mixed';
 
 /** Where a "Where in the Studio" breadcrumb can link to. */
@@ -1028,3 +1030,11 @@ GUIDES_FOR_TYPE.page = [
 ];
 GUIDES_FOR_TYPE.homePage = ['edit-a-page', 'reuse-sections', 'synced-sections', 'change-a-photo'];
 GUIDES_FOR_TYPE.sectionPreset = ['reuse-sections', 'synced-sections'];
+
+/**
+ * The quiet "How to" chip after a field's description (kit.config.ts
+ * guide.forField, PORTS.md card 134). Empty for now: a field gets its chip by
+ * name (`fields`) or by schema type (`types`) once a guide section explains it.
+ * src/lib/studio-guides.test.ts checks every link names a real guide and heading.
+ */
+export const GUIDE_FOR_FIELD: FieldGuideMap = { fields: {}, types: {} };
