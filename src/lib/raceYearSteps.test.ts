@@ -147,11 +147,10 @@ test('unconfirmed items are counted in the note', () => {
 
 test('every pane target is one the structure actually defines', () => {
   const known = new Set([
-    'checkup',
     'this-years-race;orderable-distance',
     'this-years-race;orderable-scheduleItem',
     'this-years-race;orderable-sponsor',
-    'this-years-race;results',
+    'results-and-records;results',
   ]);
   for (const s of STEPS) {
     if (!('pane' in s.target)) continue;
@@ -196,6 +195,10 @@ async function declaredPanes() {
   for (const m of src.matchAll(/orderableDocumentListDeskItem\(\{\s*type:\s*'([^']+)'/g)) {
     declared.add(`orderable-${m[1]}`);
   }
+  // The Studio kit's empty-aware lists take the id they are given.
+  for (const m of src.matchAll(/emptyAwareList\(S, context, \{\s*id:\s*'([^']+)'/g)) {
+    declared.add(m[1]);
+  }
   // A plain document-type list takes the type as its id.
   for (const m of src.matchAll(/documentTypeListItem\('([^']+)'\)/g)) declared.add(m[1]);
   // Singletons are named after their document: see singletonWithPreview.
@@ -217,17 +220,23 @@ test('the pane ids the steps use are still declared in structure.ts', async () =
 });
 
 // ── Every other door in the Studio ───────────────────────────────────────
-// The rollover checklist is not the only thing with links: the Welcome pane
-// has seven cards and the Help guides have a "Take me there" on each. Two of
+// The rollover checklist is not the only thing with links: Home's buttons and
+// cards (kit.config.ts), the Checkup's race rules (raceCheckup.ts) and the
+// Help guides' "Take me there" all link into the desk. (Until 2026-10-18 the
+// Welcome pane held the cards; the Studio kit's Home replaced it.) Two of
 // those were dead for the same reason the checklist's were, and nothing would
 // have caught it, because a dead pane link opens an empty column rather than
 // an error. Both files are read as text, so a target added in either is
 // covered the day it is written.
 
-test('every Welcome card and guide link points somewhere that exists', async () => {
+test('every Home card, Checkup rule and guide link points somewhere that exists', async () => {
   const { readFileSync } = await import('node:fs');
   const declared = await declaredPanes();
-  const files = ['src/sanity/components/WelcomePane.tsx', 'src/sanity/guides/content.ts'];
+  const files = [
+    'src/sanity/kit.config.ts',
+    'src/sanity/raceCheckup.ts',
+    'src/sanity/guides/content.ts',
+  ];
   let checked = 0;
   for (const file of files) {
     const src = readFileSync(file, 'utf8');
@@ -237,7 +246,9 @@ test('every Welcome card and guide link points somewhere that exists', async () 
         assert.ok(declared.has(segment), `${file}: pane segment "${segment}" is not declared`);
       }
     }
-    for (const m of src.matchAll(/(?:target|link):\s*\{\s*doc:\s*'([^']+)'/g)) {
+    // A doc link that names its type (a custom page, `{ doc: 'page-course', type: 'page' }`)
+    // opens that document directly; only a singleton needs a pane of its id.
+    for (const m of src.matchAll(/(?:target|link):\s*\{\s*doc:\s*'([^']+)'(?!,\s*type:)/g)) {
       checked++;
       assert.ok(
         declared.has(m[1]),

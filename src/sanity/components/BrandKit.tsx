@@ -1,5 +1,6 @@
 import { Box, Card, Flex, Grid, Stack, Text } from '@sanity/ui';
-import { ToolHeading } from './ToolHeading';
+import { ColorWheelIcon } from '@sanity/icons/ColorWheel';
+import { ToolHeading } from '../kit/shared';
 
 // =============================================================================
 // BrandKit — the race's colours and type, for anything made outside the website
@@ -110,7 +111,7 @@ export default function BrandKit() {
     <Box padding={4}>
       <Stack gap={5} style={{ maxWidth: 720, margin: '0 auto' }}>
         <Stack gap={3}>
-          <ToolHeading emoji="🎨">Brand colours and type</ToolHeading>
+          <ToolHeading icon={ColorWheelIcon}>Brand colours and type</ToolHeading>
           <Text size={2} muted style={{ lineHeight: 1.6 }}>
             For anything made away from the website: a flyer, a Facebook post, a sign at The Oval.
             These are the values the site itself uses, so something made with them will look like it

@@ -11,7 +11,7 @@
 // The component (src/sanity/components/RaceYearTool.tsx) fetches the snapshot,
 // renders the cards, and owns the links. Nothing here knows about Sanity.
 
-import type { StudioTarget } from '@/sanity/components/studioLink';
+import type { StudioTarget } from './studio-kit';
 
 export type State = 'done' | 'todo' | 'check';
 
@@ -171,7 +171,7 @@ export const STEPS: Step[] = [
     title: 'Clear the "Not confirmed" markers',
     blurb:
       'Anything the race has never published carries a small marker on the site. Confirm it or correct it.',
-    target: { pane: 'checkup' },
+    target: { tool: 'checkup' },
     // THE COUNT INCLUDES THE RACE DOCUMENT, which gates whether Google is told
     // the entry is on sale. It was excluded, so a race nobody had re-confirmed
     // still reported "Nothing is unconfirmed".
@@ -195,7 +195,7 @@ export const STEPS: Step[] = [
     title: 'After the race: check the results landed',
     blurb:
       'They import themselves within a day of your timer posting them. This is only a check, not a job.',
-    target: { pane: 'this-years-race;results' },
+    target: { pane: 'results-and-records;results' },
     // MEASURED AGAINST THE LAST RACE THAT HAS RUN, not the one being advertised.
     // Checking against the advertised year meant step one (put next year's date
     // in) silenced this step: the race was suddenly "not run yet" and a missing
@@ -215,7 +215,7 @@ export const STEPS: Step[] = [
     title: 'After the race: mark any trekkers',
     blurb:
       'Early starters cannot win an award. The importer cannot tell who they were, so they need ticking by hand.',
-    target: { pane: 'this-years-race;results' },
+    target: { pane: 'results-and-records;results' },
     state: () => 'check',
   },
 ];
