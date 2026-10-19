@@ -50,11 +50,15 @@ const SANITY_CONFIGURED =
 async function cmsQuery(query, fallback) {
   if (!SANITY_CONFIGURED) return fallback;
   try {
+    // CI reads a pinned content snapshot from a local server (PORTS.md card 138,
+    // scripts/snapshot.mjs); unset everywhere else, so deploys read the live API.
+    const snapshot = (process.env.SANITY_SNAPSHOT_URL ?? '').trim().replace(/[/]+$/, '');
     const url =
-      `https://${SANITY_PROJECT_ID}.api.sanity.io/v${SANITY_API_VERSION}` +
-      `/data/query/${SANITY_DATASET}?query=${encodeURIComponent(query)}`;
+      (snapshot || `https://${SANITY_PROJECT_ID}.api.sanity.io`) +
+      `/v${SANITY_API_VERSION}/data/query/${SANITY_DATASET}?query=${encodeURIComponent(query)}`;
     const res = await fetch(url, {
-      headers: SANITY_READ_TOKEN ? { Authorization: `Bearer ${SANITY_READ_TOKEN}` } : {},
+      headers:
+        SANITY_READ_TOKEN && !snapshot ? { Authorization: `Bearer ${SANITY_READ_TOKEN}` } : {},
     });
     if (!res.ok) return fallback;
     const { result } = await res.json();
