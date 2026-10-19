@@ -48,7 +48,6 @@
       "--sidebar-border": "#E3D6B8",
       "--sidebar-ring": "#A83C26",
       "--tint-rgb": "168, 60, 38",
-
       "--primary-accent": "#8F3323",
       "--secondary-accent": "#24462D",
       "--info": "#2E5738",
@@ -89,7 +88,6 @@
       "--sidebar-border": "#3A3226",
       "--sidebar-ring": "#FED89B",
       "--tint-rgb": "255, 235, 187",
-
       "--primary-accent": "#C9553A",
       "--secondary-accent": "#3E7049",
       "--info": "#9DC2A8",
@@ -146,6 +144,32 @@
       "tile": {
         "dark": "#D3C6AA"
       }
+    },
+    "look": {
+      "headingColor": "#1A1712",
+      "marker": "dot",
+      "markerColor": "#A83C26",
+      "markColors": ["#A83C26", "#2E5738", "#1A1712"],
+      "stone": "square",
+      "connector": {
+        "kind": "line",
+        "color": "#A83C26"
+      },
+      "tones": {
+        "note": "#2E5738",
+        "tip": "#FED89B",
+        "careful": "#A83C26"
+      },
+      "motif": "/studio-banner/course-profile.svg",
+      "motifNarrow": "/studio-banner/course-profile-phone.svg",
+      "texture": "/studio-art/topo-tile.svg",
+      "edgeColors": ["#2E5738", "#FED89B", "#A83C26", "#1A1712"],
+      "lettering": {
+        "family": "Staatliches",
+        "src": "/fonts/staatliches-400.woff2",
+        "colors": ["#FED89B"]
+      },
+      "motion": "draw"
     }
   }
 }

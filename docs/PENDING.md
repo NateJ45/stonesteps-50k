@@ -40,9 +40,21 @@ it (`src/sanity/studioEdges.config.ts`). When the logo arrives, it goes in `home
 The Studio art pass (2026-10-19) drew the rest from the site itself: the Home banner strip is the 50K profile
 (smoothed, gold ridge with the hard shadow) over the Topo contours on the course poster's mile rule, with a nail
 head at each return to The Oval; the /studio splash is the 50K distance ticket; the video and embed thumbnails are
-the bark ground and rust play plate. All of it is `npm run gen:studio-banner` (art in `public/studio-art/`, kept
-ready for starter card 128's per-site art slot; do not wire it to card 128 until that merges). Still generic and
+the bark ground and rust play plate. All of it is `npm run gen:studio-banner` (art in `public/studio-art/`). Still generic and
 left as is: the Sanity sign-in card (Sanity's own), and the logo strip thumbnail (its fixture has no logos).
+
+Starter card 128 (2026-10-19): the Studio's design language is the race's. `brand.config.json` `studio.look`: the
+rust blaze dot as the section marker, square plates in rust, forest and bark for numbered steps, the course line in
+rust joining them (drawn, not laid), callouts in forest (note), gold (tip) and rust (careful), the course profile
+strip as every banner's foot, the contour tile (`public/studio-art/topo-tile.svg`) on the featured guide panel,
+Staatliches gold lettering (`public/fonts/staatliches-400.woff2`). What the look has no slot for is
+`src/sanity/studioArt.css`: Home's banner name in Staatliches caps with the rust echo and the outlined K, the date
+line as the mono blaze eyebrow, the claim stamp above the button (wide screens), and View the website as the rust
+plate button. Still kit-fixed (starter proposals): the banner shows today's date, not race day; the button says
+"View the website". Scheduled Drafts is off (`sanity.config.ts`): on the Free plan it only opened an upgrade page.
+The phone app (card 125) is in: `/studio/manifest.webmanifest`, `public/studio/sw.js`, `public/icon-maskable-512.png`.
+Earlier versions, Post a photo, the newsletter and RSVPs (cards 125, 127) are copied but OFF in `kit.config.ts`;
+`migrations/0003_mail.sql` is NOT applied to D1.
 
 ### 1o. DONE 2026-10-05. `/registered-runners` forwards to `/results/`
 

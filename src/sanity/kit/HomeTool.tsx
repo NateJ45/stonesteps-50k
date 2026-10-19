@@ -98,7 +98,9 @@ import {
 } from './HomeCards';
 import { GuideVideos } from './GuideVideos';
 import { HomeBanner } from './HomeBanner';
+import { NewsletterCard, RsvpComingUp } from '../mail/MailHome';
 import type { KitConfig, QuickAction, ThisWeekTask } from './types';
+import { recentEditsIgnore } from '../../lib/studio-signin';
 
 const NOT_SYSTEM = `!(_type match "sanity.*") && !(_type match "system.*") && !(_type match "media.*") && !(_id in path("versions.**")) && !(_id match "_.**")`;
 
@@ -643,7 +645,10 @@ export function makeHomeTool(config: KitConfig) {
     const { staffView, switchTo, reset, overridden } = useStaffView(config);
     const quick = config.quickActions ?? [];
     // The kit's weekly tick documents (card 111) are bookkeeping, never an edit.
-    const ignore = useMemo(() => [...config.checkup.ignoreTypes, WEEK_TYPE], []); // config is fixed for the Studio's life
+    const ignore = useMemo(
+      () => recentEditsIgnore(config.checkup.ignoreTypes, config.recentIgnoreTypes, WEEK_TYPE),
+      [],
+    ); // config is fixed for the Studio's life
     const linkTo = useStudioLink();
     const guide = linkTo({ tool: 'site-guide' });
     const content = linkTo({ tool: 'structure' });
@@ -724,8 +729,9 @@ export function makeHomeTool(config: KitConfig) {
               <FixItList results={checkup.results} failed={checkup.failed} />
             )}
             {config.features.comingUp !== false && scheduledTypes.length > 0 && (
-              <ComingUp types={scheduledTypes} />
+              <ComingUp types={scheduledTypes}>{config.features.mail && <RsvpComingUp />}</ComingUp>
             )}
+            {config.features.mail && <NewsletterCard helperName={config.helper.name} />}
             <RecentEdits ignoreTypes={ignore} />
             <Panel title={`Ask ${config.helper.name}`}>
               <Quiet>

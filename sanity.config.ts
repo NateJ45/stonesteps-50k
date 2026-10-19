@@ -42,6 +42,9 @@ import { studioWording } from './src/sanity/studioWording';
 import { studioEdges } from './src/sanity/studioEdges.config';
 // The site's own font files for the Studio (rewritten by apply-brand; card 116).
 import './src/sanity/studioFonts.css';
+// The race's own art on the kit's surfaces: the banner's display type with the
+// rust echo, the blaze eyebrow, the stamp and the plate buttons (card 128 round).
+import './src/sanity/studioArt.css';
 import brand from './brand/brand.config.json';
 import { CharacterCountInput } from './src/sanity/components/CharacterCountInput';
 import { documentBadges } from './src/sanity/components/documentBadges';
@@ -129,6 +132,10 @@ export default defineConfig({
   // one Dave already knows is a tab that can only confuse him. Turn it back on
   // the day there is a reason to stage a set of changes together.
   releases: { enabled: false },
+  // SCHEDULED DRAFTS OFF too. `releases` alone does not hide it, and on the
+  // Free plan the tool only opens an upgrade page. The race schedules a page
+  // with its own Publish at date (publish-due, card 114), so nothing is lost.
+  scheduledDrafts: { enabled: false },
 
   // Global form customization. Registering the character-count input once here
   // applies it to every capped text field across all schemas. The component
