@@ -37,6 +37,13 @@ Card 122 (private and hidden pages) is next round: the shared `_seoFields.ts` no
 Dave's logo is still awaited: the Studio uses the steps mark (`public/favicon.svg`) and shows no wordmark beside
 it (`src/sanity/studioEdges.config.ts`). When the logo arrives, it goes in `homeBanner` and the wordmark there.
 
+The Studio art pass (2026-10-19) drew the rest from the site itself: the Home banner strip is the 50K profile
+(smoothed, gold ridge with the hard shadow) over the Topo contours on the course poster's mile rule, with a nail
+head at each return to The Oval; the /studio splash is the 50K distance ticket; the video and embed thumbnails are
+the bark ground and rust play plate. All of it is `npm run gen:studio-banner` (art in `public/studio-art/`, kept
+ready for starter card 128's per-site art slot; do not wire it to card 128 until that merges). Still generic and
+left as is: the Sanity sign-in card (Sanity's own), and the logo strip thumbnail (its fixture has no logos).
+
 ### 1o. DONE 2026-10-05. `/registered-runners` forwards to `/results/`
 
 The old WordPress page was a RunSignUp "Find a runner" list (Wayback: 200 captures 2012 to August 2022; 3 GA4 landings on 2026-09-15). Nathan chose `/results/` as the destination. It is in `src/lib/launch-redirects.ts` with its test line.
