@@ -377,12 +377,54 @@ export const kitConfig: KitConfig = {
     motifNarrow: '/studio-banner/course-profile-phone.svg',
     accent: '#FED89B',
     // The 50K in the site's display face, gold as on the distance ticket. The
-    // echo, the outlined K and the plate button are src/sanity/studioArt.css.
+    // echo, the outlined K, the eyebrow, the stamp and the plate button are
+    // `style` below (card 135); no site CSS touches Home's banner.
     lettering: {
       text: '50K',
       family: 'Staatliches',
       src: '/fonts/staatliches-400.woff2',
       colors: ['#FED89B'],
+    },
+    style: {
+      eyebrow: {
+        font: "'JetBrains Mono Variable', ui-monospace, monospace",
+        size: '0.75rem',
+        weight: 600,
+        tracking: '0.22em',
+        case: 'upper',
+        color: '#fed89b',
+        mark: { kind: 'dot', color: '#fed89b' },
+      },
+      title: {
+        font: "'Staatliches', 'Arial Narrow', system-ui, sans-serif",
+        weight: 400,
+        size: 'clamp(2.6rem, 2.2rem + 2.6vw, 4.6rem)',
+        leading: 0.92,
+        tracking: '0.01em',
+        case: 'upper',
+        color: '#ffebbb',
+        echo: { color: '#a83c26' },
+        lastLetterOutline: '#fed89b',
+      },
+      chip: {
+        shape: 'plate',
+        bg: '#a83c26',
+        fg: '#ffebbb',
+        hoverBg: '#8f3323',
+        edge: '#000000',
+        ring: '#fed89b',
+        font: "'Staatliches', 'Arial Narrow', system-ui, sans-serif",
+        size: '1.2rem',
+        weight: 400,
+        tracking: '0.08em',
+        case: 'upper',
+      },
+      // The brand tagline, without its full stop.
+      stamp: {
+        text: "Cincinnati's longest running ultra marathon",
+        color: '#fed89b',
+        font: "'Staatliches', 'Arial Narrow', system-ui, sans-serif",
+      },
     },
   },
 

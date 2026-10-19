@@ -47,10 +47,11 @@ Starter card 128 (2026-10-19): the Studio's design language is the race's. `bran
 rust blaze dot as the section marker, square plates in rust, forest and bark for numbered steps, the course line in
 rust joining them (drawn, not laid), callouts in forest (note), gold (tip) and rust (careful), the course profile
 strip as every banner's foot, the contour tile (`public/studio-art/topo-tile.svg`) on the featured guide panel,
-Staatliches gold lettering (`public/fonts/staatliches-400.woff2`). What the look has no slot for is
-`src/sanity/studioArt.css`: Home's banner name in Staatliches caps with the rust echo and the outlined K, the date
-line as the mono blaze eyebrow, the claim stamp above the button (wide screens), and View the website as the rust
-plate button. Still kit-fixed (starter proposals): the banner shows today's date, not race day; the button says
+Staatliches gold lettering (`public/fonts/staatliches-400.woff2`). Home's banner (card 135) is data in
+`kit.config.ts` `homeBanner.style`: Staatliches caps with the rust echo and the outlined K, the date line as the mono blaze
+eyebrow, the claim stamp above the button (wide screens), and View the website as the rust plate button.
+`src/sanity/studioArt.css` keeps only the Site Guide banner's title and eyebrow (no slot yet; starter PENDING 31). Still
+kit-fixed (starter proposals): the banner shows today's date, not race day; the button says
 "View the website". Quick update tiles wear the race plates (card 131): the megaphone for a race-week notice, the stopwatch for a race-day change. Scheduled Drafts is off (`sanity.config.ts`): on the Free plan it only opened an upgrade page.
 Card 132 (design pass two) is in: the splash and offline page draw the laid-stone path through `src/components/studio/StudioSplash.astro`, with the 50K ticket (`src/sanity/StudioSplashMotif.astro`) in its slot, and the tour steps carry a short word and art. The phone app (card 125) is in: `/studio/manifest.webmanifest`, `public/studio/sw.js`, `public/icon-maskable-512.png`.
 Earlier versions, Post a photo, the newsletter and RSVPs (cards 125, 127) are copied but OFF in `kit.config.ts`;
