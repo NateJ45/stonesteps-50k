@@ -134,7 +134,7 @@ const srText = !valid
         'clock',
         inline
           ? 'clock--inline inline-flex items-baseline gap-x-3 gap-y-1'
-          : 'inline-block rounded-[10px] border-2 border-black px-[1.15rem] pt-[0.9rem] pb-3',
+          : 'clock--plate inline-block rounded-[10px] border-2 border-black px-[1.15rem] pt-[0.9rem] pb-3 text-center lg:text-left',
       ]}
       data-target={target}
       data-phase={phase}
@@ -165,7 +165,10 @@ const srText = !valid
         {MESSAGES[phase]}
       </p>
       <div
-        class:list={['flex items-end', inline ? 'gap-3.5' : 'gap-2']}
+        class:list={[
+          'flex items-end',
+          inline ? 'gap-3.5' : 'justify-center gap-2 lg:justify-start',
+        ]}
         data-digits
         hidden={phase !== 'count'}
       >
@@ -335,6 +338,26 @@ const srText = !valid
   }
   .clock__forecast[hidden] {
     display: none;
+  }
+  /* ONE ALIGNMENT FOR THE WHOLE PLATE. The title, digits, pack link and forecast
+     used to disagree on a phone: the digits sat at the plate's left edge while
+     the text lines centred and the forecast glyph pinned left. Now every line
+     centres under 1024px (the hero is centred there) and every line hangs from
+     the left edge from lg, matching the Register buttons above. */
+  .clock__forecast {
+    margin-inline: auto;
+  }
+  .clock__forecast.forecast--icon {
+    justify-content: center;
+    text-align: left;
+  }
+  @media (min-width: 1024px) {
+    .clock__forecast {
+      margin-inline: 0;
+    }
+    .clock__forecast.forecast--icon {
+      justify-content: flex-start;
+    }
   }
   .clock__pack[hidden] {
     display: none;
