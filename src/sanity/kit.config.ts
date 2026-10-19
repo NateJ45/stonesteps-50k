@@ -326,26 +326,35 @@ export const kitConfig: KitConfig = {
   tourSteps: [
     {
       title: 'This is Home',
+      short: 'Home',
+      meaning: 'home',
       body: 'Home opens first every time. It shows the race checklist, whether your last change is on the website yet, and anything that needs fixing.',
     },
     {
       title: 'Content is where you edit',
+      short: 'Content',
+      meaning: 'pages',
       body: "Click Content in the top bar. This year's race holds the date, the distances, the schedule and the sponsors; Pages holds the pages; Results and records holds every finisher since 2003.",
     },
     {
       title: 'Live preview shows the real page',
+      short: 'Preview',
       body: 'Live preview shows the website as runners will see it, with your unpublished changes in place. Click any words on it to edit them right there.',
     },
     {
       title: 'Nothing is public until you press Publish',
+      short: 'Publish',
       body: 'Your changes are private until you press the green Publish button. After that the website updates itself in a few minutes. Changed your mind? Use Undo, or move a thing to the Trash and bring it back later.',
     },
     {
       title: 'Race week from your phone',
+      short: 'Race week',
+      meaning: 'notice',
       body: 'Quick update in the top bar puts up a race-week notice in three boxes: parking, bib pickup, the weather, a course change.',
     },
     {
       title: 'Help is always one click away',
+      short: 'Help',
       body: 'Site Guide in the top bar has step-by-step help for every job, and you can print any of it. Stuck? Home has a card for asking Nathan.',
     },
   ],
