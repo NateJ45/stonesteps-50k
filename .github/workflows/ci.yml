@@ -111,8 +111,10 @@ jobs:
       # live site because a picture is out of date.
       #
       # Anonymous, like the audit above. Inherits the workflow-level env.
+      # Reads the PINNED snapshot too (PORTS.md card 138): a title edited in the Studio must
+      # not turn this red. deploy.yml runs it live, warn-only.
       - name: Share cards match the content
-        run: npm run og:check
+        run: node scripts/snapshot.mjs run -- npm run og:check
 
       # NODE_OPTIONS raises the heap for this step only. `sanity schema extract`
       # bundles the whole Studio config and its import graph, and on the hosted
@@ -186,8 +188,11 @@ jobs:
       # site, so there is no separate `sanity build` step. Do NOT add one back:
       # `sanity build` writes to ./dist by default and would clobber the Astro
       # output.
+      # Built from the PINNED content snapshot (ci/sanity-snapshot.ndjson.gz), never the
+      # live dataset (PORTS.md card 138), so a client edit in the Studio cannot turn this
+      # red. Refresh deliberately: node scripts/snapshot.mjs export. deploy.yml builds live.
       - name: Build (site + embedded Studio)
-        run: npm run build
+        run: node scripts/snapshot.mjs run -- npm run build
 
       # linkinator over dist/client. The skip pattern is
       # `^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])`, which excludes external
