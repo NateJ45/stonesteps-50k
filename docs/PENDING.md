@@ -16,6 +16,16 @@ sequence).
 
 ## Waiting on a human
 
+### 1t. Studio complete, phase B waits on starter card 137
+
+2026-10-19. Phase A is in (`docs/agent/studio-plan.md`). Waiting on the starter's card 137 (spotlight tours,
+welcome and what's-new modals, the tutorial-video pipeline): then wire `src/sanity/guides/tours.ts` into
+`kit.config.ts`, record the six scripts in `docs/agent/studio-videos.md` and set each guide's `video`. Noted for
+the kit: a `datetime` field (`raceDate`) does not draw its "How to" chip although it is mapped, and Quick update has
+no edit-a-document, image or by-season form yet (plan doc, "Needs a generic job type"). The guide pictures were
+captured from the kit harness as an administrator; recapture as the staff view once the race director's id is in
+`kitConfig.staff`.
+
 ### 1s. The Studio kit: its settings, and the signed-in checks
 
 2026-10-18 (starter cards 106 to 120). The kit is in and works without any of its settings: each piece that needs

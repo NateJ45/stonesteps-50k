@@ -10,7 +10,8 @@
 // Who it is for: one race director who edits the site a few times a year, most
 // of it in the weeks around race day, sometimes from a phone at The Oval. So
 // Home leads with the race calendar (registration, race week, results), Quick
-// update is a race-week notice in three boxes, and the Checkup's race rules
+// update holds the year's phone jobs (notices for race week, registration,
+// volunteers and results, a new sponsor; docs/agent/studio-plan.md), and the Checkup's race rules
 // (src/sanity/raceCheckup.ts) are the ones that stop a stale date or a wrong
 // record going out.
 //
@@ -36,7 +37,18 @@ import { WarningOutlineIcon } from '@sanity/icons/WarningOutline';
 import { runPageCheck } from './actions/checkPage';
 import { PAGE_BUILDER_TYPES } from './pageBuilderConfig';
 import { raceRules } from './raceCheckup';
-import { buildNotice, inDays } from '../lib/quick-updates';
+import { HeartIcon } from '@sanity/icons/Heart';
+import { StarIcon } from '@sanity/icons/Star';
+import { UsersIcon } from '@sanity/icons/Users';
+import { EnterIcon } from '@sanity/icons/Enter';
+import {
+  buildLinkedNotice,
+  buildNotice,
+  buildSponsor,
+  inDays,
+  NOTICE_STARTERS,
+  RESULTS_PATH,
+} from '../lib/quick-updates';
 
 const PUBLISHED = '!(_id in path("drafts.**"))';
 
@@ -131,6 +143,35 @@ export const kitConfig: KitConfig = {
       target: { pane: 'announcement' },
       targetLabel: 'Open the notices',
     },
+    // Season-aware jobs (studio-complete, 2026-10-19). Each one counts as done
+    // outside its own season, so the off-season list stays short and race
+    // week and the weeks after it bring their own jobs up by themselves.
+    {
+      id: 'register-link',
+      title: 'The Register link is on the website',
+      detail: 'Every Register button reads this one address. Paste the RunSignUp sign-up page in.',
+      query: `defined(*[_type == "race" && ${PUBLISHED}][0].registerUrl)`,
+      target: { doc: 'race', field: 'registerUrl' },
+      targetLabel: 'Set the link',
+    },
+    {
+      id: 'race-week-notice',
+      title: 'Race week: a notice is up',
+      detail:
+        'Only counts in the ten days before the race. Parking, bib pickup and the weather are what runners ask.',
+      query: `count(*[_type == "race" && ${PUBLISHED} && dateTime(raceDate) > dateTime($now) && dateTime(raceDate) < dateTime($now) + 60*60*24*10]) == 0 || count(*[_type == "announcement" && ${PUBLISHED} && enabled == true && (!defined(endDate) || endDate >= $now)]) > 0`,
+      target: { tool: 'quick-update' },
+      targetLabel: 'Put one up',
+    },
+    {
+      id: 'results-in',
+      title: 'After the race: the results are in',
+      detail:
+        'Only counts in the month after the race. They import themselves overnight from RunSignUp; ask if a week goes by with nothing.',
+      query: `count(*[_type == "race" && ${PUBLISHED} && dateTime(raceDate) < dateTime($now) && dateTime(raceDate) > dateTime($now) - 60*60*24*30 && count(*[_type == "raceResult" && _createdAt > ^.raceDate]) == 0]) == 0`,
+      target: { pane: 'results-and-records;results' },
+      targetLabel: 'See the results',
+    },
     {
       id: 'runsignup',
       title: 'RunSignUp matches the website',
@@ -209,6 +250,162 @@ export const kitConfig: KitConfig = {
       build: (v, { now }) => buildNotice({ message: v.message, lastDay: inDays(now, 2) }, 'urgent'),
       doneMessage:
         'The red notice will be on the website in a few minutes. It comes down by itself two days from now. Switch it off sooner under Race notices.',
+    },
+    // The rest of the year's phone jobs (docs/agent/studio-plan.md). The words
+    // start filled in, so most of these are "check it, press the button". Only
+    // one notice shows at a time: these long ones are plain, so a short
+    // race-week notice that ends sooner still takes the top of the page.
+    {
+      id: 'registration-open',
+      title: 'Registration is open',
+      detail: 'The day sign-ups open: a line on every page with the Register link.',
+      icon: EnterIcon,
+      // The race ticket plate.
+      meaning: 'service',
+      fields: [
+        {
+          name: 'message',
+          title: 'The notice',
+          kind: 'text',
+          required: true,
+          max: 160,
+          initial: () => NOTICE_STARTERS.registration,
+        },
+        {
+          name: 'lastDay',
+          title: 'Last day to show it',
+          kind: 'date',
+          required: true,
+          initial: (now) => inDays(now, 30),
+        },
+        {
+          name: 'link',
+          title: 'Sign-up link (optional)',
+          kind: 'url',
+          description: 'Leave it empty to use the Register link already on the website.',
+        },
+      ],
+      // No link typed: the race's own Register address, so the notice and the
+      // Register buttons can never point at two different places.
+      build: async (v, { client }) => {
+        const saved = v.link
+          ? v.link
+          : await client.fetch<string | null>(`*[_type == "race" && ${PUBLISHED}][0].registerUrl`);
+        return buildLinkedNotice({
+          message: v.message,
+          lastDay: v.lastDay,
+          url: saved || undefined,
+          label: 'Register',
+        });
+      },
+      doneMessage:
+        'The notice will be on the website in a few minutes, with a Register link. It comes down at the first website update after the day you picked.',
+    },
+    {
+      id: 'volunteers',
+      title: 'Ask for volunteers',
+      detail: 'Aid stations, the course, bib pickup. A line on every page with the sign-up link.',
+      icon: UsersIcon,
+      meaning: 'people',
+      fields: [
+        {
+          name: 'message',
+          title: 'The notice',
+          kind: 'text',
+          required: true,
+          max: 160,
+          initial: () => NOTICE_STARTERS.volunteers,
+        },
+        {
+          name: 'lastDay',
+          title: 'Last day to show it',
+          kind: 'date',
+          required: true,
+          initial: (now) => inDays(now, 21),
+        },
+        {
+          name: 'link',
+          title: 'Volunteer sign-up link',
+          kind: 'url',
+          description: 'The RunSignUp volunteer page, or any https:// address. Optional.',
+        },
+      ],
+      build: (v) =>
+        buildLinkedNotice({
+          message: v.message,
+          lastDay: v.lastDay,
+          url: v.link || undefined,
+          label: 'Volunteer',
+        }),
+      doneMessage:
+        'The volunteer call will be on the website in a few minutes. It comes down at the first website update after the day you picked.',
+    },
+    {
+      id: 'results-in',
+      title: 'Tell runners the results are in',
+      detail: 'The results import themselves overnight. This points runners at them.',
+      icon: StarIcon,
+      meaning: 'value',
+      fields: [
+        {
+          name: 'message',
+          title: 'The notice',
+          kind: 'text',
+          required: true,
+          max: 160,
+          initial: () => NOTICE_STARTERS.results,
+        },
+        {
+          name: 'lastDay',
+          title: 'Last day to show it',
+          kind: 'date',
+          required: true,
+          initial: (now) => inDays(now, 14),
+        },
+      ],
+      build: (v) =>
+        buildLinkedNotice({
+          message: v.message,
+          lastDay: v.lastDay,
+          url: RESULTS_PATH,
+          label: 'See the results',
+        }),
+      doneMessage:
+        'The notice will be on the website in a few minutes, linking to the results. If this year is not there yet, give the overnight import another night.',
+    },
+    {
+      id: 'sponsor',
+      title: 'Add a sponsor',
+      detail: 'Their name and website now. The logo can follow in the full editor.',
+      icon: HeartIcon,
+      meaning: 'give',
+      submitLabel: 'Add the sponsor',
+      fields: [
+        {
+          name: 'name',
+          title: 'Sponsor name',
+          kind: 'string',
+          required: true,
+          max: 80,
+          description: 'Their real name, as on their sign. A screen reader reads it out.',
+        },
+        {
+          name: 'url',
+          title: 'Their website',
+          kind: 'url',
+          description: 'Optional. A full web address starting with https://',
+        },
+      ],
+      // The end of the drag-to-order list, so a new sponsor never jumps ahead
+      // of the ones already thanked.
+      build: async (v, { client }) => {
+        const last = await client.fetch<string | null>(
+          `*[_type == "sponsor" && defined(orderRank)] | order(orderRank desc)[0].orderRank`,
+        );
+        return buildSponsor({ name: v.name, url: v.url || undefined }, last);
+      },
+      doneMessage:
+        'The sponsor will be on the website in a few minutes, as a name patch at the end of the row. Open it in the full editor to add their logo.',
     },
   ],
 

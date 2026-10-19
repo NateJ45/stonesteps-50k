@@ -59,3 +59,66 @@ export function buildNotice(
   if (v.link) doc.link = { label: 'More details', url: v.link };
   return doc;
 }
+
+// ── More of the owner's weekly jobs (studio-complete, 2026-10-19) ───────────
+// docs/agent/studio-plan.md lists the jobs these serve. Only ONE notice shows
+// on the website at a time (getActiveAnnouncement in src/lib/queries.ts: red
+// first, then highlight, then whichever ends soonest), so the season's long
+// notices (registration, volunteers, results) are plain 'info': a short
+// race-week notice ending sooner still wins the top of the page.
+
+/** The words a form starts with, so a job on a phone is mostly "press the button". */
+export const NOTICE_STARTERS = {
+  registration: 'Registration is open for the Stone Steps 50K and 27K. Places are capped.',
+  volunteers:
+    'We need volunteers for the aid stations, the course and bib pickup. Sign up and run the race from the other side.',
+  results: 'The results are in. Find your time, and every finish since 2003, in the results.',
+} as const;
+
+/** The site's own results page, linked from the "results are in" notice. */
+export const RESULTS_PATH = '/results/';
+
+/**
+ * A notice that links somewhere with its own words ("Register", "See the
+ * results"). The link may be a page on this site ("/results/") or a full
+ * https address; the notice schema takes both.
+ */
+export function buildLinkedNotice(v: {
+  message: string;
+  lastDay: string;
+  url?: string;
+  label: string;
+}): NoticeDoc {
+  const doc = buildNotice({ message: v.message, lastDay: v.lastDay });
+  if (v.url) doc.link = { label: v.label, url: v.url };
+  return doc;
+}
+
+export type SponsorDoc = {
+  _type: 'sponsor';
+  name: string;
+  url?: string;
+  orderRank: string;
+};
+
+/**
+ * A place at the END of the drag-to-order sponsor list. The list's order is a
+ * LexoRank string (`0|hzzzzz:`); adding a character after the last one sorts
+ * after it and is still a valid rank, so the drag handles keep working. With
+ * no sponsors yet it is the plugin's own first rank.
+ */
+export function rankAfter(last?: string | null): string {
+  if (!last || !last.includes('|')) return '0|hzzzzz:';
+  return last.includes(':') ? `${last}i` : `${last}:i`;
+}
+
+/** A sponsor with a name and maybe a website; the logo is added later in the full editor. */
+export function buildSponsor(v: { name: string; url?: string }, lastRank?: string | null) {
+  const doc: SponsorDoc = {
+    _type: 'sponsor',
+    name: v.name.trim(),
+    orderRank: rankAfter(lastRank),
+  };
+  if (v.url) doc.url = v.url.trim();
+  return doc;
+}
