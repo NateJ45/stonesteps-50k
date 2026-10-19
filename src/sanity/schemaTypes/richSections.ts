@@ -682,16 +682,11 @@ export const RICH_SECTION_TYPES = richSectionSchemas.map((s) => ({ type: s.name 
 //   teamSection       -> HOME, ABOUT
 // Church-reverse-port additions:
 //   dynamicListSection -> HOME, ABOUT (auto-pull latest content; generic small-biz sources)
-export const HOME_SECTION_TYPES = [
-  ...SECTION_TYPES,
-  { type: 'founderSection' },
-  { type: 'servicesGridSection' },
-  { type: 'testimonialsSection' },
-  { type: 'processSection' },
-  { type: 'faqSection' },
-  { type: 'teamSection' },
-  { type: 'dynamicListSection' },
-];
+// Stone Steps (2026-10-18): the home page offers the same blocks as every
+// other page. The starter's business blocks (founder, services grid,
+// testimonials, process, FAQ list, team, dynamic list) fill from collections
+// this race does not keep, and none was ever on the home page.
+export const HOME_SECTION_TYPES = [...SECTION_TYPES];
 
 export const ABOUT_SECTION_TYPES = [
   ...SECTION_TYPES,

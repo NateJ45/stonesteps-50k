@@ -25,7 +25,7 @@ import { BellIcon } from '@sanity/icons/Bell';
 
 export const announcement = defineType({
   name: 'announcement',
-  title: 'Announcement',
+  title: 'Race notice',
   type: 'document',
   icon: BellIcon,
   fields: [
@@ -33,8 +33,7 @@ export const announcement = defineType({
       name: 'internalTitle',
       title: 'Internal name',
       type: 'string',
-      description:
-        'For your reference in the Studio only. Not shown on the site. Example: "Summer hours notice".',
+      description: 'For you only, never shown on the site. Like "Bib pickup moved".',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -42,7 +41,7 @@ export const announcement = defineType({
       title: 'Message',
       type: 'string',
       description:
-        'The text shown in the banner. Keep it short (under 160 characters). Example: "We are closed 26 Dec through 1 Jan. Replies will be slower than usual."',
+        'The line across the top of every page. Under 160 characters, like "Bib pickup moves to the Oval shelter, 6:00 to 6:45 AM."',
       validation: (Rule) => Rule.required().max(160),
     }),
     defineField({
@@ -50,12 +49,12 @@ export const announcement = defineType({
       title: 'Style',
       type: 'string',
       description:
-        'Info = calm muted background (neutral updates). Highlight = brand primary (good news, promotions). Urgent = red (closures, important warnings).',
+        'Info for everyday news, Highlight for good news like registration opening, Urgent (red) for a delay or a closed trail.',
       options: {
         list: [
-          { title: 'Info (neutral, muted background)', value: 'info' },
-          { title: 'Highlight (brand primary, good news)', value: 'highlight' },
-          { title: 'Urgent (red, closures or warnings)', value: 'urgent' },
+          { title: 'Info (parking, bib pickup, the schedule)', value: 'info' },
+          { title: 'Highlight (registration is open, results are up)', value: 'highlight' },
+          { title: 'Urgent, in red (a delay, a closed trail, the weather)', value: 'urgent' },
         ],
         layout: 'radio',
       },
@@ -65,20 +64,20 @@ export const announcement = defineType({
       name: 'link',
       title: 'Link (optional)',
       type: 'object',
-      description: 'Optional. Adds a clickable link at the end of the message.',
+      description: 'Optional. A link at the end of the notice, to a page here or RunSignUp.',
       options: { collapsible: true, collapsed: true },
       fields: [
         defineField({
           name: 'label',
           title: 'Link label',
           type: 'string',
-          description: 'The clickable text. Example: "See our holiday schedule".',
+          description: 'The words to click, like "See the race-day schedule".',
         }),
         defineField({
           name: 'url',
           title: 'URL',
           type: 'string',
-          description: 'A page on this site like /contact, or a full https:// address.',
+          description: 'A page on this site like /course/, or a full https:// address.',
         }),
       ],
     }),
@@ -87,21 +86,20 @@ export const announcement = defineType({
       title: 'Show from (optional)',
       type: 'datetime',
       description:
-        'Leave blank to show immediately when enabled. Set a date to schedule the banner ahead of time. Evaluated at build time -- set up a scheduled rebuild if you need precise timing.',
+        'Leave blank to show it as soon as it is published. It appears at the first website update after this time.',
     }),
     defineField({
       name: 'endDate',
       title: 'Hide after (optional)',
       type: 'datetime',
       description:
-        'Leave blank to keep showing until you disable it. Set a date to auto-expire the banner. Evaluated at build time -- a rebuild is needed for the banner to disappear.',
+        'Leave blank to show it until you switch it off. It comes down at the first website update after this time.',
     }),
     defineField({
       name: 'enabled',
       title: 'Enabled',
       type: 'boolean',
-      description:
-        'Master on/off switch. When off, this announcement never shows regardless of dates.',
+      description: 'Switch it off and the notice never shows, whatever the dates say.',
       initialValue: true,
     }),
   ],
@@ -121,7 +119,7 @@ export const announcement = defineType({
         .filter(Boolean)
         .join(' to ');
       return {
-        title: message || 'Announcement',
+        title: message || 'Race notice',
         subtitle: `${enabled ? '' : 'OFF: '}${style ?? 'info'}${window ? ` (${window})` : ''}`,
       };
     },

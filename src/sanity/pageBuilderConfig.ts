@@ -53,8 +53,26 @@ const SELF_FILLING_SECTIONS = [
   'serviceAreaSection',
   'servicesGridSection',
   'spacerSection',
+  // Holds no words of its own: they live in the saved section it shows
+  // (the authoring kit, card 109). Nothing picked is its own warning.
+  'syncedSection',
   'testimonialsSection',
   'valuesSection',
+  // The race's blocks that draw themselves from the race's own data (the race
+  // document, the distances, the schedule, the results, the sponsors, the
+  // course track), so an empty heading is not an empty section (2026-10-18).
+  'raceHeroSection',
+  'distanceTicketsSection',
+  'recordsBoardSection',
+  'raceScheduleSection',
+  'courseFeaturesSection',
+  'elevationSection',
+  'courseMapSection',
+  'coursePosterSection',
+  'sponsorPatchesSection',
+  'contactSection',
+  'raceWeatherSection',
+  'dynastiesSection',
 ];
 
 export const PAGE_CHECK_CONFIG: PageCheckConfig = {

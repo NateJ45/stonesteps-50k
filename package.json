@@ -24,6 +24,8 @@
     "studio:import": "node scripts/import-content.mjs",
     "seed": "node scripts/seed-core.mjs",
     "seed:race": "node scripts/seed-race.mjs",
+    "seed:patterns": "node --experimental-strip-types scripts/seed-section-patterns.mjs",
+    "thumbnails": "node scripts/shoot-section-thumbnails.mjs",
     "import:results": "node scripts/import-results.mjs",
     "parity": "node scripts/page-parity.mjs",
     "sync-check": "node scripts/sync-check.mjs",

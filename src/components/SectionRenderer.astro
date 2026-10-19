@@ -54,6 +54,7 @@ import RaceWeather from '@/components/sections/RaceWeather.astro';
 import Dynasties from '@/components/sections/Dynasties.astro';
 import GearBand from '@/components/sections/GearBand.astro';
 import { classifySections } from '@/lib/sectionCadence';
+import { expandSyncedSections } from '@/lib/authoring';
 import type {
   PageBuilderBlock,
   ProjectedRaceResult,
@@ -97,7 +98,13 @@ const {
   results: sharedResults = [],
   historical: sharedHistorical = [],
 } = Astro.props as Props;
-const rows = classifySections<PageBuilderBlock>(sections as PageBuilderBlock[], idPrefix);
+// Synced sections (the authoring kit, PORTS.md card 109) are swapped for the
+// sections their saved copy holds BEFORE the cadence runs, so a synced band
+// takes its place in the alternating rhythm like any typed-in band (rule 9).
+const rows = classifySections<PageBuilderBlock>(
+  expandSyncedSections(sections as PageBuilderBlock[]),
+  idPrefix,
+);
 
 // A real element in preview, nothing at all on the live site. The wrapper must
 // NOT be `display: contents`: the overlay outlines the element's rect, and a
@@ -106,11 +113,17 @@ const rows = classifySections<PageBuilderBlock>(sections as PageBuilderBlock[], 
 const Wrap = editDoc ? 'div' : Fragment;
 const wrapAttrs = (key: string | undefined) =>
   editDoc && key ? { 'data-sanity': sectionEditAttr(editDoc, key) } : {};
+// A section that came out of a synced section is not in the page itself; its
+// in-canvas controls act on the synced block it came from, which is.
+const editKeyOf = (block: unknown) => {
+  const b = block as { _key?: string; _editKey?: string };
+  return b._editKey ?? b._key;
+};
 ---
 
 {rows.map(({ block: s, surface, headingId }) => (
   <>
-    <Wrap {...wrapAttrs((s as { _key?: string })._key)}>
+    <Wrap {...wrapAttrs(editKeyOf(s))}>
       {s._type === 'heroSection' ? (
         <Hero
           eyebrow={s.eyebrow}

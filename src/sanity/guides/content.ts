@@ -892,3 +892,139 @@ export const GUIDES_FOR_TYPE: Record<string, string[]> = {
   recordEntry: ['results-after-race-day'],
   siteSettings: ['website-status', 'edit-a-page'],
 };
+
+// ── Building pages yourself (the authoring kit, PORTS.md card 109) ─────────
+guides.push(
+  {
+    slug: 'page-templates',
+    category: 'Words and pictures',
+    title: 'Start a page from a template',
+    icon: 'blocks',
+    lead: 'A new page can start with its sections already in place.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'path',
+        items: ['Pages', 'Pages (course, records, contact)'],
+        link: { pane: 'pages;page' },
+      },
+      {
+        kind: 'p',
+        text: 'Press `+` on the pages list and the Studio asks where to start. A **template** is a page already laid out for one of the race year’s jobs, with example text in every box, so you are filling in rather than starting from nothing.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          '`Race week: what to know`: bib pickup, parking, the schedule and the weather.',
+          '`Volunteer call`: what volunteers do, a photo and the sign-up button.',
+          '`Course notes and aid stations`: the course, the aid stations and the cutoffs.',
+          '`Race recap and photos`: the day in numbers, a big photo, a gallery and the results.',
+          '`Sponsor thank-you`: a thank-you and every sponsor’s logo.',
+          '`Save the date`: next year’s date, the two tickets and the register button.',
+          '`Simple page` and `Blank page`: a heading and text, or nothing at all.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'The schedule, the tickets, the sponsors and the weather fill themselves from This year’s race, so they show the real times and prices straight away.',
+      },
+      { kind: 'h', text: 'Replace every line that starts "Example:"' },
+      {
+        kind: 'p',
+        text: 'Every piece of example text starts with the word **Example:**, so it is easy to spot. Type over it with your own words. Any section that still has some shows a small yellow warning beside it, so nothing example-shaped goes live by accident.',
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Give the page a place in the menu.',
+        text: 'A new page is on the website once it is published, but nobody finds it until it is linked: add it to the menu in Site setup, or point a button on the home page at it.',
+      },
+      { kind: 'seealso', items: ['Reuse a section on other pages', 'Change the words on a page'] },
+    ],
+  },
+  {
+    slug: 'reuse-sections',
+    category: 'Words and pictures',
+    title: 'Reuse a section on other pages',
+    icon: 'copy',
+    lead: 'Drop a ready-made section onto any page: Registration is open, Race week, The results are up.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'A **saved section** is a section (or a few that belong together) kept so you can add it again. They live under `Pages`, then `Saved sections`. There is one for each moment in the race year, ready to fill in: registration opening, the price going up, the race being full, volunteers wanted, race week, the weather, a course change, the results, new records, the photos, the sponsors and next year’s date.',
+      },
+      { kind: 'h', text: 'Add one to a page' },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page (the home page, usually) and scroll to its sections.',
+          'Click `Insert a saved section` under the list.',
+          'Pick one and click `Add a copy`. It goes at the bottom of the page; drag it where you want it.',
+          'Replace the "Example:" lines and publish.',
+        ],
+      },
+      { kind: 'h', text: 'Save one of your own' },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page that has the section you like.',
+          'Open the menu next to `Publish` and choose `Save a section as preset...`.',
+          'Pick the section, give it a name you will recognise, and save.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'A copy is yours to change.',
+        text: 'Changing a copied section on one page never changes the saved section or any other page. If you want one section that stays the same everywhere, use a synced section instead.',
+      },
+      {
+        kind: 'p',
+        text: '_The `+ Add item` menu opens on pictures of every kind of section. Type in its search box to find one by name, or switch it to a plain list with the buttons at the top._',
+      },
+      { kind: 'seealso', items: ['Keep a section the same on every page'] },
+    ],
+  },
+  {
+    slug: 'synced-sections',
+    category: 'Words and pictures',
+    title: 'Keep a section the same on every page',
+    icon: 'sync',
+    lead: 'Edit it once and every page that uses it changes.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'A **synced section** shows a saved section, live. It holds no words of its own: the words live in the saved section. Change the saved section, publish it, and every page using it changes together. Good for a band that must say the same thing everywhere, like "Registration is open" on the home page and the course page at once.',
+      },
+      { kind: 'h', text: 'Add one' },
+      {
+        kind: 'steps',
+        items: [
+          'Fill in the saved section and publish it first: a synced section only shows a published one.',
+          'Open a page and click `Insert a saved section` under its sections.',
+          'Pick the saved section and click `Add synced`.',
+          'In the sections list it shows as **Synced:** and the saved section name.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'Changing it changes it everywhere.',
+        text: 'That is the point, but check which pages use it before you rewrite it. If one page needs different words, remove the synced section from that page and add a copy instead.',
+      },
+      { kind: 'seealso', items: ['Reuse a section on other pages'] },
+    ],
+  },
+);
+
+GUIDES_FOR_TYPE.page = [
+  'edit-a-page',
+  'page-templates',
+  'reuse-sections',
+  'synced-sections',
+  'share-a-preview',
+];
+GUIDES_FOR_TYPE.homePage = ['edit-a-page', 'reuse-sections', 'synced-sections', 'change-a-photo'];
+GUIDES_FOR_TYPE.sectionPreset = ['reuse-sections', 'synced-sections'];

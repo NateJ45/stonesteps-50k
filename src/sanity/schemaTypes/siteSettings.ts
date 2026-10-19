@@ -167,7 +167,7 @@ export const siteSettings = defineType({
               name: 'title',
               title: 'Column heading',
               type: 'string',
-              description: 'The small heading above the links, e.g. "Services".',
+              description: 'The small heading above the links, like "The race".',
               validation: (Rule) => Rule.required(),
             }),
             defineField({
@@ -226,7 +226,7 @@ export const siteSettings = defineType({
       type: 'object',
       group: 'navigation',
       description:
-        'The one button at the right of the header. Leave the boxes blank to keep the built-in "Book a consultation" button.',
+        'The one button at the right of the header: Register, to RunSignUp. Change the words or where it goes, or switch it off.',
       options: { collapsible: true, collapsed: true },
       fields: [
         defineField({
@@ -240,7 +240,7 @@ export const siteSettings = defineType({
           name: 'label',
           title: 'Button text',
           type: 'string',
-          description: 'Leave blank for "Book a consultation".',
+          description: 'One or two words, like "Register".',
         }),
         defineField({
           name: 'link',
@@ -252,7 +252,7 @@ export const siteSettings = defineType({
       preview: {
         select: { show: 'show', label: 'label' },
         prepare: ({ show, label }) => ({
-          title: label || 'Book a consultation',
+          title: label || 'Header button',
           subtitle: show === false ? 'Hidden' : 'Header button',
         }),
       },
@@ -316,7 +316,7 @@ export const siteSettings = defineType({
           name: 'alt',
           title: 'Alt text',
           type: 'string',
-          description: 'What the logo says, for screen readers. Example: "Studio Name".',
+          description: 'What the logo says, for screen readers, like "Stone Steps 50K".',
           validation: (Rule) =>
             Rule.custom((value, ctx: any) =>
               ctx.parent?.asset && !value

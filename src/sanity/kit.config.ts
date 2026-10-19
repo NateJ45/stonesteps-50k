@@ -28,6 +28,7 @@ import { genericRules } from '../lib/studio-checkup';
 import { guides, GUIDE_CATEGORIES, GUIDES_FOR_TYPE } from './guides/content';
 import { makeGuideView } from './components/GuideView';
 import { envVal } from './urls';
+import type { PageRules } from '../lib/page-guardrails';
 import { BellIcon } from '@sanity/icons/Bell';
 import { CalendarIcon } from '@sanity/icons/Calendar';
 import { TagIcon } from '@sanity/icons/Tag';
@@ -82,8 +83,11 @@ export const kitConfig: KitConfig = {
   toolTitles: { structure: 'Content', presentation: 'Live preview' },
 
   // Desk items only a developer needs (ids from src/sanity/structure.ts). The
-  // race days list is the weather strip's raw dates, written by a script.
-  staffHiddenPanes: ['race-days'],
+  // race days list is the weather strip's raw dates, written by a script. The
+  // records the results cannot prove are empty on purpose: every record on the
+  // site comes from a finish on file (PENDING 1j), so typing one in is not a
+  // job for the Studio.
+  staffHiddenPanes: ['race-days', 'record-entries'],
 
   // Everyday lists whose Delete becomes "Move to Trash". Not distances, results
   // or runners: results point at those, and results and runners are written by
@@ -368,4 +372,23 @@ export const kitConfig: KitConfig = {
     navbarStatus: true,
     helpPanel: true,
   },
+};
+
+/**
+ * The race's page-builder rules (the authoring kit, PORTS.md card 109). Each
+ * one shows as a yellow WARNING beside a page's sections, never an error, so
+ * nothing here can stop Publish or break a page that is already live. The
+ * built-in warnings (empty sections, leftover template example text, a synced
+ * section with nothing picked) apply everywhere whatever this says. Logic and
+ * tests: src/lib/page-guardrails.ts.
+ *
+ * Every page on this site opens with its page heading (Course, Records and
+ * Contact all start with one), and has one. Home is left out: it opens with
+ * the race banner and is shaped by hand.
+ */
+export const pageRules: PageRules = {
+  appliesTo: ['page'],
+  mustStartWith: ['pageHeaderSection', 'raceHeroSection', 'heroSection'],
+  atMostOnce: ['pageHeaderSection', 'raceHeroSection', 'heroSection'],
+  maxSections: 20,
 };

@@ -25,6 +25,7 @@ import { visionTool } from '@sanity/vision';
 import { media } from 'sanity-plugin-media';
 import { unsplashImageAsset } from 'sanity-plugin-asset-source-unsplash';
 import { schemaTypes } from './src/sanity/schemaTypes';
+import { PAGE_TEMPLATES } from './src/sanity/pageTemplates';
 import { deskStructure } from './src/sanity/structure';
 import { resolve } from './src/sanity/resolve';
 import { PreviewNavigator } from './src/sanity/components/PreviewNavigator';
@@ -58,7 +59,7 @@ import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 import { ncsStudioKit } from './src/sanity/kit';
 import { kitConfig } from './src/sanity/kit.config';
 import { ncsWorkflowTools } from './src/sanity/workflow';
-import { brandIcons, withBrandPreviews } from './src/sanity/brandIcons';
+import { brandIcons, typeIcon, withBrandPreviews } from './src/sanity/brandIcons';
 
 // =============================================================================
 // Studio theme
@@ -200,6 +201,24 @@ export default defineConfig({
     // Portable Text styles drawn in the race's fonts (StudioLook.tsx, card 116).
     // Every document type gets its icon and a picture in list rows (card 119).
     types: withBrandPreviews(withEditorTypography(schemaTypes, STUDIO_FONTS)),
+    // Page templates (the authoring kit, PORTS.md card 109): the starting
+    // points offered when the race director makes a new page (race week, a
+    // volunteer call, the recap, the sponsor thank-you and more). The list is
+    // src/sanity/pageTemplates.ts. `value` is a function so every new page gets
+    // fresh _keys. The stock 'page' template stays registered (links and
+    // intents that name it keep working); newDocumentOptions below hides it
+    // from the menus, where "Blank page" stands in for it.
+    templates: (prev) => [
+      ...prev,
+      ...PAGE_TEMPLATES.map((t) => ({
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        schemaType: 'page',
+        icon: typeIcon('page'),
+        value: () => ({ pageBuilder: t.sections() }),
+      })),
+    ],
   },
 
   // Singleton enforcement: hide these from the global "+" create menu so editors
@@ -210,10 +229,15 @@ export default defineConfig({
     // append ours.
     badges: (prev) => [...prev, ...documentBadges],
     newDocumentOptions: (prev, { creationContext }) => {
+      // Custom pages are made from a page template; the bare stock one is
+      // hidden because "Blank page" is the same thing with a clearer name.
+      const options = PAGE_TEMPLATES.length
+        ? prev.filter((option) => option.templateId !== 'page')
+        : prev;
       if (creationContext.type === 'global') {
-        return prev.filter((option) => !SINGLETON_TYPES.has(option.templateId));
+        return options.filter((option) => !SINGLETON_TYPES.has(option.templateId));
       }
-      return prev;
+      return options;
     },
     actions: (prev, { schemaType }) => {
       let base = SINGLETON_TYPES.has(schemaType)

@@ -268,7 +268,11 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               S.documentTypeListItem('athlete')
                 .title('Runners (fix a name here)')
                 .icon(typeIcon('athlete')),
+              // Hidden in the staff view (kit.config.ts staffHiddenPanes): the
+              // records show only what a finish can prove (PENDING 1j), so a
+              // hand-typed record is a developer's call, never a form to fill.
               S.documentTypeListItem('recordEntry')
+                .id('record-entries')
                 .title('Records the results cannot prove')
                 .icon(typeIcon('recordEntry')),
               // Recorded automatically each November by scripts/weather-sync.mjs;
