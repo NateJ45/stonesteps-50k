@@ -101,17 +101,21 @@ const resolvedOg = ogImage ?? perPageOg ?? globalOg ?? ogPathForRoute(Astro.url.
 const absOg = resolvedOg.startsWith('http') ? resolvedOg : new URL(resolvedOg, site.url).toString();
 
 // Build the document title. If the editor-supplied seoTitle already contains
-// the brand name anywhere, use it verbatim. Otherwise append " — {site.name}"
-// so the tab + search-result line carries the brand. Strips a trailing suffix
-// once before evaluating so any legacy pre-baked suffix is handled.
-const brandSuffix = ` — ${site.name}`;
+// the brand name anywhere, use it verbatim. Otherwise append " | {site.name}"
+// so the tab + search-result line carries the brand (a pipe, never an
+// em-dash). Strips a trailing suffix once before evaluating, in either the
+// current or the legacy em-dash form, so a pre-baked suffix is handled.
+const brandSuffix = ` | ${site.name}`;
+const legacySuffix = ` — ${site.name}`;
 const cleanTitle = title.endsWith(brandSuffix)
   ? title.slice(0, -brandSuffix.length)
-  : title;
+  : title.endsWith(legacySuffix)
+    ? title.slice(0, -legacySuffix.length)
+    : title;
 const hasBrandInline = cleanTitle.toLowerCase().includes(site.name.toLowerCase());
 const fullTitle = cleanTitle === site.name || hasBrandInline
   ? cleanTitle
-  : `${cleanTitle} — ${site.name}`;
+  : `${cleanTitle}${brandSuffix}`;
 
 // Auto-inject LocalBusiness on every page when siteSettings is available.
 // Pages can still pass their own additional schemas (Service, FAQPage, BreadcrumbList).
