@@ -2,6 +2,8 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-19: The Found on Google card was missing._ The Search Console route `src/pages/api/studio/search.ts` (starter card 136) had not been copied, so the card's request got a 404 and the card stayed hidden. The route and `studio-google.test.ts` are now in, identical to the starter.
+
 _2026-10-19: Visitors card now reads GA4 and Search Console through studio-status (card 136)._ wrangler.jsonc binds `SITE_DATA` (studio-status, entrypoint `SiteData`) and sets `SITE_DATA_KEY=stonesteps` and `ANALYTICS_PROVIDER=ga4`; no Google key lives on this Worker.
 
 _2026-10-19: Studio complete, phase B (race-week pass)._ Starter card 137 is in (PORTABLE files resynced, `sync-check` all SAME). The tours, welcome and What's new are wired from `src/sanity/studio-tours.ts` (five tours: first visit for the race director, a developer start, Quick update, editing and publishing, a new race year), replacing the old `tourSteps`. Quick update now follows the race year with `when` windows, and gains an edit job (change the start time or parking on the race document), a pick-and-edit job (mark a trekker), and links to the results and to Messages; the plan is in `docs/agent/studio-plan.md`. The phone Quick update picture is cropped to the first three tiles, and the race-week notice video is recorded (`tools/tutorial-videos/scripts/race-week-notice.json`, registered in `src/sanity/guides/videos.ts`). The other five video scripts are still to record.
