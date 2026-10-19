@@ -18,6 +18,10 @@
    editable surface and a click opens Site settings in the edit panel.
    ============================================================================ */
 import '../styles/globals.css';
+// Same order as BaseLayout: starwind.css AFTER globals.css, so the brand :root
+// tokens in globals.css win over its fallback defaults (a preview page was
+// missing this file and drew with the wrong tokens).
+import '../styles/starwind.css';
 import VisualEditingOverlay from '@/components/preview/VisualEditingOverlay.tsx';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';

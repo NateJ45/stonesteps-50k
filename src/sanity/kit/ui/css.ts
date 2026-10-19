@@ -121,10 +121,12 @@ export const UI_CSS = `
 
 /* GuideShot */
 .ncs-ui .ui-shot{display:grid;gap:12px}
-.ncs-ui .ui-shot__frame{position:relative;border-radius:var(--ui-radius);overflow:hidden;border:1px solid var(--ui-rule);background:var(--ui-surface);box-shadow:0 18px 40px -28px rgb(0 0 0 / .45)}
+.ncs-ui .ui-shot__frame{container-type:inline-size;position:relative;border-radius:var(--ui-radius);overflow:hidden;border:1px solid var(--ui-rule);background:var(--ui-surface);box-shadow:0 18px 40px -28px rgb(0 0 0 / .45)}
 .ncs-ui .ui-shot__frame>img,.ncs-ui .ui-shot__frame>.ui-shot__art{display:block;width:100%;height:auto}
 .ncs-ui .ui-shot__marks{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .ncs-ui .ui-shot__stone{position:absolute;transform:translate(-50%,-50%)}
+@container (max-width:560px){.ncs-ui .ui-shot__stone .ui-stone{transform:scale(.72)}}
+@container (max-width:400px){.ncs-ui .ui-shot__stone .ui-stone{transform:scale(.56)}}
 .ncs-ui .ui-shot__key{list-style:none;padding:0;display:grid;gap:8px;font-size:15px;color:var(--ui-muted)}
 .ncs-ui .ui-shot__key li{display:flex;gap:10px;align-items:center}
 .ncs-ui .ui-shot__cap{font-size:15px;color:var(--ui-muted)}
@@ -250,7 +252,7 @@ export const UI_CSS = `
 .ncs-ui .ui-tile{position:relative;display:block;width:100%;padding:0;overflow:hidden;text-align:left;font:inherit;color:inherit;cursor:pointer;background:var(--ui-surface);border:1px solid var(--ui-rule);border-radius:var(--ui-radius);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
 .ncs-ui .ui-tile>.ui-edge{display:block}
 .ncs-ui a.ui-tile:not([data-ui]){color:inherit;text-decoration:none}
-.ncs-ui .ui-tile__in{display:grid;grid-template-columns:60px minmax(0,1fr);gap:16px;align-items:center;padding:18px 20px 20px;min-height:96px}
+.ncs-ui .ui-tile__in{display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;align-items:start;padding:18px 20px 20px;min-height:96px}
 .ncs-ui .ui-tile__title{display:block;font-family:var(--ui-display);font-weight:var(--ui-display-weight);font-size:22px;line-height:1.2;color:var(--ui-heading);text-wrap:balance}
 .ncs-ui .ui-tile__lead{display:block;margin-top:5px;font-size:15px;line-height:1.5;color:var(--ui-muted)}
 .ncs-ui .ui-tile:hover{transform:translateY(-2px);box-shadow:0 12px 26px -16px rgb(0 0 0 / .4);border-color:var(--ui-heading)}
