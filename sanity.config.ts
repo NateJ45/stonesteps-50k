@@ -110,6 +110,13 @@ export default defineConfig({
   // sits innermost, right around Sanity's bar (see StudioLook.tsx).
   studio: { components: { navbar: StudioWordmarkNavbar } },
 
+  // Always sign in by token, never by cookie. The kit's /api/studio/* routes
+  // (Messages, Visitors, Earlier versions, deploy status) are sent the session
+  // token from localStorage (kit/shared.tsx studioToken). A browser the Studio
+  // had signed in by cookie only has no such token, so those routes answered
+  // 401 "Sign in to the Studio again" until the editor signed out and in.
+  auth: { loginMethod: 'token' },
+
   projectId:
     envVal('SANITY_STUDIO_PROJECT_ID', 'PUBLIC_SANITY_PROJECT_ID') || 'placeholder-project-id',
   dataset: envVal('SANITY_STUDIO_DATASET', 'PUBLIC_SANITY_DATASET') || 'production',
