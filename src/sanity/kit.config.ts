@@ -29,6 +29,7 @@ import { genericRules } from '../lib/studio-checkup';
 import { guides, GUIDE_CATEGORIES, GUIDE_FOR_FIELD, GUIDES_FOR_TYPE } from './guides/content';
 import { makeGuideView } from './components/GuideView';
 import { envVal } from './urls';
+import { TOURS, WELCOME, WHATS_NEW } from './studio-tours';
 import type { PageRules } from '../lib/page-guardrails';
 import { BellIcon } from '@sanity/icons/Bell';
 import { CalendarIcon } from '@sanity/icons/Calendar';
@@ -51,6 +52,19 @@ import {
 } from '../lib/quick-updates';
 
 const PUBLISHED = '!(_id in path("drafts.**"))';
+
+/**
+ * The race year's seasons for Quick update's `when` (card 137; 'MM-DD', every
+ * year). The race is always in the last third of October, so these are wide
+ * enough to catch it whichever Sunday it lands on. A job outside its season
+ * is not gone: the same change is a few taps further in under Content, and
+ * the Site Guide says where.
+ */
+const RACE_WEEK = { from: '10-14', to: '10-31' };
+const AFTER_RACE = { from: '10-24', to: '12-15' };
+const BUILD_UP = { from: '08-15', to: '10-31' };
+// Registration opens in the new year; the window wraps the New Year.
+const REGISTRATION = { from: '12-01', to: '07-31' };
 
 /**
  * Page types with a Google description (seoDescription). Only the pages this
@@ -195,6 +209,7 @@ export const kitConfig: KitConfig = {
   quickUpdate: [
     {
       id: 'race-week',
+      when: RACE_WEEK,
       title: 'Put up a race-week notice',
       // Card 131: the tile wears the race's megaphone plate (brandIconArt.tsx).
       meaning: 'notice',
@@ -232,6 +247,7 @@ export const kitConfig: KitConfig = {
     },
     {
       id: 'urgent',
+      when: RACE_WEEK,
       title: 'Urgent: a change on race day',
       detail: 'A notice in red, for a delayed start, a closed trail or bad weather.',
       icon: WarningOutlineIcon,
@@ -251,12 +267,53 @@ export const kitConfig: KitConfig = {
       doneMessage:
         'The red notice will be on the website in a few minutes. It comes down by itself two days from now. Switch it off sooner under Race notices.',
     },
+    // Race morning (card 137 "edit"): change what is already on the race
+    // document instead of making a new one. The form starts from what is
+    // there, so only the box that changed is touched. The date box moves the
+    // countdown, the footer and the date Google shows (one date, read everywhere).
+    {
+      id: 'race-morning',
+      when: RACE_WEEK,
+      title: 'Change the start time or parking',
+      detail:
+        'The race day and start time, the start area and the parking words. Already filled in.',
+      icon: CalendarIcon,
+      meaning: 'place',
+      submitLabel: 'Save the change',
+      job: { kind: 'edit', doc: 'race' },
+      fields: [
+        {
+          name: 'raceDate',
+          title: 'Race day and start time',
+          kind: 'datetime',
+          required: true,
+          description: 'Local time. Moving it moves the countdown and the date Google shows.',
+        },
+        {
+          name: 'startArea',
+          title: 'Start and finish area',
+          kind: 'string',
+          max: 120,
+        },
+        {
+          name: 'parkingNote',
+          title: 'Parking',
+          kind: 'text',
+          max: 240,
+          description: 'One or two sentences. Shown beside the start line and under the schedule.',
+        },
+      ],
+      doneTitle: 'The race page is updated',
+      doneMessage:
+        'The change will be on the website in a few minutes. If runners need to know right away, put up a race-week notice too.',
+    },
     // The rest of the year's phone jobs (docs/agent/studio-plan.md). The words
     // start filled in, so most of these are "check it, press the button". Only
     // one notice shows at a time: these long ones are plain, so a short
     // race-week notice that ends sooner still takes the top of the page.
     {
       id: 'registration-open',
+      when: REGISTRATION,
       title: 'Registration is open',
       detail: 'The day sign-ups open: a line on every page with the Register link.',
       icon: EnterIcon,
@@ -303,6 +360,7 @@ export const kitConfig: KitConfig = {
     },
     {
       id: 'volunteers',
+      when: BUILD_UP,
       title: 'Ask for volunteers',
       detail: 'Aid stations, the course, bib pickup. A line on every page with the sign-up link.',
       icon: UsersIcon,
@@ -342,6 +400,7 @@ export const kitConfig: KitConfig = {
     },
     {
       id: 'results-in',
+      when: AFTER_RACE,
       title: 'Tell runners the results are in',
       detail: 'The results import themselves overnight. This points runners at them.',
       icon: StarIcon,
@@ -372,6 +431,56 @@ export const kitConfig: KitConfig = {
         }),
       doneMessage:
         'The notice will be on the website in a few minutes, linking to the results. If this year is not there yet, give the overnight import another night.',
+    },
+    // The weeks after the race: results come in by themselves; the director
+    // only checks them and ticks any early starter (trekker) who finished near
+    // the front. Edit-with-pick lists this year's finishers, fastest first.
+    {
+      id: 'mark-trekker',
+      when: AFTER_RACE,
+      title: 'Mark a trekker',
+      detail:
+        'An early starter who finished near the front. Their time stays; the records leave them out.',
+      icon: StarIcon,
+      meaning: 'value',
+      submitLabel: 'Save',
+      job: {
+        kind: 'edit',
+        pick: {
+          type: 'raceResult',
+          filter: 'year == math::max(*[_type == "raceResult"].year)',
+          order: 'place asc',
+          titleField: 'athlete->name + ", place " + string(place) + " (" + distance->name + ")"',
+          label: 'Which runner?',
+        },
+      },
+      fields: [
+        {
+          name: 'trekker',
+          title: 'Ran as a trekker',
+          kind: 'boolean',
+          description: 'Tick if they took the optional early start.',
+        },
+      ],
+      doneMessage:
+        'Saved. The records recalculate when the website next updates, in a few minutes.',
+    },
+    {
+      id: 'see-results',
+      when: AFTER_RACE,
+      title: 'Look at the results',
+      detail: 'They import themselves overnight from RunSignUp. See what has come in.',
+      meaning: 'overview',
+      icon: StarIcon,
+      job: { kind: 'link', target: { pane: 'results-and-records;results' } },
+    },
+    {
+      id: 'messages',
+      title: 'Read your messages',
+      detail: 'What runners sent through the contact form.',
+      meaning: 'message',
+      icon: EnterIcon,
+      job: { kind: 'link', target: { tool: 'messages' } },
     },
     {
       id: 'sponsor',
@@ -522,41 +631,11 @@ export const kitConfig: KitConfig = {
   // checks as the "Check this page..." action, on the page-builder types.
   pageCheck: { types: [...PAGE_BUILDER_TYPES], run: (doc, client) => runPageCheck(client, doc) },
 
-  tourSteps: [
-    {
-      title: 'This is Home',
-      short: 'Home',
-      meaning: 'home',
-      body: 'Home opens first every time. It shows the race checklist, whether your last change is on the website yet, and anything that needs fixing.',
-    },
-    {
-      title: 'Content is where you edit',
-      short: 'Content',
-      meaning: 'pages',
-      body: "Click Content in the top bar. This year's race holds the date, the distances, the schedule and the sponsors; Pages holds the pages; Results and records holds every finisher since 2003.",
-    },
-    {
-      title: 'Live preview shows the real page',
-      short: 'Preview',
-      body: 'Live preview shows the website as runners will see it, with your unpublished changes in place. Click any words on it to edit them right there.',
-    },
-    {
-      title: 'Nothing is public until you press Publish',
-      short: 'Publish',
-      body: 'Your changes are private until you press the green Publish button. After that the website updates itself in a few minutes. Changed your mind? Use Undo, or move a thing to the Trash and bring it back later.',
-    },
-    {
-      title: 'Race week from your phone',
-      short: 'Race week',
-      meaning: 'notice',
-      body: 'Quick update in the top bar puts up a race-week notice in three boxes: parking, bib pickup, the weather, a course change.',
-    },
-    {
-      title: 'Help is always one click away',
-      short: 'Help',
-      body: 'Site Guide in the top bar has step-by-step help for every job, and you can print any of it. Stuck? Home has a card for asking Nathan.',
-    },
-  ],
+  // Card 137: the spotlight tours, welcome and What's new are data in studio-tours.ts.
+  tourSteps: [], // the old single tour; `tours` below replaces it
+  tours: TOURS,
+  welcome: WELCOME,
+  whatsNew: WHATS_NEW,
 
   liveSlowAfterMinutes: 15,
 

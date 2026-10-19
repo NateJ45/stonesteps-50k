@@ -50,14 +50,14 @@ export const GUIDE_SHOTS: Record<string, GuideShotData> = {
   },
   'quick-update-tiles': {
     src: '/guide-shots/quick-update-tiles.webp',
-    alt: 'Quick update on a phone: six big buttons, from a race-week notice and an urgent change to registration, volunteers, results and a new sponsor.',
+    alt: 'Quick update on a phone in race week: big buttons for a race-week notice, an urgent change on race day, and changing the start time or parking.',
     width: 390,
-    height: 909,
+    height: 492,
     marks: [
-      { kind: 'ring', x: 4.6, y: 1, w: 90.8, h: 15.7 },
-      { kind: 'stone', x: 5.6, y: 2, label: 'Race week: parking, bib pickup, the weather.' },
-      { kind: 'ring', x: 4.6, y: 33.3, w: 90.8, h: 13.2 },
-      { kind: 'stone', x: 5.6, y: 34.3, label: 'The morning sign-ups open.' },
+      { kind: 'ring', x: 4.4, y: 3.6, w: 91.3, h: 30.5 },
+      { kind: 'stone', x: 5.4, y: 2.7, label: 'Race week: parking, bib pickup, the weather.' },
+      { kind: 'ring', x: 4.4, y: 63.1, w: 91.3, h: 35.9 },
+      { kind: 'stone', x: 5.4, y: 62.3, label: 'The start time or the parking moved.' },
     ],
   },
   'quick-update-form': {

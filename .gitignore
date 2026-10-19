@@ -64,3 +64,10 @@ test-results/
 # The owner's scratch folder of mockups. Never source, never committed; see
 # the matching @source exclusion in src/styles/globals.css.
 design/
+
+# Studio media tools (card 137): locks, scratch frames and the music bed stay out of the repo
+tools/.studio-media.lock/
+tools/tutorial-videos/work/
+tools/tutorial-videos/chk/
+tools/**/*.mp3
+tools/**/*.wav

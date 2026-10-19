@@ -761,21 +761,30 @@ guides.push(
     icon: 'bolt',
     lead: 'The jobs of the race year, each a few taps on a phone.',
     diy: 'self',
+    video: 'race-week-notice',
     body: [
       {
         kind: 'p',
-        text: 'Open the Studio on your phone, tap the menu at the top and choose `Quick update` (on Home it is also a button). Pick one:',
+        text: 'Open the Studio on your phone, tap the menu at the top and choose `Quick update` (on Home it is also a button). The tiles follow the race year: each job only shows in its own season, so the screen stays short. Race week shows:',
       },
       {
         kind: 'bullets',
         items: [
           '**Put up a race-week notice**: parking, bib pickup, the weather, a course change. A short line across the top of every page, until the last day you pick.',
           '**Urgent: a change on race day**: the same line in red, for a delayed start or a closed trail. It comes down by itself two days later.',
-          '**Registration is open**: the words are written for you, and it links to the Register page you already set.',
-          '**Ask for volunteers**: a call for the aid stations, the course and bib pickup, with your sign-up link.',
-          '**Tell runners the results are in**: once this year shows under Results by year, it links runners to the results.',
-          '**Add a sponsor**: their name and website now. Add the logo later in the full editor.',
+          '**Change the start time or parking**: changes what is already on the race page, so the boxes start with today’s words. Fix the one that moved and save.',
+          '**Read your messages**: opens what runners sent through the contact form.',
         ],
+      },
+      {
+        kind: 'p',
+        text: 'The rest of the year the other jobs take their turn: **Registration is open** (winter and spring; the words are written for you and it links to the Register page you set), **Ask for volunteers** (late summer to race week), and after the race **Tell runners the results are in**, **Mark a trekker** (pick the early starter who finished near the front and tick the box) and **Look at the results**. **Add a sponsor** is there all year: their name and website now, the logo later in the full editor.',
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'A job you cannot see is out of season.',
+        text: 'Every one of them can still be done in `Content`; the guide for each job says where. Quick update just keeps the screen to what matters this month.',
       },
       { kind: 'shot', key: 'quick-update-tiles' },
       {
@@ -1117,7 +1126,6 @@ guides.push(
           'Press the button. The notice is across the top of every page in a few minutes.',
         ],
       },
-      { kind: 'shot', key: 'quick-update-tiles' },
       {
         kind: 'callout',
         tone: 'positive',
@@ -1177,6 +1185,7 @@ guides.push(
     icon: 'times',
     lead: 'What runners ask that week, and the button that answers each one.',
     diy: 'self',
+    video: 'race-week-notice',
     body: [
       {
         kind: 'p',
@@ -1204,6 +1213,7 @@ guides.push(
         kind: 'bullets',
         items: [
           'Something changed? `Quick update`, then `Urgent: a change on race day`. One box, a red line on every page, and it takes itself down two days later.',
+          'The start time or the parking moved? `Quick update`, then `Change the start time or parking`. It changes the race page itself, so the countdown and the date Google shows follow.',
         ],
       },
       { kind: 'shot', key: 'quick-update-form' },
@@ -1212,7 +1222,7 @@ guides.push(
         kind: 'bullets',
         items: [
           'The results import themselves overnight from RunSignUp. Once you can see this year under **Results by year**, press `Tell runners the results are in`.',
-          'Switch on `Ran as a trekker` for any early starter who finished near the front.',
+          '`Quick update`, then `Mark a trekker`, for any early starter who finished near the front. Pick them from the list and tick the box.',
           'Switch off anything left over under **Race notices**.',
         ],
       },

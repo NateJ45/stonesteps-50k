@@ -3,8 +3,16 @@
 Written 2026-10-19 for the tutorial-video pipeline (starter card 137). Each script is recorded with Playwright against
 the LOCAL Studio holding the sample data below, never the live dataset and never a real runner, sponsor or volunteer.
 Captions are the words shown on screen, one per shot, in the guides' voice (plain, no em-dashes). Target length under
-90 seconds; phone scripts at 390 x 844, desk scripts at 1280 x 800. When recorded, each file goes in `public/guides/`
-and its guide's `video` field (`src/sanity/guides/content.ts`) points at it.
+90 seconds; phone scripts at 390 x 844, desk scripts at 1280 x 800. When recorded (`node tools/tutorial-videos/record.mjs tools/tutorial-videos/scripts/<slug>.json`, music from
+`_assets/video-music`, never committed), the clip lands in `public/guide-videos/`, gets an entry in
+`src/sanity/guides/videos.ts`, and its guide's `video` field (`src/sanity/guides/content.ts`) names that key.
+
+## Status
+
+- Recorded: script 1 as `tools/tutorial-videos/scripts/race-week-notice.json` (390 x 844, about 20 seconds, the guides
+  `quick-update` and `race-week`).
+- To record, one at a time under the build lock: scripts 2 to 6 below, each written as a JSON script beside the first.
+  Script 3 is a desk clip (1280 x 800) and needs the race document open at the Links tab.
 
 ## Sample data (all invented)
 
