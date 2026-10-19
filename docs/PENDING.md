@@ -32,6 +32,8 @@ list names, Your pages links), Quick update publishing a notice, the forest top 
 in the desk and list rows at 16 to 24px in light and dark, Help for this page, Messages, Share a preview, Trash and
 Bring it back, the tour, and the staff view.
 
+Card 122 (private and hidden pages) is next round: the shared `_seoFields.ts` now titles the switch "Hide this page from Google and the menus". Google is honoured here (robots tag and sitemap, astro.config.mjs); this site has no automatic menus (Top menu links in Site setup are typed by hand), so a hidden page someone links in the menu by hand still shows there.
+
 Dave's logo is still awaited: the Studio uses the steps mark (`public/favicon.svg`) and shows no wordmark beside
 it (`src/sanity/studioEdges.config.ts`). When the logo arrives, it goes in `homeBanner` and the wordmark there.
 
