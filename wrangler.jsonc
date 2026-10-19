@@ -61,7 +61,12 @@
   //
   // "Share a preview" (card 117) needs one secret, 32+ random characters:
   // npx wrangler secret put SHARE_PREVIEW_SECRET
+  // Visitors card (starter PORTS.md card 136): GA4 and Search Console read through
+  // studio-status. SITE_DATA_KEY names this site there; ANALYTICS_PROVIDER picks ga4.
+  "services": [{ "binding": "SITE_DATA", "service": "studio-status", "entrypoint": "SiteData" }],
   "vars": {
+    "SITE_DATA_KEY": "stonesteps",
+    "ANALYTICS_PROVIDER": "ga4",
     "GITHUB_REPO": "NateJ45/stonesteps-50k",
   },
 
