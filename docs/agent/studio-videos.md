@@ -11,7 +11,7 @@ Captions are the words shown on screen, one per shot, in the guides' voice (plai
 
 - Recorded: script 1 as `tools/tutorial-videos/scripts/race-week-notice.json` (390 x 844, about 20 seconds, the guides
   `quick-update` and `race-week`).
-- To record, one at a time under the build lock: scripts 2 to 6 below, each written as a JSON script beside the first.
+- Recorded 2026-10-19: script 2 as `race-day-change.json` and the phone half of script 4 as `add-a-sponsor.json` (about 18 and 19 seconds). Scripts 3, 5 and 6 and the desk half of 4 are not recorded: 3 and 5 are out of season, and 6 and the desk half need documents the read-only harness data may not hold.
   Script 3 is a desk clip (1280 x 800) and needs the race document open at the Links tab.
 
 ## Sample data (all invented)

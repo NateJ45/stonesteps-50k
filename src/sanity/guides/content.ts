@@ -47,7 +47,9 @@ export type GuideBlock =
   | { kind: 'seealso'; items: string[] }
   // A picture of the Studio by key (./shots.ts, PORTS.md card 130); a key with
   // no capture yet draws the wireframe, so a guide never shows a hole.
-  | { kind: 'shot'; key: string; caption?: string };
+  | { kind: 'shot'; key: string; caption?: string }
+  // A clip by key (./videos.ts, PORTS.md card 137); a key with no clip draws nothing.
+  | { kind: 'video'; key: string; caption?: string };
 
 /** Site-specific names, kept in one place so the prose never hardcodes them. */
 export const SITE = {
@@ -413,6 +415,7 @@ export const guides: Guide[] = [
     icon: 'heart',
     lead: 'The row of patches near the bottom of the home page.',
     diy: 'self',
+    video: 'add-a-sponsor',
     body: [
       {
         kind: 'path',
@@ -1216,6 +1219,7 @@ guides.push(
           'The start time or the parking moved? `Quick update`, then `Change the start time or parking`. It changes the race page itself, so the countdown and the date Google shows follow.',
         ],
       },
+      { kind: 'video', key: 'race-day-change' },
       { kind: 'shot', key: 'quick-update-form' },
       { kind: 'h', text: 'The week after' },
       {

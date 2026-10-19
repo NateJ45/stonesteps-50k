@@ -41,4 +41,26 @@ export const GUIDE_VIDEOS: Record<string, GuideVideoData> = {
     width: 390,
     height: 844,
   },
+  // Recorded 2026-10-19 on the kit harness with sample text (race-day-change.json).
+  'race-day-change': {
+    title: 'An urgent change on race day',
+    src: '/guide-videos/race-day-change.mp4',
+    webm: '/guide-videos/race-day-change.webm',
+    poster: '/guide-videos/race-day-change.jpg',
+    captions: '/guide-videos/race-day-change.vtt',
+    duration: 18,
+    width: 390,
+    height: 844,
+  },
+  // Recorded 2026-10-19 on the kit harness with sample text (add-a-sponsor.json).
+  'add-a-sponsor': {
+    title: 'Add a sponsor from your phone',
+    src: '/guide-videos/add-a-sponsor.mp4',
+    webm: '/guide-videos/add-a-sponsor.webm',
+    poster: '/guide-videos/add-a-sponsor.jpg',
+    captions: '/guide-videos/add-a-sponsor.vtt',
+    duration: 19,
+    width: 390,
+    height: 844,
+  },
 };

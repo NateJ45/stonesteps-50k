@@ -1,0 +1,46 @@
+{
+  "slug": "add-a-sponsor",
+  "title": "Add a sponsor from your phone",
+  "start": "/quick-update",
+  "ready": "[data-quick=\"sponsor\"]",
+  "viewport": { "width": 390, "height": 844 },
+  "cover": {
+    "selectors": [
+      "[data-ui=\"whats-new-card\"]",
+      "[data-ui=\"Popover\"]:has([data-ui=\"whats-new-card\"])"
+    ]
+  },
+  "steps": [
+    {
+      "do": "caption",
+      "text": "A new sponsor? Add them from your phone.",
+      "ms": 2600,
+      "poster": true
+    },
+    {
+      "do": "ring",
+      "target": "[data-quick=\"sponsor\"]",
+      "caption": "Pick Add a sponsor.",
+      "ms": 2200
+    },
+    { "do": "click", "target": "[data-quick=\"sponsor\"]" },
+    {
+      "do": "type",
+      "target": "[data-tour=\"quick-field-name\"] input",
+      "text": "Hilltop Trail Supply",
+      "caption": "Their real name, as on their sign."
+    },
+    {
+      "do": "type",
+      "target": "[data-tour=\"quick-field-url\"] input",
+      "text": "https://example.org/hilltop",
+      "caption": "And their website, if they have one."
+    },
+    {
+      "do": "ring",
+      "target": "[data-tour=\"quick-submit\"]",
+      "caption": "They go on the end of the row. Add the logo later, at a desk.",
+      "ms": 3200
+    }
+  ]
+}
