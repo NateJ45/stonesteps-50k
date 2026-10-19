@@ -14,7 +14,6 @@ import {
 } from 'react';
 import { useClient, useCurrentUser, useSchema, useWorkspace } from 'sanity';
 import { useRouter } from 'sanity/router';
-import { Box, Flex, Heading, Text } from '@sanity/ui';
 import {
   isStaffView,
   readOverride,
@@ -34,6 +33,9 @@ import {
   type SiteFiles,
 } from '../../lib/studio-checkup';
 import type { KitConfig } from './types';
+import { KitScope, ToolHead } from './ui';
+import type { BrandIconKey } from '../../lib/studio-icons';
+import { signInNote } from '../../lib/studio-signin';
 
 export const API_VERSION = '2025-02-19';
 
@@ -155,45 +157,30 @@ export function staffDesk<T>(
 // -----------------------------------------------------------------------------
 
 export function ToolHeading({
-  icon: Icon,
+  icon,
+  meaning,
+  label,
   children,
   lead,
 }: {
-  icon: ComponentType;
+  icon?: ComponentType;
+  /** Card 131: the site's own art for the tool, drawn on its stone (the icon is the fallback). */
+  meaning?: BrandIconKey;
+  /** A small-caps word beside the marker, e.g. "Checkup". */
+  label?: ReactNode;
   children: ReactNode;
   lead?: ReactNode;
 }) {
   return (
-    <Box>
-      <Flex align="center" gap={3}>
-        <Flex
-          aria-hidden
-          align="center"
-          justify="center"
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
-            flexShrink: 0,
-            fontSize: 26,
-            background: 'var(--card-badge-default-bg-color, rgba(127,127,127,0.12))',
-            color: 'var(--card-fg-color)',
-          }}
-        >
-          <Icon />
-        </Flex>
-        <Heading as="h1" size={4}>
-          {children}
-        </Heading>
-      </Flex>
-      {lead && (
-        <Box marginTop={4}>
-          <Text size={3} muted style={{ lineHeight: 1.6 }}>
-            {lead}
-          </Text>
-        </Box>
-      )}
-    </Box>
+    <KitScope>
+      <ToolHead
+        title={children}
+        lead={lead}
+        label={label}
+        meaning={meaning}
+        icon={meaning ? undefined : icon}
+      />
+    </KitScope>
   );
 }
 
@@ -376,8 +363,9 @@ export function useLiveData(): LiveData | null {
 // route checks with Sanity (src/lib/studio-auth.ts). The signed-in embedded
 // Studio keeps that token in localStorage under __studio_auth_token_<projectId>
 // (the step 0 spike in docs/agent/studio-kit.md); the client's config carries
-// it too when it is set. A cookie-only login has no token, so the route says
-// "sign in again" and the editor can still ask for help.
+// it too when it is set. A cookie-only login has no token, so the route answers
+// 401 and the editor is told, in plain words, to sign out and in once (card 129;
+// sanity.config.ts sets auth.loginMethod 'token' so that switch is one time).
 
 export function studioToken(client: { config: () => { token?: string; projectId?: string } }) {
   const cfg = client.config();
@@ -409,7 +397,12 @@ export function useTryAgain() {
       setNote(
         r.ok && j.ok
           ? 'Trying again now. The website usually updates within a few minutes.'
-          : (j.error ?? 'That did not work just now. Ask for help if it keeps happening.'),
+          : signInNote(
+              Boolean(token),
+              r.status,
+              j.error,
+              'That did not work just now. Ask for help if it keeps happening.',
+            ),
       );
     } catch {
       setNote('That did not work just now. Ask for help if it keeps happening.');

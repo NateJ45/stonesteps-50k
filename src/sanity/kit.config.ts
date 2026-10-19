@@ -155,6 +155,8 @@ export const kitConfig: KitConfig = {
     {
       id: 'race-week',
       title: 'Put up a race-week notice',
+      // Card 131: the tile wears the race's megaphone plate (brandIconArt.tsx).
+      meaning: 'notice',
       detail:
         'Parking, bib pickup, the weather, a course change. A line across the top of every page.',
       icon: BellIcon,
@@ -192,6 +194,8 @@ export const kitConfig: KitConfig = {
       title: 'Urgent: a change on race day',
       detail: 'A notice in red, for a delayed start, a closed trail or bad weather.',
       icon: WarningOutlineIcon,
+      // The race-day stopwatch plate: this one is for the day itself.
+      meaning: 'times',
       fields: [
         {
           name: 'message',
@@ -223,6 +227,11 @@ export const kitConfig: KitConfig = {
     // flag every result. Race days are the weather script's own bookkeeping.
     ignoreTypes: ['sectionPreset', 'redirect', 'raceDay'],
   },
+
+  // Home's Recent edits and Pick up skip the results the nightly import writes
+  // (card 129): dozens of identical rows a night that are not Dave's work. The
+  // Checkup still checks them.
+  recentIgnoreTypes: ['raceResult'],
 
   guide: {
     guides,
@@ -356,6 +365,14 @@ export const kitConfig: KitConfig = {
     motif: '/studio-banner/course-profile.svg',
     motifNarrow: '/studio-banner/course-profile-phone.svg',
     accent: '#FED89B',
+    // The 50K in the site's display face, gold as on the distance ticket. The
+    // echo, the outlined K and the plate button are src/sanity/studioArt.css.
+    lettering: {
+      text: '50K',
+      family: 'Staatliches',
+      src: '/fonts/staatliches-400.woff2',
+      colors: ['#FED89B'],
+    },
   },
 
   features: {

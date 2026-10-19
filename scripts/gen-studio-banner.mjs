@@ -24,6 +24,8 @@
 //   public/studio-art/ticket-50k.svg               the /studio splash motif
 //                                                  (inlined by StudioSplashMotif.astro)
 //   public/studio-art/topo.svg                     the contour field on its own
+//   public/studio-art/topo-tile.svg                the contours as a seamless tile (the
+//                                                  kit's texture slot, card 128)
 //   public/studio-art/steps-mark.svg               the steps, bare (no plate)
 //
 // public/studio-art/ is the race's art slot for the Studio design language
@@ -263,6 +265,45 @@ function topoField() {
 `;
 }
 
+/**
+ * The contour field as a SEAMLESS tile, for the kit's texture slot (card 128:
+ * the featured "Start here" panel on the Site Guide, drawn over the banner's
+ * forest at 420px). Topo.astro's PRNG and ridge shape, but every wave has a
+ * whole number of periods across the tile and each line is drawn again one
+ * tile up and down, so the edges meet with no seam in either direction.
+ */
+function topoTile() {
+  const S = 420;
+  const rand = rng(11);
+  const lines = 7;
+  const paths = [];
+  for (let i = 0; i < lines; i++) {
+    const offset = (i / lines) * S;
+    const amp = 10 + rand() * 18;
+    const phase = rand() * Math.PI * 2;
+    const k = 1 + Math.floor(rand() * 2); // 1 or 2 waves across: whole periods
+    for (const dy of [-S, 0, S]) {
+      const pts = [];
+      for (let st = 0; st <= 48; st++) {
+        const t = (st / 48) * Math.PI * 2;
+        const y =
+          offset +
+          dy +
+          Math.sin(k * t + phase) * amp +
+          Math.sin(2 * k * t + phase * 1.7) * (amp * 0.35);
+        pts.push([(st / 48) * S, y]);
+      }
+      const gold = i % 3 === 2 ? ` stroke="${GOLD}" stroke-opacity="0.35"` : '';
+      paths.push(`<path d="${smooth(pts)}"${gold}/>`);
+    }
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" aria-hidden="true">
+  <!-- Topo.astro's contours as a seamless 420px tile (seed 11). Drawn by scripts/gen-studio-banner.mjs. -->
+  <g fill="none" stroke="${CONTOUR}" stroke-width="1.2">${paths.join('')}</g>
+</svg>
+`;
+}
+
 /** The steps from public/favicon.svg, without the bark plate. */
 const stepsMark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="7 11.5 49 42.5" aria-hidden="true">
   <!-- The race's steps (public/favicon.svg) without the plate; fill with currentColor. -->
@@ -298,7 +339,8 @@ writeFileSync(
 );
 writeFileSync(resolve(art, 'ticket-50k.svg'), ticket());
 writeFileSync(resolve(art, 'topo.svg'), topoField());
+writeFileSync(resolve(art, 'topo-tile.svg'), topoTile());
 writeFileSync(resolve(art, 'steps-mark.svg'), stepsMark);
 console.log(
-  '[gen-studio-banner] wrote public/studio-banner/course-profile{,-phone}.svg and public/studio-art/{ticket-50k,topo,steps-mark}.svg',
+  '[gen-studio-banner] wrote public/studio-banner/course-profile{,-phone}.svg and public/studio-art/{ticket-50k,topo,topo-tile,steps-mark}.svg',
 );

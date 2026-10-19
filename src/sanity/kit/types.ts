@@ -13,6 +13,8 @@ import type { SanityClient } from 'sanity';
 import type { CheckGroup } from '../../lib/page-checks';
 import type { CheckupRule } from '../../lib/studio-checkup';
 import type { QuickFieldKind, StudioTarget } from '../../lib/studio-kit';
+import type { BrandIconKey } from '../../lib/studio-icons';
+import type { GallerySpec } from '../../lib/photo-post';
 
 /**
  * One recurring job on Home's "This week" card. It is ticked one of three ways
@@ -69,6 +71,8 @@ export interface QuickForm {
   title: string;
   detail?: string;
   icon?: ComponentType;
+  /** Card 131: the site's art for the tile (its stone icon); the icon is the fallback. */
+  meaning?: BrandIconKey;
   fields: QuickField[];
   /** The button at the bottom of the form ("Put it on the website"). */
   submitLabel?: string;
@@ -82,6 +86,38 @@ export interface QuickForm {
   ) => QuickDoc | Promise<QuickDoc>;
   /** One sentence after it is saved ("The notice shows until the day you picked."). */
   doneMessage?: string;
+}
+
+/**
+ * "Post a photo" on the Quick update tool (card 125): a photo from the phone's
+ * camera or gallery, with a required description, added to a gallery on a page
+ * or to a new post. Always a DRAFT: the editor presses Publish.
+ */
+export interface PostPhotoConfig {
+  /** Document types whose page builder can hold a gallery ([...PAGE_BUILDER_TYPES]). */
+  galleryTypes: string[];
+  /** Where a gallery and its photos live. Default: pageBuilder / gallerySection / images / alt / caption. */
+  gallery?: Partial<GallerySpec>;
+  /** A new post made from the photo, saved as a draft. Missing: galleries only. */
+  post?: {
+    /** "A new journal post", as the choice reads. */
+    label: string;
+    /** The document type ("journalEntry"). */
+    type: string;
+    /**
+     * The new post's fields (the kit adds the draft id). `image` is a complete
+     * image value with its description; put it in the post's cover image field.
+     */
+    build: (input: {
+      title: string;
+      alt: string;
+      caption: string;
+      image: Record<string, unknown>;
+      now: Date;
+    }) => QuickDoc;
+  };
+  /** One line above the picker, for a site rule ("Only post children with a parent's permission."). */
+  note?: string;
 }
 
 /** One large button on Home for a job this site does often (PORTS.md card 110). */
@@ -129,6 +165,14 @@ export interface TourStep {
   body: string;
 }
 
+/** What the kit hands a site's GuideView (card 128). */
+export interface GuideViewProps {
+  /** 'panel' in the narrow "Help for this page" inspector. */
+  variant?: 'page' | 'panel';
+  /** Opens another guide in place (See also). Without it the view decides. */
+  onOpen?: (slug: string) => void;
+}
+
 /** The help guides, as the site's Help & Guide data already holds them. */
 export interface KitGuide {
   slug: string;
@@ -136,6 +180,14 @@ export interface KitGuide {
   title: string;
   lead: string;
   body: unknown[];
+  /**
+   * The guide's art (card 128): a name from GUIDE_ICON_MEANINGS in
+   * src/lib/studio-look.ts ('clock') or a meaning in the icon registry
+   * ('times'). Anything else (an old emoji) draws the guide icon.
+   */
+  icon?: string;
+  /** Who does this job (card 41): drawn as a stone tag under the title. */
+  diy?: 'self' | 'ask' | 'mixed';
   /**
    * A short clip showing the job (PORTS.md card 115): a file in public/
    * ("/guides/post-a-notice.mp4"), a YouTube or Vimeo link, or any https
@@ -224,6 +276,9 @@ export interface KitConfig {
    */
   quickUpdate?: QuickForm[];
 
+  /** "Post a photo" on the Quick update tool (card 125). Missing: no photo action. */
+  postPhoto?: PostPhotoConfig;
+
   /** First day of the week for "This week": 0 Sunday, 1 Monday. */
   weekStartsOn: 0 | 1;
 
@@ -236,8 +291,11 @@ export interface KitConfig {
   guide: {
     guides: KitGuide[];
     categories: readonly string[];
-    /** Renders one guide by slug (the site's GuideView). */
-    view: (slug: string) => ComponentType;
+    /**
+     * Renders one guide by slug (the site's GuideView), for the desk and the
+     * "Help for this page" panel, which passes variant 'panel' (card 128).
+     */
+    view: (slug: string) => ComponentType<GuideViewProps>;
     /**
      * Guide slugs per document type, for the "Help for this page" panel
      * (card 110). The key '*' is the fallback for any type not listed.
@@ -250,6 +308,13 @@ export interface KitConfig {
    * groups, each a one-click link. Missing or empty hides the card.
    */
   pages?: PageMapGroup[];
+
+  /**
+   * Types Home's "Recent edits" and "Pick up" skip, on top of `checkup.ignoreTypes`
+   * (card 129). For documents a script writes (nightly imports) that are not an
+   * editor's work but should still be checked. Missing: only the Checkup list.
+   */
+  recentIgnoreTypes?: string[];
 
   /** Home's quick actions, in order. Empty or missing shows the two plain buttons. */
   quickActions?: QuickAction[];
@@ -292,6 +357,11 @@ export interface KitConfig {
      * at" time. Missing counts as on; it shows only when some type has publishAt.
      */
     comingUp?: boolean;
+    /**
+     * The email backbone (card 127): Home's Newsletter card and the RSVP rows in
+     * "Coming up". Needs ncsMailTools registered. Missing counts as off.
+     */
+    mail?: boolean;
     /** The status line under the top bar (card 110). Missing counts as on. */
     navbarStatus?: boolean;
     /** The "Help for this page" document panel (card 110). Missing counts as on. */
@@ -301,6 +371,12 @@ export interface KitConfig {
      * findings for the open document. Missing counts as on.
      */
     publishPanel?: boolean;
+    /**
+     * The "Earlier versions" document panel (card 125): the nightly backups,
+     * through /api/studio/earlier-versions/. Without the Worker's GitHub
+     * settings it offers "Ask <helper> to restore this". Missing counts as on.
+     */
+    earlierVersions?: boolean;
     /**
      * Plain words in an empty desk list, and emptyAwareList() (card 111).
      * Missing counts as on.

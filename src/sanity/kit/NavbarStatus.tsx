@@ -15,13 +15,16 @@
 //
 // A `studio.components.navbar` middleware: it ALWAYS renders
 // props.renderDefault(props) first, so every plugin's navbar after this one
-// still runs. With no build time to compare against (a fresh clone, a dev
+// still runs. Card 128: the line never clips (wraps instead) at any width.
+// With no build time to compare against (a fresh clone, a dev
 // server without /build-info.json) it draws nothing at all.
 // =============================================================================
 
 import type { NavbarProps } from 'sanity';
-import { Box, Button, Card, Flex, Stack, Text } from '@sanity/ui';
-import { deployProblem, navbarStatus } from '../../lib/studio-kit';
+import { Button, Card, Flex, Stack, Text } from '@sanity/ui';
+import { deployProblem, liveStatus, navbarStatus } from '../../lib/studio-kit';
+import { LIVE_STEP_WORDS, liveSteps } from '../../lib/studio-look';
+import { KitScope, LiveSteps } from './ui';
 import { useLiveData, useStudioLink, useTryAgain } from './shared';
 import type { KitConfig } from './types';
 
@@ -42,6 +45,11 @@ export function makeNavbarStatus(config: KitConfig) {
         config.typicalUpdateMinutes,
       );
     if (!status) return null;
+    const steps = liveSteps(
+      problem
+        ? 'failed'
+        : liveStatus(data.builtAt, data.lastPublish, data.now, config.liveSlowAfterMinutes).state,
+    );
     const home = config.features.home ? linkTo({ tool: 'home' }) : null;
     return (
       <Card
@@ -52,21 +60,27 @@ export function makeNavbarStatus(config: KitConfig) {
         role="status"
         aria-live="polite"
       >
-        <Flex align="center" justify="flex-end" gap={2} wrap="wrap">
-          <Box
-            aria-hidden
+        <Flex align="center" justify="flex-end" gap={2} wrap="wrap" style={{ minWidth: 0 }}>
+          {/* Card 131: the same three stones as Home's "Is it live?", small. The words carry the meaning. */}
+          <KitScope style={{ display: 'inline-flex', flexShrink: 0, lineHeight: 0 }}>
+            <LiveSteps compact states={steps} words={LIVE_STEP_WORDS} />
+          </KitScope>
+          {/* Card 128: the words may wrap but never clip. Nathan saw "Website up
+              to d..." at the top right; a flex child's min-width and an inherited
+              nowrap can cut a line short, so the line shrinks, wraps and stays whole. */}
+          <Text
+            size={1}
+            muted={status.tone === 'default'}
             style={{
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              flexShrink: 0,
-              // The tone's own badge dot colour, so the branded theme and dark
-              // mode both apply; no literal colour here.
-              background: 'var(--card-badge-default-dot-color, currentColor)',
-              opacity: status.tone === 'default' ? 0.6 : 1,
+              minWidth: 0,
+              flex: '0 1 auto',
+              whiteSpace: 'normal',
+              overflow: 'visible',
+              textOverflow: 'clip',
+              overflowWrap: 'anywhere',
+              textAlign: 'right',
             }}
-          />
-          <Text size={1} muted={status.tone === 'default'}>
+          >
             {problem ? (retry.note ?? problem.text) : status.text}
             {home && status.tone !== 'default' && (
               <>
