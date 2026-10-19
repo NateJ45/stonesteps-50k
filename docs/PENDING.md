@@ -51,7 +51,7 @@ Staatliches gold lettering (`public/fonts/staatliches-400.woff2`). What the look
 `src/sanity/studioArt.css`: Home's banner name in Staatliches caps with the rust echo and the outlined K, the date
 line as the mono blaze eyebrow, the claim stamp above the button (wide screens), and View the website as the rust
 plate button. Still kit-fixed (starter proposals): the banner shows today's date, not race day; the button says
-"View the website". Scheduled Drafts is off (`sanity.config.ts`): on the Free plan it only opened an upgrade page.
+"View the website". Quick update tiles wear the race plates (card 131): the megaphone for a race-week notice, the stopwatch for a race-day change. Scheduled Drafts is off (`sanity.config.ts`): on the Free plan it only opened an upgrade page.
 The phone app (card 125) is in: `/studio/manifest.webmanifest`, `public/studio/sw.js`, `public/icon-maskable-512.png`.
 Earlier versions, Post a photo, the newsletter and RSVPs (cards 125, 127) are copied but OFF in `kit.config.ts`;
 `migrations/0003_mail.sql` is NOT applied to D1.

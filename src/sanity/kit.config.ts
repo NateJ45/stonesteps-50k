@@ -155,6 +155,8 @@ export const kitConfig: KitConfig = {
     {
       id: 'race-week',
       title: 'Put up a race-week notice',
+      // Card 131: the tile wears the race's megaphone plate (brandIconArt.tsx).
+      meaning: 'notice',
       detail:
         'Parking, bib pickup, the weather, a course change. A line across the top of every page.',
       icon: BellIcon,
@@ -192,6 +194,8 @@ export const kitConfig: KitConfig = {
       title: 'Urgent: a change on race day',
       detail: 'A notice in red, for a delayed start, a closed trail or bad weather.',
       icon: WarningOutlineIcon,
+      // The race-day stopwatch plate: this one is for the day itself.
+      meaning: 'times',
       fields: [
         {
           name: 'message',
