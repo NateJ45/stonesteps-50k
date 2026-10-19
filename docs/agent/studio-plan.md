@@ -3,7 +3,7 @@
 Written 2026-10-19 (studio-complete). The map from the race director's real jobs to the Studio surface that serves
 each one. When a job changes, change this file, then the surface, then its guide. Settings live in
 `src/sanity/kit.config.ts`; the guides in `src/sanity/guides/content.ts`; the pictures in `src/sanity/guides/shots.ts`;
-the tour steps in `src/sanity/guides/tours.ts`; the video scripts in `docs/agent/studio-videos.md`.
+the tours, welcome and What's new in `src/sanity/studio-tours.ts`; the video scripts in `docs/agent/studio-videos.md`.
 
 ## Who edits
 
@@ -62,26 +62,32 @@ otherwise, and keeps a trekker tick that was made by hand.
 
 ## Quick update (what it covers now)
 
-Six forms, each published straight away (`kitConfig.quickUpdate`, builders in `src/lib/quick-updates.ts`, tested):
+Eleven forms, each published straight away. Each shows only in its season (`when`, card 137, `MM-DD` every year; the
+windows are constants at the top of `kitConfig`); a job out of season is still done in Content, and its guide says
+where. Notice builders are in `src/lib/quick-updates.ts` (tested); the edit, pick and link jobs are kit job types.
 
-1. Put up a race-week notice (message, last day, optional link).
-2. Urgent: a change on race day (one box; red; down after two days).
-3. Registration is open (words pre-written; links to the race's Register address when no link is typed).
-4. Ask for volunteers (words pre-written; sign-up link; three weeks).
-5. Tell runners the results are in (words pre-written; links to `/results/`; two weeks).
-6. Add a sponsor (name and website; goes to the end of the drag-to-order list; logo later).
+| Form                                                                                                 | Season           | Kind                     |
+| ---------------------------------------------------------------------------------------------------- | ---------------- | ------------------------ |
+| Put up a race-week notice (message, last day, optional link)                                         | 14 Oct to 31 Oct | create                   |
+| Urgent: a change on race day (one box; red; down after two days)                                     | 14 Oct to 31 Oct | create                   |
+| Change the start time or parking (race day and time, start area, parking; starts from what is there) | 14 Oct to 31 Oct | edit the race document   |
+| Tell runners the results are in (words pre-written; links to `/results/`; two weeks)                 | 24 Oct to 15 Dec | create                   |
+| Mark a trekker (pick this year's finisher, tick the box)                                             | 24 Oct to 15 Dec | edit with a pick list    |
+| Look at the results                                                                                  | 24 Oct to 15 Dec | link to the results pane |
+| Registration is open (words pre-written; Register link from the race page)                           | 1 Dec to 31 Jul  | create                   |
+| Ask for volunteers (words pre-written; sign-up link; three weeks)                                    | 15 Aug to 31 Oct | create                   |
+| Add a sponsor (name and website; end of the drag-to-order list; logo later)                          | all year         | create                   |
+| Read your messages                                                                                   | all year         | link to Messages         |
 
 Only one notice shows on the site at a time (red, then highlight, then soonest to end), so the long season notices are
 plain: a short race-week notice always takes the top of the page while it runs.
 
-### Needs a generic job type (for starter card 137)
+### Still not a Quick update job
 
-- **Edit an existing document** (a patch job): "change the race date", "change a price step", "tick a trekker",
-  "confirm a schedule line". The current kit API only creates documents, so these stay as Home quick actions that open
-  the right field.
-- **An image field** on a form: a sponsor's logo from the phone's photos (today it is "add the logo later").
-- **Forms that show by season**: a `when` on a form (a GROQ test against `$now`, like the checklist), so race-week tiles
-  lead in race week and registration leads in the spring.
+- A sponsor's logo from the phone (an `image` field exists in the kit; a sponsor needs alt text too, so it stays a
+  desk job for now).
+- Price steps and caps (`feeTiers` is an array of objects the form kinds cannot draw): Home's quick action opens them.
+- RSVPs: this site has no RSVP form.
 
 ## Other improvements made here
 
