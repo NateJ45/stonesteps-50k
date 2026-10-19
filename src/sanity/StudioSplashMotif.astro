@@ -1,18 +1,15 @@
 ---
 // Safe to edit by hand
 // The motif under the name on the /studio loading splash
-// (src/pages/studio/index.astro, PORTS.md card 120): the 50K's elevation
-// profile, the same strip as the foot of Home's banner
-// (public/studio-banner/, drawn by npm run gen:studio-banner). Forest hills
-// with a gold ridge read on the paper and on the dark ground alike.
+// (src/pages/studio/index.astro, PORTS.md card 120): the 50K distance ticket
+// from the homepage (DistanceTickets.astro), with the course's elevation
+// profile across its face. Forest stock, the 2px bark edge, the hard offset
+// shadow, punched notches (cut with a mask, so the paper or the dark scheme
+// shows through) and gold lettering in Staatliches, which the splash page
+// loads. It is inlined, not an <img>, so the lettering gets the real font.
+// Drawn by npm run gen:studio-banner into public/studio-art/ticket-50k.svg.
 // Decorative: the splash wraps it in aria-hidden.
+import ticket from '../../public/studio-art/ticket-50k.svg?raw';
 ---
 
-<img
-  src="/studio-banner/course-profile-phone.svg"
-  alt=""
-  width="390"
-  height="56"
-  decoding="async"
-  style="border-radius: 6px"
-/>
+<Fragment set:html={ticket} />

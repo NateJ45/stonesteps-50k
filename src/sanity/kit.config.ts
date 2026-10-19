@@ -346,8 +346,9 @@ export const kitConfig: KitConfig = {
   // Home's banner (card 118): the welcome on the forest green top bar. The
   // race's mark is the stone steps on their bark plate (public/favicon.svg),
   // which carries its own dark ground, so it is drawn bare. The strip along the
-  // foot is the 50K's own elevation profile, eight loops of Mt. Airy Forest
-  // (npm run gen:studio-banner draws it from scripts/data/course-profile.json),
+  // foot is the 50K's own elevation profile, seven loops of Mt. Airy Forest
+  // out of The Oval over the site's topo contours, on the course poster's mile
+  // rule (npm run gen:studio-banner draws it from scripts/data/course-profile.json),
   // and the editor's name is in the gold the site uses for labels on forest.
   // Dave's new logo is still to come; when it does, it replaces the mark here.
   homeBanner: {

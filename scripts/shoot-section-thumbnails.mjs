@@ -31,7 +31,7 @@
 
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { existsSync, mkdirSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
 import { chromium } from '@playwright/test';
 
@@ -42,11 +42,24 @@ const FIXTURE = join(ROOT, 'scripts', 'data', 'photos', 'stone-steps-climb.jpg')
 const WIDTH = 1200;
 const HEIGHT = 800;
 
-/** What a video or embed frame shows in a thumbnail: a dark panel, a play mark. */
+/**
+ * What a video or embed frame shows in a thumbnail. Not a generic grey panel:
+ * the race's own grammar, the bark ground with the site's topo contours
+ * (public/studio-art/topo.svg, drawn by npm run gen:studio-banner) and the
+ * rust sign plate with its 2px edge, hard offset shadow and forward lean
+ * (.btn-plate), carrying a cream play mark. On bark a black shadow vanishes, so
+ * the shadow leans toward cream stock, as --lift-ground does on the site.
+ */
+const TOPO = readFileSync(join(ROOT, 'public', 'studio-art', 'topo.svg'), 'utf8')
+  .replace(/<!--.*?-->/gs, '')
+  .replace('<svg ', '<svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.55" ');
 const STAND_IN =
-  '<html><body style="margin:0;height:100vh;display:grid;place-items:center;background:#3a3f47">' +
-  '<svg width="96" height="96" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#e8e8e8"/></svg>' +
-  '</body></html>';
+  '<html><body style="margin:0;height:100vh;position:relative;overflow:hidden;display:grid;place-items:center;background:#1a1712">' +
+  TOPO +
+  '<div style="position:relative;width:132px;height:96px;display:grid;place-items:center;background:#a83c26;' +
+  'border:2px solid #0d0b08;border-radius:12px;box-shadow:5px 7px 0 rgba(255,235,187,.24);transform:skewX(-7deg)">' +
+  '<svg width="54" height="54" viewBox="0 0 24 24" style="transform:skewX(7deg)"><path d="M8 5v14l11-7z" fill="#ffebbb"/></svg>' +
+  '</div></body></html>';
 
 const argUrl = process.argv.includes('--url')
   ? process.argv[process.argv.indexOf('--url') + 1]
@@ -164,6 +177,17 @@ try {
     const box = page.locator(`[data-section-type="${type}"]`);
     await box.scrollIntoViewIfNeeded();
     await page.waitForTimeout(150);
+    // The course map is a client:visible MapLibre island with satellite tiles
+    // and terrain: give it time to hydrate and paint, or the tile is a blank
+    // paper box.
+    if (type === 'courseMapSection') {
+      await box
+        .locator('canvas')
+        .first()
+        .waitFor({ timeout: 20_000 })
+        .catch(() => console.warn('  courseMapSection: no map canvas, shooting as is'));
+      await page.waitForTimeout(4000);
+    }
     await hidePinned();
     // Page coordinates (not viewport ones): a fullPage clip is measured from
     // the top of the document.
