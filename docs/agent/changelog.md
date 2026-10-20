@@ -2,6 +2,8 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-20: The Studio has its own devices (`studio.look`)._ A drawn mile-post marker (`public/studio-banner/mile-post.svg`) replaces the neutral dot, the connector between steps is trail-blaze dashes, and stones are laid in turn (`motion: lay`). The elevation-profile banner strip, topo texture, square bib stones and Staatliches lettering were already in place; `npm run check:look` now reports the site has settled its own devices. The schema has no count-down motion or micro-copy setting, so those stay as they are.
+
 _2026-10-20: Starter cards 144 (Trash page) and 145 (Home as a full-width dashboard) synced; `structure.ts` uses `trashListItem`._
 
 _2026-10-20: Starter cards 138 (follow-up), 139, 140, 141, 142 and 143 synced._ (142 puts the How-to chip under date and datetime inputs, so the Race day field gets its chip.) The marked files (live-watch, snapshot, the Studio look helpers, toasts that carry the Is-it-live stones, `check:look`) match the starter again, `sync-check` all SAME. CI here still builds from the live dataset; the pinned-snapshot workflows (card 138) are not adopted yet.
