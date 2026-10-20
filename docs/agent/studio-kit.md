@@ -418,7 +418,7 @@ quickUpdate: [
 
 `postPhoto.tileLead` and `postPhoto.draftNote` reword Post a photo's "saved as a draft" lines (a shop: "Saved for you to check before it goes in the shop.").
 
-`postPhoto.stories` (card 143) adds documents that keep a photo list of their own, such as a room story's `gallery`, to the places a photo can go: `{ types: ['project'], field?: 'gallery', altField?: 'alt', captionField?: 'caption', noun?: 'Room story' }`. Each document appears as "Room story: Title (n photos)"; the photo goes onto the DRAFT (made from the published copy when there is none), alt text required, never published. One photo per pass, with "Post another photo" on the done card. `galleryTypes` may be empty when only stories are offered.
+`postPhoto.stories` (card 143) adds documents that keep a photo list of their own, such as a room story's `gallery`, to the places a photo can go: `{ types: ['project'], field?: 'gallery', altField?: 'alt', captionField?: 'caption', noun?: 'Room story' }`. Each document appears as "Room story: Title (n photos)"; the photo goes onto the DRAFT (made from the published copy when there is none), alt text required, never published. One photo per pass, with "Post another photo" on the done card. `galleryTypes` may be empty when only stories are offered. `postPhoto.altExample` (card 144) swaps the church example in "Describe the photo" for one in the site's world, and `postPhoto.emptyNote` words the line shown when there is nowhere to put a photo yet (default: "There is no room story to add a photo to yet. Start one in the full editor first." for a stories-only site).
 
 Field kinds: `string`, `text`, `date`, `datetime`, `url`, `number`, `boolean` (a checkbox; its `description` is the
 words beside it), `select` (`options: [{ title, value }]`), `file`, `image` (`accept`). Every field takes `path`
@@ -925,6 +925,10 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
 **Switch (card 141).** `KitSwitch` (`kit/ui/surfaces.tsx`) draws a Quick update yes/no field: a `role="switch"` button, a track and thumb in the look's colours, "Yes" or "No" in words. Do not use a native checkbox in the kit; it can be invisible in real Chrome. Bench: `part=switch`.
 
 **How to on date fields (card 142).** Sanity 6 date and datetime inputs draw their own header, so the chip goes under the input, not in the description (`drawsOwnHeader()` in `studio-kit.ts`).
+
+**Empty Trash (card 146).** `trashListItem()` (`kit/trash.tsx`) is the desk's Trash item: the list when something is in it, `EmptyTrashPane` (the kit's `EmptyState`) when not. Keep the id `trash`. Bench: `part=trash`.
+
+**Home as a dashboard (card 145).** The status rail runs the full height at the right, from the top of the page, so "Is it live?" is on screen with the greeting. `HomeTool.tsx` lays Home out as `.ui-dash` (`kit/ui/css.ts`): the banner and the ways in at the top left, a main column (Pick up, Coming up, Newsletter, Recent edits, Visitors, Your pages, videos) and a status rail (Is it live, Checkup, This week, Ask). The layout follows the pane's width with container queries: 960px and up puts the rail at the right (sticky), 1500px and up lays the main cards two across, and anything narrower is one column with the status first. A new Home card goes in the main column, or in the rail only if it is a status.
 
 **Still to do** (`docs/PENDING.md`): the sign-in heading (blocked in sanity 6.19; see "The edges" above). The field
 "How to" chip landed with card 134 (below).
