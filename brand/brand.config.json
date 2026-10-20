@@ -147,12 +147,11 @@
     },
     "look": {
       "headingColor": "#1A1712",
-      "marker": "dot",
-      "markerColor": "#A83C26",
+      "marker": { "src": "/studio-banner/mile-post.svg", "width": 26, "height": 40 },
       "markColors": ["#A83C26", "#2E5738", "#1A1712"],
       "stone": "square",
       "connector": {
-        "kind": "line",
+        "kind": "dashes",
         "color": "#A83C26"
       },
       "tones": {
@@ -169,7 +168,7 @@
         "src": "/fonts/staatliches-400.woff2",
         "colors": ["#FED89B"]
       },
-      "motion": "draw"
+      "motion": "lay"
     }
   }
 }
