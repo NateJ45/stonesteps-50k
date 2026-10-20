@@ -39,7 +39,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from 'react';
-import { stepsLabel, type StepState } from '../../../lib/studio-look';
+import { LIVE_STEP_WORDS, stepsLabel, type StepState } from '../../../lib/studio-look';
 import type { BrandIconKey } from '../../../lib/studio-icons';
 import {
   ArtTile,
@@ -47,6 +47,7 @@ import {
   Marker,
   SectionRule,
   Sill,
+  KitScope,
   Stone,
   useLookTokens,
   type Tone,
@@ -775,5 +776,86 @@ export function StepTrail({ words, current }: { words: readonly string[]; curren
     <div className="ui-trail">
       <LiveSteps states={states} words={words} />
     </div>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Card 140: toasts in the site's voice
+// -----------------------------------------------------------------------------
+
+/**
+ * The body of a success toast (a React node for `toast.push({ description })`):
+ * the plain sentence, and, for a publish, the three steps as small stones so the
+ * editor sees where the update is. Sanity owns the toast frame and title; this
+ * is all that can be drawn inside it.
+ */
+export function KitToastBody({
+  children,
+  steps,
+}: {
+  children: ReactNode;
+  steps?: readonly StepState[];
+}) {
+  return (
+    <KitScope className="ui-toast">
+      <span className="ui-toast__text">{children}</span>
+      {steps && (
+        <span className="ui-toast__steps">
+          <LiveSteps states={steps} words={LIVE_STEP_WORDS} compact />
+          <span className="ui-sr">{stepsLabel(LIVE_STEP_WORDS, steps)}</span>
+        </span>
+      )}
+    </KitScope>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Card 141: a switch that is drawn, not a native checkbox
+// -----------------------------------------------------------------------------
+
+/**
+ * An on/off switch for a yes-or-no question. It is a button with role="switch"
+ * and a track and thumb drawn in the look's colours, so it shows in every
+ * browser whatever the Studio's own form resets do to a native checkbox (the
+ * Quick update "Sold" box was invisible in real Chrome). The state is also
+ * said in words ("Yes" / "No"), never colour alone.
+ */
+export function KitSwitch({
+  id,
+  checked,
+  onChange,
+  label,
+  describedBy,
+  labelledBy,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (next: boolean) => void;
+  label: ReactNode;
+  describedBy?: string;
+  /** The id of the question's heading, so the name reads "Sold, This one has sold". */
+  labelledBy?: string;
+}) {
+  return (
+    <KitScope>
+      <button
+        type="button"
+        id={id}
+        role="switch"
+        aria-checked={checked}
+        aria-describedby={describedBy}
+        aria-labelledby={labelledBy ? `${labelledBy} ${id}-label` : undefined}
+        className={['ui-switch', checked ? 'is-on' : ''].join(' ').trim()}
+        onClick={() => onChange(!checked)}
+      >
+        <span className="ui-switch__track" aria-hidden>
+          <span className="ui-switch__thumb" />
+        </span>
+        <span className="ui-switch__label" id={`${id}-label`}>
+          {label}
+        </span>
+        <span className="ui-switch__state">{checked ? 'Yes' : 'No'}</span>
+      </button>
+    </KitScope>
   );
 }
