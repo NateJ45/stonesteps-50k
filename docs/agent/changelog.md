@@ -2,6 +2,8 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-20: Starter cards 144 (Trash page) and 145 (Home as a full-width dashboard) synced; `structure.ts` uses `trashListItem`._
+
 _2026-10-20: Starter cards 138 (follow-up), 139, 140, 141, 142 and 143 synced._ (142 puts the How-to chip under date and datetime inputs, so the Race day field gets its chip.) The marked files (live-watch, snapshot, the Studio look helpers, toasts that carry the Is-it-live stones, `check:look`) match the starter again, `sync-check` all SAME. CI here still builds from the live dataset; the pinned-snapshot workflows (card 138) are not adopted yet.
 
 _2026-10-19: The Found on Google card was missing._ The Search Console route `src/pages/api/studio/search.ts` (starter card 136) had not been copied, so the card's request got a 404 and the card stayed hidden. The route and `studio-google.test.ts` are now in, identical to the starter.
