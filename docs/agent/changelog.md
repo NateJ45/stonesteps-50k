@@ -2,6 +2,8 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-20: Starter card 148 synced (Quick update uses a wide pane: a tile grid, and a "How this goes" rail beside an open form from 860px; phones unchanged)._
+
 _2026-10-20: Starter card 147 synced (the Checkup uses the whole pane: a count strip and the levels as columns)._
 
 _2026-10-20: The Studio has its own devices (`studio.look`)._ A drawn mile-post marker (`public/studio-banner/mile-post.svg`) replaces the neutral dot, the connector between steps is trail-blaze dashes, and stones are laid in turn (`motion: lay`). The elevation-profile banner strip, topo texture, square bib stones and Staatliches lettering were already in place; `npm run check:look` now reports the site has settled its own devices. The schema has no count-down motion or micro-copy setting, so those stay as they are.
