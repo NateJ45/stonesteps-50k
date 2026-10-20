@@ -169,10 +169,10 @@ export async function sanityFetch<T>(
 }
 
 // A build makes a few hundred reads, and one of them failing on a network blip
-// used to publish a page as a redirect to /404 (ported from fbcm a2e3b1c,
-// 2026-09-24, which caught it on /ministries). Two retries, 0.5 s then 1.5 s
-// apart, ride out a blip; a real outage still fails after about 2 s and the
-// build stops.
+// would otherwise publish a page as a redirect to /404 further down the
+// pipeline (a static route that took a swallowed fetch error for a missing
+// document). Two retries, 0.5 s then 1.5 s apart, ride out a blip; a real
+// outage still fails after about 2 s and the build stops.
 async function fetchWithRetry<T>(query: string, params: Record<string, unknown>): Promise<T> {
   const waits = [500, 1500];
   for (let attempt = 0; ; attempt++) {
