@@ -2,6 +2,8 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-20: Starter card 150 synced (Quick update tiles keep their colour edge flush at the top)._
+
 _2026-10-20: Starter card 149 synced (the kit test bench and the docs; the test bench draws the writing helper's suggestion card, so `WritingHelp.tsx` and `studio-ai.ts` are copied but the helper is not wired into this Studio, and the private-page password input is not used here)._
 
 _2026-10-20: Starter card 148 synced (Quick update uses a wide pane: a tile grid, and a "How this goes" rail beside an open form from 860px; phones unchanged)._
