@@ -313,4 +313,14 @@ export const UI_CSS = `
 @media (max-width:480px){.ncs-ui .ui-bars__row{grid-template-columns:minmax(0,1fr) auto}.ncs-ui .ui-bars__track{grid-column:1 / -1;grid-row:2}}
 .ncs-ui .ui-trail .ui-live{max-width:520px}
 .ncs-ui .ui-tour-trail .ui-live{max-width:none}
+.ncs-ui.ui-toast{display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.45}
+.ncs-ui.ui-toast .ui-toast__steps{display:flex;align-items:center}
+.ncs-ui .ui-switch{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:8px 14px;background:var(--ui-surface);border:2px solid var(--ui-ink);border-radius:var(--ui-radius);color:var(--ui-ink);font:inherit;font-size:16px;text-align:left;cursor:pointer}
+.ncs-ui .ui-switch__track{flex:none;position:relative;width:52px;height:30px;border-radius:999px;border:2px solid var(--ui-ink);background:var(--ui-surface);transition:background .15s}
+.ncs-ui .ui-switch__thumb{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:var(--ui-ink);transition:transform .15s}
+.ncs-ui .ui-switch.is-on .ui-switch__track{background:var(--ui-heading);border-color:var(--ui-heading)}
+.ncs-ui .ui-switch.is-on .ui-switch__thumb{transform:translateX(22px);background:var(--ui-surface)}
+.ncs-ui .ui-switch__label{flex:1;min-width:0}
+.ncs-ui .ui-switch__state{flex:none;font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--ui-ink)}
+@media (prefers-reduced-motion:reduce){.ncs-ui .ui-switch__track,.ncs-ui .ui-switch__thumb{transition:none}}
 `;

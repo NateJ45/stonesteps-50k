@@ -2,6 +2,8 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-20: Starter cards 138 (follow-up), 139, 140, 141, 142 and 143 synced._ (142 puts the How-to chip under date and datetime inputs, so the Race day field gets its chip.) The marked files (live-watch, snapshot, the Studio look helpers, toasts that carry the Is-it-live stones, `check:look`) match the starter again, `sync-check` all SAME. CI here still builds from the live dataset; the pinned-snapshot workflows (card 138) are not adopted yet.
+
 _2026-10-19: The Found on Google card was missing._ The Search Console route `src/pages/api/studio/search.ts` (starter card 136) had not been copied, so the card's request got a 404 and the card stayed hidden. The route and `studio-google.test.ts` are now in, identical to the starter.
 
 _2026-10-19: Live-page redirect guard adopted (starter PORTS.md card 22 addendum; `fix/redirect-live-page-guard`)._ A redirect whose old address is where a published page lives now (a rename and a rename back, or a hand-filed redirect over a real page) looped another family site on 2026-10-19, because Cloudflare applies redirects before it serves files. `src/lib/redirect-guard.ts` (+ test, byte-identical to the starter) now drops such entries from the editor redirect map at build time and logs them; the `redirect` document stays in the Studio. `astro.config.mjs` wires it with `LIVE_PATH_BY_TYPE` for `page` and `journalEntry` (the slugged routes in `pathForDoc()`). The code-side launch redirects in `launch-redirects.ts` are untouched.

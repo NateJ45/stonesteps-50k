@@ -1,24 +1,22 @@
 // Foundation, edit with care
-// Generates one share card at public/og/<route-slug>.png, matching the
+// Generates one OG PNG per page at public/og/<route-slug>.png, matching the
 // per-route convention in BaseLayout (the pathname with slashes turned into
 // dashes; falls back to og-default.png when a route has no matching file).
 //
-// Run with `npm run og:pages` after editing an seoTitle in Sanity, after adding
-// a page, or when `npm run og:check` says the committed cards have gone stale.
-// Output PNGs are committed to git, so Cloudflare needs neither Sanity access
-// nor a browser at build time.
+// Covers the core route singletons. When your project adds dynamic collections
+// (blog posts, case studies, etc.) extend COLLECTIONS below with the matching
+// Sanity _type, prefix, and field names.
 //
-// WHAT EACH CARD SAYS lives in scripts/lib/og-inputs.mjs, shared with the
-// staleness check so the two cannot drift. WHAT EACH CARD LOOKS LIKE lives in
-// scripts/lib/render-og.mjs. This file only joins them up and writes the two
-// manifests.
+// Run via `npm run og:pages` after editing seoTitle in Sanity or after adding a
+// page. Output PNGs are committed to git so Cloudflare does not need Sanity
+// access at build time. BaseLayout picks the right PNG per pathname; anything
+// without a file gracefully falls back to og-default.png.
 
-import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
-import { renderOg, closeRenderer } from './lib/render-og.mjs';
-import { collectOgInputs } from './lib/og-inputs.mjs';
+import { renderOg } from './lib/render-og.mjs';
+import { OG_THEME } from './og-theme.mjs';
 import { loadEnv } from './lib/loadEnv.mjs';
 import { snapshotClientOptions } from './snapshot.mjs';
 
@@ -29,9 +27,10 @@ const env = loadEnv(root);
 const projectId = env.PUBLIC_SANITY_PROJECT_ID;
 const dataset = env.PUBLIC_SANITY_DATASET ?? 'production';
 const apiVersion = env.PUBLIC_SANITY_API_VERSION ?? '2026-05-01';
-// A token is not needed: everything these cards are made of reads anonymously
-// on this dataset (verified 2026-09-13). One is used when present because it
-// costs nothing and a future field might not be public.
+// This dataset filters anonymous reads down to the page singletons only; a read
+// token is needed to see the collections (projects, journal entries, guides),
+// exactly as src/lib/sanity.ts does at build time. Falls back to the write
+// token, which can also read. Without any token, only the singletons render.
 const readToken = env.SANITY_API_READ_TOKEN || env.SANITY_API_WRITE_TOKEN;
 
 if (!projectId) {
@@ -53,35 +52,75 @@ const client = createClient({
 
 const outDir = resolve(root, 'public/og');
 
-const inputs = await collectOgInputs(client);
+// Business name for the OG wordmark. Reads SITE_NAME from env first so CI can
+// override without touching source; falls back to the value in src/data/site.ts
+// (hard-coded here to avoid a TypeScript import from a plain .mjs script).
+// Update this default when you replace the starter identity in src/data/site.ts.
+const WORDMARK = env.SITE_NAME ?? 'Studio Starter';
 
-for (const { slug, headline, strap } of inputs) {
-  await renderOg({ headline, strap, outPath: resolve(outDir, `${slug}.png`) });
-  console.log(`  ${slug}.png — ${headline.slice(0, 60)}${headline.length > 60 ? '…' : ''}`);
+let count = 0;
+async function render(slug, tagline) {
+  await renderOg({
+    wordmark: WORDMARK,
+    tagline,
+    outPath: resolve(outDir, `${slug}.png`),
+    theme: OG_THEME,
+  });
+  count += 1;
+  const t = String(tagline);
+  console.log(`  ${slug}.png — ${t.slice(0, 60)}${t.length > 60 ? '…' : ''}`);
 }
 
-// ---- Two manifests, for two different readers ---------------------------
-// BaseLayout reads the SLUG list to decide whether a route HAS an image,
-// instead of assuming one and emitting a URL that 404s (that bug shipped: see
-// the note in BaseLayout). Both are committed beside the PNGs.
-const slugs = inputs.map((r) => r.slug).sort();
-writeFileSync(resolve(root, 'src/data/ogPages.json'), JSON.stringify(slugs, null, 2) + '\n');
-console.log(`\nManifest: ${slugs.length} slugs -> src/data/ogPages.json`);
+// ---- Page singletons → /og/<slug>.png -----------------------------------
+// `slug` matches the route (slashes already dash-free here). `defaultTitle` is
+// the fallback when Sanity's seoTitle / heroHeadline are both empty.
+// These are the core routes every starter project ships with. Add rows for any
+// additional page singletons you define in your Sanity schema.
+const SINGLETONS = [
+  { type: 'homePage', slug: 'home', defaultTitle: 'Welcome' },
+  { type: 'aboutPage', slug: 'about', defaultTitle: 'About us' },
+  { type: 'servicesPage', slug: 'services', defaultTitle: 'Services' },
+  { type: 'faqPage', slug: 'faq', defaultTitle: 'Frequently asked questions' },
+  { type: 'contactPage', slug: 'contact', defaultTitle: 'Get in touch' },
+  { type: 'journalPage', slug: 'journal', defaultTitle: 'Journal' },
+  { type: 'privacyPage', slug: 'privacy', defaultTitle: 'Privacy policy' },
+];
 
-// check-og-fresh.mjs reads the INPUTS, so it can tell whether the committed
-// pictures still match what the Studio says. This is the record of what these
-// PNGs were actually drawn from, and it is only true at the moment they are
-// written, which is why it is written here and nowhere else.
-writeFileSync(resolve(root, 'scripts/data/og-inputs.json'), JSON.stringify(inputs, null, 2) + '\n');
-console.log(`Inputs:   ${inputs.length} cards -> scripts/data/og-inputs.json`);
+for (const page of SINGLETONS) {
+  const doc = await client
+    .fetch(`*[_type == $type][0]{ seoTitle, heroHeadline }`, { type: page.type })
+    .catch(() => null);
+  const tagline = doc?.seoTitle || doc?.heroHeadline || page.defaultTitle;
+  await render(page.slug, tagline);
+}
 
-// THIS IS NOT OPTIONAL. render-og.mjs keeps ONE chromium alive across the whole
-// run, because launching a browser per card turned a four second job into
-// ninety. A browser Playwright has not been told to close keeps the event loop
-// alive forever, so without this the script does all its work, prints the line
-// below, and then hangs: every card written, every timestamp correct, and the
-// process never exits. That looked exactly like a slow render the first time it
-// happened and cost two ten-minute timeouts before anyone suspected the exit.
+// ---- Dynamic collections → /og/<prefix>-<slug>.png ----------------------
+// Mirrors BaseLayout: /journal/my-post → journal-my-post.png, etc.
+// Each module that defines a dynamic collection should add its own entry here.
+// Field names are verified against studio/schemaTypes/<type>.ts before enabling.
+// journalEntry: slug (slug type, value at slug.current), seoTitle and title (both string).
+
+const COLLECTIONS = [
+  {
+    prefix: 'journal',
+    query: `*[_type=="journalEntry" && defined(slug.current)]{ "slug": slug.current, seoTitle, title }`,
+    pick: (d) => d.seoTitle || d.title,
+  },
+];
+
+for (const col of COLLECTIONS) {
+  const docs = await client.fetch(col.query).catch(() => []);
+  for (const d of docs) {
+    const tagline = col.pick(d);
+    if (!d.slug || !tagline) continue;
+    await render(`${col.prefix}-${d.slug}`, tagline);
+  }
+}
+
+// Not optional: the renderer holds one chromium open for the whole run and the
+// process cannot exit until it is closed. Without this the script writes every
+// card correctly, prints the line below, and then hangs forever. See the note
+// on closeRenderer in scripts/lib/render-og.mjs.
 await closeRenderer();
 
-console.log(`\nDone. ${inputs.length} share cards written to ${outDir}`);
+console.log(`\nDone. ${count} OG images written to ${outDir}`);

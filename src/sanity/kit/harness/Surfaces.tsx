@@ -59,6 +59,8 @@ import {
   SeverityStone,
   StepTrail,
   type CheckItem,
+  KitSwitch,
+  KitToastBody,
 } from '../ui';
 
 const noLink = () => ({
@@ -438,6 +440,27 @@ export function SurfacesBench({ part }: { part: string }) {
   const show = (p: string) => part === 'all' || part === p;
   return (
     <div style={{ display: 'grid', gap: 40 }}>
+      {show('switch') && (
+        <KitScope style={{ maxWidth: 420, display: 'grid', gap: 16 }}>
+          <KitSwitch id="b1" checked={false} onChange={() => {}} label="This one has sold" />
+          <KitSwitch id="b2" checked onChange={() => {}} label="This one has sold" />
+        </KitScope>
+      )}
+      {show('toast') && (
+        <KitScope style={{ maxWidth: 360, display: 'grid', gap: 16 }}>
+          <div style={{ padding: 12, border: '1px solid #ccc', borderRadius: 6 }}>
+            <strong>Published</strong>
+            <KitToastBody steps={liveSteps('on-its-way')}>
+              The website updates itself in a few minutes. Home shows "Up to date" once your change
+              is live.
+            </KitToastBody>
+          </div>
+          <div style={{ padding: 12, border: '1px solid #ccc', borderRadius: 6 }}>
+            <strong>Moved to Trash</strong>
+            <KitToastBody>It comes off the website at the next update.</KitToastBody>
+          </div>
+        </KitScope>
+      )}
       {show('tool') && (
         <ToolHeading
           meaning="checkup"
