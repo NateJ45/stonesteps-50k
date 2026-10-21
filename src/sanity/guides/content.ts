@@ -1185,6 +1185,7 @@ guides.push(
     icon: 'times',
     lead: 'What runners ask that week, and the button that answers each one.',
     diy: 'self',
+    video: 'urgent-change',
     body: [
       {
         kind: 'p',
