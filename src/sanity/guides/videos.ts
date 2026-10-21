@@ -41,4 +41,15 @@ export const GUIDE_VIDEOS: Record<string, GuideVideoData> = {
     width: 390,
     height: 844,
   },
+  // Recorded 2026-10-20 on the kit harness with sample text (urgent-change.json).
+  'urgent-change': {
+    title: 'Put up an urgent change on race day',
+    src: '/guide-videos/urgent-change.mp4',
+    webm: '/guide-videos/urgent-change.webm',
+    poster: '/guide-videos/urgent-change.jpg',
+    captions: '/guide-videos/urgent-change.vtt',
+    duration: 17,
+    width: 390,
+    height: 844,
+  },
 };

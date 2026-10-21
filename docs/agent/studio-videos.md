@@ -9,9 +9,10 @@ Captions are the words shown on screen, one per shot, in the guides' voice (plai
 
 ## Status
 
-- Recorded: script 1 as `tools/tutorial-videos/scripts/race-week-notice.json` (390 x 844, about 20 seconds, the guides
-  `quick-update` and `race-week`).
-- To record, one at a time under the build lock: scripts 2 to 6 below, each written as a JSON script beside the first.
+- Recorded: script 1 as `tools/tutorial-videos/scripts/race-week-notice.json` (390 x 844, about 20 seconds, the guide
+  `quick-update`), and script 2 as `urgent-change.json` (390 x 844, 17 seconds, the guide `race-week`). Each guide has its
+  own clip; two guides must never name the same key.
+- To record, one at a time under the build lock: scripts 3 to 6 below, each written as a JSON script beside the first.
   Script 3 is a desk clip (1280 x 800) and needs the race document open at the Links tab.
 
 ## Sample data (all invented)
@@ -89,3 +90,9 @@ Captions are the words shown on screen, one per shot, in the guides' voice (plai
 
 For each recording: every caption frame readable at 390 wide, no account avatar or real name on screen, no live-dataset
 document visible (the URL shows the local dev server), and the final frame shows the result on the website.
+
+## Recording from a worktree
+
+A fresh worktree has no `.env`, so the Studio shows Sanity's connection dialog over the page and every click times out
+("intercepts pointer events"). Pass the public project and dataset as environment variables to `record.mjs`
+(`PUBLIC_SANITY_PROJECT_ID`, `SANITY_STUDIO_PROJECT_ID`, and the two `..._DATASET` ones). The recorder refuses all writes.
