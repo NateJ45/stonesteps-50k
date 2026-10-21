@@ -1185,7 +1185,6 @@ guides.push(
     icon: 'times',
     lead: 'What runners ask that week, and the button that answers each one.',
     diy: 'self',
-    video: 'race-week-notice',
     body: [
       {
         kind: 'p',

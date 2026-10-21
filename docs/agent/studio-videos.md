@@ -9,8 +9,8 @@ Captions are the words shown on screen, one per shot, in the guides' voice (plai
 
 ## Status
 
-- Recorded: script 1 as `tools/tutorial-videos/scripts/race-week-notice.json` (390 x 844, about 20 seconds, the guides
-  `quick-update` and `race-week`).
+- Recorded: script 1 as `tools/tutorial-videos/scripts/race-week-notice.json` (390 x 844, about 20 seconds, the guide
+  `quick-update` only; `race-week` shows no clip until script 2 is recorded, so the two guides never play the same one).
 - To record, one at a time under the build lock: scripts 2 to 6 below, each written as a JSON script beside the first.
   Script 3 is a desk clip (1280 x 800) and needs the race document open at the Links tab.
 
