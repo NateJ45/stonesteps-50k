@@ -182,7 +182,7 @@ const mileBar = t.mileUnits * 0.5;
           </span>
         ))}
         <span class="ctease__scale-label" aria-hidden="true">
-          ½ mile
+          <span>½ mile</span>
         </span>
 
         <span class="ctease__tag" data-tag aria-hidden="true">
@@ -469,16 +469,29 @@ const mileBar = t.mileUnits * 0.5;
     stroke: rgb(243 233 210 / 0.55);
     stroke-width: 2;
   }
+  /* The label sits on whatever part of the photograph the bottom-left corner
+     lands on, and that moves with the page width and the image crop. Faded
+     cream straight on the photo measured 4.3:1 on race day 2026-10-25, when
+     the page above it got shorter. So it carries its own plate: on the worst
+     case (pure white under it) the plate still reads about 82/255 grey and
+     solid cream on it clears 6:1. The negative margin keeps the TEXT where it
+     was, on the scale bar's left tick, and lets the plate overhang. The text is
+     an inner span so the plate is a background BEHIND it, which is what
+     contrast.spec.ts photographs (it hides the measured element's own box). */
   .ctease__scale-label {
     position: absolute;
     left: 7%;
     bottom: 7.2%;
     z-index: 2;
-    transform: translateY(-4px);
+    margin-left: -5px;
+    padding: 3px 5px;
+    border-radius: 2px;
+    background: rgb(15 13 10 / 0.72);
+    transform: translateY(-1px);
     font: 600 0.6875rem/1 var(--font-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgb(243 233 210 / 0.6);
+    color: #f3e9d2;
   }
 
   @media (width < 48rem) {

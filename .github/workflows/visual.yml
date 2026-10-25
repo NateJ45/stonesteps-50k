@@ -26,6 +26,7 @@ on:
       - 'src/**'
       - 'public/**'
       - 'tests/visual/**'
+      - 'tests/clock.ts'
       - 'playwright.visual.config.ts'
       - 'package.json'
       - '.github/workflows/visual.yml'
@@ -36,6 +37,7 @@ on:
       - 'src/**'
       - 'public/**'
       - 'tests/visual/**'
+      - 'tests/clock.ts'
       - 'playwright.visual.config.ts'
       - 'package.json'
       - '.github/workflows/visual.yml'
@@ -96,6 +98,8 @@ jobs:
         env:
           PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
           PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+          # Same pinned instant as ci.yml; see the note there.
+          NCS_BUILD_NOW: '2026-10-01T16:00:00Z'
         run: |
           if [ "${{ inputs.update }}" = "true" ]; then
             node scripts/snapshot.mjs run -- npm run test:visual:update
