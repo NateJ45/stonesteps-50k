@@ -472,7 +472,7 @@ export const guides: Guide[] = [
       { kind: 'h', text: 'The one thing worth checking' },
       {
         kind: 'p',
-        text: 'The early starters. Trekkers are not eligible for awards, and the site leaves them out of every record, but RunSignUp does not tell the website who they were. If a trekker finished near the front, open their result and tick `Ran as a trekker`, or they could take a record they were not eligible to win.',
+        text: 'The early starters. Trekkers are not eligible for awards, and the site leaves them out of every record. Since 2026 the timer lists them separately and the import marks them itself, so just glance at the top of each distance. If a trekker there is not marked, open their result and tick `Ran as a trekker`, or they could take a record they were not eligible to win.',
       },
       { kind: 'seealso', items: ['Fix a runner’s name'] },
     ],
@@ -1290,7 +1290,7 @@ guides.push(
     body: [
       {
         kind: 'p',
-        text: 'Trekkers take the optional early start, so they are not eligible for awards. RunSignUp does not tell the website who they were, so after each race the website needs telling, once, for anyone who finished near the front.',
+        text: 'Trekkers take the optional early start, so they are not eligible for awards. Since 2026 the timer lists trekkers separately on RunSignUp, and the overnight import marks them for you. You only need this when somebody was missed, or for a year before 2026, when RunSignUp did not say who they were.',
       },
       {
         kind: 'path',
