@@ -478,7 +478,9 @@ const mileBar = t.mileUnits * 0.5;
     font: 600 0.6875rem/1 var(--font-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgb(243 233 210 / 0.6);
+    /* 0.6 measured 4.3:1 and 0.72 measured 4.47:1 where the label lands on the
+       plate (contrast.spec, 2026-10-25); 0.9 clears AA with room to spare. */
+    color: rgb(243 233 210 / 0.9);
   }
 
   @media (width < 48rem) {

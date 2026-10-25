@@ -17,7 +17,15 @@
 import { test, expect } from '@playwright/test';
 
 test('the countdown keeps running after navigating away and back', async ({ page }) => {
+  // The clock only counts BEFORE the race; on race day and after it shows a
+  // message instead (Countdown.astro). So the test sets the browser's clock to
+  // three days before whatever race date the build carries, or this fails every
+  // year from race morning until the next date is typed in (it did, 2026-10-25).
   await page.goto('/');
+  const target = await page.locator('.clock[data-target]').first().getAttribute('data-target');
+  test.skip(!target, 'no race date on the home page countdown');
+  await page.clock.install({ time: new Date(target!).getTime() - 3 * 86_400_000 });
+  await page.reload();
   const seconds = page.locator('.clock [data-unit="seconds"]').first();
   await expect(seconds).toBeVisible();
 
