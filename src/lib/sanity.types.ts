@@ -43,145 +43,6 @@ export type Redirect = {
   note?: string;
 };
 
-export type SectionPreset = {
-  _id: string;
-  _type: 'sectionPreset';
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
-  sectionType?: string;
-  section?: Array<
-    | ({
-        _key: string;
-      } & RaceHeroSection)
-    | ({
-        _key: string;
-      } & PageHeaderSection)
-    | ({
-        _key: string;
-      } & ContactSection)
-    | ({
-        _key: string;
-      } & FaqKioskSection)
-    | ({
-        _key: string;
-      } & DistanceTicketsSection)
-    | ({
-        _key: string;
-      } & RecordsBoardSection)
-    | ({
-        _key: string;
-      } & RaceScheduleSection)
-    | ({
-        _key: string;
-      } & CourseFeaturesSection)
-    | ({
-        _key: string;
-      } & LoopCardSection)
-    | ({
-        _key: string;
-      } & ElevationSection)
-    | ({
-        _key: string;
-      } & CourseMapSection)
-    | ({
-        _key: string;
-      } & CoursePosterSection)
-    | ({
-        _key: string;
-      } & SponsorPatchesSection)
-    | ({
-        _key: string;
-      } & TickerSection)
-    | ({
-        _key: string;
-      } & ParksSection)
-    | ({
-        _key: string;
-      } & CommunitySection)
-    | ({
-        _key: string;
-      } & RaceWeatherSection)
-    | ({
-        _key: string;
-      } & DynastiesSection)
-    | ({
-        _key: string;
-      } & GearSection)
-    | ({
-        _key: string;
-      } & PhotoBandSection)
-    | ({
-        _key: string;
-      } & HeroSection)
-    | ({
-        _key: string;
-      } & RichTextSection)
-    | ({
-        _key: string;
-      } & ImageTextSection)
-    | ({
-        _key: string;
-      } & GallerySection)
-    | ({
-        _key: string;
-      } & QuoteSection)
-    | ({
-        _key: string;
-      } & StatSection)
-    | ({
-        _key: string;
-      } & CtaBandSection)
-    | ({
-        _key: string;
-      } & VideoSection)
-    | ({
-        _key: string;
-      } & SpacerSection)
-    | ({
-        _key: string;
-      } & LogoStripSection)
-    | ({
-        _key: string;
-      } & EmbedSection)
-    | ({
-        _key: string;
-      } & FounderSection)
-    | ({
-        _key: string;
-      } & ServicesGridSection)
-    | ({
-        _key: string;
-      } & TestimonialsSection)
-    | ({
-        _key: string;
-      } & StorySection)
-    | ({
-        _key: string;
-      } & ValuesSection)
-    | ({
-        _key: string;
-      } & ProcessSection)
-    | ({
-        _key: string;
-      } & ServiceAreaSection)
-    | ({
-        _key: string;
-      } & GuaranteeSection)
-    | ({
-        _key: string;
-      } & FaqSection)
-    | ({
-        _key: string;
-      } & TeamSection)
-    | ({
-        _key: string;
-      } & DynamicListSection)
-  >;
-  note?: string;
-};
-
 export type JournalCategory = {
   _id: string;
   _type: 'journalCategory';
@@ -1096,6 +957,152 @@ export type FounderSection = {
   cta?: CtaBlock;
 };
 
+export type JournalEntryReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'journalEntry';
+};
+
+export type CtaBlock = {
+  _type: 'ctaBlock';
+  label?: string;
+  linkType?: 'internal' | 'external' | 'email' | 'phone';
+  internalLink?:
+    | HomePageReference
+    | AboutPageReference
+    | ServicesPageReference
+    | ProcessPageReference
+    | FaqPageReference
+    | ContactPageReference
+    | JournalPageReference
+    | JournalEntryReference
+    | PageReference;
+  internalPath?: string;
+  externalUrl?: string;
+  emailAddress?: string;
+  phoneNumber?: string;
+  openInNewTab?: boolean;
+};
+
+export type SectionPresetReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'sectionPreset';
+};
+
+export type SyncedSection = {
+  _type: 'syncedSection';
+  preset?: SectionPresetReference;
+};
+
+export type SectionPreset = {
+  _id: string;
+  _type: 'sectionPreset';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  sectionType?: string;
+  section?: Array<
+    | ({
+        _key: string;
+      } & RaceHeroSection)
+    | ({
+        _key: string;
+      } & PageHeaderSection)
+    | ({
+        _key: string;
+      } & ContactSection)
+    | ({
+        _key: string;
+      } & FaqKioskSection)
+    | ({
+        _key: string;
+      } & DistanceTicketsSection)
+    | ({
+        _key: string;
+      } & RecordsBoardSection)
+    | ({
+        _key: string;
+      } & RaceScheduleSection)
+    | ({
+        _key: string;
+      } & CourseFeaturesSection)
+    | ({
+        _key: string;
+      } & LoopCardSection)
+    | ({
+        _key: string;
+      } & ElevationSection)
+    | ({
+        _key: string;
+      } & CourseMapSection)
+    | ({
+        _key: string;
+      } & CoursePosterSection)
+    | ({
+        _key: string;
+      } & SponsorPatchesSection)
+    | ({
+        _key: string;
+      } & TickerSection)
+    | ({
+        _key: string;
+      } & ParksSection)
+    | ({
+        _key: string;
+      } & CommunitySection)
+    | ({
+        _key: string;
+      } & RaceWeatherSection)
+    | ({
+        _key: string;
+      } & DynastiesSection)
+    | ({
+        _key: string;
+      } & GearSection)
+    | ({
+        _key: string;
+      } & PhotoBandSection)
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & LogoStripSection)
+    | ({
+        _key: string;
+      } & EmbedSection)
+  >;
+  note?: string;
+};
+
 export type EmbedSection = {
   _type: 'embedSection';
   eyebrow?: string;
@@ -1421,6 +1428,7 @@ export type CourseFeaturesSection = {
     caption?: string;
     _type: 'image';
   };
+  caption?: string;
 };
 
 export type RaceScheduleSection = {
@@ -1570,34 +1578,6 @@ export type PrivacyPage = {
   }>;
 };
 
-export type JournalEntryReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'journalEntry';
-};
-
-export type CtaBlock = {
-  _type: 'ctaBlock';
-  label?: string;
-  linkType?: 'internal' | 'external' | 'email' | 'phone';
-  internalLink?:
-    | HomePageReference
-    | AboutPageReference
-    | ServicesPageReference
-    | ProcessPageReference
-    | FaqPageReference
-    | ContactPageReference
-    | JournalPageReference
-    | JournalEntryReference
-    | PageReference;
-  internalPath?: string;
-  externalUrl?: string;
-  emailAddress?: string;
-  phoneNumber?: string;
-  openInNewTab?: boolean;
-};
-
 export type Page = {
   _id: string;
   _type: 'page';
@@ -1700,6 +1680,9 @@ export type Page = {
     | ({
         _key: string;
       } & EmbedSection)
+    | ({
+        _key: string;
+      } & SyncedSection)
   >;
   addToMainNav?: boolean;
   navGroup?: 'top' | 'services' | 'resources';
@@ -2156,6 +2139,9 @@ export type ProcessPage = {
       } & EmbedSection)
     | ({
         _key: string;
+      } & SyncedSection)
+    | ({
+        _key: string;
       } & ProcessSection)
     | ({
         _key: string;
@@ -2273,6 +2259,9 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & EmbedSection)
+    | ({
+        _key: string;
+      } & SyncedSection)
     | ({
         _key: string;
       } & ServicesGridSection)
@@ -2432,6 +2421,9 @@ export type AboutPage = {
     | ({
         _key: string;
       } & EmbedSection)
+    | ({
+        _key: string;
+      } & SyncedSection)
     | ({
         _key: string;
       } & StorySection)
@@ -2652,25 +2644,7 @@ export type HomePage = {
       } & EmbedSection)
     | ({
         _key: string;
-      } & FounderSection)
-    | ({
-        _key: string;
-      } & ServicesGridSection)
-    | ({
-        _key: string;
-      } & TestimonialsSection)
-    | ({
-        _key: string;
-      } & ProcessSection)
-    | ({
-        _key: string;
-      } & FaqSection)
-    | ({
-        _key: string;
-      } & TeamSection)
-    | ({
-        _key: string;
-      } & DynamicListSection)
+      } & SyncedSection)
   >;
   seoTitle?: string;
   seoDescription?: string;
@@ -2799,6 +2773,64 @@ export type Testimonial = {
   reviewUrl?: string;
 };
 
+export type StudioWeek = {
+  _id: string;
+  _type: 'studioWeek';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  weekOf?: string;
+  ticked?: Array<string>;
+};
+
+export type TrashedItem = {
+  _id: string;
+  _type: 'trashedItem';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  kind?: string;
+  deletedAt?: string;
+  wasPublished?: boolean;
+  originalType?: string;
+  originalId?: string;
+  payload?: string;
+};
+
+export type PreviewShare = {
+  _id: string;
+  _type: 'previewShare';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  docId?: string;
+  docType?: string;
+  path?: string;
+  days?: number;
+  expiresAt?: string;
+  createdBy?: string;
+  revoked?: boolean;
+};
+
+export type MediaFolderReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'media.folder';
+};
+
+export type MediaFolder = {
+  _id: string;
+  _type: 'media.folder';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  parent?: MediaFolderReference;
+};
+
 export type MediaTag = {
   _id: string;
   _type: 'media.tag';
@@ -2902,7 +2934,6 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | Photo
   | Redirect
-  | SectionPreset
   | JournalCategory
   | Slug
   | ProcessStep
@@ -2952,6 +2983,11 @@ export type AllSanitySchemaTypes =
   | TestimonialsSection
   | ServicesGridSection
   | FounderSection
+  | JournalEntryReference
+  | CtaBlock
+  | SectionPresetReference
+  | SyncedSection
+  | SectionPreset
   | EmbedSection
   | LogoStripSection
   | SpacerSection
@@ -2985,8 +3021,6 @@ export type AllSanitySchemaTypes =
   | RaceHeroSection
   | FormQuestion
   | PrivacyPage
-  | JournalEntryReference
-  | CtaBlock
   | Page
   | JournalCategoryReference
   | JournalEntry
@@ -2998,6 +3032,11 @@ export type AllSanitySchemaTypes =
   | AboutPage
   | HomePage
   | Testimonial
+  | StudioWeek
+  | TrashedItem
+  | PreviewShare
+  | MediaFolderReference
+  | MediaFolder
   | MediaTag
   | SanityImagePaletteSwatch
   | SanityImagePalette

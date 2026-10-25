@@ -490,27 +490,27 @@ const canvases = [
      the FINISHED chart. Under reduced motion, and under the reveal observer's
      own reduced-motion branch, nothing here applies at all. */
   @media (prefers-reduced-motion: no-preference) {
-    .elev[data-reveal] .elev__line {
+    :global(html.motion) .elev[data-reveal] .elev__line {
       stroke-dasharray: 1;
       stroke-dashoffset: 1;
     }
-    .elev[data-reveal].is-visible .elev__line {
+    :global(html.motion) .elev[data-reveal].is-visible .elev__line {
       transition: stroke-dashoffset 1900ms cubic-bezier(0.33, 0, 0.15, 1);
       stroke-dashoffset: 0;
     }
 
-    .elev[data-reveal] .elev__area {
+    :global(html.motion) .elev[data-reveal] .elev__area {
       opacity: 0;
     }
-    .elev[data-reveal].is-visible .elev__area {
+    :global(html.motion) .elev[data-reveal].is-visible .elev__area {
       transition: opacity 900ms ease-out 900ms;
       opacity: 1;
     }
 
-    .elev[data-reveal] .elev__aid {
+    :global(html.motion) .elev[data-reveal] .elev__aid {
       opacity: 0;
     }
-    .elev[data-reveal].is-visible .elev__aid {
+    :global(html.motion) .elev[data-reveal].is-visible .elev__aid {
       animation: elev-aid 460ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
       animation-delay: calc(var(--t, 0) * 1900ms);
     }

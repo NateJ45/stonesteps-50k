@@ -1,4 +1,5 @@
 // @ts-check
+import { execSync } from 'node:child_process';
 import { defineConfig } from 'astro/config';
 import { loadEnv } from 'vite';
 
@@ -10,8 +11,10 @@ import react from '@astrojs/react';
 import sanity from '@sanity/astro';
 
 import { buildRedirectMap } from './src/lib/redirects.ts';
+import { dropRedirectsOverLivePages } from './src/lib/redirect-guard.ts';
 import { launchRedirects } from './src/lib/launch-redirects.ts';
 import { fixSanityDedupeAlias } from './src/lib/sanity-dedupe-alias.ts';
+import { studioConfigModule } from './src/lib/studio-route.ts';
 
 // The Sanity project id is PUBLIC by design: it ships in every client bundle.
 // A fresh clone with no .env still builds; the Studio then shows a project-not-
@@ -47,11 +50,15 @@ const SANITY_CONFIGURED =
 async function cmsQuery(query, fallback) {
   if (!SANITY_CONFIGURED) return fallback;
   try {
+    // CI reads a pinned content snapshot from a local server (PORTS.md card 138,
+    // scripts/snapshot.mjs); unset everywhere else, so deploys read the live API.
+    const snapshot = (process.env.SANITY_SNAPSHOT_URL ?? '').trim().replace(/[/]+$/, '');
     const url =
-      `https://${SANITY_PROJECT_ID}.api.sanity.io/v${SANITY_API_VERSION}` +
-      `/data/query/${SANITY_DATASET}?query=${encodeURIComponent(query)}`;
+      (snapshot || `https://${SANITY_PROJECT_ID}.api.sanity.io`) +
+      `/v${SANITY_API_VERSION}/data/query/${SANITY_DATASET}?query=${encodeURIComponent(query)}`;
     const res = await fetch(url, {
-      headers: SANITY_READ_TOKEN ? { Authorization: `Bearer ${SANITY_READ_TOKEN}` } : {},
+      headers:
+        SANITY_READ_TOKEN && !snapshot ? { Authorization: `Bearer ${SANITY_READ_TOKEN}` } : {},
     });
     if (!res.ok) return fallback;
     const { result } = await res.json();
@@ -66,9 +73,40 @@ async function cmsQuery(query, fallback) {
 // 301/302. Most of them are filed automatically when a page's web address
 // changes (src/sanity/components/slugRedirect.tsx); the shaping rules live in
 // src/lib/redirects.ts so the Studio and the build agree on what a path is.
-const cmsRedirects = buildRedirectMap(
-  await cmsQuery('*[_type == "redirect" && defined(from) && defined(to)]{from,to,permanent}', []),
+//
+// The live-page guard (src/lib/redirect-guard.ts, card 22 addendum 2026-09-29):
+// a redirect whose OLD address is where a published page lives NOW is dropped,
+// because Cloudflare applies _redirects before it serves files and it would
+// shadow the page. A rename and a rename back produces exactly that loop. The
+// address of each slugged type is listed below; a repo with more slugged routes
+// adds a line (the same map pathForDoc() in src/sanity/urls.ts holds). Archived
+// pages are not built, so a redirect away from one is left alone.
+/** @type {Record<string, (slug: string) => string>} */
+const LIVE_PATH_BY_TYPE = {
+  page: (slug) => `/${slug}`,
+  journalEntry: (slug) => `/journal/${slug}`,
+};
+const redirectRead = await cmsQuery(
+  `{
+    "redirects": *[_type == "redirect" && defined(from) && defined(to)]{from,to,permanent},
+    "live": *[_type in $types && defined(slug.current) && archived != true &&
+              !(_id in path("drafts.**"))]{_type, "slug": slug.current}
+  }`.replace('$types', JSON.stringify(Object.keys(LIVE_PATH_BY_TYPE))),
+  { redirects: [], live: [] },
 );
+const guarded = dropRedirectsOverLivePages(
+  buildRedirectMap(Array.isArray(redirectRead?.redirects) ? redirectRead.redirects : []),
+  (Array.isArray(redirectRead?.live) ? redirectRead.live : []).map(
+    (/** @type {{ _type: string; slug: string }} */ doc) =>
+      LIVE_PATH_BY_TYPE[doc._type]?.(doc.slug) ?? null,
+  ),
+);
+if (guarded.dropped.length) {
+  console.warn(
+    `[redirects] skipped ${guarded.dropped.length} redirect(s) from an address a published page lives at now: ${guarded.dropped.join(', ')}`,
+  );
+}
+const cmsRedirects = guarded.redirects;
 
 // Pages the editor keeps out of search. "Keep this page out of Google"
 // (page.hideFromSearch) has to do two things: put a robots tag on the page
@@ -85,6 +123,23 @@ const hiddenPagePaths = new Set(
     .filter((/** @type {unknown} */ slug) => typeof slug === 'string' && slug)
     .map((/** @type {string} */ slug) => `/${slug}`),
 );
+
+// The commit this build came from, for /build-info.json (Studio kit, PORTS.md
+// card 106). Read HERE, in Node, because the route prerenders inside workerd,
+// where process.env.GITHUB_SHA is not visible. GitHub Actions sets GITHUB_SHA;
+// a local build asks git; no git (a tarball) gives null. Handed to the route
+// as a Vite define below.
+const BUILD_COMMIT = (() => {
+  const sha = process.env.GITHUB_SHA || process.env.WORKERS_CI_COMMIT_SHA;
+  if (sha) return sha.slice(0, 7);
+  try {
+    return execSync('git rev-parse --short=7 HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
+  } catch {
+    return null;
+  }
+})();
 
 // https://astro.build/config
 export default defineConfig({
@@ -156,11 +211,16 @@ export default defineConfig({
     // studio: it rebuilds with every deploy, so it can never drift stale the
     // way a hosted *.sanity.studio deploy does. The config it loads is the
     // repo-root sanity.config.ts.
+    //
+    // NO studioBasePath (PORTS.md card 120): the site owns the /studio page
+    // (src/pages/studio/index.astro: its title, icons and a branded splash).
+    // Setting studioBasePath would also inject Sanity's own page at /studio.
+    // studioConfigModule() in vite.plugins below serves the Studio its config
+    // instead, exactly as the integration did (hash history, basePath "/").
     sanity({
       projectId: SANITY_PROJECT_ID,
       dataset: SANITY_DATASET,
       useCdn: false,
-      studioBasePath: '/studio',
     }),
     sitemap({
       // /studio and /preview are Studio plumbing (SSR, noindex). The sitemap
@@ -200,7 +260,10 @@ export default defineConfig({
     // macOS/Linux. Do not delete it, and do not "fix" this with
     // SANITY_ASTRO_DISABLE_MODULE_DEDUPE=1 (the Studio then fails to hydrate).
     // Full story: src/lib/sanity-dedupe-alias.ts and PORTS.md card 60.
-    plugins: [tailwindcss(), fixSanityDedupeAlias()],
+    // The build's commit for /build-info.json (see BUILD_COMMIT above).
+    define: { __NCS_BUILD_COMMIT__: JSON.stringify(BUILD_COMMIT) },
+    // studioConfigModule(): the `sanity:studio` module for /studio (see above).
+    plugins: [tailwindcss(), fixSanityDedupeAlias(), studioConfigModule()],
     optimizeDeps: {
       // `sanity` USED TO BE EXCLUDED HERE; IT IS NOT ANY MORE (2026-09-29).
       // The exclude was a workaround for a misdiagnosed crash: on Windows
@@ -231,13 +294,19 @@ export default defineConfig({
       // init, surfacing as "TypeError: Cannot read properties of undefined
       // (reading 'v2')" from inside styled-components' generateAndInjectStyles.
       // Leave the bundler's default chunking alone.
+      //
+      // `react/compiler-runtime` has to be INCLUDED because of that exclusion
+      // (Sanity phase 2, PORTS.md card 103). @sanity/ui 4 is compiled with the
+      // React Compiler and imports React's own CommonJS `react/compiler-runtime`.
+      // An excluded package's imports are served raw, so without this the dev
+      // Studio fails to hydrate with "react/compiler-runtime.js does not provide
+      // an export named 'c'". @sanity/astro only includes the older
+      // `react-compiler-runtime` package. Dev only; `astro build` is unaffected.
+      // (An earlier attempt on the phase-1 set, reverted because the SSR
+      // environment ran two React instances, predates fixSanityDedupeAlias and
+      // the phase-2 set; re-check "Invalid hook call" in the dev console.)
       exclude: ['@sanity/ui', 'styled-components'],
-      // Tried and reverted: `include: ['react/compiler-runtime']`, meant to
-      // give the unbundled Studio an ESM copy of that CJS entry. It did not get
-      // the Studio hydrating (the sanity self-reference fails in the browser
-      // regardless), and a pre-bundled entry inlines its own copy of react, so
-      // the SSR environment ran two React instances and every island render
-      // logged "Invalid hook call" from react-dom/server. Do not add it back.
+      include: ['react/compiler-runtime'],
     },
     // THE DEV SERVER HAS THREE ENVIRONMENTS AND THEY ALL NEED WORK HERE:
     // `astro` (the workerd module runner), `ssr` and `client`. Measured with a

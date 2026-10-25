@@ -32,6 +32,12 @@ import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
 import { collectOgInputs } from './lib/og-inputs.mjs';
 import { loadEnv } from './lib/loadEnv.mjs';
+import { snapshotClientOptions } from './snapshot.mjs';
+
+// Exit a moment after the last request. On Windows, Node can hit a libuv assertion
+// ("UV_HANDLE_CLOSING", exit 127) when process.exit() runs straight after an HTTP request
+// to the local snapshot server (PORTS.md card 138). Never resolves: the timer ends the process.
+const exitAfterDrain = (code) => new Promise(() => setTimeout(() => process.exit(code), 300));
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -49,7 +55,7 @@ if (!projectId) {
   // A fork with no Sanity project cannot answer the question, and must not
   // fail for it. Same rule the deploy gate follows.
   console.log('PUBLIC_SANITY_PROJECT_ID not set; skipping the share card check.');
-  process.exit(0);
+  await exitAfterDrain(0);
 }
 
 const readToken = env.SANITY_API_READ_TOKEN || env.SANITY_API_WRITE_TOKEN;
@@ -60,6 +66,8 @@ const client = createClient({
   useCdn: !readToken,
   perspective: 'published',
   ...(readToken ? { token: readToken } : {}),
+  // CI reads a pinned snapshot (PORTS.md card 138); empty unless SANITY_SNAPSHOT_URL is set.
+  ...snapshotClientOptions(process.env),
 });
 
 const recordPath = resolve(root, 'scripts/data/og-inputs.json');
@@ -68,7 +76,7 @@ try {
   recorded = JSON.parse(readFileSync(recordPath, 'utf8'));
 } catch {
   annotate('error', `No ${recordPath}. Run \`npm run og:pages\` to render the cards and write it.`);
-  process.exit(warnOnly ? 0 : 1);
+  await exitAfterDrain(warnOnly ? 0 : 1);
 }
 
 const current = await collectOgInputs(client);
@@ -97,7 +105,7 @@ for (const slug of was.keys()) {
 
 if (problems.length === 0) {
   console.log(`Share cards are current: ${current.length} checked, all matching Sanity.`);
-  process.exit(0);
+  await exitAfterDrain(0);
 }
 
 annotate(
@@ -105,4 +113,4 @@ annotate(
   `${problems.length} share card${problems.length === 1 ? '' : 's'} out of date. Run \`npm run og:pages\` and commit public/og/.`,
 );
 for (const p of problems) console.log(`  - ${p}`);
-process.exit(warnOnly ? 0 : 1);
+await exitAfterDrain(warnOnly ? 0 : 1);

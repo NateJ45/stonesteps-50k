@@ -39,6 +39,8 @@ import FinalCta from '@/components/FinalCta.astro';
 import SectionRenderer from '@/components/SectionRenderer.astro';
 import type { ProjectedRaceResult, ProjectedRecordEntry } from '@/lib/pageBuilder.types';
 import { previewFetch, previewConfig, previewUnconfiguredResponse } from '@/lib/cms-preview';
+import { SHARE_PARAM } from '@/lib/preview-share';
+import { sharedPreviewAccess, sharedPreviewFetch } from '@/lib/preview-share-server';
 import {
   IMAGE_PROJECTION,
   CTA_PROJECTION,
@@ -57,6 +59,15 @@ if (!config.ok) {
 // drafts through the server's token. isStudioPreview compares it with the
 // fingerprint /api/draft-mode/enable writes (src/lib/preview-auth.ts).
 const draftMode = await isStudioPreview(Astro.cookies.get(perspectiveCookieName)?.value);
+
+// A private preview link (PORTS.md card 117): `?share=<signed token>` shows
+// THIS page's draft to someone with no login, until the link expires or an
+// editor stops it. It never turns on draftMode: no overlay, no live channel,
+// no stega, and every other page stays published. src/lib/preview-share.ts.
+const share = draftMode
+  ? null
+  : await sharedPreviewAccess(Astro.url.searchParams.get(SHARE_PARAM), Astro.url.pathname);
+if (share) Astro.response.headers.set('Referrer-Policy', 'no-referrer');
 
 // Never let a browser cache a preview page (2026-08-28, measured on
 // presacademy). These SSR responses carried NO Cache-Control, so browsers
@@ -135,13 +146,23 @@ interface PreviewDoc {
 
 const singletonType = SINGLETON_BY_PATH[slug];
 
-const fetched = await previewFetch<PreviewDoc | null>(
-  draftMode,
-  singletonType
-    ? `*[_type == $type][0]${PREVIEW_FIELDS}`
-    : `*[_type == "page" && slug.current == $slug][0]${PREVIEW_FIELDS}`,
-  singletonType ? { type: singletonType } : { slug },
-);
+const docQuery = singletonType
+  ? `*[_type == $type][0]${PREVIEW_FIELDS}`
+  : `*[_type == "page" && slug.current == $slug][0]${PREVIEW_FIELDS}`;
+const docParams = singletonType ? { type: singletonType } : { slug };
+let fetched = share
+  ? await sharedPreviewFetch<PreviewDoc | null>(docQuery, docParams)
+  : await previewFetch<PreviewDoc | null>(draftMode, docQuery, docParams);
+// A share link shows ONE document's draft. If this path resolves to another
+// document (a slug moved), fall back to the published page.
+if (share && fetched && fetched._id.replace(/^drafts./, '') !== share.d) {
+  fetched = await previewFetch<PreviewDoc | null>(false, docQuery, docParams);
+}
+const sharedUntil = share
+  ? new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'America/New_York' }).format(
+      new Date(share.e * 1000),
+    )
+  : null;
 
 // A MISSING DOCUMENT STILL RENDERS THE PREVIEW SHELL. This used to answer a bare
 // 404 text response, and that broke the Studio in a way a refresh was the only
@@ -209,59 +230,57 @@ const label = doc.title || doc.seoTitle || heroHeadline || slug || 'Home';
 const title = `${label} - Preview`;
 ---
 
-{
-  /* THE SAME CALL index.astro MAKES. Only the home page runs its content up
+{/* THE SAME CALL index.astro MAKES. Only the home page runs its content up
     behind a transparent header; every other route uses the solid one. Keyed off
     the document type rather than the slug so a renamed address cannot silently
-    change how the preview is framed. */
-}
+    change how the preview is framed. */}
 <PreviewLayout {title} {draftMode} {pageId} headerOverlay={doc._type === 'homePage'}>
-  {
-    missing && (
-      <div class="mx-auto max-w-3xl px-4 py-6">
-        <p class="rounded-md border border-border-soft bg-bg-soft px-4 py-3 text-sm text-foreground/80">
-          {singletonType === 'notFoundPage'
-            ? 'This page has not been created in the Studio yet, so these are the built-in words the live site uses. Fill in the form on the right and publish to change them.'
-            : `No document found for "${slug || 'home'}" yet. Create it in the Studio and it will appear here.`}
-        </p>
-      </div>
-    )
-  }
-  {
-    showHero && (
-      <Hero
-        eyebrow={heroEyebrow}
-        headline={heroHeadline}
-        subhead={doc.heroSubhead ?? ''}
-        backgroundImage={(doc.heroImage as never) ?? null}
-        scriptAccent={doc.heroScriptAccent}
-        headingId="preview-hero"
-        size="short"
-      />
-    )
-  }
-  {
-    !isBuilderPage && (
-      <div class="mx-auto max-w-3xl px-4 py-6">
-        <p class="rounded-md border border-border-soft bg-bg-soft px-4 py-3 text-sm text-foreground/80">
-          This page's middle is drawn in code (the list, form or grid it is built around), so it
-          previews as its editable surface only: the hero above, any page sections below, and the
-          closing call to action. The parts held in code render on the live site.
-        </p>
-      </div>
-    )
-  }
-  {
-    isBuilderPage && sections.length === 0 && (
-      <div class="mx-auto max-w-3xl px-4 py-6">
-        <p class="rounded-md border border-border-soft bg-bg-soft px-4 py-3 text-sm text-foreground/80">
-          This page has no sections yet. Add one from the Page layout field, or right here in the
-          preview with the plus control. The live site falls back to the built-in default sections
-          until you do, so it is not blank.
-        </p>
-      </div>
-    )
-  }
+  {sharedUntil && (
+    <div class="mx-auto max-w-3xl px-4 pt-6" data-share-banner>
+      <p class="rounded-md border border-border-soft bg-bg-soft px-4 py-3 text-sm text-foreground">
+        You are looking at a draft of this page that has not been published yet. This private link
+        works until {sharedUntil}.
+      </p>
+    </div>
+  )}
+  {missing && (
+    <div class="mx-auto max-w-3xl px-4 py-6">
+      <p class="rounded-md border border-border-soft bg-bg-soft px-4 py-3 text-sm text-foreground/80">
+        {singletonType === 'notFoundPage'
+          ? 'This page has not been created in the Studio yet, so these are the built-in words the live site uses. Fill in the form on the right and publish to change them.'
+          : `No document found for "${slug || 'home'}" yet. Create it in the Studio and it will appear here.`}
+      </p>
+    </div>
+  )}
+  {showHero && (
+    <Hero
+      eyebrow={heroEyebrow}
+      headline={heroHeadline}
+      subhead={doc.heroSubhead ?? ''}
+      backgroundImage={(doc.heroImage as never) ?? null}
+      scriptAccent={doc.heroScriptAccent}
+      headingId="preview-hero"
+      size="short"
+    />
+  )}
+  {!isBuilderPage && (
+    <div class="mx-auto max-w-3xl px-4 py-6">
+      <p class="rounded-md border border-border-soft bg-bg-soft px-4 py-3 text-sm text-foreground/80">
+        This page's middle is drawn in code (the list, form or grid it is built around), so it
+        previews as its editable surface only: the hero above, any page sections below, and the
+        closing call to action. The parts held in code render on the live site.
+      </p>
+    </div>
+  )}
+  {isBuilderPage && sections.length === 0 && (
+    <div class="mx-auto max-w-3xl px-4 py-6">
+      <p class="rounded-md border border-border-soft bg-bg-soft px-4 py-3 text-sm text-foreground/80">
+        This page has no sections yet. Add one from the Page layout field, or right here in the
+        preview with the plus control. The live site falls back to the built-in default sections
+        until you do, so it is not blank.
+      </p>
+    </div>
+  )}
   <SectionRenderer
     {sections}
     {idPrefix}
@@ -269,16 +288,14 @@ const title = `${label} - Preview`;
     results={doc.results ?? []}
     historical={doc.historical ?? []}
   />
-  {
-    hasFinalCta && (
-      <FinalCta
-        eyebrow={doc.finalCtaEyebrow}
-        headline={doc.finalCtaHeadline}
-        subhead={doc.finalCtaSubhead}
-        scriptAccent={doc.finalCtaScriptAccent}
-        cta={doc.finalCta ?? null}
-        backgroundImage={(doc.finalCtaBackgroundImage as never) ?? null}
-      />
-    )
-  }
+  {hasFinalCta && (
+    <FinalCta
+      eyebrow={doc.finalCtaEyebrow}
+      headline={doc.finalCtaHeadline}
+      subhead={doc.finalCtaSubhead}
+      scriptAccent={doc.finalCtaScriptAccent}
+      cta={doc.finalCta ?? null}
+      backgroundImage={(doc.finalCtaBackgroundImage as never) ?? null}
+    />
+  )}
 </PreviewLayout>

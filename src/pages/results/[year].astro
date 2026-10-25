@@ -41,6 +41,9 @@ import { getAllResults, getDistanceRefs, getSiteSettings } from '@/lib/queries';
 import { editionFor, summariseEditions, type ResultRow, type DistanceRef } from '@/lib/editions';
 import { formatRaceTime } from '@/lib/race-time';
 import { fastestByBracket } from '@/lib/bracket-leaders';
+import { resultsDescription } from '@/lib/results-meta';
+import raceDays from '@/data/raceDayWeather.json';
+import type { RaceDay } from '@/lib/raceWeather';
 
 export async function getStaticPaths() {
   const [results, distances] = await Promise.all([getAllResults(), getDistanceRefs()]);
@@ -72,7 +75,24 @@ const siteSettings = await getSiteSettings();
 const anyTrekker = edition.distances.some((d) => d.rows.some((r) => r.trekker));
 
 const title = `${edition.year} results | Stone Steps 50K`;
-const description = `Every finisher of the ${edition.year} Stone Steps 50K and 27K, with times.`;
+// A distinct description per year, built from what this page already shows:
+// the race-day date and weather, the finisher count and who was placed first in
+// each distance. See src/lib/results-meta.ts (120 to 155 characters, unit-tested).
+const description = resultsDescription(
+  {
+    year: edition.year,
+    total: edition.total,
+    distances: edition.distances.map((d) => {
+      const first = d.rows.find((r) => r.place === 1 && r.name && (r.timeSeconds ?? 0) > 0);
+      return {
+        name: d.name,
+        finishers: d.finishers,
+        winner: first ? { name: first.name as string, seconds: first.timeSeconds as number } : null,
+      };
+    }),
+  },
+  (raceDays as RaceDay[]).find((d) => d.year === edition.year),
+);
 
 // Built here because PageHeader takes a plain string. Same sentence the page
 // has always opened with, assembled instead of interleaved with markup.
@@ -85,8 +105,7 @@ const lede =
 ---
 
 <BaseLayout {title} {description} {siteSettings}>
-  {
-    /* THE SAME HEADER BAND EVERY OTHER INNER PAGE GETS (2026-09-17). See the
+  {/* THE SAME HEADER BAND EVERY OTHER INNER PAGE GETS (2026-09-17). See the
       note on /results: a year page used to open on flat background with a
       smaller headline than the rest of the site, which made the whole archive
       read as a bolt-on. The eyebrow keeps its link back up to the archive,
@@ -97,8 +116,7 @@ const lede =
       quarters of the line empty beside it, on the one page whose entire title
       is a number. `headlineStamp` gives it the hero's press and the hero's
       second pass of rust ink, which is a treatment a numeral can carry and a
-      sentence cannot. See the prop's own note on PageHeader. */
-  }
+      sentence cannot. See the prop's own note on PageHeader. */}
   <PageHeader
     eyebrow="Results"
     eyebrowHref="/results"
@@ -111,10 +129,9 @@ const lede =
   {/* No aria-labelledby here: see the note on /results. One region per page. */}
   <section class="bg-background py-section-lg">
     <div class="mx-auto w-full max-w-content px-6">
-      {
-        edition.distances.map((d, di) => (
-          <div class="mt-16 first:mt-0">
-            {/* A REAL BREAK BETWEEN THE TWO RACES. This was a `text-h3` heading
+      {edition.distances.map((d, di) => (
+        <div class="mt-16 first:mt-0">
+          {/* A REAL BREAK BETWEEN THE TWO RACES. This was a `text-h3` heading
               43px wide with two and a half thousand pixels of unbroken table
               between it and the next one, so the page read as one endless list
               that changed race somewhere in the middle without saying so. The
@@ -123,21 +140,21 @@ const lede =
               uses, so the two agree about what a race looks like. The first
               distance in the Studio's own order is the headline one and gets
               the filled chip. */}
-            <div class="dist-head">
-              {/* NO CHIP HERE, and that is not an oversight. On the archive
+          <div class="dist-head">
+            {/* NO CHIP HERE, and that is not an oversight. On the archive
                 page a distance is a marker on a dense row, so it is a chip. On
                 this page the distance IS the section, so it is a heading, and a
                 chip beside a heading that says the same word twice is just
                 repetition. The headline race is set in the accent instead, so
                 the two blocks are told apart at a glance from anywhere on the
                 page rather than by reading them. */}
-              <h2 class:list={['display text-h2', di === 0 && 'text-heading-accent']}>{d.name}</h2>
-              <p class="tabular text-sm text-muted-foreground">
-                {d.finishers} {d.finishers === 1 ? 'finisher' : 'finishers'}
-              </p>
-            </div>
+            <h2 class:list={['display text-h2', di === 0 && 'text-heading-accent']}>{d.name}</h2>
+            <p class="tabular text-sm text-muted-foreground">
+              {d.finishers} {d.finishers === 1 ? 'finisher' : 'finishers'}
+            </p>
+          </div>
 
-            {/* THE WINNERS GO ON THE BOARD, the same one the home page and
+          {/* THE WINNERS GO ON THE BOARD, the same one the home page and
               /records use. They were two callouts with a rust rule down the
               left, which is the shape the course-record holders were in until
               this tier: the same information in two different costumes on two
@@ -153,23 +170,23 @@ const lede =
               one: the board is a few lines of large type, and an empty rail on
               it reads as a fault where the same gap in a table reads as a
               gap. */}
-            {d.winners.length > 0 && (
-              <RecordBoard
-                class="mt-6 max-w-[46rem]"
-                seed={edition.year + di}
-                label={`${edition.year} ${d.name} winners`}
-                rows={d.winners
-                  .filter((w) => Boolean(w.row.name))
-                  .map((w) => ({
-                    label: w.gender === 'F' ? 'Women' : 'Men',
-                    name: w.row.name as string,
-                    slug: w.row.slug,
-                    time: formatRaceTime(w.row.timeSeconds),
-                  }))}
-              />
-            )}
+          {d.winners.length > 0 && (
+            <RecordBoard
+              class="mt-6 max-w-[46rem]"
+              seed={edition.year + di}
+              label={`${edition.year} ${d.name} winners`}
+              rows={d.winners
+                .filter((w) => Boolean(w.row.name))
+                .map((w) => ({
+                  label: w.gender === 'F' ? 'Women' : 'Men',
+                  name: w.row.name as string,
+                  slug: w.row.slug,
+                  time: formatRaceTime(w.row.timeSeconds),
+                }))}
+            />
+          )}
 
-            {/* THE SHEET ON THE CLIPBOARD. Everything from here to the end of
+          {/* THE SHEET ON THE CLIPBOARD. Everything from here to the end of
               the distance is one document: who was fastest in each age band,
               then every finisher. A clipboard is what that was written on, and
               it is already an object this site owns (RaceSchedule.astro).
@@ -190,10 +207,10 @@ const lede =
               page's own gutter and its paddings shrink to the smallest that
               still reads as a board with a sheet on it. Measured after: 152px
               for a name against the 160 it had. */}
-            <div class="clip -mx-3 mt-10 max-w-[46rem] px-2 pt-5 pb-2 sm:mx-0 sm:px-[1.1rem] sm:pt-6 sm:pb-[1.1rem]">
-              <div class="clip__clamp" aria-hidden="true" />
-              <div class="clip__sheet clip__sheet--paper p-2 sm:p-7">
-                {/* FASTEST IN EACH AGE GROUP, NOT "AGE GROUP WINNERS". The race's
+          <div class="clip -mx-3 mt-10 max-w-[46rem] px-2 pt-5 pb-2 sm:mx-0 sm:px-[1.1rem] sm:pt-6 sm:pb-[1.1rem]">
+            <div class="clip__clamp" aria-hidden="true" />
+            <div class="clip__sheet clip__sheet--paper p-2 sm:p-7">
+              {/* FASTEST IN EACH AGE GROUP, NOT "AGE GROUP WINNERS". The race's
               own divisions have moved around: 2007 awarded under 30 and 30-39,
               2008 and 2009 replaced both with a single under 40, and several
               years published no divisions at all. Calling these people winners
@@ -203,107 +220,107 @@ const lede =
               Only brackets with somebody in them render, so a thin early field
               shows three rows rather than six with gaps, and 2006 shows nothing
               at all because its source published age ranges instead of ages. */}
-                {(() => {
-                  const groups = [
-                    { key: 'M', label: 'Men' },
-                    { key: 'F', label: 'Women' },
-                  ]
-                    .map((g) => ({ ...g, leaders: fastestByBracket(d.rows, g.key) }))
-                    .filter((g) => g.leaders.length > 0);
-                  if (groups.length === 0) return null;
-                  return (
-                    /* No measure of its own any more: the sheet it is on supplies
+              {(() => {
+                const groups = [
+                  { key: 'M', label: 'Men' },
+                  { key: 'F', label: 'Women' },
+                ]
+                  .map((g) => ({ ...g, leaders: fastestByBracket(d.rows, g.key) }))
+                  .filter((g) => g.leaders.length > 0);
+                if (groups.length === 0) return null;
+                return (
+                  /* No measure of its own any more: the sheet it is on supplies
                   one, and a second cap inside it would just be a narrower
                   column floating in a wider sheet. */
-                    <div>
-                      <p class="font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase">
-                        Fastest in each age group
-                      </p>
-                      <div class="mt-3 grid gap-x-10 gap-y-6 sm:grid-cols-2">
-                        {groups.map((g) => (
-                          <div>
-                            <p class="text-heading-accent font-mono text-[0.6875rem] tracking-[0.2em] uppercase">
-                              {g.label}
-                            </p>
-                            <ul class="ages mt-2">
-                              {g.leaders.map((l) => (
-                                <li class="ages__row">
-                                  <span class="ages__bracket">{l.label}</span>
-                                  <span class="ages__name">
-                                    {l.row.slug ? (
-                                      <a
-                                        class="underline-offset-2 hover:text-link hover:underline"
-                                        href={`/runners/${l.row.slug}/`}
-                                      >
-                                        {l.row.name}
-                                      </a>
-                                    ) : (
-                                      l.row.name
-                                    )}
-                                  </span>
-                                  <span class="ages__time tabular">
-                                    {formatRaceTime(l.row.timeSeconds)}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
-                      </div>
+                  <div>
+                    <p class="font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase">
+                      Fastest in each age group
+                    </p>
+                    <div class="mt-3 grid gap-x-10 gap-y-6 sm:grid-cols-2">
+                      {groups.map((g) => (
+                        <div>
+                          <p class="text-heading-accent font-mono text-[0.6875rem] tracking-[0.2em] uppercase">
+                            {g.label}
+                          </p>
+                          <ul class="ages mt-2">
+                            {g.leaders.map((l) => (
+                              <li class="ages__row">
+                                <span class="ages__bracket">{l.label}</span>
+                                <span class="ages__name">
+                                  {l.row.slug ? (
+                                    <a
+                                      class="underline-offset-2 hover:text-link hover:underline"
+                                      href={`/runners/${l.row.slug}/`}
+                                    >
+                                      {l.row.name}
+                                    </a>
+                                  ) : (
+                                    l.row.name
+                                  )}
+                                </span>
+                                <span class="ages__time tabular">
+                                  {formatRaceTime(l.row.timeSeconds)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
                     </div>
-                  );
-                })()}
+                  </div>
+                );
+              })()}
 
-                {/* THE TABLE TAKES A MEASURE, NOT THE COLUMN. Full width, the Name
+              {/* THE TABLE TAKES A MEASURE, NOT THE COLUMN. Full width, the Name
               cell alone was 762px on a desktop, so a name sat at the left
               margin and its time 880px away with nothing in between: the eye
               had to carry one across the other sixty times over. The <colgroup>
               plus `table-layout: fixed` is what holds it, because without the
               fixed layout the browser hands every spare pixel back to the
               longest name and the gap returns. See .finishers in globals.css. */}
-                <div class="mt-7 overflow-x-auto">
-                  <table class="finishers text-sm">
-                    <caption class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase">
-                      {edition.year} {d.name}, every finisher on file
-                    </caption>
-                    <colgroup>
-                      <col class="c-place" />
-                      <col />
-                      <col class="c-age" />
-                      <col class="c-time" />
-                    </colgroup>
-                    <thead>
-                      <tr class="border-b border-primary/30">
-                        <th
-                          scope="col"
-                          class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                        >
-                          #
-                        </th>
-                        <th
-                          scope="col"
-                          class="pb-2 pl-3 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                        >
-                          Name
-                        </th>
-                        <th
-                          scope="col"
-                          class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                        >
-                          Age
-                        </th>
-                        <th
-                          scope="col"
-                          class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
-                        >
-                          Time
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {d.rows.map((row) => (
-                        <tr>
-                          {/* THE ROW INDEX IS NOT A PLACE. This used to read
+              <div class="mt-7 overflow-x-auto">
+                <table class="finishers text-sm">
+                  <caption class="pb-2 text-left font-mono text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase">
+                    {edition.year} {d.name}, every finisher on file
+                  </caption>
+                  <colgroup>
+                    <col class="c-place" />
+                    <col />
+                    <col class="c-age" />
+                    <col class="c-time" />
+                  </colgroup>
+                  <thead>
+                    <tr class="border-b border-primary/30">
+                      <th
+                        scope="col"
+                        class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                      >
+                        #
+                      </th>
+                      <th
+                        scope="col"
+                        class="pb-2 pl-3 text-left font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                      >
+                        Name
+                      </th>
+                      <th
+                        scope="col"
+                        class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                      >
+                        Age
+                      </th>
+                      <th
+                        scope="col"
+                        class="pb-2 text-right font-mono text-[0.6875rem] tracking-[0.18em] uppercase"
+                      >
+                        Time
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.rows.map((row) => (
+                      <tr>
+                        {/* THE ROW INDEX IS NOT A PLACE. This used to read
                         `row.place ?? i + 1`, so a row the race never placed
                         still showed a number, and Marc Teismann was 3rd here in
                         2014 and blank on his own page. Every placeable row now
@@ -312,75 +329,70 @@ const lede =
                         derive-place.ts), so the only rows left without one are
                         the trekkers, who are ineligible by the race's own rule
                         and get the same dash their runner page gives them. */}
-                          <td class="f-place">
-                            {row.place ?? <span aria-hidden="true">&mdash;</span>}
-                          </td>
-                          <th scope="row" class="f-name">
-                            {row.slug ? (
-                              <a
-                                class="underline-offset-2 hover:text-link hover:underline"
-                                href={`/runners/${row.slug}/`}
-                              >
-                                {row.name}
-                              </a>
-                            ) : (
-                              row.name
-                            )}
-                            {row.trekker && (
-                              <abbr
-                                class="source-flag text-muted-foreground"
-                                title="Trekker: took the optional early start, not eligible for awards"
-                              >
-                                T
-                              </abbr>
-                            )}
-                          </th>
-                          <td class="f-age">{row.age ?? ''}</td>
-                          <td class="f-time">{formatRaceTime(row.timeSeconds)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                        <td class="f-place">
+                          {row.place ?? <span aria-hidden="true">&mdash;</span>}
+                        </td>
+                        <th scope="row" class="f-name">
+                          {row.slug ? (
+                            <a
+                              class="underline-offset-2 hover:text-link hover:underline"
+                              href={`/runners/${row.slug}/`}
+                            >
+                              {row.name}
+                            </a>
+                          ) : (
+                            row.name
+                          )}
+                          {row.trekker && (
+                            <abbr
+                              class="source-flag text-muted-foreground"
+                              title="Trekker: took the optional early start, not eligible for awards"
+                            >
+                              T
+                            </abbr>
+                          )}
+                        </th>
+                        <td class="f-age">{row.age ?? ''}</td>
+                        <td class="f-time">{formatRaceTime(row.timeSeconds)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
-        ))
-      }
+        </div>
+      ))}
 
-      {
-        anyTrekker && (
-          <ul class="mt-10 grid max-w-[62ch] gap-2 border-t border-border pt-6 text-sm text-muted-foreground">
-            <li>
-              <span class="source-flag" aria-hidden="true">
-                T
-              </span>{' '}
-              Trekker. Took the optional early start, which the race makes ineligible for age group
-              and overall awards. The time is real and counts nowhere in the records.
-            </li>
-          </ul>
-        )
-      }
+      {anyTrekker && (
+        <ul class="mt-10 grid max-w-[62ch] gap-2 border-t border-border pt-6 text-sm text-muted-foreground">
+          <li>
+            <span class="source-flag" aria-hidden="true">
+              T
+            </span>{' '}
+            Trekker. Took the optional early start, which the race makes ineligible for age group
+            and overall awards. The time is real and counts nowhere in the records.
+          </li>
+        </ul>
+      )}
 
       <nav class="mt-12 flex flex-wrap items-center gap-4" aria-label="Other years">
-        {
-          older && (
-            <a class="btn-plate btn-plate--cream" href={`/results/${older}/`}>
-              <span aria-hidden="true">&larr;</span> {older}
-            </a>
-          )
-        }
-        <a class="btn-plate btn-plate--cream" href="/results/">All years</a>
-        {
-          newer && (
-            <a class="btn-plate btn-plate--cream" href={`/results/${newer}/`}>
-              {newer}{' '}
-              <span class="btn-plate__arrow" aria-hidden="true">
-                &rarr;
-              </span>
-            </a>
-          )
-        }
+        {older && (
+          <a class="btn-plate btn-plate--cream" href={`/results/${older}/`}>
+            <span aria-hidden="true">&larr;</span> {older}
+          </a>
+        )}
+        <a class="btn-plate btn-plate--cream" href="/results/">
+          All years
+        </a>
+        {newer && (
+          <a class="btn-plate btn-plate--cream" href={`/results/${newer}/`}>
+            {newer}{' '}
+            <span class="btn-plate__arrow" aria-hidden="true">
+              &rarr;
+            </span>
+          </a>
+        )}
       </nav>
     </div>
   </section>

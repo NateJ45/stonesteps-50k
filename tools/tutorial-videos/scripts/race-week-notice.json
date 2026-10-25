@@ -1,0 +1,46 @@
+{
+  "slug": "race-week-notice",
+  "title": "Put up a race-week notice from your phone",
+  "start": "/quick-update",
+  "ready": "[data-quick=\"race-week\"]",
+  "viewport": { "width": 390, "height": 844 },
+  "cover": {
+    "selectors": [
+      "[data-ui=\"whats-new-card\"]",
+      "[data-ui=\"Popover\"]:has([data-ui=\"whats-new-card\"])"
+    ]
+  },
+  "steps": [
+    {
+      "do": "caption",
+      "text": "Race week. Open Quick update on your phone.",
+      "ms": 2600,
+      "poster": true
+    },
+    {
+      "do": "ring",
+      "target": "[data-quick=\"race-week\"]",
+      "caption": "In race week, the first tile is the notice.",
+      "ms": 2400
+    },
+    { "do": "click", "target": "[data-quick=\"race-week\"]" },
+    {
+      "do": "type",
+      "target": "[data-tour=\"quick-field-message\"] textarea",
+      "text": "Bib pickup moves to the Oval shelter, 6:00 to 6:45 AM.",
+      "caption": "Say it in one or two short sentences."
+    },
+    {
+      "do": "ring",
+      "target": "[data-tour=\"quick-field-lastDay\"]",
+      "caption": "It comes down after the last day you pick.",
+      "ms": 2400
+    },
+    {
+      "do": "ring",
+      "target": "[data-tour=\"quick-submit\"]",
+      "caption": "Press the button. It is on every page in a few minutes.",
+      "ms": 2800
+    }
+  ]
+}

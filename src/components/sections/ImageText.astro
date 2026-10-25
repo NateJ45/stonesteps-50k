@@ -63,13 +63,11 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
   The pool is now drawn small enough to stay inside the section on its own, so
   there is nothing to clip and the ridge survives. -->
 <section class:list={[bg, cutout && 'relative']} aria-labelledby={heading ? headingId : undefined}>
-  {
-    /* A CUT-OUT SUBJECT NEEDS GROUND TO STAND ON. Without it the person floats
+  {/* A CUT-OUT SUBJECT NEEDS GROUND TO STAND ON. Without it the person floats
       on a flat band, which is the other half of the problem the frame was
       solving badly. The mud is bigger and sparser here than on the hero: it
       sits behind a person rather than behind a headline, so it should read as
-      ground rather than as a second texture competing with him. */
-  }
+      ground rather than as a second texture competing with him. */}
   {
     /* CLIPPED BY A WRAPPER, NOT BY THE SECTION. The mud's arrival scales each
       throw slightly past its resting size, so unclipped it widens the document
@@ -85,8 +83,7 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
       </div>
     )
   }
-  {
-    /* THE SHARED SPLIT (2026-09-18). This band used to cut the content column
+  {/* THE SHARED SPLIT (2026-09-18). This band used to cut the content column
       into two equal halves with a 76.8px gutter and to do it at `md`, which is
       neither of the two things the rest of the site does. It now takes `.split`
       from globals.css: the picture always gets the narrow track and the words
@@ -95,8 +92,7 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
 
       THE PICTURE STAYS FIRST IN THE DOM whichever side it is shown on, and the
       side is chosen with `lg:order-*`, so the stacked reading order on a phone
-      (picture, then words) is exactly what it was. */
-  }
+      (picture, then words) is exactly what it was. */}
   <div
     class:list={[
       'split mx-auto max-w-content items-center px-6 py-section-lg',
@@ -105,63 +101,61 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
     data-reveal
   >
     <div class:list={[imageFirst ? 'lg:order-1' : 'lg:order-2']}>
-      {
-        localPoster === 'region' ? (
-          <RegionPoster bandBg={surface} />
-        ) : image?.asset ? (
-          cutout ? (
-            // A CUT-OUT GETS NO FRAME, but it does get GROUND. A rounded box
-            // and a colour wash would draw the rectangle back and undo the only
-            // reason to cut him out; a soft pool behind him and a scatter of
-            // marks in front of him put him in the scene instead. See
-            // `.subject-stage` in globals.css.
-            //
-            // THE SIZE IS CAPPED BY WIDTH, NOT HEIGHT, and that is not a style
-            // preference. Left to its own aspect this photograph came out 948px
-            // tall and dragged the band to 1172px, half again what the four
-            // paragraphs beside it need. Capping it with max-height and
-            // width:auto did fix that and cost something quieter: an unloaded
-            // lazy image with width:auto has no width to compute a height FROM,
-            // so the band reserved nothing and jumped when the picture arrived.
-            // Capping the width instead lets the intrinsic aspect ratio hold
-            // the space open. Same rendered size, no shift.
-            // THE TWO CUSTOM PROPERTIES (2026-09-18) put him on the left edge
-            // of his column, where every other object on the page starts, and
-            // take the pool of ground with him rather than leaving it centred
-            // on a column he no longer fills. `--stage-img-w` repeats the cap
-            // on the picture below and `--stage-spread` is how much wider the
-            // disc is than the picture: 577 over 304, about 1.9, which is the
-            // disc this band already drew. Full argument on `.subject-stage`.
-            <div class="subject-stage" style="--stage-img-w: 19rem; --stage-spread: 1.9">
-              <span class="subject-stage__pool" aria-hidden="true">
-                <Topo seed={5} lines={9} />
-              </span>
-              <SanityImage
-                source={image}
-                width={800}
-                sizes="(min-width: 768px) 45vw, 100vw"
-                quality={80}
-                class="photo-cutout h-auto w-full max-w-[19rem]"
-              />
-              <MudField field="director-fore" class="subject-stage__mud" />
-            </div>
-          ) : (
-            // `photo-plate` on the clipping wrapper, so this photograph takes
-            // the same grade as every other one on the site.
-            <div class="photo-plate overflow-hidden rounded-md">
-              <SanityImage
-                source={image}
-                width={800}
-                sizes="(min-width: 768px) 45vw, 100vw"
-                quality={75}
-                class="h-auto w-full"
-              />
-            </div>
-          )
+      {localPoster === 'region' ? (
+        <RegionPoster bandBg={surface} />
+      ) : image?.asset ? (
+        cutout ? (
+          // A CUT-OUT GETS NO FRAME, but it does get GROUND. A rounded box
+          // and a colour wash would draw the rectangle back and undo the only
+          // reason to cut him out; a soft pool behind him and a scatter of
+          // marks in front of him put him in the scene instead. See
+          // `.subject-stage` in globals.css.
+          //
+          // THE SIZE IS CAPPED BY WIDTH, NOT HEIGHT, and that is not a style
+          // preference. Left to its own aspect this photograph came out 948px
+          // tall and dragged the band to 1172px, half again what the four
+          // paragraphs beside it need. Capping it with max-height and
+          // width:auto did fix that and cost something quieter: an unloaded
+          // lazy image with width:auto has no width to compute a height FROM,
+          // so the band reserved nothing and jumped when the picture arrived.
+          // Capping the width instead lets the intrinsic aspect ratio hold
+          // the space open. Same rendered size, no shift.
+          // THE TWO CUSTOM PROPERTIES (2026-09-18) put him on the left edge
+          // of his column, where every other object on the page starts, and
+          // take the pool of ground with him rather than leaving it centred
+          // on a column he no longer fills. `--stage-img-w` repeats the cap
+          // on the picture below and `--stage-spread` is how much wider the
+          // disc is than the picture: 577 over 304, about 1.9, which is the
+          // disc this band already drew. Full argument on `.subject-stage`.
+          <div class="subject-stage" style="--stage-img-w: 19rem; --stage-spread: 1.9">
+            <span class="subject-stage__pool" aria-hidden="true">
+              <Topo seed={5} lines={9} />
+            </span>
+            <SanityImage
+              source={image}
+              width={800}
+              sizes="(min-width: 768px) 45vw, 100vw"
+              quality={80}
+              class="photo-cutout h-auto w-full max-w-[19rem]"
+            />
+            <MudField field="director-fore" class="subject-stage__mud" />
+          </div>
         ) : (
-          <div class="aspect-[4/5] rounded-md bg-muted" aria-hidden="true" />
+          // `photo-plate` on the clipping wrapper, so this photograph takes
+          // the same grade as every other one on the site.
+          <div class="photo-plate overflow-hidden rounded-md">
+            <SanityImage
+              source={image}
+              width={800}
+              sizes="(min-width: 768px) 45vw, 100vw"
+              quality={75}
+              class="h-auto w-full"
+            />
+          </div>
         )
-      }
+      ) : (
+        <div class="aspect-[4/5] rounded-md bg-muted" aria-hidden="true" />
+      )}
     </div>
 
     <div class:list={['label-column', imageFirst ? 'lg:order-2' : 'lg:order-1']}>
@@ -181,21 +175,17 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
           in globals.css. */
         eyebrow && <p class="section-label section-label--fit text-foreground/80">{eyebrow}</p>
       }
-      {
-        heading && (
-          <h2 id={headingId} class="font-display text-h2 text-foreground">
-            {heading}
-          </h2>
-        )
-      }
+      {heading && (
+        <h2 id={headingId} class="font-display text-h2 text-foreground">
+          {heading}
+        </h2>
+      )}
       {body && <PortableText value={body} className={bodyClass} />}
-      {
-        cta?.label && (
-          <div class="mt-l">
-            <CtaLink cta={cta} variant="secondary" />
-          </div>
-        )
-      }
+      {cta?.label && (
+        <div class="mt-l">
+          <CtaLink cta={cta} variant="secondary" />
+        </div>
+      )}
     </div>
   </div>
 </section>

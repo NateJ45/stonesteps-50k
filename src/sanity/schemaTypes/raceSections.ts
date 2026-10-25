@@ -24,23 +24,21 @@
 // contents are derived and must not be retyped. See src/lib/queries.ts.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
-import {
-  ActivityIcon,
-  ArrowRightIcon,
-  BlockElementIcon,
-  EnvelopeIcon,
-  HelpCircleIcon,
-  CalendarIcon,
-  ClockIcon,
-  ComponentIcon,
-  HeartIcon,
-  SunIcon,
-  ImageIcon,
-  PinIcon,
-  StarFilledIcon,
-  UsersIcon,
-  TrendUpwardIcon,
-} from '@sanity/icons';
+import { ActivityIcon } from '@sanity/icons/Activity';
+import { ArrowRightIcon } from '@sanity/icons/ArrowRight';
+import { BlockElementIcon } from '@sanity/icons/BlockElement';
+import { EnvelopeIcon } from '@sanity/icons/Envelope';
+import { HelpCircleIcon } from '@sanity/icons/HelpCircle';
+import { CalendarIcon } from '@sanity/icons/Calendar';
+import { ClockIcon } from '@sanity/icons/Clock';
+import { ComponentIcon } from '@sanity/icons/Component';
+import { HeartIcon } from '@sanity/icons/Heart';
+import { SunIcon } from '@sanity/icons/Sun';
+import { ImageIcon } from '@sanity/icons/Image';
+import { PinIcon } from '@sanity/icons/Pin';
+import { StarFilledIcon } from '@sanity/icons/StarFilled';
+import { UsersIcon } from '@sanity/icons/Users';
+import { TrendUpwardIcon } from '@sanity/icons/TrendUpward';
 
 /* ---------- Hero ---------------------------------------------------------- */
 
@@ -248,13 +246,29 @@ export const courseFeaturesSection = defineType({
           type: 'string',
           validation: (Rule) => Rule.required(),
         }),
+        // The block-level `caption` below is the one editors fill in. This one is
+        // kept because SectionRenderer reads it first (`s.image?.caption ??
+        // s.caption`); it stays hidden unless something is already stored here,
+        // so the block never shows two caption boxes.
         defineField({
           name: 'caption',
           title: 'Photo caption (optional)',
           type: 'string',
           description: 'One line under the photograph: what the trail is like, who is pictured.',
+          hidden: ({ value }) => !value,
         }),
       ],
+    }),
+    // 2026-10-13: the home page's live caption has always been stored on the
+    // block (audit:data, PENDING 1r), and the renderer falls back to it, so it
+    // is declared here rather than moved, and the Studio stops calling it unknown.
+    defineField({
+      name: 'caption',
+      title: 'Photo caption (optional)',
+      type: 'string',
+      description:
+        'One line under the photograph: what the trail is like, who is pictured. Shows only ' +
+        'when there is a photograph.',
     }),
   ],
   preview: {

@@ -1,8 +1,10 @@
 // scripts/repair-athletes.mjs
 //
 // Usage:
-//   node scripts/repair-athletes.mjs --dry-run
-//   node scripts/repair-athletes.mjs
+//   node scripts/repair-athletes.mjs                                   # dry run
+//   NCS_PRODUCTION_WRITE=yes node scripts/repair-athletes.mjs --apply  # write
+//   (dry by default; a write needs --apply AND NCS_PRODUCTION_WRITE=yes,
+//    scripts/lib/write-gate.mjs, PORTS.md card 86)
 //
 // Three repairs, all idempotent and all safe to re-run.
 //
@@ -45,6 +47,7 @@
 //    cannot fork an athlete. race-time.test.ts asserts that property.
 // ---------------------------------------------------------------------------
 
+import { writeGate } from './lib/write-gate.mjs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
@@ -56,9 +59,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 const env = loadEnv(root);
 
-const DRY_RUN = process.argv.includes('--dry-run');
 const projectId = env.PUBLIC_SANITY_PROJECT_ID;
 const dataset = env.PUBLIC_SANITY_DATASET ?? 'production';
+const DRY_RUN = !writeGate({ dataset });
 const token = env.SANITY_API_WRITE_TOKEN;
 
 if (!projectId) {
@@ -149,8 +152,8 @@ async function main() {
   if (renames.length) process.stdout.write('\n');
 
   console.log('\nDone. Now re-run BOTH importers to restore what was deleted:');
-  console.log('  node scripts/import-archive.mjs');
-  console.log('  node scripts/import-results.mjs');
+  console.log('  NCS_PRODUCTION_WRITE=yes node scripts/import-archive.mjs --apply');
+  console.log('  NCS_PRODUCTION_WRITE=yes node scripts/import-results.mjs --apply');
 }
 
 main().catch((err) => {

@@ -106,16 +106,16 @@ const mileBar = t.mileUnits * 0.5;
   data-course-plate
   data-plate={plateData}
 >
-  {
-    /* THE CONTENT COLUMN, NOT A COLUMN OF ITS OWN (2026-09-18). This band used
+  {/* THE CONTENT COLUMN, NOT A COLUMN OF ITS OWN (2026-09-18). This band used
       to set its own 72rem box inside the page's 82.5rem one, so its heading
       started at x=88 while the bands above and below it ran 24 to 1256. Same
-      `max-w-content px-6` every other band uses. */
-  }
+      `max-w-content px-6` every other band uses. */}
   <div class="ctease__inner mx-auto w-full max-w-content px-6">
     <div class="ctease__head" data-reveal>
       {eyebrow && <p class="section-label text-foreground/80">{eyebrow}</p>}
-      <h2 class="ctease__headline" id={headingId}>{headline}</h2>
+      <h2 class="ctease__headline" id={headingId}>
+        {headline}
+      </h2>
       {intro && <p class="ctease__intro">{intro}</p>}
     </div>
 
@@ -132,33 +132,31 @@ const mileBar = t.mileUnits * 0.5;
           aria-hidden="true"
           focusable="false"
         >
-          {
-            /* Two routes, each drawn twice: a wide faint underlay for the glow
+          {/* Two routes, each drawn twice: a wide faint underlay for the glow
             (a filter would repaint on every frame the runner moves) and the
             line itself. pathLength=1 makes the draw-in and the progress trail a
-            plain 0..1 dash offset whatever the real length. */
-          }
+            plain 0..1 dash offset whatever the real length. */}
           <g class="ctease__routes">
             <path class="ctease__glow ctease__glow--short" d={t.routes.short}></path>
             <path
               class="ctease__route ctease__route--short"
               data-route="short"
               d={t.routes.short}
-              pathLength="1"></path>
+              pathLength="1"
+            ></path>
             <path class="ctease__glow ctease__glow--long" d={t.routes.long}></path>
             <path
               class="ctease__route ctease__route--long"
               data-route="long"
               d={t.routes.long}
-              pathLength="1"></path>
+              pathLength="1"
+            ></path>
           </g>
           <path class="ctease__steep" d={t.steep.long + t.steep.short}></path>
           <g class="ctease__miles">
-            {
-              t.mileDots.map((m) => (
-                <circle class={`ctease__mile ctease__mile--${m.kind}`} cx={m.x} cy={m.y} r="5" />
-              ))
-            }
+            {t.mileDots.map((m) => (
+              <circle class={`ctease__mile ctease__mile--${m.kind}`} cx={m.x} cy={m.y} r="5" />
+            ))}
           </g>
           <path class="ctease__trail-glow" data-trail-glow d={t.routes.long} pathLength="1"></path>
           <path class="ctease__trail" data-trail d={t.routes.long} pathLength="1"></path>
@@ -173,26 +171,30 @@ const mileBar = t.mileUnits * 0.5;
           </g>
         </svg>
 
-        {
-          t.labels.map((l) => (
-            <span
-              class={`ctease__pin ${labelOffset[l.key]} ctease__pin--${l.key}`}
-              style={`left:${l.left}%;top:${l.top}%`}
-              aria-hidden="true"
-            >
-              <b>{l.text}</b>
-              <i>{l.detail}</i>
-            </span>
-          ))
-        }
-        <span class="ctease__scale-label" aria-hidden="true">½ mile</span>
+        {t.labels.map((l) => (
+          <span
+            class={`ctease__pin ${labelOffset[l.key]} ctease__pin--${l.key}`}
+            style={`left:${l.left}%;top:${l.top}%`}
+            aria-hidden="true"
+          >
+            <b>{l.text}</b>
+            <i>{l.detail}</i>
+          </span>
+        ))}
+        <span class="ctease__scale-label" aria-hidden="true">
+          ½ mile
+        </span>
 
-        <span class="ctease__tag" data-tag aria-hidden="true">Mile 0.0 · 867 ft</span>
+        <span class="ctease__tag" data-tag aria-hidden="true">
+          Mile 0.0 · 867 ft
+        </span>
 
         <a class="ctease__hit" href="/course/" data-hit aria-label="Open the 3D course map">
           <span class="ctease__open" aria-hidden="true">
             <span class="ctease__open-hint ctease__open-hint--mouse">Hover to run it</span>
-            <span class="ctease__open-go">Fly it in 3D <span>&rarr;</span></span>
+            <span class="ctease__open-go">
+              Fly it in 3D <span>&rarr;</span>
+            </span>
           </span>
         </a>
       </div>
@@ -202,25 +204,25 @@ const mileBar = t.mileUnits * 0.5;
     </div>
 
     <div class="ctease__ctrl" data-reveal>
-      <p class="ctease__kicker" data-kicker>Running the long loop</p>
+      <p class="ctease__kicker" data-kicker>
+        Running the long loop
+      </p>
       <div class="ctease__laps" role="group" aria-label="Pick a loop">
-        {
-          loops.map((l) => (
-            <button
-              type="button"
-              class={`ctease__lap ctease__lap--${l.kind}`}
-              data-lap={l.index}
-              aria-pressed="false"
-            >
-              <span class="ctease__lap-n">{l.kind === 'long' ? 'Long loop' : 'Short loop'}</span>
-              <span class="ctease__lap-mi">{l.miles} mi</span>
-              <span class="ctease__lap-meta">Run {l.times} times</span>
-              <span class="ctease__lap-meta">
-                {l.lowFt} to {l.highFt} ft
-              </span>
-            </button>
-          ))
-        }
+        {loops.map((l) => (
+          <button
+            type="button"
+            class={`ctease__lap ctease__lap--${l.kind}`}
+            data-lap={l.index}
+            aria-pressed="false"
+          >
+            <span class="ctease__lap-n">{l.kind === 'long' ? 'Long loop' : 'Short loop'}</span>
+            <span class="ctease__lap-mi">{l.miles} mi</span>
+            <span class="ctease__lap-meta">Run {l.times} times</span>
+            <span class="ctease__lap-meta">
+              {l.lowFt} to {l.highFt} ft
+            </span>
+          </button>
+        ))}
       </div>
 
       <div class="ctease__strip" aria-hidden="true">
@@ -240,7 +242,10 @@ const mileBar = t.mileUnits * 0.5;
 
       <div class="ctease__actions">
         <a class="btn-plate" href="/course/" data-cta>
-          Fly the 3D map <span class="btn-plate__arrow" aria-hidden="true">&rarr;</span>
+          Fly the 3D map{' '}
+          <span class="btn-plate__arrow" aria-hidden="true">
+            &rarr;
+          </span>
         </a>
         <p class="ctease__note">Tilt it, zoom it, pin any mile.</p>
       </div>

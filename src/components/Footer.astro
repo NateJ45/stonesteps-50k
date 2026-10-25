@@ -205,39 +205,32 @@ const rowClass = (label: string) =>
   label.length > LONG_LABEL ? 'foot-link__label foot-link__label--long' : 'foot-link__label';
 ---
 
-{
-  /* THE BOARD. Its ground is a literal one step deeper than the page's, set in
+{/* THE BOARD. Its ground is a literal one step deeper than the page's, set in
     globals.css rather than with `bg-muted`: muted is seven units off the body
-    on the cream theme, which left the torn top edge with nothing to cut. */
-}
+    on the cream theme, which left the torn top edge with nothing to cut. */}
 <footer class="site-foot text-foreground">
-  {
-    /* The backdrop: one baked field of mud and prints, out of the flow, and
+  {/* The backdrop: one baked field of mud and prints, out of the flow, and
       marked as media so the contrast gate samples the pixels under the type.
-      See .foot-mud in globals.css for why it is one layer and not two. */
-  }
+      See .foot-mud in globals.css for why it is one layer and not two. */}
   <div class="foot-mud" aria-hidden="true" data-contrast-media></div>
 
-  {
-    /* NEXT RUNNING, at poster size. Only while the date is still ahead: a
+  {/* NEXT RUNNING, at poster size. Only while the date is still ahead: a
       footer advertising a race that already happened is worse than one that
-      says nothing, and this is the line nobody would remember to take down. */
-  }
-  {
-    raceDateLabel && raceIsUpcoming && (
-      <div class="foot-z border-b border-border/60">
-        <div class="mx-auto flex max-w-content flex-col items-start gap-m px-6 py-l md:flex-row md:items-end md:justify-between">
-          <div>
-            <p class="blaze text-heading-accent mb-2 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-              Next running
-            </p>
-            <p class="foot-date">{raceDateLabel}</p>
-            <p class="mt-3 text-sm text-foreground/80">
-              {[editionLabel, wherePlace].filter(Boolean).join(' · ')}
-            </p>
-          </div>
+      says nothing, and this is the line nobody would remember to take down. */}
+  {raceDateLabel && raceIsUpcoming && (
+    <div class="foot-z border-b border-border/60">
+      <div class="mx-auto flex max-w-content flex-col items-start gap-m px-6 py-l md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="blaze text-heading-accent mb-2 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+            Next running
+          </p>
+          <p class="foot-date">{raceDateLabel}</p>
+          <p class="mt-3 text-sm text-foreground/80">
+            {[editionLabel, wherePlace].filter(Boolean).join(' · ')}
+          </p>
+        </div>
 
-          {/* THE CLOCK, BESIDE THE DATE IT COUNTS TO. The hero wears the
+        {/* THE CLOCK, BESIDE THE DATE IT COUNTS TO. The hero wears the
               finish-line housing; this is the same component with the housing
               taken off, so the three-phase logic has exactly one home.
 
@@ -249,165 +242,140 @@ const rowClass = (label: string) =>
               pages are statically built, so a page built the week before is
               still being served at the gun, and the script turns it over to
               RACE TIME! and then to TBC on a document nobody rebuilt. */}
-          {race?.raceDate && (
-            <Countdown target={race.raceDate} label="Gun time in" variant="inline" />
-          )}
-          {race?.registerUrl && (
-            <a
-              class="btn-plate btn-plate--cream"
-              href={race.registerUrl}
-              {...externalLinkAttrs(race.registerUrl)}
-            >
-              Register
-              <span class="btn-plate__arrow" aria-hidden="true">
-                &rarr;
-              </span>
-            </a>
-          )}
-        </div>
+        {race?.raceDate && (
+          <Countdown target={race.raceDate} label="Gun time in" variant="inline" />
+        )}
+        {race?.registerUrl && (
+          <a
+            class="btn-plate btn-plate--cream"
+            href={race.registerUrl}
+            {...externalLinkAttrs(race.registerUrl)}
+          >
+            Register
+            <span class="btn-plate__arrow" aria-hidden="true">
+              &rarr;
+            </span>
+          </a>
+        )}
       </div>
-    )
-  }
+    </div>
+  )}
 
-  {
-    /* THE ROWS AND THE RAIL. Three tracks at lg: the numbered columns take a
+  {/* THE ROWS AND THE RAIL. Three tracks at lg: the numbered columns take a
       fraction each and the reference rail sits beside them. Below lg they
       stack, rows first, because navigation is what a visitor came down here
-      for and the address is what they will read once. */
-  }
-  <div
-    class="foot-z mx-auto grid max-w-content gap-l px-6 pt-l pb-m lg:grid-cols-[1fr_minmax(0,16rem)]"
-  >
-    {
-      /* AUTO-FIT, NOT A COUNT. The columns come from Site settings and there
+      for and the address is what they will read once. */}
+  <div class="foot-z mx-auto grid max-w-content gap-l px-6 pt-l pb-m lg:grid-cols-[1fr_minmax(0,16rem)]">
+    {/* AUTO-FIT, NOT A COUNT. The columns come from Site settings and there
         can be one of them or four, so the track list is computed from the
         available width rather than written down here. A hardcoded three-track
         grid put the rail on a fourth track and then wrapped it to its own row
         the moment a third column was added, which is exactly what the live
-        dataset does. */
-    }
+        dataset does. */}
     <div class="foot-cols">
-      {
-        columns.map((col, colIdx) => (
-          <nav class="foot-col" aria-labelledby={`foot-col-${colIdx}`}>
-            <p id={`foot-col-${colIdx}`} class="foot-col__title">
-              {col.title}
-            </p>
-            <ul class="foot-list">
-              {col.links.map((link, i) => (
-                <li class="foot-item">
-                  <a
-                    href={link.href}
-                    class="foot-link"
-                    aria-current={isHere(link.href) ? 'page' : undefined}
-                    {...externalLinkAttrs(link.href)}
-                  >
-                    {/* A ONE-ROW COLUMN IS NOT A LIST. The numbers exist so four
+      {columns.map((col, colIdx) => (
+        <nav class="foot-col" aria-labelledby={`foot-col-${colIdx}`}>
+          <p id={`foot-col-${colIdx}`} class="foot-col__title">
+            {col.title}
+          </p>
+          <ul class="foot-list">
+            {col.links.map((link, i) => (
+              <li class="foot-item">
+                <a
+                  href={link.href}
+                  class="foot-link"
+                  aria-current={isHere(link.href) ? 'page' : undefined}
+                  {...externalLinkAttrs(link.href)}
+                >
+                  {/* A ONE-ROW COLUMN IS NOT A LIST. The numbers exist so four
                     rows read as a route to follow down; "01" on its own above
                     nothing is just a decoration that raises a question. The
                     live "Where" column is exactly this case. */}
-                    {col.links.length > 1 && (
-                      <span class="foot-link__idx" aria-hidden="true">
-                        {idx(i)}
-                      </span>
-                    )}
-                    <span class={rowClass(link.label)}>{link.label}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ))
-      }
+                  {col.links.length > 1 && (
+                    <span class="foot-link__idx" aria-hidden="true">
+                      {idx(i)}
+                    </span>
+                  )}
+                  <span class={rowClass(link.label)}>{link.label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))}
     </div>
 
-    {
-      /* The reference rail. A description list because that is what it is:
+    {/* The reference rail. A description list because that is what it is:
         labelled facts, not another menu.
 
         NO "WHERE" ROW HERE. The first cut had one, reading the venue off the
         race singleton, and on the live dataset the footer then said where the
         race is three times: in the Next running line directly above, in this
         rail, and in the editor's own "Where" column beside it. The line above
-        is the one that cannot be switched off, so it wins. */
-    }
+        is the one that cannot be switched off, so it wins. */}
     <div class="foot-rail">
       <dl class="m-0">
         <dt>Get in touch</dt>
         <dd>
           {email && <CopyEmailButton client:visible email={email} variant="link" />}
-          {
-            phone && (
-              <a
-                href={telHref(phone)}
-                class="inline-flex items-center gap-xs text-link transition-colors hover:text-primary-dark"
-              >
-                <Phone size={14} aria-hidden="true" />
-                {phone}
-              </a>
-            )
-          }
-          {
-            /* Without an email or phone on file this used to render the brand
-              name and nothing else, which is not a way to get in touch. */
-          }
-          {
-            !email && !phone && (
-              <a class="tap-pad-lg text-link underline-offset-2 hover:underline" href="/contact/">
-                Ask the race director
-              </a>
-            )
-          }
-          {
-            race?.directorName && (
-              <span class="mt-1 block text-foreground/75">{race.directorName}, race director</span>
-            )
-          }
+          {phone && (
+            <a
+              href={telHref(phone)}
+              class="inline-flex items-center gap-xs text-link transition-colors hover:text-primary-dark"
+            >
+              <Phone size={14} aria-hidden="true" />
+              {phone}
+            </a>
+          )}
+          {/* Without an email or phone on file this used to render the brand
+              name and nothing else, which is not a way to get in touch. */}
+          {!email && !phone && (
+            <a class="tap-pad-lg text-link underline-offset-2 hover:underline" href="/contact/">
+              Ask the race director
+            </a>
+          )}
+          {race?.directorName && (
+            <span class="mt-1 block text-foreground/75">{race.directorName}, race director</span>
+          )}
         </dd>
-        {
-          socialLinksToRender.length > 0 && (
-            <>
-              <dt>Elsewhere</dt>
-              <dd>
-                <ul class="flex list-none gap-s p-0">
-                  {socialLinksToRender.map((link) => {
-                    const Icon = socialIcon(link.platform);
-                    const ariaLabel = link.label ?? link.platform ?? 'Social link';
-                    return (
-                      <li>
-                        <a
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={ariaLabel}
-                          class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-primary-dark hover:bg-primary-dark hover:text-white"
-                        >
-                          <Icon size={20} stroke={1.5} />
-                        </a>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </dd>
-            </>
-          )
-        }
+        {socialLinksToRender.length > 0 && (
+          <>
+            <dt>Elsewhere</dt>
+            <dd>
+              <ul class="flex list-none gap-s p-0">
+                {socialLinksToRender.map((link) => {
+                  const Icon = socialIcon(link.platform);
+                  const ariaLabel = link.label ?? link.platform ?? 'Social link';
+                  return (
+                    <li>
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={ariaLabel}
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-primary-dark hover:bg-primary-dark hover:text-white"
+                      >
+                        <Icon size={20} stroke={1.5} />
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </dd>
+          </>
+        )}
       </dl>
 
-      {
-        /* THE MARK, MOUNTED. Same nailed plate the header wears, bigger and
+      {/* THE MARK, MOUNTED. Same nailed plate the header wears, bigger and
           turned the other way, so the two boards read as the same sign seen at
-          opposite ends of the page. */
-      }
+          opposite ends of the page. */}
       <div class="mt-l flex items-center gap-m">
         <a href="/" aria-label={`${brandName} home`} class="sign-badge foot-badge shrink-0">
-          {
-            /* The mark is the race's own painted trail sign, portrait at
+          {/* The mark is the race's own painted trail sign, portrait at
               108x180, so it is sized by HEIGHT and its width follows. An
               unloaded lazy image with width:auto shrink-wraps to 0x0, never
               intersects the viewport and never loads, which is how the sponsor
-              logos vanished earlier in this build: give it real dimensions. */
-          }
+              logos vanished earlier in this build: give it real dimensions. */}
           <img
             alt={brandName}
             width={108}
@@ -423,69 +391,60 @@ const rowClass = (label: string) =>
             data-logo-dark-srcset={footerLogoDark}
           />
         </a>
-        {
-          siteSettings?.tagline && (
-            <p class="text-sm text-foreground/80 italic">{siteSettings.tagline}</p>
-          )
-        }
+        {siteSettings?.tagline && (
+          <p class="text-sm text-foreground/80 italic">{siteSettings.tagline}</p>
+        )}
       </div>
     </div>
   </div>
 
-  {
-    /* The base rail: copyright, small print and the credit on one line, so they
-      never grow into a column of their own. */
-  }
+  {/* The base rail: copyright, small print and the credit on one line, so they
+      never grow into a column of their own. */}
   <div class="foot-base foot-z">
-    <div
-      class="mx-auto flex max-w-content flex-col items-center justify-center gap-xs px-6 py-m text-center text-xs text-foreground/80 sm:flex-row sm:justify-between"
-    >
-      <p>© {currentYear} {brandName}</p>
+    <div class="mx-auto flex max-w-content flex-col items-center justify-center gap-xs px-6 py-m text-center text-xs text-foreground/80 sm:flex-row sm:justify-between">
+      <p>
+        © {currentYear} {brandName}
+      </p>
       <div class="flex items-center gap-m">
-        {
-          /* The privacy policy is always linked, because it is a code page at a
+        {/* The privacy policy is always linked, because it is a code page at a
             fixed route rather than a Sanity document that might not exist. It
             was absent until 2026-09-18: the race genuinely had no such page and
             a footer link to a 404 is worse than no link. Adding Google
             Analytics changed that, since it sets cookies and Google's own terms
             require a policy disclosing them. Any further legal links still come
-            from Site settings and render after it. */
-        }
+            from Site settings and render after it. */}
         <a
           href="/privacy/"
           class="tap-pad-lg underline underline-offset-2 transition-colors hover:text-link"
-          >Privacy</a
         >
-        {
-          LEGAL_LINKS.map((l) => (
-            <a
-              href={l.href}
-              class="tap-pad-lg underline underline-offset-2 transition-colors hover:text-link"
-              {...externalLinkAttrs(l.href)}
-            >
-              {l.label}
-            </a>
-          ))
-        }
-        {
-          siteCredit && (
-            <span>
-              Designed by{' '}
-              {siteCreditUrl ? (
-                <a
-                  href={siteCreditUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="tap-pad-lg underline underline-offset-2 transition-colors hover:text-link"
-                >
-                  {siteCredit}
-                </a>
-              ) : (
-                siteCredit
-              )}
-            </span>
-          )
-        }
+          Privacy
+        </a>
+        {LEGAL_LINKS.map((l) => (
+          <a
+            href={l.href}
+            class="tap-pad-lg underline underline-offset-2 transition-colors hover:text-link"
+            {...externalLinkAttrs(l.href)}
+          >
+            {l.label}
+          </a>
+        ))}
+        {siteCredit && (
+          <span>
+            Designed by{' '}
+            {siteCreditUrl ? (
+              <a
+                href={siteCreditUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="tap-pad-lg underline underline-offset-2 transition-colors hover:text-link"
+              >
+                {siteCredit}
+              </a>
+            ) : (
+              siteCredit
+            )}
+          </span>
+        )}
       </div>
     </div>
   </div>

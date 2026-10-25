@@ -5,7 +5,7 @@
 //
 // Usage:
 //   node scripts/build-elevation.mjs course.gpx                 # report only
-//   node scripts/build-elevation.mjs course.gpx --write         # save to Sanity
+//   NCS_PRODUCTION_WRITE=yes node scripts/build-elevation.mjs course.gpx --write  # save to Sanity
 //   node scripts/build-elevation.mjs course.gpx --loops 4,3     # long/short counts
 //   node scripts/build-elevation.mjs course.gpx --out p.json    # save to disk, not Sanity
 //
@@ -73,6 +73,7 @@
 // thing to infer.
 // ---------------------------------------------------------------------------
 
+import { writeGate } from './lib/write-gate.mjs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeFileSync } from 'node:fs';
@@ -89,7 +90,14 @@ const env = loadEnv(root);
 
 const args = process.argv.slice(2);
 const file = args.find((a) => !a.startsWith('--'));
-const WRITE = args.includes('--write');
+// --write saves to Sanity, and on production it also needs NCS_PRODUCTION_WRITE=yes
+// in the same command (scripts/lib/write-gate.mjs, PORTS.md card 86). Checked
+// here, before the elevation lookups, so a refused run fails fast.
+const WRITE = writeGate({
+  dataset: env.PUBLIC_SANITY_DATASET ?? 'production',
+  flag: '--write',
+  quiet: true,
+});
 // GUARDED, NOT args[indexOf + 1]. With no --loops flag indexOf returns -1 and
 // args[0] is the GPX path, which is truthy, so the report printed a stray
 // "NaN long + undefined short" line on every ordinary run.
@@ -233,7 +241,9 @@ async function main() {
   }
 
   if (!WRITE) {
-    console.log(`\n${profile.points.length} profile points ready. Re-run with --write to save.`);
+    console.log(
+      `\n${profile.points.length} profile points ready. Re-run with --write and NCS_PRODUCTION_WRITE=yes to save.`,
+    );
     return;
   }
 

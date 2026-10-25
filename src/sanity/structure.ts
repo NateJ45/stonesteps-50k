@@ -1,50 +1,37 @@
-// Studio Desk structure. Pins Site Settings at the top, then ALL page singletons
-// (one document each) under "Pages", then the reusable content collections under
-// "Content", then "Journal". Every document type is placed explicitly so nothing
-// floats loose at the desk root. The trailing default-list filter is a safety net
-// for any future type that hasn't been placed (and hides sanity-plugin-media's
-// media.tag type, which would otherwise show at the root).
+// Studio Desk structure for the Stone Steps 50K. The order follows the race
+// year: this year's race first (the date, the distances, the schedule, the
+// sponsors), then the results and records (written by the nightly import),
+// then the pages, the race notices and the site setup, then the Trash.
 //
-// "Pages" is one list (so the rule for editors is simple: every page lives here).
+// Names (2026-10-18): one name per thing, in runners' words. Race notices
+// (code: announcement), Runners (athlete), Results (raceResult), Records the
+// results cannot prove (recordEntry), Saved sections (sectionPreset). Every
+// document type is placed explicitly so nothing floats loose at the desk root;
+// the trailing default-list filter is a safety net for a future type.
 //
-// Orderable lists: service / philosophyPoint use the orderable-document-list plugin.
-// Editors drag rows to reorder; the plugin writes an `orderRank` string. GROQ
-// queries order by orderRank (with displayOrder fallback) so the site mirrors Studio.
+// The Studio kit (PORTS.md card 106) took over three things this desk used to
+// hold: the Welcome pane is the Home tool, the Checkup pane is the Checkup
+// tool, and the Help & Guide list is the Site Guide tool (all in the top bar).
+// "Start a new race year" and "Brand colours" stay here: they are the race's
+// own, and the race director comes looking for them in the menu.
 //
-// Preview: 2026-08-28 the per-document iframe tab (sanity-plugin-iframe-pane)
-// was retired in favour of the Presentation tool, which renders the SSR
-// /preview/* routes with click-to-edit and in-canvas section controls. The
-// singleton list items below therefore carry the plain form view, and
-// "see it on the page" is the Presentation tool in the navbar.
+// Orderable lists (distances, schedule, course features, sponsors) use the
+// orderable-document-list plugin: drag rows to reorder; GROQ orders by
+// orderRank so the site mirrors the Studio.
 
 import type { StructureBuilder, StructureResolverContext } from 'sanity/structure';
 import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list';
-import {
-  BellIcon,
-  BlockElementIcon,
-  CogIcon,
-  ColorWheelIcon,
-  HomeIcon,
-  InfoOutlineIcon,
-  EnvelopeIcon,
-  DocumentTextIcon,
-  DocumentsIcon,
-  HeartIcon,
-  ThListIcon,
-  PinIcon,
-  ArrowRightIcon,
-  StarFilledIcon,
-  CalendarIcon,
-  ClockIcon,
-  UsersIcon,
-  ActivityIcon,
-} from '@sanity/icons';
-import { makeGuideView } from './components/GuideView';
-import { guides, GUIDE_CATEGORIES } from './guides/content';
-import { WelcomePane } from './components/WelcomePane';
-import { CheckupTool } from './components/CheckupTool';
 import { RaceYearTool } from './components/RaceYearTool';
 import BrandKit from './components/BrandKit';
+import { staffDesk } from './kit/shared';
+import { trashListItem } from './kit/trash';
+import { brandIcon, typeIcon, type BrandIcon } from './brandIcons';
+import { emptyAwareList } from './kit/emptyList';
+import { WEEK_TYPE } from '../lib/studio-kit';
+import { TRASH_TYPE } from '../lib/studio-trash';
+import { tableListItem } from './workflow';
+import { TABLES } from './tables.config';
+import { kitConfig } from './kit.config';
 
 const SINGLETON_TYPES = [
   'siteSettings',
@@ -59,7 +46,7 @@ const SINGLETON_TYPES = [
   'journalPage',
   'notFoundPage',
   'privacyPage',
-  // The race's own singleton: date, venue, links, fee tiers.
+  // The race's own singleton: date, venue, links.
   'race',
 ] as const;
 
@@ -77,7 +64,7 @@ const ORDERABLE_TYPES = [
 const HIDDEN_FROM_DEFAULT = new Set<string>([
   ...SINGLETON_TYPES,
   ...ORDERABLE_TYPES,
-  'announcement', // placed explicitly under Content → Announcements
+  'announcement', // placed explicitly: Race notices
   'testimonial',
   'faqItem',
   'faqCategory',
@@ -86,234 +73,125 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'page', // custom pages, placed explicitly under "Pages"
   'sectionPreset', // saved sections, placed explicitly under "Pages"
   'redirect', // placed explicitly under "Pages" -> Redirects
-  // sanity-plugin-media registers this tag type; keep it out of the desk root
-  // (the "Media" tool in the top sidebar is where tags belong).
-  'media.tag',
-  // processStep is placed explicitly under Content → Process Steps
-  'processStep',
-  // Race collections, all placed explicitly under "The Race" below.
+  // Race collections, placed explicitly under "Results and records".
   'athlete',
   'raceResult',
   'recordEntry',
   'raceDay',
+  TRASH_TYPE, // the Studio kit's Trash, placed explicitly at the bottom
+  // The Studio kit's weekly tick document (card 111): Home's bookkeeping, never edited here.
+  WEEK_TYPE,
+  // Private preview link records (card 117): managed from "Share a preview" only.
+  'previewShare',
 ]);
 
 /**
- * Build a singleton list item pinned to one document id.
- *
- * The name is historical: it used to attach an iframe preview view alongside
- * the form. Since 2026-08-28 the live draft preview is the Presentation tool
- * (src/sanity/resolve.ts maps every one of these types to a /preview path), so
- * the editor pane is the form. Views are still set explicitly because
- * S.document().views([...]) bypasses defaultDocumentNode in sanity.config.ts,
- * and that is where the per-type extra tabs are added.
+ * A singleton list item pinned to one document id. The id is the document's,
+ * not the title's: an intent link ("open the race document", from Home, the
+ * Checkup or a guide) resolves to the pane named after the document, and a
+ * title-derived id opened the parent list instead (2026-09-12).
  */
-function singletonWithPreview(S: StructureBuilder, schemaType: string, title: string, icon: any) {
-  return (
-    S.listItem()
-      // THE ID IS THE DOCUMENT'S, NOT THE TITLE'S, and that is what makes every
-      // "Take me there" button land on the form. With no explicit id Sanity
-      // derives one from the title, so "Race day (date, times, fees)" became the
-      // pane `raceDayDateTimesFees`, while an edit intent for the race document
-      // looks for a pane called `race`. It found the parent list and stopped
-      // there, which is why the guides opened the category rather than the
-      // document (2026-09-12). Naming the pane after the document also means a
-      // reworded title can no longer break a link.
-      .id(schemaType)
-      .title(title)
-      .icon(icon)
-      .child(S.document().schemaType(schemaType).documentId(schemaType).views([S.view.form()]))
-  );
+function singletonWithPreview(
+  S: StructureBuilder,
+  schemaType: string,
+  title: string,
+  icon: BrandIcon = typeIcon(schemaType),
+) {
+  return S.listItem()
+    .id(schemaType)
+    .title(title)
+    .icon(icon)
+    .child(
+      S.document()
+        .schemaType(schemaType)
+        .documentId(schemaType)
+        .views([S.view.form().title('Edit')]),
+    );
 }
 
+// The Studio kit's staff view hides kitConfig.staffHiddenPanes from this desk
+// (src/sanity/kit/shared.tsx, staffDesk); everyone else sees all of it.
 export const deskStructure = (S: StructureBuilder, context: StructureResolverContext) =>
+  staffDesk(fullDesk(S, context), context, kitConfig);
+
+const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
   S.list()
-    .title('Stone Steps 50K')
+    .title('Content')
     .items([
-      // WELCOME — the landing screen. First, because the desk used to open on
-      // nothing at all: a menu, and no indication of which entry answers the
-      // question you arrived with. Ported from west-chester-preschool.
-      S.listItem()
-        .id('welcome')
-        .title('Welcome')
-        .icon(HomeIcon)
-        .child(
-          S.component(WelcomePane as never)
-            .id('welcome-pane')
-            .title('Welcome'),
-        ),
-
-      // CHECKUP and START A NEW RACE YEAR. Both read-only, both ported from
-      // west-chester-preschool (HealthTool and SetupWizard). They sit here
-      // rather than in the top toolbar on purpose: the toolbar already holds
-      // Presentation, Media and Releases, and a tool nobody notices is a tool
-      // nobody runs. This site is edited twice a year by one person, so the
-      // things that tell him what needs doing belong where he already is.
-      S.listItem()
-        .id('checkup')
-        .title('Checkup (what needs attention)')
-        .icon(ActivityIcon)
-        .child(
-          S.component(CheckupTool as never)
-            .id('checkup-pane')
-            .title('Checkup'),
-        ),
-
-      S.listItem()
-        .id('race-year')
-        .title('Start a new race year')
-        .icon(CalendarIcon)
-        .child(
-          S.component(RaceYearTool as never)
-            .id('race-year-pane')
-            .title('Start a new race year'),
-        ),
-
-      // BRAND COLOURS. Not a website job, which is exactly why it is here: the
-      // flyer and the Facebook post are made somewhere else, and this is the
-      // only place the race's actual values are written down in one list.
-      S.listItem()
-        .id('brand-kit')
-        .title('Brand colours (for flyers and posts)')
-        .icon(ColorWheelIcon)
-        .child(
-          S.component(BrandKit as never)
-            .id('brand-kit-pane')
-            .title('Brand colours'),
-        ),
-
-      S.divider(),
-
-      // HELP & GUIDE — the handbook, kept high so it is always in reach.
-      //
-      // This replaced the starter's "Start Here" panes on 2026-09-07. Those were
-      // written for a design studio ("Your business at a glance", "Brand kit",
-      // "Grow your studio"), which means nothing to a race director, and all
-      // three of their documents were never seeded for this project, so every
-      // one of those panes opened empty.
-      //
-      // The pattern is ported from west-chester-preschool, where it was worked
-      // out with a volunteer who had never used a CMS. The guides are DATA in
-      // src/sanity/guides/content.ts, held in the repo rather than in Sanity so
-      // they cannot be deleted by accident and the next person inherits them.
-      S.listItem()
-        .id('help-and-guide')
-        .title('Help & Guide')
-        .icon(InfoOutlineIcon)
-        .child(
-          S.list()
-            .id('help-and-guide-list')
-            .title('Help & Guide')
-            .items(
-              GUIDE_CATEGORIES.flatMap((category) => {
-                const mine = guides.filter((g) => g.category === category);
-                return mine.length === 0
-                  ? []
-                  : [
-                      S.divider().title(category),
-                      ...mine.map((g) =>
-                        S.listItem()
-                          .id(`guide-${g.slug}`)
-                          .title(g.title)
-                          .icon(() => g.icon)
-                          .child(
-                            S.component(makeGuideView(g.slug) as never)
-                              .id(`guide-view-${g.slug}`)
-                              .title(g.title),
-                          ),
-                      ),
-                    ];
-              }),
-            ),
-        ),
-
-      S.divider(),
-
-      // Site Settings — pinned singleton (no preview; not a page)
-      singletonWithPreview(S, 'siteSettings', 'Site setup (menus, footer)', CogIcon),
-
-      S.divider(),
-
       // THIS YEAR'S RACE. Everything that changes from one running to the next,
       // in one place, so preparing next year is one visit rather than a hunt.
-      // Named for WHEN you touch it rather than for what it holds: "The Race"
-      // was accurate and told a first-time editor nothing.
-      //
-      // Athletes and Results are listed but are not day-to-day editing surfaces:
-      // both are written by scripts/import-results.mjs from the RunSignUp API.
-      // They are here so a name can be corrected at its single source, which is
-      // the whole reason results reference an athlete rather than repeating one.
+      // EVERY PANE A TOOL LINKS TO NEEDS AN EXPLICIT ID: Home, the Checkup,
+      // raceYearSteps.ts and the guides link to 'this-years-race;...'.
       S.listItem()
-        // EVERY PANE A TOOL LINKS TO NEEDS AN EXPLICIT ID. A list item with no
-        // `.id()` gets a generated one, so `/structure/this-years-race` matched
-        // nothing and the "Start a new race year" cards that pointed here were
-        // dead links (2026-09-12). Change an id here and the targets in
-        // RaceYearTool.tsx and guides/content.ts have to move with it.
         .id('this-years-race')
         .title("This year's race")
-        .icon(ActivityIcon)
+        .icon(typeIcon('race'))
         .child(
           S.list()
             .title("This year's race")
             .items([
-              singletonWithPreview(S, 'race', 'Race day (date, times, fees)', CalendarIcon),
+              singletonWithPreview(S, 'race', 'Race day (date, venue, links)'),
               orderableDocumentListDeskItem({
                 type: 'distance',
-                title: 'Distances',
-                icon: ArrowRightIcon,
+                title: 'Distances (fees, caps, start times)',
+                icon: typeIcon('distance'),
                 S,
                 context,
               }),
               orderableDocumentListDeskItem({
                 type: 'scheduleItem',
                 title: 'Race-day schedule',
-                icon: ClockIcon,
+                icon: typeIcon('scheduleItem'),
                 S,
                 context,
               }),
               orderableDocumentListDeskItem({
                 type: 'courseFeature',
                 title: 'Course features',
-                icon: PinIcon,
+                icon: typeIcon('courseFeature'),
                 S,
                 context,
               }),
               orderableDocumentListDeskItem({
                 type: 'sponsor',
                 title: 'Sponsors',
-                icon: HeartIcon,
+                icon: typeIcon('sponsor'),
                 S,
                 context,
               }),
+              ...TABLES.filter((c) => c.type === 'sponsor').map((c) => tableListItem(S, c)),
               S.divider(),
-              // Results, drilled down by year and then by distance.
-              //
-              // WHY THIS IS NOT A PLAIN documentTypeListItem. There are 1,961
-              // result documents across 22 runnings. Sanity's default list is
-              // virtualised so it does not fall over, but it is one infinite
-              // scroll with no structure: finding the 2011 field means
-              // scrolling past a decade, and the ordering options can only sort
-              // the whole archive at once. Splitting on year turns that into 22
-              // lists, each of which is one race.
-              //
-              // AND THEN ON DISTANCE, because a year holds two separate races.
-              // Ordering a mixed year by time interleaves them and puts a fast
-              // 27K above a slow 50K, which reads as a results table that has
-              // gone wrong. Sorting the list on the distance REFERENCE was the
-              // first attempt and the Studio rejects it: `distance._ref` is a
-              // valid GROQ sort but not a schema field path, and the pane fails
-              // with "Could not fetch list items". A second level is clearer
-              // than a clever sort would have been anyway.
-              //
-              // Both levels are QUERIED, not hardcoded, so importing a
-              // recovered edition adds it to the desk without anyone editing
-              // this file, and a year that only ever ran one distance shows
-              // only that one. The query is inside the child callback, so it
-              // runs when an editor opens Results rather than on every boot.
+              S.listItem()
+                .id('race-year')
+                .title('Start a new race year')
+                .icon(brandIcon('event'))
+                .child(
+                  S.component(RaceYearTool as never)
+                    .id('race-year-pane')
+                    .title('Start a new race year'),
+                ),
+            ]),
+        ),
+
+      // RESULTS AND RECORDS. Shown, not typed into: scripts/import-results.mjs
+      // writes results and runners from the RunSignUp API every night through
+      // October and November, and weekly the rest of the year. The two hand
+      // jobs are fixing a runner's name at its single source and ticking
+      // "Ran as a trekker" on a result. Records are derived from the results
+      // on the site itself; the recordEntry list is only for a mark the
+      // results cannot prove (empty since 2026-09-17, PENDING 1j).
+      S.listItem()
+        .id('results-and-records')
+        .title('Results and records')
+        .icon(typeIcon('raceResult'))
+        .child(
+          S.list()
+            .title('Results and records')
+            .items([
               S.listItem()
                 .id('results')
                 .title('Results')
-                .icon(ThListIcon)
+                .icon(typeIcon('raceResult'))
                 .child(() =>
                   context
                     .getClient({ apiVersion: '2026-05-01' })
@@ -377,7 +255,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                           S.listItem()
                             .id('all-results')
                             .title('All results')
-                            .icon(ThListIcon)
+                            .icon(typeIcon('raceResult'))
                             .child(S.documentTypeList('raceResult').title('All results')),
                           S.divider(),
                           ...yearItems,
@@ -388,97 +266,119 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                     // taking Results away entirely.
                     .catch(() => S.documentTypeList('raceResult').title('All results')),
                 ),
-              S.documentTypeListItem('athlete').title('Runners (fix a name here)').icon(UsersIcon),
+              S.documentTypeListItem('athlete')
+                .title('Runners (fix a name here)')
+                .icon(typeIcon('athlete')),
+              // Hidden in the staff view (kit.config.ts staffHiddenPanes): the
+              // records show only what a finish can prove (PENDING 1j), so a
+              // hand-typed record is a developer's call, never a form to fill.
               S.documentTypeListItem('recordEntry')
+                .id('record-entries')
                 .title('Records the results cannot prove')
-                .icon(StarFilledIcon),
+                .icon(typeIcon('recordEntry')),
               // Recorded automatically each November by scripts/weather-sync.mjs;
-              // here so a missed year can be typed in.
-              S.documentTypeListItem('raceDay').title('Race days (for the weather strip)'),
+              // here so a missed year can be typed in. Hidden in the staff view.
+              S.documentTypeListItem('raceDay')
+                .id('race-days')
+                .title('Race days (for the weather strip)')
+                .icon(typeIcon('raceDay')),
             ]),
         ),
 
       S.divider(),
 
-      // Pages — every page singleton lives here.
+      // Pages: every page the race director can change.
       S.listItem()
         .id('pages')
         .title('Pages')
-        .icon(DocumentTextIcon)
+        .icon(brandIcon('pages'))
         .child(
           S.list()
             .title('Pages')
             .items([
-              // Only the pages this site actually serves. The starter's About,
-              // Services, Process, FAQ, Journal and Privacy singletons still
-              // exist as schema types (src/lib/section-fields.test.ts reads two
-              // of those files), but their ROUTES were removed because the race
-              // does not have those pages. Listing a page an editor can fill in
-              // and then never see published is worse than not offering it.
-              singletonWithPreview(S, 'homePage', 'Home', HomeIcon),
-              singletonWithPreview(
-                S,
-                'notFoundPage',
-                'The "page not found" page',
-                DocumentTextIcon,
-              ),
+              // Only the pages this site serves. The starter's About, Services,
+              // Process, FAQ, Journal and Privacy singletons still exist as
+              // schema types, but their routes were removed: the race does not
+              // have those pages, and a page an editor can fill in and never
+              // see published is worse than not offering it.
+              singletonWithPreview(S, 'homePage', 'Home'),
+              singletonWithPreview(S, 'notFoundPage', 'The "page not found" page'),
 
               S.divider(),
 
-              // Custom pages: editors build these themselves from the section library.
-              // Multi-instance (not a singleton), so it is a normal document list.
               // Course, Records and Contact live here: they are `page`
-              // documents built from the section library, not singletons, so
-              // the race director can reorder or add to them freely.
-              S.documentTypeListItem('page')
-                .title('Pages (course, records, contact)')
-                .icon(DocumentsIcon),
+              // documents built from the section library, so the race director
+              // can reorder or add to them freely.
+              emptyAwareList(S, context, {
+                id: 'page',
+                type: 'page',
+                title: 'Pages (course, records, contact)',
+                icon: typeIcon('page'),
+                explain:
+                  'Pages you build from sections: the course, the records, contact, or a new one like a volunteer call or a race recap.',
+              }),
 
               S.divider(),
 
-              // Saved sections: one band of a page, kept for reuse. Made from a
-              // page's publish menu ("Save a section as preset..."), added to a
-              // page from the Saved sections group in the Presentation
-              // navigator. Ordered by name, because the name is the only way
-              // you find one again.
+              // Saved sections: one band of a page, kept for reuse.
               S.documentTypeListItem('sectionPreset')
                 .title('Saved sections')
-                .icon(BlockElementIcon),
+                .icon(typeIcon('sectionPreset')),
 
               S.divider(),
 
-              // Redirects: old address -> new address. Most entries are filed
-              // automatically when a page's web address changes on publish
-              // (src/sanity/components/slugRedirect.tsx); the editor adds one by
-              // hand for an address that never existed on this site.
+              // Redirects: old address -> new address. Most are filed
+              // automatically when a page's web address changes on publish.
               S.documentTypeListItem('redirect')
                 .title('Redirects (old links)')
-                .icon(ArrowRightIcon),
+                .icon(typeIcon('redirect')),
             ]),
         ),
 
+      // RACE NOTICES. The line across the top of every page: parking, bib
+      // pickup, the weather, a course change. Quick update makes one from a
+      // phone. The id is load-bearing: Home and the race checklist link to it.
+      emptyAwareList(S, context, {
+        id: 'announcement',
+        type: 'announcement',
+        title: 'Race notices',
+        icon: typeIcon('announcement'),
+        explain:
+          'A short line across the top of every page, for race-week news: parking, bib pickup, the weather, a course change. Quick update puts one up from your phone.',
+        createLabel: 'Write the first notice',
+      }),
+      ...TABLES.filter((c) => c.type === 'announcement').map((c) => tableListItem(S, c)),
+
       S.divider(),
 
-      // Content. The starter's service-business collections (services,
-      // philosophy values, process steps, testimonials, FAQ items, journal)
-      // are NOT listed: this site has no routes that render them, and a
-      // collection an editor can fill with content that reaches no page is a
-      // trap. Their schema types stay registered so the section library and
-      // its drift tests are unchanged.
+      // Site setup: the menus, the footer, the settings. Rarely touched.
+      singletonWithPreview(S, 'siteSettings', 'Site setup (menus, footer)'),
+
+      // BRAND COLOURS. Not a website job, which is exactly why it is here: the
+      // flyer and the Facebook post are made somewhere else, and this is the
+      // only place the race's actual values are written down in one list.
       S.listItem()
-        .title('Content')
-        .icon(ThListIcon)
+        .id('brand-kit')
+        .title('Brand colours (for flyers and posts)')
+        .icon(brandIcon('brandKit'))
         .child(
-          S.list()
-            .title('Content')
-            .items([S.documentTypeListItem('announcement').title('Announcements').icon(BellIcon)]),
+          S.component(BrandKit as never)
+            .id('brand-kit-pane')
+            .title('Brand colours'),
         ),
 
       S.divider(),
 
+      // The Studio kit's Trash: "Move to Trash" keeps a copy here, and "Bring
+      // it back" puts it where it was (src/sanity/kit/trash.tsx). The id is
+      // load-bearing: the Checkup's "Open the Trash" links to it.
+      trashListItem(S, context, brandIcon('trash')),
+
       // Safety net: surface any document type we have NOT explicitly placed above
-      // (and keep the hidden set, including media.tag, out of the desk root).
-      ...S.documentTypeListItems().filter(
-        (item) => !HIDDEN_FROM_DEFAULT.has(item.getId() as string),
-      ),
+      // (and keep the hidden set out of the desk root). Every media.* type
+      // belongs to sanity-plugin-media's own tool.
+      ...S.documentTypeListItems().filter((item) => {
+        const id = item.getId() as string;
+        return !HIDDEN_FROM_DEFAULT.has(id) && !id.startsWith('media.');
+      }),
     ]);

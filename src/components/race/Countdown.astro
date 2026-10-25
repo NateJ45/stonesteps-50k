@@ -127,29 +127,28 @@ const srText = !valid
       : 'Next running to be confirmed.';
 ---
 
-{
-  valid && (
-    <div class={className}>
-      <div
-        class:list={[
-          'clock',
-          inline
-            ? 'clock--inline inline-flex items-baseline gap-x-3 gap-y-1'
-            : 'inline-block rounded-[10px] border-2 border-black px-[1.15rem] pt-[0.9rem] pb-3',
-        ]}
-        data-target={target}
-        data-phase={phase}
-        data-week={week ? '1' : '0'}
-        data-title-week={WEEK_TITLE}
-        data-title-count={label}
-        data-title-race={TITLES.race}
-        data-title-done={TITLES.done}
-        data-msg-race={MESSAGES.race}
-        data-msg-done={MESSAGES.done}
-        role="timer"
-        aria-label={srText}
-      >
-        {/* THE LABEL LIVES ON THE PLATE, not on the band. It used to sit above
+{valid && (
+  <div class={className}>
+    <div
+      class:list={[
+        'clock',
+        inline
+          ? 'clock--inline inline-flex items-baseline gap-x-3 gap-y-1'
+          : 'clock--plate inline-block rounded-[10px] border-2 border-black px-[1.15rem] pt-[0.9rem] pb-3 text-center lg:text-left',
+      ]}
+      data-target={target}
+      data-phase={phase}
+      data-week={week ? '1' : '0'}
+      data-title-week={WEEK_TITLE}
+      data-title-count={label}
+      data-title-race={TITLES.race}
+      data-title-done={TITLES.done}
+      data-msg-race={MESSAGES.race}
+      data-msg-done={MESSAGES.done}
+      role="timer"
+      aria-label={srText}
+    >
+      {/* THE LABEL LIVES ON THE PLATE, not on the band. It used to sit above
           the clock on the page ground, 12px over the mud, and axe blends the
           four mud layers into a veil there: it measured 4.11:1 once, then
           2.68:1 after the wordmark grew and the label moved a hundred pixels
@@ -157,48 +156,50 @@ const srText = !valid
           back over the line. A label whose contrast depends on where the
           mud happens to fall is not a label with contrast. On the plate's own
           face it is cream on near-black and the mud cannot reach it. */}
-        <p class="clock__title font-mono text-[0.6875rem] tracking-[0.22em] uppercase">
-          {week ? WEEK_TITLE : TITLES[phase]}
-        </p>
-        {/* The two messages, lit in the same LED as the digits. Hidden while
+      <p class="clock__title font-mono text-[0.6875rem] tracking-[0.22em] uppercase">
+        {week ? WEEK_TITLE : TITLES[phase]}
+      </p>
+      {/* The two messages, lit in the same LED as the digits. Hidden while
             counting; the digits row is hidden while one of these shows. */}
-        <p class="clock__msg tabular" data-msg hidden={phase === 'count'}>
-          {MESSAGES[phase]}
-        </p>
-        <div
-          class:list={['flex items-end', inline ? 'gap-3.5' : 'gap-2']}
-          data-digits
-          hidden={phase !== 'count'}
-        >
-          {units.map((u, i) => (
-            <>
-              {i > 0 && !inline && (
-                <span class="clock__sep pb-4 font-mono text-2xl leading-none" aria-hidden="true">
-                  :
-                </span>
-              )}
-              <span class="clock__group grid justify-items-center">
-                <span class="clock__ghost tabular" aria-hidden="true" data-ghost={u.ghost} />
-                <span class="clock__val tabular" data-unit={u.key}>
-                  {u.text}
-                </span>
-                <span class="clock__lbl font-mono" aria-hidden="true">
-                  {u.lbl}
-                </span>
+      <p class="clock__msg tabular" data-msg hidden={phase === 'count'}>
+        {MESSAGES[phase]}
+      </p>
+      <div
+        class:list={[
+          'flex items-end',
+          inline ? 'gap-3.5' : 'justify-center gap-2 lg:justify-start',
+        ]}
+        data-digits
+        hidden={phase !== 'count'}
+      >
+        {units.map((u, i) => (
+          <>
+            {i > 0 && !inline && (
+              <span class="clock__sep pb-4 font-mono text-2xl leading-none" aria-hidden="true">
+                :
               </span>
-            </>
-          ))}
-        </div>
-        {!inline && (
-          <a class="clock__pack font-mono" href="/course#pack" data-pack hidden={!week}>
-            Race week: what to pack →
-          </a>
-        )}
-        {!inline && <p class="clock__forecast font-mono" data-forecast="brief" hidden />}
+            )}
+            <span class="clock__group grid justify-items-center">
+              <span class="clock__ghost tabular" aria-hidden="true" data-ghost={u.ghost} />
+              <span class="clock__val tabular" data-unit={u.key}>
+                {u.text}
+              </span>
+              <span class="clock__lbl font-mono" aria-hidden="true">
+                {u.lbl}
+              </span>
+            </span>
+          </>
+        ))}
       </div>
+      {!inline && (
+        <a class="clock__pack font-mono" href="/course#pack" data-pack hidden={!week}>
+          Race week: what to pack →
+        </a>
+      )}
+      {!inline && <p class="clock__forecast font-mono" data-forecast="brief" hidden />}
     </div>
-  )
-}
+  </div>
+)}
 <ForecastLoader />
 
 <style>
@@ -337,6 +338,26 @@ const srText = !valid
   }
   .clock__forecast[hidden] {
     display: none;
+  }
+  /* ONE ALIGNMENT FOR THE WHOLE PLATE. The title, digits, pack link and forecast
+     used to disagree on a phone: the digits sat at the plate's left edge while
+     the text lines centred and the forecast glyph pinned left. Now every line
+     centres under 1024px (the hero is centred there) and every line hangs from
+     the left edge from lg, matching the Register buttons above. */
+  .clock__forecast {
+    margin-inline: auto;
+  }
+  .clock__forecast.forecast--icon {
+    justify-content: center;
+    text-align: left;
+  }
+  @media (min-width: 1024px) {
+    .clock__forecast {
+      margin-inline: 0;
+    }
+    .clock__forecast.forecast--icon {
+      justify-content: flex-start;
+    }
   }
   .clock__pack[hidden] {
     display: none;

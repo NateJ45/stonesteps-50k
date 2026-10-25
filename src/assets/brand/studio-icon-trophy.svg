@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Record">
+  <!-- Stone Steps 50K Studio icon (PORTS.md card 119): a plate with the race's hard offset shadow. -->
+  <rect x="2.6" y="2.6" width="20" height="20" rx="5" fill="#1A1712"/><rect x="1" y="1" width="20" height="20" rx="5" fill="#3A3128"/>
+  <path d="M7.4 5 H14.6 V9 A3.6 3.6 0 0 1 7.4 9 Z" fill="#FED89B"/><path d="M7.4 6.4 H5.4 A2.2 2.2 0 0 0 7.6 10 M14.6 6.4 H16.6 A2.2 2.2 0 0 1 14.4 10" fill="none" stroke="#FED89B" stroke-width="1.3"/><rect x="10.1" y="12.2" width="1.8" height="2.6" fill="#FED89B"/><rect x="7.6" y="14.8" width="6.8" height="2.4" rx="0.6" fill="#FFEBBB"/>
+</svg>

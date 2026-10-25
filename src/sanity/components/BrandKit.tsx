@@ -1,5 +1,6 @@
 import { Box, Card, Flex, Grid, Stack, Text } from '@sanity/ui';
-import { ToolHeading } from './ToolHeading';
+import { ColorWheelIcon } from '@sanity/icons/ColorWheel';
+import { ToolHeading } from '../kit/shared';
 
 // =============================================================================
 // BrandKit — the race's colours and type, for anything made outside the website
@@ -87,7 +88,7 @@ function SwatchCard({ s }: { s: Swatch }) {
   return (
     <Card padding={0} radius={3} border overflow="hidden">
       <Box padding={4} style={{ background: s.hex, color: s.ink ?? '#1A1712' }}>
-        <Stack space={2}>
+        <Stack gap={2}>
           <Text size={2} weight="semibold" style={{ color: 'inherit' }}>
             {s.name}
           </Text>
@@ -108,9 +109,9 @@ function SwatchCard({ s }: { s: Swatch }) {
 export default function BrandKit() {
   return (
     <Box padding={4}>
-      <Stack space={5} style={{ maxWidth: 720, margin: '0 auto' }}>
-        <Stack space={3}>
-          <ToolHeading emoji="🎨">Brand colours and type</ToolHeading>
+      <Stack gap={5} style={{ maxWidth: 720, margin: '0 auto' }}>
+        <Stack gap={3}>
+          <ToolHeading icon={ColorWheelIcon}>Brand colours and type</ToolHeading>
           <Text size={2} muted style={{ lineHeight: 1.6 }}>
             For anything made away from the website: a flyer, a Facebook post, a sign at The Oval.
             These are the values the site itself uses, so something made with them will look like it
@@ -119,11 +120,11 @@ export default function BrandKit() {
         </Stack>
 
         {GROUPS.map((g) => (
-          <Stack key={g.label} space={3}>
+          <Stack key={g.label} gap={3}>
             <Text size={1} weight="semibold" muted style={{ textTransform: 'uppercase' }}>
               {g.label}
             </Text>
-            <Grid columns={[1, 2, 2]} gap={3}>
+            <Grid gridTemplateColumns={[1, 2, 2]} gap={3}>
               {g.swatches.map((s) => (
                 <SwatchCard key={s.hex} s={s} />
               ))}
@@ -131,13 +132,13 @@ export default function BrandKit() {
           </Stack>
         ))}
 
-        <Stack space={3}>
+        <Stack gap={3}>
           <Text size={1} weight="semibold" muted style={{ textTransform: 'uppercase' }}>
             Type
           </Text>
           {FONTS.map((f) => (
             <Card key={f.name} padding={4} radius={3} border>
-              <Stack space={2}>
+              <Stack gap={2}>
                 <Flex align="baseline" gap={3}>
                   <Text size={2} weight="semibold">
                     {f.name}
@@ -155,7 +156,7 @@ export default function BrandKit() {
         </Stack>
 
         <Card padding={4} radius={3} tone="caution" border>
-          <Stack space={2}>
+          <Stack gap={2}>
             <Text size={1} weight="semibold">
               Two pairings to avoid.
             </Text>

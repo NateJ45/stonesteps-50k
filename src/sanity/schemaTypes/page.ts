@@ -12,11 +12,12 @@
 // error and the site never builds a colliding page.
 
 import { defineType, defineField } from 'sanity';
-import { DocumentsIcon } from '@sanity/icons';
+import { DocumentsIcon } from '@sanity/icons/Documents';
 import { SECTION_TYPES, sectionArrayOptions } from './sections';
 import { RESERVED_SLUGS } from '../../lib/reservedSlugs';
 import { PUBLISH_AT_GROUP, publishAtField } from './_publishAt';
 import { seoFields } from './_seoFields';
+import { pageBuilderAuthoring } from '../pageBuilderAuthoring';
 
 // ONE LIST, IMPORTED. This file used to carry its own copy of the reserved
 // routes with a comment asking that the two be kept in sync, and they were not:
@@ -36,7 +37,7 @@ export const page = defineType({
   groups: [
     { name: 'content', title: 'Content', default: true },
     { name: 'extra', title: 'Extra sections' },
-    { name: 'menu', title: 'Menu placement' },
+    { name: 'menu', title: 'Archive' },
     { name: 'seo', title: 'Search & sharing' },
     PUBLISH_AT_GROUP,
   ],
@@ -56,7 +57,7 @@ export const page = defineType({
       type: 'slug',
       group: 'content',
       description:
-        'The end of the address, like "studio-tour" for example.com/studio-tour. Click Generate to make one from the title.',
+        'The end of the address, like "volunteers" for stonesteps50k.com/volunteers. Click Generate to make one from the title.',
       options: { source: 'title', maxLength: 96 },
       validation: (Rule) =>
         Rule.required().custom((slug) => {
@@ -77,14 +78,22 @@ export const page = defineType({
       of: SECTION_TYPES,
       // Grouped + searchable insert menu, in the form AND in the preview canvas.
       options: sectionArrayOptions,
+      // The authoring kit (card 109): Insert a saved section, plus gentle warnings.
+      ...pageBuilderAuthoring,
     }),
 
     // ── Menu placement ────────────────────────────────────────────────────────
+    // HIDDEN ON THIS SITE (2026-10-18). The four menu fields below are the
+    // starter's: getNavPages() reads them, and nothing on this site calls it.
+    // The menus are Site setup's Top menu links and Footer link columns, so a
+    // tick here changed nothing a runner could see. Hidden, not removed: no data
+    // is lost, and a fork that wires getNavPages() can show them again.
     defineField({
       name: 'addToMainNav',
       title: 'Show in the top menu',
       type: 'boolean',
       group: 'menu',
+      hidden: true,
       initialValue: false,
       description:
         'Off by default, so you can build and preview privately. Turn on when you want visitors to find it in the menu.',
@@ -95,7 +104,7 @@ export const page = defineType({
       type: 'string',
       group: 'menu',
       initialValue: 'top',
-      hidden: ({ parent }) => !parent?.addToMainNav,
+      hidden: true,
       options: {
         list: [
           { title: 'Its own menu item', value: 'top' },
@@ -110,7 +119,7 @@ export const page = defineType({
       title: 'Menu label (optional)',
       type: 'string',
       group: 'menu',
-      hidden: ({ parent }) => !parent?.addToMainNav,
+      hidden: true,
       description:
         'Shorter text for the menu, if the page title is long. Leave blank to use the title.',
     }),
@@ -119,6 +128,7 @@ export const page = defineType({
       title: 'Show in the footer',
       type: 'boolean',
       group: 'menu',
+      hidden: true,
       initialValue: false,
     }),
 

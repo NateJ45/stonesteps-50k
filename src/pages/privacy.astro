@@ -46,8 +46,7 @@ const lastReviewed = 'September 2026';
   noindex={false}
   {siteSettings}
 >
-  {
-    /*
+  {/*
     NO EYEBROW ON PURPOSE. The hero eyebrow renders as .section-label, a display
     word drawn as a 1.5px outline at 42% of the foreground. Every other hero on
     this site sits on a photograph, so that outline has a dark image behind it.
@@ -58,8 +57,7 @@ const lastReviewed = 'September 2026';
     hero image, an eyebrow can come back with it.
 
     size="short" because this is an interior page, matching every non-home hero.
-  */
-  }
+  */}
   <Hero
     headline="Privacy"
     subhead="What this site collects, why it collects it, and how to get your name off it."
@@ -67,38 +65,33 @@ const lastReviewed = 'September 2026';
     headingId="privacy-heading"
   />
 
-  {
-    /*
+  {/*
     py-section-lg, NOT py-xl. This site renamed its two big spacing tokens
     (globals.css: "--spacing-section-md: ... was --spacing-xl"), so the starter's
     py-xl is a class that does not exist here. Tailwind emits nothing for an
     undefined utility rather than complaining, so the section shipped with
     literally 0px of padding and the last paragraph sat flush against the
     footer. py-section-lg is what all 32 of this site's other section bands use.
-  */
-  }
+  */}
   <section class="bg-paper py-section-lg">
-    {
-      /*
+    {/*
       Container copied from Hero.astro deliberately: mx-auto max-w-content px-m
       on the outside, a left-aligned max-w-3xl column inside. The starter's
       privacy page centred a narrower max-w-prose column, which put this page's
       body 211px to the right of its own hero. That is CLAUDE.md rule 17, one
       grammar per page, and it is only visible when you scroll past the fold,
       which is why it needs to be copied rather than re-chosen.
-    */
-    }
+    */}
     <div class="mx-auto max-w-content px-m">
       <div class="max-w-3xl">
         <div class="space-y-l">
           <p class="text-foreground/80">
             This is a trail race, not a data business. The site collects as little as it can get
-            away with, and this page says plainly what that is. If something here bothers you, email{
-              ' '
-            }
+            away with, and this page says plainly what that is. If something here bothers you, email{' '}
             <a class="underline underline-offset-2 hover:text-link" href={`mailto:${contactEmail}`}>
               {contactEmail}
-            </a> and it will get sorted out.
+            </a>{' '}
+            and it will get sorted out.
           </p>
 
           <div>
@@ -123,7 +116,8 @@ const lastReviewed = 'September 2026';
                 href={`mailto:${contactEmail}`}
               >
                 {contactEmail}
-              </a> with the name and the year. There is no form to fill in and no reason to give. Your
+              </a>{' '}
+              with the name and the year. There is no form to fill in and no reason to give. Your
               result stays in the race's own records, it just stops being on this website.
             </p>
           </div>
@@ -156,52 +150,48 @@ const lastReviewed = 'September 2026';
             </p>
           </div>
 
-          {
-            (hasGa || hasCfAnalytics) && (
-              <div>
-                <h2 class="mb-s font-display text-h3 text-foreground">How visits are counted</h2>
-                {hasCfAnalytics && (
-                  <p class="text-foreground/80">
-                    Page visits are counted with Cloudflare Web Analytics, which sets no cookies and
-                    does not identify individual visitors.
-                  </p>
-                )}
-                {hasGa && (
-                  <p class="mt-s text-foreground/80">
-                    Page visits are {hasCfAnalytics ? 'also ' : ''}measured with Google Analytics.
-                    It does set cookies on your device, named <code>_ga</code> and <code>_ga_</code>
-                    followed by a stream id, so a return visit is recognised as the same person
-                    rather than a new one. It records which pages get opened, roughly what part of
-                    the world the visit came from, and what kind of device was used. It also counts
-                    two actions: following a link through to RunSignUp, and a contact message being
-                    sent. It records that the action happened, never your name, email address or
-                    anything you wrote. It is used to see whether people can find the course
-                    description, the results and the registration page, nothing more.
-                  </p>
-                )}
-                {hasGa && (
-                  <p class="mt-s text-foreground/80">
-                    It is not used for advertising, and the numbers are not sold or handed to anyone
-                    beyond Google's own processing. If you would rather not be counted, block
-                    cookies for this site in your browser settings, or use any tracker-blocking
-                    extension. The site works exactly the same either way.
-                  </p>
-                )}
-              </div>
-            )
-          }
-
-          {
-            !hasGa && !hasCfAnalytics && (
-              <div>
-                <h2 class="mb-s font-display text-h3 text-foreground">How visits are counted</h2>
+          {(hasGa || hasCfAnalytics) && (
+            <div>
+              <h2 class="mb-s font-display text-h3 text-foreground">How visits are counted</h2>
+              {hasCfAnalytics && (
                 <p class="text-foreground/80">
-                  They are not. This build runs no analytics of any kind, sets no measurement
-                  cookies, and stores nothing on your device for counting visits.
+                  Page visits are counted with Cloudflare Web Analytics, which sets no cookies and
+                  does not identify individual visitors.
                 </p>
-              </div>
-            )
-          }
+              )}
+              {hasGa && (
+                <p class="mt-s text-foreground/80">
+                  Page visits are {hasCfAnalytics ? 'also ' : ''}measured with Google Analytics. It
+                  does set cookies on your device, named <code>_ga</code> and <code>_ga_</code>
+                  followed by a stream id, so a return visit is recognised as the same person rather
+                  than a new one. It records which pages get opened, roughly what part of the world
+                  the visit came from, and what kind of device was used. It also counts two actions:
+                  following a link through to RunSignUp, and a contact message being sent. It
+                  records that the action happened, never your name, email address or anything you
+                  wrote. It is used to see whether people can find the course description, the
+                  results and the registration page, nothing more.
+                </p>
+              )}
+              {hasGa && (
+                <p class="mt-s text-foreground/80">
+                  It is not used for advertising, and the numbers are not sold or handed to anyone
+                  beyond Google's own processing. If you would rather not be counted, block cookies
+                  for this site in your browser settings, or use any tracker-blocking extension. The
+                  site works exactly the same either way.
+                </p>
+              )}
+            </div>
+          )}
+
+          {!hasGa && !hasCfAnalytics && (
+            <div>
+              <h2 class="mb-s font-display text-h3 text-foreground">How visits are counted</h2>
+              <p class="text-foreground/80">
+                They are not. This build runs no analytics of any kind, sets no measurement cookies,
+                and stores nothing on your device for counting visits.
+              </p>
+            </div>
+          )}
 
           <div>
             <h2 class="mb-s font-display text-h3 text-foreground">The course map</h2>
@@ -243,7 +233,8 @@ const lastReviewed = 'September 2026';
                 href={`mailto:${contactEmail}`}
               >
                 {contactEmail}
-              </a>. That covers taking your name off the results pages, deleting a message you sent
+              </a>
+              . That covers taking your name off the results pages, deleting a message you sent
               through the contact form, or asking what is held about you. A real person reads it and
               you will get an answer.
             </p>

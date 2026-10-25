@@ -35,29 +35,24 @@ const COPIES = Math.max(4, Math.ceil(24 / Math.max(items.length, 1)));
 const shift = `${(100 / COPIES).toFixed(4)}%`;
 ---
 
-{
-  items.length > 0 && (
-    <div
-      class="ticker border-y-2 border-black bg-primary text-primary-foreground"
-      aria-hidden="true"
-    >
-      <div class="ticker__ease">
-        <div class="ticker__track" style={`--ticker-shift: ${shift}`}>
-          {Array.from({ length: COPIES }).map(() => (
-            <ul class="ticker__row">
-              {items.map((item) => (
-                <li>
-                  {item}
-                  <span class="ticker__dot">&middot;</span>
-                </li>
-              ))}
-            </ul>
-          ))}
-        </div>
+{items.length > 0 && (
+  <div class="ticker border-y-2 border-black bg-primary text-primary-foreground" aria-hidden="true">
+    <div class="ticker__ease">
+      <div class="ticker__track" style={`--ticker-shift: ${shift}`}>
+        {Array.from({ length: COPIES }).map(() => (
+          <ul class="ticker__row">
+            {items.map((item) => (
+              <li>
+                {item}
+                <span class="ticker__dot">&middot;</span>
+              </li>
+            ))}
+          </ul>
+        ))}
       </div>
     </div>
-  )
-}
+  </div>
+)}
 
 <style>
   .ticker {

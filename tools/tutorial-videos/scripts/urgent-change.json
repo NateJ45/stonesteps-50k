@@ -1,0 +1,40 @@
+{
+  "slug": "urgent-change",
+  "title": "Put up an urgent change on race day",
+  "start": "/quick-update",
+  "ready": "[data-quick=\"urgent\"]",
+  "viewport": { "width": 390, "height": 844 },
+  "cover": {
+    "selectors": [
+      "[data-ui=\"whats-new-card\"]",
+      "[data-ui=\"Popover\"]:has([data-ui=\"whats-new-card\"])"
+    ]
+  },
+  "steps": [
+    {
+      "do": "caption",
+      "text": "Something changed on race morning?",
+      "ms": 2600,
+      "poster": true
+    },
+    {
+      "do": "ring",
+      "target": "[data-quick=\"urgent\"]",
+      "caption": "Pick the urgent one.",
+      "ms": 2400
+    },
+    { "do": "click", "target": "[data-quick=\"urgent\"]" },
+    {
+      "do": "type",
+      "target": "[data-tour=\"quick-field-message\"] textarea",
+      "text": "The 50K start is delayed 30 minutes because of the storm.",
+      "caption": "One box: what has changed."
+    },
+    {
+      "do": "ring",
+      "target": "[data-tour=\"quick-submit\"]",
+      "caption": "It goes up in red, and comes down by itself two days later.",
+      "ms": 2800
+    }
+  ]
+}

@@ -16,9 +16,21 @@ updates:
       day: monday
       time: '07:00'
       timezone: America/New_York
+    # Groups are matched in order, so `formatters` must stay above the
+    # catch-all bundle.
     groups:
+      # A formatter bump can reformat files and fail format:check (starter
+      # PORTS.md card 92). Kept apart so only this small PR goes red, not the
+      # whole bundle; fix it with `npm run format` on the branch and push.
+      formatters:
+        patterns: ['prettier', 'prettier-plugin-*']
+        update-types: ['minor', 'patch']
       minor-and-patch:
         update-types: ['minor', 'patch']
+        # Formatters belong to the group above. A refresh of an older bundle
+        # ignores group order and pulls them back in, so exclude them here too
+        # (starter PORTS.md card 92).
+        exclude-patterns: ['prettier', 'prettier-plugin-*']
     open-pull-requests-limit: 5
     # The Sanity stack (sanity, @sanity/*, react, react-dom) is pinned to exact
     # versions on purpose and moves BY HAND, TOGETHER. Dependabot bumping one
@@ -41,10 +53,20 @@ updates:
       # `astro build` and still break `wrangler deploy` (starter dependabot.yml).
       - dependency-name: '@astrojs/cloudflare'
       - dependency-name: 'wrangler'
+      # Astro moves only with its adapter, by hand (starter PORTS.md card 92).
+      # The adapter imports Astro internals: astro 7.3 dropped an export that
+      # @astrojs/cloudflare 14.2.4 imports, so a lone astro bump failed the build.
+      - dependency-name: 'astro'
       # TypeScript 7 (the native compiler) breaks Astro's tooling; majors only, 6.x flows
       # (vault gotcha typescript-not-7).
       - dependency-name: 'typescript'
         versions: ['>=7']
+      # No npm semver-major bumps from Dependabot (starter PR #57, PORTS.md card 62).
+      # Majors wait for ONE planned, starter-first stack upgrade (Astro, the adapter,
+      # Sanity, wrangler) with a real deploy test. Minors and patches still flow.
+      # The github-actions ecosystem below is exempt.
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /

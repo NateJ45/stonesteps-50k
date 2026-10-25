@@ -16,6 +16,56 @@ sequence).
 
 ## Waiting on a human
 
+### 1t. Studio complete, phase B (2026-10-19): race-week pass in, the rest queued
+
+In: tours, welcome and What's new wired from `src/sanity/studio-tours.ts`; Quick update by season with edit, pick and
+link jobs (`docs/agent/studio-plan.md`); the phone Quick update picture cropped to three tiles; the race-week video.
+Left: the other five scripts in `docs/agent/studio-videos.md` (record one at a time under the build lock, with the
+music from `_assets/video-music`, then `checkframes.mjs`); a signed-in check of the tours' anchors and the new Quick
+update tiles; the `datetime` "How to" chip on `raceDate` (kit, starter PENDING 32); recapture the guide pictures as the
+staff view once the race director's id is in `kitConfig.staff`.
+
+### 1s. The Studio kit: its settings, and the signed-in checks
+
+2026-10-18 (starter cards 106 to 120). The kit is in and works without any of its settings: each piece that needs
+one says "not set up yet" or keeps its old behaviour. The settings, each once, are the table in OPERATIONS.md "The
+Studio kit": `GITHUB_DEPLOY_TOKEN` (failed-deploy line and Try again), Cloudflare Web Analytics and its three Worker
+settings (Visitors), the `message_status` migration on `stonesteps-contact` (Messages statuses), the
+`SANITY_API_WRITE_TOKEN` repo secret and the `publish-due.yml` schedule (Publish automatically at), the
+`change-note.yml` schedule (morning change note), `"studioWeek"` and `"previewShare"` in the publish webhook's
+deny-list, and the race director's Sanity user id in `staff` (`src/sanity/kit.config.ts`).
+
+Checked signed out only (Playwright): `/studio/` serves the race's own page and splash, the sign-in card, the
+`/api/studio/*` routes refuse without a session. Still to see signed in: Home (banner, checklist ticks, Fix-it
+list names, Your pages links), Quick update publishing a notice, the forest top bar and status line, the plate icons
+in the desk and list rows at 16 to 24px in light and dark, Help for this page, Messages, Share a preview, Trash and
+Bring it back, the tour, and the staff view.
+
+Card 122 (private and hidden pages) is next round: the shared `_seoFields.ts` now titles the switch "Hide this page from Google and the menus". Google is honoured here (robots tag and sitemap, astro.config.mjs); this site has no automatic menus (Top menu links in Site setup are typed by hand), so a hidden page someone links in the menu by hand still shows there.
+
+Dave's logo is still awaited: the Studio uses the steps mark (`public/favicon.svg`) and shows no wordmark beside
+it (`src/sanity/studioEdges.config.ts`). When the logo arrives, it goes in `homeBanner` and the wordmark there.
+
+The Studio art pass (2026-10-19) drew the rest from the site itself: the Home banner strip is the 50K profile
+(smoothed, gold ridge with the hard shadow) over the Topo contours on the course poster's mile rule, with a nail
+head at each return to The Oval; the /studio splash is the 50K distance ticket; the video and embed thumbnails are
+the bark ground and rust play plate. All of it is `npm run gen:studio-banner` (art in `public/studio-art/`). Still generic and
+left as is: the Sanity sign-in card (Sanity's own), and the logo strip thumbnail (its fixture has no logos).
+
+Starter card 128 (2026-10-19): the Studio's design language is the race's. `brand.config.json` `studio.look`: the
+rust blaze dot as the section marker, square plates in rust, forest and bark for numbered steps, the course line in
+rust joining them (drawn, not laid), callouts in forest (note), gold (tip) and rust (careful), the course profile
+strip as every banner's foot, the contour tile (`public/studio-art/topo-tile.svg`) on the featured guide panel,
+Staatliches gold lettering (`public/fonts/staatliches-400.woff2`). Home's banner (card 135) is data in
+`kit.config.ts` `homeBanner.style`: Staatliches caps with the rust echo and the outlined K, the date line as the mono blaze
+eyebrow, the claim stamp above the button (wide screens), and View the website as the rust plate button.
+`src/sanity/studioArt.css` keeps only the Site Guide banner's title and eyebrow (no slot yet; starter PENDING 31). Still
+kit-fixed (starter proposals): the banner shows today's date, not race day; the button says
+"View the website". Quick update tiles wear the race plates (card 131): the megaphone for a race-week notice, the stopwatch for a race-day change. Scheduled Drafts is off (`sanity.config.ts`): on the Free plan it only opened an upgrade page.
+Card 132 (design pass two) is in: the splash and offline page draw the laid-stone path through `src/components/studio/StudioSplash.astro`, with the 50K ticket (`src/sanity/StudioSplashMotif.astro`) in its slot, and the tour steps carry a short word and art. The phone app (card 125) is in: `/studio/manifest.webmanifest`, `public/studio/sw.js`, `public/icon-maskable-512.png`.
+Earlier versions, Post a photo, the newsletter and RSVPs (cards 125, 127) are copied but OFF in `kit.config.ts`;
+`migrations/0003_mail.sql` is NOT applied to D1.
+
 ### 1o. DONE 2026-10-05. `/registered-runners` forwards to `/results/`
 
 The old WordPress page was a RunSignUp "Find a runner" list (Wayback: 200 captures 2012 to August 2022; 3 GA4 landings on 2026-09-15). Nathan chose `/results/` as the destination. It is in `src/lib/launch-redirects.ts` with its test line.
@@ -36,6 +86,17 @@ year's weather; the results-import workflow runs it daily through October and No
 and the deploy bakes before every build. First live run: the mornings after 2026-10-31.
 If it has not produced a 2026 bar on /course by early November, run the import workflow
 by hand and read its "Bake race-day weather" step.
+
+### 1q. Two scheduled workflows write without the production second factor
+
+2026-10-13 (PORTS.md card 86). Every write script now needs its write flag plus
+`NCS_PRODUCTION_WRITE=yes` (`scripts/lib/write-gate.mjs`, `.claude/rules/data-scripts.md`),
+except that three scripts keep writing as before inside GitHub Actions, because their
+unattended workflows could not be edited in that change: `results-import.yml` runs
+`import-results.mjs` bare and `weather-sync.mjs --record`, and `publish-due.yml` runs
+`publish-due.mjs --apply`. To close it: give those steps `--apply` (import-results) and
+`NCS_PRODUCTION_WRITE: yes` in their `env:`, then drop `ci`/`ciBare` from the three
+`writeGate` calls. Needs a workflow edit, so Nathan decides.
 
 ### 1p. The map poster pipeline has no caller
 
@@ -206,22 +267,22 @@ carry a verified-in-anger note rather than an installed-and-gated one.
 
 ---
 
-### 1a. Sign in to a Studio built on the phase-1 Sanity set
+### 1a. Sign in to a Studio built on the phase-2 Sanity set
 
 **Blocker: no agent can do this, and this template has no Sanity project.**
 
-2026-09-06 moved this repo onto the family's phase-1 Sanity set (`sanity` 6.9.1,
-`@sanity/ui` 3.5.4, `@sanity/client` 7.26.2, `@sanity/visual-editing` 5.7.3). Every
+2026-09-06 moved this repo onto the family's phase-1 Sanity set, and 2026-10-17 onto the
+phase-2 set (`sanity` 6.19.0, `@sanity/ui` 4.4.9, `@sanity/client` 8.9.0,
+`@sanity/visual-editing` 6.1.3; PORTS.md card 103). Every
 automated gate is green and the single-instance invariant holds on disk and in the
 lockfile, but the login screen is core code and renders fine even when the
-styled-components theme context is broken. The set is already human-verified on
-presacademy, reid-design-site and mas-monograms, so the risk here is low; what is
-unverified is this repo's own custom Studio panes and the in-canvas overlay against it.
+styled-components theme context is broken. The Studio code was migrated to `@sanity/ui` 4 (gap, subpath icons) and every gate is
+green; what is unverified is this repo's own custom Studio panes and the in-canvas overlay against it.
 Whoever forks this next should sign in, open the desk, and drive the Presentation tool
 until an in-canvas control draws and writes back, then note it here.
 
-Do NOT take `sanity` 6.9.2: that PATCH release crosses to `@sanity/ui` 4, which is a real
-migration (PORTS.md card 10, phase 2).
+The phase-2 migration is done; see `.claude/rules/dependencies-and-deploy.md` for the pins
+and the one-copy invariants.
 
 ---
 
@@ -343,7 +404,7 @@ box in the Studio each year.
 **Cosmetic, Sanity's own behaviour, low priority.**
 
 A guide link can name a field (`{ doc: 'race', field: 'raceDate' }` in
-`src/sanity/components/studioLink.ts`), which becomes Sanity's `path=` intent
+`src/lib/studio-kit.ts`, `studioTargetPath`), which becomes Sanity's `path=` intent
 parameter. Verified in the deployed Studio on 2026-09-12: it opens the right
 document, selects the right field group tab, and puts the cursor in the field.
 It does NOT scroll the field into view, so on the race document the focused
@@ -368,9 +429,9 @@ than at startup, the optimizer re-bundles and reloads the module graph mid-fligh
 `react-dom/server` is left holding a React instance from the previous pass whose hook
 dispatcher is null. Every island then fails to server-render. That is
 withastro/astro#17834, fixed upstream in `@astrojs/cloudflare` by pre-bundling
-`astro/logger/json`; we cannot take that release while the adapter is pinned at 14.2.4
-(entry 4 below), so the same deps are listed in `vite.environments.ssr.optimizeDeps.include`
-in `astro.config.mjs` and bundled at startup instead.
+`astro/logger/json`; that fix ships in the 14.3.x adapter this repo has pinned since 2026-10-13 (card 94). The same deps
+are still listed in `vite.environments.ssr.optimizeDeps.include` in `astro.config.mjs` and bundled at startup;
+the block can be re-measured and dropped separately (entry 4 below).
 
 Also learned: the environment that RENDERS in dev is `ssr`, not `astro`. The previous fix
 was aimed at `astro`, which is why it never fully worked. Verified with a
@@ -433,8 +494,8 @@ Drop it during a slop sweep (card 16) if it is still unused then.
 
 ### 4. The adapter and wrangler pins are tighter than the bug requires
 
-`@astrojs/cloudflare` is pinned exact at 14.2.4 and `wrangler` at `~4.110.0`. Verified
-2026-08-28 that 14.2.4 does **not** emit `legacy_env` into the generated config, so card
+`@astrojs/cloudflare` is pinned exact at 14.3.4 (was 14.2.4 until 2026-10-13) and `wrangler` at
+`~4.149.0` (was `~4.110.0`). Verified 2026-08-28 that 14.2.4 does **not** emit `legacy_env` into the generated config, so card
 14's original failure does not reproduce here; the pin holds the pair together because
 14.2.5 peers `wrangler ^4.125.0`, one minor from the version that rejects the field.
 Revisit when a newer adapter's peer range and emitted config are both checked by hand
@@ -530,6 +591,27 @@ already preloaded, and the phase breakdown is TTFB 450ms plus 3.5s of render del
 is the Lantern model charging the inlined stylesheet as described below. So: the CI runner
 straddles the budget, the site did not move, and the lever remains the one in this item.
 Merged on that reading.
+
+2026-10-13 addendum (a studio-wide site audit flagged home TBT 150ms and the 113KiB image
+note; both re-measured, nothing changed). Mobile Lighthouse, three runs each on a quiet
+machine: live stonesteps50k.com performance 84 to 86, LCP 3.8 to 4.0s, TBT 11 to 28ms;
+a local build of `main` (wrangler dev, no gtag because GA is production-hostname only)
+performance 90 to 91, LCP 3.2 to 3.3s, TBT 18 to 23ms. The audit's TBT 150ms was a run taken
+while another job loaded the machine (the same page read 107 and 310ms in two runs during an
+`npm ci`, then 21ms once it finished), so it is noise, not a regression. The home page has no
+map or chart island to defer: its islands are the theme toggle, mobile nav, back-to-top and
+toaster (all `client:idle`) and the stats counter (`client:visible`); the map is
+`client:visible` on `/course/` only. The only long tasks on a quiet run are the HTML parse
+(about 190ms), and the idle-loaded Google tag (two tasks of 52 and 70ms). The "forced reflow"
+insight is Astro's ClientRouter reading `scrollX`/`scrollY` once at start-up, plus the
+countdown's per-tick `offsetWidth` and the ticket perforation's `offsetTop`; the router is
+framework code and the layout it forces would run before first paint anyway. The LCP element
+is still the wordmark text (render delay, not load time), the first hero slide is already
+eager, `fetchpriority="high"`, AVIF q45, and the other two are parked until a second after
+load. The 113KiB image estimate is the same cover-crop and DPR arithmetic settled on
+2026-09-13 below; the only remaining lever is the phone art-direction in the list at the end
+of this item, which edits `SanityImage.astro` or `RaceHero.astro` (both Foundation files)
+and changes which part of the photograph survives, so it is a design call.
 
 Things that were measured and are NOT the problem, so nobody repeats them:
 

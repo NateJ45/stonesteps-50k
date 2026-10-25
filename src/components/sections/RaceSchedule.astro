@@ -43,75 +43,73 @@ const ghost = race?.atmosphere?.[0];
 const directions = directionsUrl(race?.geo);
 ---
 
-{
-  items.length > 0 && (
-    <section class="band-torn relative bg-background py-section-lg" aria-labelledby={headingId}>
-      {/* Clipped by a wrapper, never by the section: the band's ridge lives
+{items.length > 0 && (
+  <section class="band-torn relative bg-background py-section-lg" aria-labelledby={headingId}>
+    {/* Clipped by a wrapper, never by the section: the band's ridge lives
         above its own box. See GhostPhoto's header. */}
-      <div class="pointer-events-none absolute inset-0 overflow-hidden">
-        <GhostPhoto image={ghost} side="left" />
-      </div>
-      <div class="mob-center relative z-10 mx-auto w-full max-w-content px-6 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center lg:gap-x-16">
-        {/* TWO COLUMNS FROM `lg` (2026-10-03). The clipboard was capped at 46rem
+    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <GhostPhoto image={ghost} side="left" />
+    </div>
+    <div class="mob-center relative z-10 mx-auto w-full max-w-content px-6 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center lg:gap-x-16">
+      {/* TWO COLUMNS FROM `lg` (2026-10-03). The clipboard was capped at 46rem
           and hung off the left edge, so on a desktop the right half of the band
           was bare paper. Now the heading and the parking note stand on the left
           and the clipboard fills the right. Below `lg` the order and the
           centring are what they always were. */}
-        <div class="lg:col-start-1 lg:row-start-1 lg:self-end">
-          {eyebrow && (
-            <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
-              {eyebrow}
-            </p>
-          )}
-          <h2 id={headingId} class="display text-h2">
-            {headline}
-          </h2>
-        </div>
+      <div class="lg:col-start-1 lg:row-start-1 lg:self-end">
+        {eyebrow && (
+          <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
+            {eyebrow}
+          </p>
+        )}
+        <h2 id={headingId} class="display text-h2">
+          {headline}
+        </h2>
+      </div>
 
-        {/* THE CLIPBOARD SITS UNDER ITS OWN HEADING (2026-09-18). It was
+      {/* THE CLIPBOARD SITS UNDER ITS OWN HEADING (2026-09-18). It was
           `mx-auto` at every width, so on the home page a 736px board floated in
           the middle of the page at x=272 with its heading at 24, while the same
           clipboard on /results/2025 sat at 24 like the record board beside it.
           `lg:mx-0` puts it on the column's left edge from `lg` up and leaves the
           phone alone, where a 327px column centres everything anyway. */}
-        <div class="clip mx-auto mt-14 max-w-[46rem] px-[1.1rem] pt-6 pb-[1.1rem] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:mt-0 lg:max-w-none">
-          <div class="clip__clamp" aria-hidden="true" />
-          <div class="clip__sheet p-6 sm:p-8">
-            <ol class="grid gap-1">
-              {items.map((item) => (
-                <li class="grid grid-cols-[6.5rem_1fr] items-baseline gap-x-4 gap-y-0.5 border-b border-black/10 py-2.5 last:border-b-0 sm:grid-cols-[6.5rem_minmax(0,1fr)_auto] lg:py-3.5">
-                  <span
-                    class={`tabular text-sm ${item.time ? 'text-[color:var(--plate-accent)]' : 'text-[color:var(--plate-ink-soft)]'}`}
-                  >
-                    {item.time ?? 'TBC'}
+      <div class="clip mx-auto mt-14 max-w-[46rem] px-[1.1rem] pt-6 pb-[1.1rem] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:mt-0 lg:max-w-none">
+        <div class="clip__clamp" aria-hidden="true" />
+        <div class="clip__sheet p-6 sm:p-8">
+          <ol class="grid gap-1">
+            {items.map((item) => (
+              <li class="grid grid-cols-[6.5rem_1fr] items-baseline gap-x-4 gap-y-0.5 border-b border-black/10 py-2.5 last:border-b-0 sm:grid-cols-[6.5rem_minmax(0,1fr)_auto] lg:py-3.5">
+                <span
+                  class={`tabular text-sm ${item.time ? 'text-[color:var(--plate-accent)]' : 'text-[color:var(--plate-ink-soft)]'}`}
+                >
+                  {item.time ?? 'TBC'}
+                </span>
+                <span class="display on-light text-[1.15rem] lg:text-[1.4rem]">{item.label}</span>
+                {item.detail && (
+                  <span class="col-start-2 text-xs text-[color:var(--plate-ink-soft)] sm:col-start-3 sm:text-right">
+                    {item.detail}
                   </span>
-                  <span class="display on-light text-[1.15rem] lg:text-[1.4rem]">{item.label}</span>
-                  {item.detail && (
-                    <span class="col-start-2 text-xs text-[color:var(--plate-ink-soft)] sm:col-start-3 sm:text-right">
-                      {item.detail}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </div>
+                )}
+              </li>
+            ))}
+          </ol>
         </div>
-        {(race?.parkingNote || directions) && (
-          <p class="mob-center mt-4 max-w-[46rem] text-sm text-muted-foreground lg:col-start-1 lg:row-start-2 lg:mt-6 lg:self-start lg:text-left">
-            {race?.parkingNote}
-            {race?.parkingNote && directions && ' '}
-            {directions && (
-              <a
-                class="tap-pad text-link underline underline-offset-2"
-                href={directions}
-                {...externalLinkAttrs(directions)}
-              >
-                Get directions to The Oval
-              </a>
-            )}
-          </p>
-        )}
       </div>
-    </section>
-  )
-}
+      {(race?.parkingNote || directions) && (
+        <p class="mob-center mt-4 max-w-[46rem] text-sm text-muted-foreground lg:col-start-1 lg:row-start-2 lg:mt-6 lg:self-start lg:text-left">
+          {race?.parkingNote}
+          {race?.parkingNote && directions && ' '}
+          {directions && (
+            <a
+              class="tap-pad text-link underline underline-offset-2"
+              href={directions}
+              {...externalLinkAttrs(directions)}
+            >
+              Get directions to The Oval
+            </a>
+          )}
+        </p>
+      )}
+    </div>
+  </section>
+)}

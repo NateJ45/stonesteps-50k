@@ -9,12 +9,20 @@
 //   - The two `distance` documents must already exist (npm run seed:race)
 //
 // Usage:
-//   node scripts/import-results.mjs             # import everything available
-//   node scripts/import-results.mjs --dry-run   # fetch and report, write nothing
+//   node scripts/import-results.mjs             # fetch and report, write nothing
+//   NCS_PRODUCTION_WRITE=yes node scripts/import-results.mjs --apply  # import
+//   (results-import.yml still runs it bare: in GitHub Actions a bare run
+//    writes, the CI allowance in scripts/lib/write-gate.mjs, PORTS.md card 86)
 //   node scripts/import-results.mjs --year 2025 # one year only
 //
-// Idempotent: deterministic _id values with createOrReplace, so re-running
-// updates in place and never duplicates. Safe to run after each year's race.
+// Idempotent: deterministic _id values, so re-running updates in place and
+// never duplicates. Safe to run after each year's race.
+//
+// IT NEVER UNDOES A HAND FIX (2026-10-18). Each document is created whole if it
+// is new, and after that only the fields RunSignUp owns are set: a trekker tick,
+// a source note, or a runner's name, city or state fixed in the Studio stay as
+// they are. It used to createOrReplace, which wiped all of those on every
+// nightly run. The field rule is scripts/lib/import-merge.mjs (tested).
 //
 // ---------------------------------------------------------------------------
 // WHAT THIS ARCHIVE ACTUALLY CONTAINS, which is less than it looks
@@ -35,6 +43,8 @@
 // RunSignUp for the full record.
 // ---------------------------------------------------------------------------
 
+import { writeGate } from './lib/write-gate.mjs';
+import { importMutations } from './lib/import-merge.mjs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
@@ -48,10 +58,10 @@ const root = resolve(__dirname, '..');
 const env = loadEnv(root);
 const projectId = env.PUBLIC_SANITY_PROJECT_ID;
 const dataset = env.PUBLIC_SANITY_DATASET ?? 'production';
+const DRY_RUN = !writeGate({ dataset, ci: true, ciBare: true });
 const token = env.SANITY_API_WRITE_TOKEN;
 
 const args = process.argv.slice(2);
-const DRY_RUN = args.includes('--dry-run');
 const yearArg = args.indexOf('--year');
 const ONLY_YEAR = yearArg !== -1 ? Number(args[yearArg + 1]) : null;
 
@@ -238,14 +248,17 @@ async function main() {
   }
 
   // Athletes first: a result references one, and a reference to a document
-  // that does not exist yet is a broken document.
+  // that does not exist yet is a broken document. Each document is two
+  // mutations (create if new, then set the import's own fields), so a chunk of
+  // 50 documents is one transaction of 100.
   const docs = [...athletes.values(), ...results];
   let done = 0;
   for (let i = 0; i < docs.length; i += 50) {
     const chunk = docs.slice(i, i + 50);
-    let tx = client.transaction();
-    for (const doc of chunk) tx = tx.createOrReplace(doc);
-    await tx.commit({ visibility: 'async' });
+    await client.mutate(chunk.flatMap(importMutations), {
+      visibility: 'async',
+      returnDocuments: false,
+    });
     done += chunk.length;
     process.stdout.write(`\r  written ${done}/${docs.length}`);
   }

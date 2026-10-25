@@ -39,6 +39,7 @@ const projectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID;
 const dataset = import.meta.env.PUBLIC_SANITY_DATASET ?? 'production';
 const apiVersion = import.meta.env.PUBLIC_SANITY_API_VERSION ?? '2026-05-01';
 const readToken = import.meta.env.SANITY_API_READ_TOKEN as string | undefined;
+const snapshotUrl = ((import.meta.env.SANITY_SNAPSHOT_URL as string | undefined) ?? '').trim();
 
 /** Returns true when no real Sanity project has been configured. */
 const PLACEHOLDER_IDS = new Set(['', 'your-project-id', 'placeholder']);
@@ -84,6 +85,14 @@ export const client: SanityClient = createClient({
   useCdn: true,
   perspective: 'published',
   ...(readToken ? { token: readToken } : {}),
+  // CI builds from a pinned content snapshot served on 127.0.0.1, never the live
+  // dataset (PORTS.md card 138, scripts/snapshot.mjs): a client edit in the
+  // Studio must not be able to turn CI red. Unset everywhere else, so production
+  // builds, dev and scripts read the live dataset exactly as before. Inlined here
+  // (not imported from scripts/) because this module also ships to the browser.
+  ...(snapshotUrl
+    ? { apiHost: snapshotUrl, useProjectHostname: false, useCdn: false, token: undefined }
+    : {}),
 });
 
 /**
@@ -160,10 +169,10 @@ export async function sanityFetch<T>(
 }
 
 // A build makes a few hundred reads, and one of them failing on a network blip
-// used to publish a page as a redirect to /404 (ported from fbcm a2e3b1c,
-// 2026-09-24, which caught it on /ministries). Two retries, 0.5 s then 1.5 s
-// apart, ride out a blip; a real outage still fails after about 2 s and the
-// build stops.
+// would otherwise publish a page as a redirect to /404 further down the
+// pipeline (a static route that took a swallowed fetch error for a missing
+// document). Two retries, 0.5 s then 1.5 s apart, ride out a blip; a real
+// outage still fails after about 2 s and the build stops.
 async function fetchWithRetry<T>(query: string, params: Record<string, unknown>): Promise<T> {
   const waits = [500, 1500];
   for (let attempt = 0; ; attempt++) {

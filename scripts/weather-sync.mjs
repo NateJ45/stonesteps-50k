@@ -12,7 +12,8 @@
 // THE SHAPE OF THE FIX. The race date is on The Race document months ahead.
 // So:
 //
-//   --record   (needs SANITY_API_WRITE_TOKEN) Reads The Race's date. If that
+//   --record   (needs SANITY_API_WRITE_TOKEN, and NCS_PRODUCTION_WRITE=yes
+//              outside GitHub Actions) Reads The Race's date. If that
 //              day has happened, is old enough for the weather archive to hold
 //              it, and is not on file yet, it writes a `raceDay` document for
 //              it. That document is the durable memory: when Dave moves the
@@ -33,6 +34,7 @@
 //
 // Run: node scripts/weather-sync.mjs [--record] [--dry-run] [--as-of DATE]
 
+import { writeGate } from './lib/write-gate.mjs';
 import { readFileSync, writeFileSync, appendFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -53,6 +55,10 @@ const projectId = process.env.PUBLIC_SANITY_PROJECT_ID;
 const dataset = process.env.PUBLIC_SANITY_DATASET || 'production';
 const token = process.env.SANITY_API_WRITE_TOKEN;
 const unconfigured = !projectId || projectId === 'your-project-id';
+// The Sanity write behind --record also needs NCS_PRODUCTION_WRITE=yes on
+// production, except in GitHub Actions, where results-import.yml runs it
+// unattended (scripts/lib/write-gate.mjs, PORTS.md card 86).
+const RECORD_WRITES = RECORD && !unconfigured && writeGate({ dataset, flag: '--record', ci: true });
 
 const DAYS_FILE = resolve(root, 'scripts/data/race-days.json');
 const WEATHER_FILE = resolve(root, 'src/data/raceDayWeather.json');
@@ -105,7 +111,7 @@ if (RECORD) {
       date: due.date,
       source: `The Race document's race date, recorded automatically on ${AS_OF}`,
     };
-    if (DRY) console.log('would create', JSON.stringify(doc));
+    if (DRY || !RECORD_WRITES) console.log('would create', JSON.stringify(doc));
     else {
       await client.createIfNotExists(doc);
       byYear.set(due.year, doc);

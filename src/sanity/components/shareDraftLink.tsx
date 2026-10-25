@@ -16,7 +16,7 @@
 // Studio can mint. So a share link is simply the same URL, minted on demand and
 // handed to a human instead of to an iframe.
 //
-//   /api/draft-mode/enable
+//   /api/draft-mode/enable/
 //     ?sanity-preview-secret=<minted>
 //     &sanity-preview-pathname=/preview/<page>
 //
@@ -51,8 +51,8 @@
 // =============================================================================
 import { useCallback, useState } from 'react';
 import { useClient, type DocumentActionComponent, type DocumentActionDescription } from 'sanity';
-import { useToast } from '@sanity/ui';
-import { ShareIcon } from '@sanity/icons';
+import { useToast } from '@sanity/ui/toast';
+import { ShareIcon } from '@sanity/icons/Share';
 import { createPreviewSecret } from '@sanity/preview-url-secret/create-secret';
 import {
   urlSearchParamPreviewPathname,
@@ -104,7 +104,7 @@ export function useShareDraftLink() {
         const studioUrl = `${window.location.origin}/studio`;
         const { secret } = await createPreviewSecret(client, 'share-link', studioUrl);
 
-        const url = new URL('/api/draft-mode/enable', window.location.origin);
+        const url = new URL('/api/draft-mode/enable/', window.location.origin);
         url.searchParams.set(urlSearchParamPreviewSecret, secret);
         url.searchParams.set(urlSearchParamPreviewPathname, previewPathname);
         const link = url.toString();

@@ -89,15 +89,18 @@ jobs:
       # project. The variables are passed anyway so the page's shared chrome
       # (header, footer) is the real one rather than an empty-state fallback,
       # which is exactly where the forked logo was hiding.
+      # Built from the PINNED content snapshot (ci/sanity-snapshot.ndjson.gz), never the
+      # live dataset (PORTS.md card 138), so a client edit in the Studio cannot turn this
+      # red. Refresh deliberately: node scripts/snapshot.mjs export. deploy.yml builds live.
       - name: Run the visual suite
         env:
           PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
           PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
         run: |
           if [ "${{ inputs.update }}" = "true" ]; then
-            npm run test:visual:update
+            node scripts/snapshot.mjs run -- npm run test:visual:update
           else
-            npm run test:visual
+            node scripts/snapshot.mjs run -- npm run test:visual
           fi
 
       # On a check run this is the evidence of what moved. On an update run it

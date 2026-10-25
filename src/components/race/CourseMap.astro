@@ -46,19 +46,17 @@ const shortMiles = meta.loops.find((l) => l.kind === 'short')?.publishedMiles ??
 ---
 
 <figure class="cmap" id={id} data-course-map>
-  {
-    /* client:visible, and this one is safe where the old control island was not:
+  {/* client:visible, and this one is safe where the old control island was not:
     that island's only child was absolutely positioned inside a
     `display: contents` <astro-island>, so IntersectionObserver had no box to
     observe and it never hydrated. This component's root is the map's own framed
     box, which has a rect, so "when the reader reaches it" works. That timing is
-    the point: MapLibre is ~250KB and must not be in the page's measured load. */
-  }
+    the point: MapLibre is ~250KB and must not be in the page's measured load. */}
   <CourseMapLibre client:visible />
 
   <figcaption class="cmap__figcap">
-    Seven loops out of The Oval: four long loops of about {longMiles} miles alternating with three short
-    loops of about {shortMiles} miles.
+    Seven loops out of The Oval: four long loops of about {longMiles} miles alternating with three
+    short loops of about {shortMiles} miles.
   </figcaption>
 </figure>
 

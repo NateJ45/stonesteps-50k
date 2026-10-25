@@ -14,6 +14,7 @@ import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEnv } from './lib/loadEnv.mjs';
+import { snapshotClientOptions } from './snapshot.mjs';
 import { readBrandConfig, resolveSiteIdentity } from './lib/site-identity.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -42,6 +43,8 @@ const client = createClient({
   useCdn: !readToken,
   perspective: 'published',
   ...(readToken ? { token: readToken } : {}),
+  // CI reads a pinned snapshot (PORTS.md card 138); empty unless SANITY_SNAPSHOT_URL is set.
+  ...snapshotClientOptions(process.env),
 });
 
 /** Flatten Portable Text blocks into plain text (paragraphs separated by blank lines). */
@@ -112,6 +115,10 @@ const p = (s = '') => lines.push(s);
 const siteName = identity.siteName;
 
 p(`# ${siteName} — Full Site Content`);
+p('');
+// The Studio's Checkup reads this line to tell an editor when the file was
+// last made (PORTS.md card 123). Keep the wording: the rule matches it.
+p(`Last updated: ${new Date().toISOString().slice(0, 10)}`);
 p('');
 p(
   `> This is the expanded companion to /llms.txt for ${siteName}. It inlines the substantive content of the site pulled from Sanity so a language model can answer questions about this business from a single document. For the short link map, see /llms.txt.`,

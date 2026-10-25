@@ -135,7 +135,7 @@ export function surfaceClass(value?: string | null): string {
 
 /**
  * The accent colour for one word inside a heading (the colour sibling of the
- * script accent in src/lib/scriptAccent.ts).
+ * script accent in src/lib/heading-accent.ts).
  *
  * There is deliberately no CHOICE here: the editor picks a word, never a
  * colour, so this is one token and one pinned literal for the fixed dark band.

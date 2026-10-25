@@ -1,0 +1,22 @@
+{
+  "base": "http://localhost:4321/kit-harness/studio",
+  "viewport": { "width": 390, "height": 1000 },
+  "cover": {
+    "selectors": [
+      "[data-ui=\"whats-new-card\"]",
+      "[data-ui=\"Popover\"]:has([data-ui=\"whats-new-card\"])"
+    ]
+  },
+  "shots": [
+    {
+      "key": "quick-update-tiles",
+      "path": "/quick-update",
+      "waitFor": "[data-quick=\"race-morning\"]",
+      "clip": { "x": 0, "y": 380, "width": 390, "height": 500 },
+      "measure": {
+        "Race week: parking, bib pickup, the weather.": "[data-quick=\"race-week\"]",
+        "The start time or the parking moved.": "[data-quick=\"race-morning\"]"
+      }
+    }
+  ]
+}

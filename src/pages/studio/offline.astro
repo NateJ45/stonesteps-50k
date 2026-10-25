@@ -1,0 +1,94 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+// =============================================================================
+// /studio/offline/: what the Studio app shows with no connection (card 125)
+// =============================================================================
+// The Studio's service worker (public/studio/sw.js) keeps a copy of this page,
+// and every file it points at (the brand's font files, the lettering, the
+// motif strips, the mark), and shows it when the editor opens the app with no
+// signal, instead of the phone's own "no internet" screen.
+//
+// Card 132: it wears the same splash as /studio (the shared partial
+// src/components/studio/StudioSplash.astro): the mark, the name in the site's
+// lettering, its stone path with the last stone not yet laid, the motif strip,
+// and a pill "Try again". All from brand.config.json `studio.look`; a site
+// changes nothing here. Plain HTML and CSS, no script but the button and the
+// colour-scheme pick. The words are the brief's: a change made before the
+// signal went is still waiting in the open Studio and goes through when the
+// connection is back; nothing here can lose it.
+// =============================================================================
+import brand from '../../../brand/brand.config.json';
+import { STUDIO_COLORS } from '../../sanity/studioTheme';
+import StudioSplash from '../../components/studio/StudioSplash.astro';
+// The brand's font files, the same ones the Studio loads (card 116); the
+// worker keeps them at install so the page is whole with no connection.
+import '../../sanity/studioFonts.css';
+
+export const prerender = true;
+
+const name = brand.name;
+const vars = [`--paper: ${STUDIO_COLORS.white}`, `--dark: ${STUDIO_COLORS.black}`].join('; ');
+// Served at /studio/ when the boot page cannot load, so "Try again" reloads
+// that; opened at its own address, it goes to the Studio.
+const retry =
+  "location.pathname.indexOf('/studio/offline') === 0 ? location.assign('/studio/') : location.reload()";
+---
+
+<!doctype html>
+<html lang="en" style={vars}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{`You're offline | ${name}`}</title>
+    <meta name="theme-color" content={STUDIO_COLORS.chrome.bg} />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      try {
+        var pick = localStorage.getItem('sanityStudio:ui:colorScheme');
+        if (pick === 'dark' || pick === 'light') {
+          document.documentElement.setAttribute('data-studio-scheme', pick);
+        }
+      } catch (_e) {
+        /* Storage blocked: the media query decides. */
+      }
+    </script>
+    <style is:global>
+      html,
+      body {
+        margin: 0;
+        background: var(--paper);
+        -webkit-font-smoothing: antialiased;
+      }
+      @media (prefers-color-scheme: dark) {
+        html:not([data-studio-scheme='light']),
+        html:not([data-studio-scheme='light']) body {
+          background: var(--dark);
+        }
+      }
+      html[data-studio-scheme='dark'],
+      html[data-studio-scheme='dark'] body {
+        background: var(--dark);
+      }
+      main {
+        box-sizing: border-box;
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <main data-studio-offline>
+      <StudioSplash mode="offline">
+        <button type="button" class="ncs-sp__button" onclick={retry}>
+          Try again
+        </button>
+      </StudioSplash>
+    </main>
+  </body>
+</html>

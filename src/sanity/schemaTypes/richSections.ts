@@ -15,19 +15,17 @@
 // See the classification table in the Phase B plan for reasoning.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
-import {
-  UserIcon,
-  ThLargeIcon,
-  StarIcon,
-  DocumentTextIcon,
-  BulbOutlineIcon,
-  OlistIcon,
-  PinIcon,
-  CheckmarkCircleIcon,
-  UsersIcon,
-  HelpCircleIcon,
-  SyncIcon,
-} from '@sanity/icons';
+import { UserIcon } from '@sanity/icons/User';
+import { ThLargeIcon } from '@sanity/icons/ThLarge';
+import { StarIcon } from '@sanity/icons/Star';
+import { DocumentTextIcon } from '@sanity/icons/DocumentText';
+import { BulbOutlineIcon } from '@sanity/icons/BulbOutline';
+import { OlistIcon } from '@sanity/icons/Olist';
+import { PinIcon } from '@sanity/icons/Pin';
+import { CheckmarkCircleIcon } from '@sanity/icons/CheckmarkCircle';
+import { UsersIcon } from '@sanity/icons/Users';
+import { HelpCircleIcon } from '@sanity/icons/HelpCircle';
+import { SyncIcon } from '@sanity/icons/Sync';
 import { SECTION_TYPES } from './sections';
 import { columnsField, headingAccentField, hideWhenRich, richTwin } from './_appearanceFields';
 
@@ -684,16 +682,11 @@ export const RICH_SECTION_TYPES = richSectionSchemas.map((s) => ({ type: s.name 
 //   teamSection       -> HOME, ABOUT
 // Church-reverse-port additions:
 //   dynamicListSection -> HOME, ABOUT (auto-pull latest content; generic small-biz sources)
-export const HOME_SECTION_TYPES = [
-  ...SECTION_TYPES,
-  { type: 'founderSection' },
-  { type: 'servicesGridSection' },
-  { type: 'testimonialsSection' },
-  { type: 'processSection' },
-  { type: 'faqSection' },
-  { type: 'teamSection' },
-  { type: 'dynamicListSection' },
-];
+// Stone Steps (2026-10-18): the home page offers the same blocks as every
+// other page. The starter's business blocks (founder, services grid,
+// testimonials, process, FAQ list, team, dynamic list) fill from collections
+// this race does not keep, and none was ever on the home page.
+export const HOME_SECTION_TYPES = [...SECTION_TYPES];
 
 export const ABOUT_SECTION_TYPES = [
   ...SECTION_TYPES,

@@ -12,6 +12,7 @@
  *
  * Usage:
  *   node modules/donations/seed.mjs
+ *   (dry run; to write: NCS_PRODUCTION_WRITE=yes node modules/donations/seed.mjs --apply)
  *
  * The document uses a deterministic `_id` so running the script more than
  * once does not create duplicates (`createOrReplace` is idempotent).
@@ -25,6 +26,7 @@
  * Add FAQ references manually in Studio after seeding.
  */
 
+import { writeGate, gateClient } from '../../scripts/lib/write-gate.mjs';
 import { createClient } from '@sanity/client';
 import { config } from 'dotenv';
 
@@ -44,13 +46,16 @@ if (!token) {
   process.exit(1);
 }
 
-const client = createClient({
+// Dry by default: a bare run prints every write it would make. Writing needs
+// --apply AND, on production, NCS_PRODUCTION_WRITE=yes in the same command
+// (scripts/lib/write-gate.mjs, PORTS.md card 86).
+const client = gateClient(createClient({
   projectId,
   dataset,
   token,
   apiVersion: '2024-01-01',
   useCdn: false,
-});
+}), writeGate({ dataset }));
 
 // ---------------------------------------------------------------------------
 // donationsPage singleton

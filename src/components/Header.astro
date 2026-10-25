@@ -170,29 +170,23 @@ function isGroupActive(items: { href: string }[]) {
 }
 ---
 
-{
-  /* NO `bg-background` UTILITY HERE. The board paints its own stock in
+{/* NO `bg-background` UTILITY HERE. The board paints its own stock in
     globals.css (`--board-stock`, shared with the footer), and a utility class
     on the element would be a second answer to the same question whose winner
     depends on where Tailwind injects its layer. Overlay mode still wins over
-    both: that rule is an attribute selector. */
-}
+    both: that rule is an attribute selector. */}
 <header class="site-header sign-board" data-overlay={overlay ? '' : undefined}>
-  {
-    /* Eyebrow strip (desktop only). Carries the locked positioning line and
+  {/* Eyebrow strip (desktop only). Carries the locked positioning line and
       utility controls (email + social icons + theme toggle). Mobile gets
       the same info through the MobileNav drawer. Breakpoint bumped from
       md (768 px) to lg (1024 px) so the eyebrow strip + nav row only
       appear once there's room for the full nav + CTA without squishing
-      the logo. */
-  }
+      the logo. */}
 
-  {
-    /* Main nav row. Mobile (and tablet) center the logo; desktop ≥1024 px
+  {/* Main nav row. Mobile (and tablet) center the logo; desktop ≥1024 px
       justifies logo left, nav+CTA grouped right. Breakpoint matches the
       eyebrow strip above — at viewports between md and lg the desktop
-      layout would squish, so mobile-style header stays in use. */
-  }
+      layout would squish, so mobile-style header stays in use. */}
   <div
     class:list={[
       'relative mx-auto flex max-w-content items-center justify-center px-l py-m lg:justify-between',
@@ -202,41 +196,37 @@ function isGroupActive(items: { href: string }[]) {
       !overlay && 'border-b border-border',
     ]}
   >
-    {
-      /* Mobile-only availability pill, mirroring the hamburger menu's
+    {/* Mobile-only availability pill, mirroring the hamburger menu's
         absolute-right placement. Gives mobile visitors an at-a-glance trust
         signal ("Open / accepting new clients") and a single-tap path to
         /contact — meaningfully conversion-positive in a tiny footprint. Renders
         nothing when siteSettings.availabilityStatus is empty so the slot just
-        stays empty negative space. */
-    }
-    {
-      availability && (
-        <a
-          href="/contact/"
-          class="absolute top-1/2 left-m inline-flex h-9 -translate-y-1/2 items-center gap-1.5 rounded-full border border-border-soft bg-muted pr-2.5 pl-2 text-foreground transition-colors hover:border-primary hover:text-primary-dark lg:hidden"
-          aria-label={`${availability}. Tap to start a conversation.`}
-        >
-          <span class="relative flex h-2 w-2 shrink-0" aria-hidden="true">
-            {/* Soft pulsing halo — kills under prefers-reduced-motion via the
+        stays empty negative space. */}
+    {availability && (
+      <a
+        href="/contact/"
+        class="absolute top-1/2 left-m inline-flex h-9 -translate-y-1/2 items-center gap-1.5 rounded-full border border-border-soft bg-muted pr-2.5 pl-2 text-foreground transition-colors hover:border-primary hover:text-primary-dark lg:hidden"
+        aria-label={`${availability}. Tap to start a conversation.`}
+      >
+        <span class="relative flex h-2 w-2 shrink-0" aria-hidden="true">
+          {/* Soft pulsing halo — kills under prefers-reduced-motion via the
               global rule that flattens all animations. */}
-            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-tertiary opacity-60" />
-            <span class="relative inline-flex h-2 w-2 rounded-full bg-tertiary" />
-          </span>
-          {/* On the narrowest phones the centered logo leaves room only for a
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-tertiary opacity-60" />
+          <span class="relative inline-flex h-2 w-2 rounded-full bg-tertiary" />
+        </span>
+        {/* On the narrowest phones the centered logo leaves room only for a
             compact "Open". From md up, where the pill has space before the
             logo, show the full availabilityStatus so the roomy header doesn't
             read as half-empty. The complete status is always in the aria-label
             and on the Contact page. */}
-          <span class="text-[0.75rem] font-semibold tracking-eyebrow whitespace-nowrap uppercase md:hidden">
-            Open
-          </span>
-          <span class="hidden text-[0.75rem] font-semibold tracking-eyebrow whitespace-nowrap uppercase md:inline">
-            {availability}
-          </span>
-        </a>
-      )
-    }
+        <span class="text-[0.75rem] font-semibold tracking-eyebrow whitespace-nowrap uppercase md:hidden">
+          Open
+        </span>
+        <span class="hidden text-[0.75rem] font-semibold tracking-eyebrow whitespace-nowrap uppercase md:inline">
+          {availability}
+        </span>
+      </a>
+    )}
 
     <a
       href="/"
@@ -244,8 +234,7 @@ function isGroupActive(items: { href: string }[]) {
       aria-label={`${brandName} home`}
     >
       <span class="sign-badge">
-        {
-          /*
+        {/*
         Single theme-aware logo. The img ships with NO src/srcset so the
         browser doesn't start fetching anything; the inline script below
         sets the right variant synchronously before paint based on the
@@ -260,46 +249,59 @@ function isGroupActive(items: { href: string }[]) {
         — no CLS. The mark is PORTRAIT: it is the race's own painted trail
         sign standing on its own, not a wide lockup, so it is sized by
         height and its width follows.
-      */
-        }
-        {
-          logo ? (
-            /* An uploaded Site Settings logo replaces the pair above. It carries no
+      */}
+        {logo ? (
+          /* An uploaded Site Settings logo replaces the pair above. It carries no
            data-theme-logo attribute, so the inline swap script below skips it
            and the one image serves both themes. */
+          <img
+            src={logoSrc}
+            srcset={logoSrcset}
+            sizes="280px"
+            alt={logo.alt || brandName}
+            class="h-11 w-auto lg:h-16"
+            loading="eager"
+            decoding="async"
+          />
+        ) : (
+          <img
+            alt={brandName}
+            width={108}
+            height={180}
+            class="h-[4.5rem] w-auto lg:h-24"
+            loading="eager"
+            decoding="async"
+            data-theme-logo
+            data-logo-light-src={logoLightSrc}
+            data-logo-light-srcset={logoLightSrc}
+            data-logo-dark-src={logoDarkSrc}
+            data-logo-dark-srcset={logoDarkSrc}
+          />
+        )}
+        {/* No-JS fallback (PORTS.md card 108). The swap img above has no src
+            until the inline script runs, so with JS off it would show only its
+            alt text. The noscript copy carries the light variant (no-JS never
+            gets html.dark) and the scoped rule below hides the src-less swap
+            img. A noscript img is not fetched when JS is on, so the
+            single-fetch behaviour is unchanged. */}
+        {!logo && (
+          <noscript>
             <img
-              src={logoSrc}
-              srcset={logoSrcset}
-              sizes="280px"
-              alt={logo.alt || brandName}
-              class="h-11 w-auto lg:h-16"
-              loading="eager"
-              decoding="async"
-            />
-          ) : (
-            <img
+              src={logoLightSrc}
               alt={brandName}
               width={108}
               height={180}
               class="h-[4.5rem] w-auto lg:h-24"
-              loading="eager"
               decoding="async"
-              data-theme-logo
-              data-logo-light-src={logoLightSrc}
-              data-logo-light-srcset={logoLightSrc}
-              data-logo-dark-src={logoDarkSrc}
-              data-logo-dark-srcset={logoDarkSrc}
             />
-          )
-        }
+          </noscript>
+        )}
       </span>
     </a>
-    {
-      /* Synchronous inline setup — runs immediately after the img element
+    {/* Synchronous inline setup — runs immediately after the img element
         is parsed, so the src is set before the browser begins any image
         fetch. Re-applied across View Transitions navs by the anti-FOUC
-        listener in BaseLayout. */
-    }
+        listener in BaseLayout. */}
     <script is:inline>
       (function () {
         const img = document.querySelector('header img[data-theme-logo]');
@@ -309,118 +311,107 @@ function isGroupActive(items: { href: string }[]) {
         img.srcset = dark ? img.dataset.logoDarkSrcset : img.dataset.logoLightSrcset;
       })();
     </script>
-
-    {
-      /* Nav + CTA grouped on the right (lg+ only).
+    {/* Nav + CTA grouped on the right (lg+ only).
 
         The desktop nav is server-rendered as real <a> tags (flat links) plus
         native <details> disclosure groups (the two dropdowns). Everything is in
         the HTML at build time — crawlable, keyboard-usable, and present before
         any JS runs (no flash, no CLS). The progressive-enhancement script at the
         bottom of this file layers on hover-to-open + outside-click/Escape/
-        navigation close; the nav is fully functional without it. */
-    }
+        navigation close; the nav is fully functional without it. */}
     <div class="hidden items-center gap-l lg:flex">
       <nav class="site-nav flex items-center gap-l" aria-label="Primary">
-        {
-          NAV_ITEMS.map((item) =>
-            item.kind === 'flat' ? (
-              <a
-                href={item.href}
-                class:list={[
-                  'nav-stroke text-sm tracking-wide transition-colors',
-                  isActive(item.href)
-                    ? 'font-semibold text-link'
-                    : 'text-foreground hover:text-link',
-                ]}
-                aria-current={isActive(item.href) ? 'page' : undefined}
-              >
-                {item.label}
-              </a>
-            ) : (
-              <details class="site-nav__group relative">
-                {/* <summary> is the disclosure toggle. It carries .nav-underline
+        {NAV_ITEMS.map((item) =>
+          item.kind === 'flat' ? (
+            <a
+              href={item.href}
+              class:list={[
+                'nav-stroke text-sm tracking-wide transition-colors',
+                isActive(item.href) ? 'font-semibold text-link' : 'text-foreground hover:text-link',
+              ]}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          ) : (
+            <details class="site-nav__group relative">
+              {/* <summary> is the disclosure toggle. It carries .nav-underline
                   so it gets the same bronze underline as flat links, and
                   aria-current="page" (which locks the underline wide) when one
                   of its children is the active route. role/aria-expanded are
                   managed natively by <details>. */}
-                <summary
-                  class:list={[
-                    'nav-underline text-sm tracking-wide transition-colors',
-                    'inline-flex cursor-pointer list-none items-center gap-0.5 select-none',
-                    'rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                    isGroupActive(item.items)
-                      ? 'font-semibold text-link'
-                      : 'text-foreground hover:text-link',
-                  ]}
-                  aria-current={isGroupActive(item.items) ? 'page' : undefined}
-                >
-                  {item.label}
-                  <ChevronDown
-                    size={14}
-                    className="site-nav__chevron mt-px transition-transform duration-150"
-                    aria-hidden="true"
-                  />
-                </summary>
+              <summary
+                class:list={[
+                  'nav-underline text-sm tracking-wide transition-colors',
+                  'inline-flex cursor-pointer list-none items-center gap-0.5 select-none',
+                  'rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  isGroupActive(item.items)
+                    ? 'font-semibold text-link'
+                    : 'text-foreground hover:text-link',
+                ]}
+                aria-current={isGroupActive(item.items) ? 'page' : undefined}
+              >
+                {item.label}
+                <ChevronDown
+                  size={14}
+                  className="site-nav__chevron mt-px transition-transform duration-150"
+                  aria-hidden="true"
+                />
+              </summary>
 
-                {/* Menu panel. Absolutely positioned under the summary so it
+              {/* Menu panel. Absolutely positioned under the summary so it
                   doesn't shift layout. Uses popover tokens to match the mobile
                   drawer + shadcn dropdowns, and the bronze ring + shadow of the
                   card rhythm. */}
-                <div class="site-nav__menu absolute top-full left-0 z-50 mt-2 min-w-[200px] rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10">
-                  {item.items.map((sub) => (
-                    <a
-                      href={sub.href}
-                      class:list={[
-                        'block rounded-md px-2.5 py-1.5 text-sm transition-colors',
-                        'outline-none hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground',
-                        isActive(sub.href) ? 'font-semibold text-link' : 'text-foreground',
-                      ]}
-                      aria-current={isActive(sub.href) ? 'page' : undefined}
-                    >
-                      {sub.label}
-                    </a>
-                  ))}
-                </div>
-              </details>
-            ),
-          )
-        }
+              <div class="site-nav__menu absolute top-full left-0 z-50 mt-2 min-w-[200px] rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10">
+                {item.items.map((sub) => (
+                  <a
+                    href={sub.href}
+                    class:list={[
+                      'block rounded-md px-2.5 py-1.5 text-sm transition-colors',
+                      'outline-none hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground',
+                      isActive(sub.href) ? 'font-semibold text-link' : 'text-foreground',
+                    ]}
+                    aria-current={isActive(sub.href) ? 'page' : undefined}
+                  >
+                    {sub.label}
+                  </a>
+                ))}
+              </div>
+            </details>
+          ),
+        )}
       </nav>
       {/* The theme toggle moved down here when the tagline strip went. */}
       <ThemeToggle client:idle />
-      {
-        facebookGroupUrl && (
-          <a
-            href={facebookGroupUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Stone Steps Facebook group"
-            title="Facebook group"
-            class="inline-flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition-colors hover:text-primary focus-visible:text-primary"
-          >
-            <IconBrandFacebook size={20} stroke={1.75} aria-hidden="true" />
-          </a>
-        )
-      }
+      {facebookGroupUrl && (
+        <a
+          href={facebookGroupUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Stone Steps Facebook group"
+          title="Facebook group"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition-colors hover:text-primary focus-visible:text-primary"
+        >
+          <IconBrandFacebook size={20} stroke={1.75} aria-hidden="true" />
+        </a>
+      )}
       <span class="h-6 w-px bg-border-soft" aria-hidden="true"></span>
-      {
-        headerCta.show && (
-          <a
-            href={headerCta.href}
-            {...externalLinkAttrs(headerCta.href)}
-            class:list={[
-              'btn-plate btn-plate--sm',
-              isActive(headerCta.href) && 'btn-plate--is-current',
-            ]}
-          >
-            {headerCta.label}
-            <span class="btn-plate__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </a>
-        )
-      }
+      {headerCta.show && (
+        <a
+          href={headerCta.href}
+          {...externalLinkAttrs(headerCta.href)}
+          class:list={[
+            'btn-plate btn-plate--sm',
+            isActive(headerCta.href) && 'btn-plate--is-current',
+          ]}
+        >
+          {headerCta.label}
+          <span class="btn-plate__arrow" aria-hidden="true">
+            &rarr;
+          </span>
+        </a>
+      )}
     </div>
 
     <MobileNav
@@ -436,6 +427,12 @@ function isGroupActive(items: { href: string }[]) {
 </header>
 
 <style>
+  /* The theme-aware logo only lacks a src when the inline swap script never
+     ran (JS off); the <noscript> copy shows instead (card 108). */
+  img[data-theme-logo]:not([src]) {
+    display: none;
+  }
+
   /* Desktop dropdown groups (native <details>). The links are server-rendered
      and fully usable with no JS; these styles + the script below add the
      dropdown affordances. */
@@ -466,13 +463,11 @@ function isGroupActive(items: { href: string }[]) {
   }
 </style>
 
-{
-  /* Progressive enhancement for the desktop dropdown nav. Everything still
+{/* Progressive enhancement for the desktop dropdown nav. Everything still
     works without this (native <details> toggles on click/Enter/Space, links
     are real <a> tags). This adds: open-on-hover with a small close delay,
     close-on-outside-click, close-on-Escape, and close-when-a-link-is-followed.
-    Re-binds on astro:page-load so it survives View Transitions navigations. */
-}
+    Re-binds on astro:page-load so it survives View Transitions navigations. */}
 <script>
   // Query groups fresh each call — the nav DOM is replaced on every View
   // Transitions navigation, so a captured list would go stale.

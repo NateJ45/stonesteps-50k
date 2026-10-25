@@ -1,0 +1,21 @@
+/* Safe to edit by hand
+   =============================================================================
+   studioArt.css: the Site Guide banner's type, in the race's display stack
+   =============================================================================
+   Imported by sanity.config.ts after studioFonts.css. Home's banner (name,
+   eyebrow, stamp, plate button) is data now: kit.config.ts `homeBanner.style`
+   (card 135). The Site Guide's banner has no slot yet (starter PENDING 31), so
+   its title and eyebrow stay here, lifted from src/styles/globals.css.
+   ============================================================================= */
+
+/* ---- The Site Guide's banner: the same display stack --------------------- */
+.ncs-ui .ui-banner__title {
+  text-transform: uppercase;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-shadow: 0.055em 0.055em 0 #a83c26;
+}
+.ncs-ui .ui-banner__eyebrow {
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  letter-spacing: 0.22em;
+}
