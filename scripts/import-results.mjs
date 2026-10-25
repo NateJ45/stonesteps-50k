@@ -29,7 +29,7 @@
 //
 // The API is public and needs no key, but it does not reach the whole history:
 //
-//   - Results exist for 2017 through 2025 only. 2020, 2016 and 2015 have no
+//   - Results exist from 2017 on (2026 the latest checked). 2020, 2016 and 2015 have no
 //     result set at all, and neither does the 2021 27K.
 //   - The years before 2017 come from scripts/import-archive.mjs instead (the
 //     2003 to 2016 tables), which is what put a result behind every record on
@@ -51,6 +51,7 @@ import { createClient } from '@sanity/client';
 import { loadEnv } from './lib/loadEnv.mjs';
 import { parseRaceTime, titleCaseName } from '../src/lib/race-time.ts';
 import { canonicalSlug, canonicalName } from '../src/lib/athlete-aliases.ts';
+import { pickResultRows, distanceFromEventName } from './lib/result-sets.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -94,22 +95,39 @@ async function getJson(url) {
   return res.json();
 }
 
-/** Every event the race has ever listed, with its year and distance slug. */
+/**
+ * A line GitHub Actions shows on the run's summary page (plain text locally).
+ * For anything a person should look at that must not stop the import.
+ */
+function warn(message) {
+  console.log(process.env.GITHUB_ACTIONS ? `::warning::${message}` : `  ! ${message}`);
+}
+
+/** Every event the race has ever listed, with its year, date and distance slug. */
 async function listEvents() {
   const data = await getJson(`${API}/race/${RACE_ID}?format=json&future_events_only=F`);
-  return (data.race?.events ?? [])
-    .map((e) => {
-      // start_time is "10/26/2025 08:00"; the year is the authoritative label,
-      // because the event NAME is just "50K" on every one of them.
-      const year = Number(String(e.start_time ?? '').match(/\/(\d{4})\s/)?.[1]);
-      const slug = String(e.name ?? '')
-        .trim()
-        .toLowerCase();
-      return { eventId: e.event_id, year, distanceSlug: slug, name: e.name };
-    })
-    .filter(
-      (e) => Number.isFinite(e.year) && (e.distanceSlug === '50k' || e.distanceSlug === '27k'),
-    );
+  const events = [];
+  for (const e of data.race?.events ?? []) {
+    // start_time is "10/26/2025 08:00"; the year is the authoritative label,
+    // because the event NAME is just "50K" on every one of them. Any 20xx in it
+    // will do, in case RunSignUp changes the date format.
+    const when = String(e.start_time ?? '');
+    const year = Number(when.match(/\b(20\d{2})\b/)?.[1]);
+    const [, mm, dd] = when.match(/^(\d{1,2})\/(\d{1,2})\//) ?? [];
+    const date = mm && dd ? new Date(Date.UTC(year, Number(mm) - 1, Number(dd))) : null;
+    // "50K", "Stone Steps 50K Trail Run" and the like: see distanceFromEventName.
+    const distanceSlug = distanceFromEventName(e.name);
+    if (!Number.isFinite(year)) {
+      warn(`RunSignUp event ${e.event_id} "${e.name}" has no readable year in "${when}"; skipped.`);
+      continue;
+    }
+    if (!distanceSlug) {
+      warn(`RunSignUp event ${e.event_id} "${e.name}" (${year}) is not a 50K or 27K; skipped.`);
+      continue;
+    }
+    events.push({ eventId: e.event_id, year, date, distanceSlug, name: e.name });
+  }
+  return events;
 }
 
 /** Every finisher in one event, or [] when the event has no published results. */
@@ -118,12 +136,9 @@ async function fetchResults(eventId) {
     `${API}/race/${RACE_ID}/results/get-results` +
     `?format=json&event_id=${eventId}&results_per_page=2500`;
   const data = await getJson(url);
-  const sets = data.individual_results_sets ?? [];
-  if (sets.length === 0) return [];
-  // Take the largest set. Some years publish an "Overall" set alongside
-  // narrower age-group or "Trek" sets, and the overall one is the archive.
-  const set = sets.reduce((a, b) => ((b.results?.length ?? 0) > (a.results?.length ?? 0) ? b : a));
-  return set.results ?? [];
+  // Which set is the archive, and who in it is a trekker: see
+  // scripts/lib/result-sets.mjs (2026 split the trekkers into their own set).
+  return pickResultRows(data.individual_results_sets);
 }
 
 /**
@@ -178,7 +193,13 @@ function mapResult(row, { year, distanceSlug }) {
       timeSeconds,
       gender,
       ...(age ? { age } : {}),
-      ...(Number.isFinite(Number(row.place)) ? { place: Number(row.place) } : {}),
+      // A trekker gets no place, as in the 2004 to 2007 archive rows: their
+      // place in the timer's combined set ranks them against the field.
+      ...(row.trekker
+        ? { trekker: true }
+        : Number.isFinite(Number(row.place))
+          ? { place: Number(row.place) }
+          : {}),
       timeSource: chip ? 'chip' : 'gun',
     },
   };
@@ -203,22 +224,42 @@ async function main() {
 
   for (const ev of wanted) {
     let rows = [];
+    let trekkers = 0;
+    let note;
     try {
-      rows = await fetchResults(ev.eventId);
+      ({ rows, trekkers, note } = await fetchResults(ev.eventId));
     } catch (err) {
-      console.error(`  ! ${ev.year} ${ev.name}: ${err.message}`);
+      warn(`${ev.year} ${ev.name}: RunSignUp did not answer (${err.message}); skipped this run.`);
       continue;
     }
 
     if (rows.length === 0) {
       console.log(`  - ${ev.year} ${ev.name.padEnd(4)} no published results`);
+      // A race from the last two months with nothing on the API a week after it
+      // ran: either the timer is late, or the results went up as a file the API
+      // cannot reach (2021's 27K did; scripts/import-results-html.mjs reads those).
+      const days = ev.date ? (Date.now() - ev.date.getTime()) / 86_400_000 : NaN;
+      if (days > 7 && days < 60) {
+        warn(
+          `${ev.year} ${ev.name}: no results on the RunSignUp API ${Math.floor(days)} days ` +
+            'after the race. If they are on the results page they may be an uploaded file; ' +
+            'see scripts/import-results-html.mjs.',
+        );
+      }
       continue;
     }
+    if (note) warn(`${ev.year} ${ev.name}: ${note}.`);
 
     let kept = 0;
+    let unreadable = 0;
     for (const row of rows) {
       const mapped = mapResult(row, ev);
       if (!mapped) {
+        // A row with something time-like in it that still did not map means
+        // the format moved (a new time shape, renamed name columns). DNF and
+        // blank rows have no digits and are skipped quietly, as before.
+        const timeLike = `${row.chip_time ?? ''}${row.clock_time ?? ''}`;
+        if (/\d/.test(timeLike)) unreadable += 1;
         skipped.push(`${ev.year} ${ev.name} ${row.first_name ?? ''} ${row.last_name ?? ''}`.trim());
         continue;
       }
@@ -226,8 +267,24 @@ async function main() {
       results.push(mapped.result);
       kept += 1;
     }
+    // As many unreadable timed rows as readable ones is not a few bad rows, it
+    // is a format change. Fail the run before anything is written, so GitHub
+    // emails, rather than quietly import a year with half its finishers gone.
+    if (unreadable > 0 && unreadable >= kept) {
+      console.error(
+        `  ! ${ev.year} ${ev.name}: ${unreadable} rows have a time that could not be read ` +
+          `(${kept} could). RunSignUp's format has probably changed; nothing was written.`,
+      );
+      process.exit(1);
+    }
+    if (unreadable > 0) {
+      warn(`${ev.year} ${ev.name}: ${unreadable} rows had a time that could not be read.`);
+    }
     covered.push(`${ev.year} ${ev.name}`);
-    console.log(`  + ${ev.year} ${ev.name.padEnd(4)} ${kept} finishers`);
+    console.log(
+      `  + ${ev.year} ${ev.name.padEnd(4)} ${kept} finishers` +
+        (trekkers ? ` (${trekkers} trekker rows flagged)` : ''),
+    );
     // Be a polite guest on someone else's public API.
     await new Promise((r) => setTimeout(r, 350));
   }
