@@ -2,6 +2,10 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-25 - The /contact region map links somewhere._
+
+Nathan found the three-pin plate not that useful: it showed where things are and left the reader nothing to do. The plate is unchanged in look, but each place in `RegionPoster.astro` is now an SVG link: Downtown and CVG open a Google Maps hotel search centred on that pin, and The Oval opens driving directions (`directionsUrl`). Straight-line miles became drive times (about 15 and 25 minutes, rounded no-traffic estimates hand-entered in the component). Each link has a transparent tap target with a dashed focus ring, and the small lines get bigger type under 480px so they stay readable on a phone.
+
 _2026-10-09 - The /contact region map is a drawn plate, not a baked still._
 
 Nathan found the re-baked map no different on a 1x screen and asked for something simpler and better looking. `RegionPoster.astro` now draws a cream plate (black edge, hard shadow, like the tickets and FAQ cards) with three pins at their real coordinates, The Oval taken from the first point of `course-geo.json`, straight-line miles computed from the same numbers, and one flat band for the Ohio. A busier version with contours, interstates and a course inset was tried and dropped as too much. `npm run map-region`, `scripts/capture-region-poster.mjs` and `public/region-poster*` are gone; the capture pipeline it used is now orphaned (PENDING 1p).
