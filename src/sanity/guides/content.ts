@@ -262,15 +262,15 @@ export const guides: Guide[] = [
         kind: 'steps',
         items: [
           'Open the thing that carries the marker, for example a row in the race-day schedule.',
-          'Read what it says. If it is right, tick `Confirmed by the race director`.',
-          'If it is wrong, fix the wording FIRST, then tick the box.',
+          'Read what it says. If it is right, check `Confirmed by the race director`.',
+          'If it is wrong, fix the wording FIRST, then check the box.',
           'Publish.',
         ],
       },
       {
         kind: 'callout',
         tone: 'caution',
-        title: 'Only tick it if you actually know.',
+        title: 'Only check it if you actually know.',
         text: 'The whole point of the marker is that a runner can trust everything without one. Ticking the box on something you are not sure about is worse than leaving the marker in place, because it turns "we are not sure" into "the race says so".',
       },
     ],
@@ -344,7 +344,7 @@ export const guides: Guide[] = [
         items: [
           'Click the row you want to change.',
           'Edit the time and the label.',
-          'If this is something the race genuinely publishes, tick `Confirmed by the race director`.',
+          'If this is something the race genuinely publishes, check `Confirmed by the race director`.',
           'Publish.',
         ],
       },
@@ -472,7 +472,7 @@ export const guides: Guide[] = [
       { kind: 'h', text: 'The one thing worth checking' },
       {
         kind: 'p',
-        text: 'The early starters. Trekkers are not eligible for awards, and the site leaves them out of every record. Since 2026 the timer lists them separately and the import marks them itself, so just glance at the top of each distance. If a trekker there is not marked, open their result and tick `Ran as a trekker`, or they could take a record they were not eligible to win.',
+        text: 'The early starters. Trekkers are not eligible for awards, and the site leaves them out of every record. Since 2026 the timer lists them separately and the import marks them itself, so just glance at the top of each distance. If a trekker there is not marked, open their result and check `Ran as a trekker`, or they could take a record they were not eligible to win.',
       },
       { kind: 'seealso', items: ['Fix a runner’s name'] },
     ],
@@ -557,7 +557,7 @@ export const guides: Guide[] = [
       { kind: 'h', text: 'How a page is built' },
       {
         kind: 'p',
-        text: 'A page is a stack of **blocks**, one on top of the other: a heading band, a row of numbers, the two tickets, the elevation chart, and so on. You edit what is inside a block. You do not have to think about colours or spacing, because the design decides those from the block’s position on the page.',
+        text: 'A page is a stack of **blocks**, one on top of the other: a heading band, a row of numbers, the two tickets, the elevation chart, and so on. You edit what is inside a block. You do not have to think about colors or spacing, because the design decides those from the block’s position on the page.',
       },
       { kind: 'h', text: 'Seeing it as you type' },
       {
@@ -648,7 +648,7 @@ export const guides: Guide[] = [
         kind: 'bullets',
         items: [
           'Nothing, for the results. They arrive on their own.',
-          'Check whether any **trekkers** finished near the front, and tick their box.',
+          'Check whether any **trekkers** finished near the front, and check their box.',
           'Have a look at the records page and enjoy it.',
         ],
       },
@@ -683,7 +683,7 @@ guides.push(
         kind: 'bullets',
         items: [
           '**The big buttons**: the jobs that come round every year. The race date, the entry fees, a race notice, and the once-a-year list.',
-          '**Race checklist**: the things that should be true whenever a runner looks. Most tick themselves when the website can see they are done; the RunSignUp one you tick yourself, because the website cannot see inside RunSignUp. Ticks start fresh every Monday.',
+          '**Race checklist**: the things that should be true whenever a runner looks. Most check themselves when the website can see they are done; the RunSignUp one you check yourself, because the website cannot see inside RunSignUp. Ticks start fresh every Monday.',
           '**Coming up**: pages set to publish by themselves, soonest first, with the time in plain words.',
           '**Fix-it list**: the things the Checkup found, by name, like a schedule line still marked "Not confirmed" or a picture with no description. `Edit` opens it at the right spot. `See the whole list` opens the Checkup.',
           '**Visitors**: how many people visited in the last 7 days against the week before, a small chart of the last four weeks, the most-read pages and how people found the website.',
@@ -778,7 +778,7 @@ guides.push(
       },
       {
         kind: 'p',
-        text: 'The rest of the year the other jobs take their turn: **Registration is open** (winter and spring; the words are written for you and it links to the Register page you set), **Ask for volunteers** (late summer to race week), and after the race **Tell runners the results are in**, **Mark a trekker** (pick the early starter who finished near the front and tick the box) and **Look at the results**. **Add a sponsor** is there all year: their name and website now, the logo later in the full editor.',
+        text: 'The rest of the year the other jobs take their turn: **Registration is open** (winter and spring; the words are written for you and it links to the Register page you set), **Ask for volunteers** (late summer to race week), and after the race **Tell runners the results are in**, **Mark a trekker** (pick the early starter who finished near the front and check the box) and **Look at the results**. **Add a sponsor** is there all year: their name and website now, the logo later in the full editor.',
       },
       {
         kind: 'callout',
@@ -998,7 +998,7 @@ guides.push(
         items: [
           'Open the page that has the section you like.',
           'Open the menu next to `Publish` and choose `Save a section as preset...`.',
-          'Pick the section, give it a name you will recognise, and save.',
+          'Pick the section, give it a name you will recognize, and save.',
         ],
       },
       {
@@ -1130,7 +1130,7 @@ guides.push(
         kind: 'callout',
         tone: 'positive',
         title: 'The Home checklist keeps score.',
-        text: 'The race checklist on Home ticks **The Register link is on the website** and **The next race date is on the website** by itself once they are done. The RunSignUp line you tick by hand after you have compared the two.',
+        text: 'The race checklist on Home checks **The Register link is on the website** and **The next race date is on the website** by itself once they are done. The RunSignUp line you check by hand after you have compared the two.',
       },
       {
         kind: 'seealso',
@@ -1196,7 +1196,7 @@ guides.push(
         kind: 'bullets',
         items: [
           'Put up a **race-week notice** with the thing people ask most: bib pickup, or parking at The Oval.',
-          'Open **Race-day schedule** and check every time. Tick `Confirmed by the race director` on each one you know is right.',
+          'Open **Race-day schedule** and check every time. Check `Confirmed by the race director` on each one you know is right.',
           'Look at Home. The race checklist shows **Race week: a notice is up** until there is one.',
         ],
       },
@@ -1222,7 +1222,7 @@ guides.push(
         kind: 'bullets',
         items: [
           'The results import themselves overnight from RunSignUp. Once you can see this year under **Results by year**, press `Tell runners the results are in`.',
-          '`Quick update`, then `Mark a trekker`, for any early starter who finished near the front. Pick them from the list and tick the box.',
+          '`Quick update`, then `Mark a trekker`, for any early starter who finished near the front. Pick them from the list and check the box.',
           'Switch off anything left over under **Race notices**.',
         ],
       },
@@ -1310,8 +1310,8 @@ guides.push(
       {
         kind: 'callout',
         tone: 'primary',
-        title: 'The overnight import leaves your tick alone.',
-        text: 'Results come in from RunSignUp every night after the race, but a tick you have made is kept.',
+        title: 'The overnight import leaves your check alone.',
+        text: 'Results come in from RunSignUp every night after the race, but a check you have made is kept.',
       },
       { kind: 'seealso', items: ['What happens after race day'] },
     ],
@@ -1328,7 +1328,7 @@ guides.push(
       {
         kind: 'bullets',
         items: [
-          'Open the Studio and look at Home. If the race checklist is all ticked, there is nothing to do.',
+          'Open the Studio and look at Home. If the race checklist is all checked, there is nothing to do.',
           'Read anything new in `Messages` and mark it **Replied** once you have answered.',
         ],
       },
@@ -1337,7 +1337,7 @@ guides.push(
       {
         kind: 'bullets',
         items: [
-          'Run **Start a new race year** under This year’s race. It lists what changes for the next running, with what is already done ticked off.',
+          'Run **Start a new race year** under This year’s race. It lists what changes for the next running, with what is already done checked off.',
           'Swap in a photograph or two from the last race.',
           'Thank the sponsors: add any new ones with `Quick update`, `Add a sponsor`, and the logo afterwards in the full editor.',
         ],

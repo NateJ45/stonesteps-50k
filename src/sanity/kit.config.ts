@@ -459,7 +459,7 @@ export const kitConfig: KitConfig = {
           name: 'trekker',
           title: 'Ran as a trekker',
           kind: 'boolean',
-          description: 'Tick if they took the optional early start.',
+          description: 'Check if they took the optional early start.',
         },
       ],
       doneMessage:

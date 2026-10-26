@@ -359,12 +359,12 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
       // only place the race's actual values are written down in one list.
       S.listItem()
         .id('brand-kit')
-        .title('Brand colours (for flyers and posts)')
+        .title('Brand colors (for flyers and posts)')
         .icon(brandIcon('brandKit'))
         .child(
           S.component(BrandKit as never)
             .id('brand-kit-pane')
-            .title('Brand colours'),
+            .title('Brand colors'),
         ),
 
       S.divider(),
