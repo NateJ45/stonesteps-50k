@@ -53,6 +53,9 @@ import CommunityBand from '@/components/sections/CommunityBand.astro';
 import RaceWeather from '@/components/sections/RaceWeather.astro';
 import Dynasties from '@/components/sections/Dynasties.astro';
 import GearBand from '@/components/sections/GearBand.astro';
+// The builder kit (PORTS.md card 173).
+import BuilderBlock from '@/components/builder-blocks/BuilderBlock.astro';
+import { isBuilderBlock } from '@/lib/builderBlocks.types';
 import { classifySections } from '@/lib/sectionCadence';
 import { expandSyncedSections } from '@/lib/authoring';
 import type {
@@ -121,10 +124,18 @@ const editKeyOf = (block: unknown) => {
 };
 ---
 
-{rows.map(({ block: s, surface, headingId }) => (
+{rows.map(({ block: s, surface, headingId }, rowIndex) => (
   <>
     <Wrap {...wrapAttrs(editKeyOf(s))}>
-      {s._type === 'heroSection' ? (
+      {isBuilderBlock(s) ? (
+        // The builder kit (PORTS.md card 173): one branch, BuilderBlock picks the component.
+        <BuilderBlock
+          block={s}
+          surface={surface === 'muted' ? 'muted' : 'background'}
+          headingId={headingId}
+          isFirst={rowIndex === 0}
+        />
+      ) : s._type === 'heroSection' ? (
         <Hero
           eyebrow={s.eyebrow}
           headline={s.headline ?? ''}

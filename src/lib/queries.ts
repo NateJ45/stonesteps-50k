@@ -73,6 +73,16 @@ export const ARCHIVE_PROJECTION = `
 // The per-type arms, shared by a page's own sections and by the sections a
 // synced section shows (below), so a block renders the same either way.
 const SECTION_ARMS = `
+    // The builder kit (builderSections.ts, PORTS.md card 173). Columns, tabs and
+    // the schedule carry no image or button, so they need no arm.
+    _type == "buttonRowSection" => { ..., links[]{ ..., link${CTA_PROJECTION} } },
+    _type == "timelineSection" => { ..., entries[]{ ..., image${IMAGE_PROJECTION} } },
+    _type == "letterSection" => { ..., signature${IMAGE_PROJECTION}, link${CTA_PROJECTION} },
+    _type == "eventDetailsSection" => { ..., image${IMAGE_PROJECTION}, button${CTA_PROJECTION} },
+    _type == "photoCardsSection" => {
+      ...,
+      cards[]{ ..., image${IMAGE_PROJECTION}, link${CTA_PROJECTION} }
+    },
     _type == "heroSection" => {
       ...,
       backgroundImage${IMAGE_PROJECTION},

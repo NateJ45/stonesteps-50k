@@ -14,6 +14,10 @@
 
 import { defineType, defineField, defineArrayMember, type ArrayOptions } from 'sanity';
 import { raceSectionSchemas } from './raceSections';
+// The builder kit (PORTS.md card 173): columns, buttons, tabs, a timeline, a
+// letter, event details, a schedule and cards with photos.
+import { BUILDER_INSERT_GROUPS, builderSectionSchemas } from './builderSections';
+import { withSiteGroups, type InsertGroup } from '../../lib/insert-groups';
 import { BlockElementIcon } from '@sanity/icons/BlockElement';
 import { ImageIcon } from '@sanity/icons/Image';
 import { ImagesIcon } from '@sanity/icons/Images';
@@ -695,6 +699,8 @@ export const pageSectionSchemas = [
   spacerSection,
   logoStripSection,
   embedSection,
+  // The builder kit (builderSections.ts, PORTS.md card 173).
+  ...builderSectionSchemas,
 ];
 
 // The race's blocks and the general ones, on their own. A saved section
@@ -731,66 +737,83 @@ export const sectionThumbnailUrl = (type: string): string | undefined =>
 // types are all absent from a given array simply does not appear, which is what
 // lets one config serve the curated per-page lists in richSections.ts. Any type
 // not named in a group falls under "All".
+//
+// SITE_INSERT_GROUPS (PORTS.md card 173): the groups a library file adds, merged
+// into the base list by withSiteGroups() (src/lib/insert-groups.ts): a group
+// with a name that already exists gains the types, a new name becomes a new
+// group at the end. The builder kit adds to "Words and pictures" and brings
+// "Events and dates".
+const SITE_INSERT_GROUPS: InsertGroup[] = [...BUILDER_INSERT_GROUPS];
+
 export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
   filter: true,
   // Grid first, so the picker opens on pictures of the race's own blocks; the
   // list view stays one click away and keeps the search box (card 109).
   views: [{ name: 'grid', previewImageUrl: sectionThumbnailUrl }, { name: 'list' }],
-  groups: [
-    {
-      name: 'race',
-      title: 'The race',
-      of: [
-        'raceHeroSection',
-        'pageHeaderSection',
-        'contactSection',
-        'faqKioskSection',
-        'distanceTicketsSection',
-        'recordsBoardSection',
-        'raceScheduleSection',
-        'courseFeaturesSection',
-        'loopCardSection',
-        'elevationSection',
-        'courseMapSection',
-        'coursePosterSection',
-        'raceWeatherSection',
-        'sponsorPatchesSection',
-        'tickerSection',
-        'parksSection',
-        'communitySection',
-        'dynastiesSection',
-        'gearSection',
-        'photoBandSection',
-      ],
-    },
-    {
-      name: 'basics',
-      title: 'Words and pictures',
-      of: ['heroSection', 'richTextSection', 'imageTextSection', 'ctaBandSection', 'spacerSection'],
-    },
-    {
-      name: 'proof',
-      title: 'Quotes and numbers',
-      of: ['quoteSection', 'statSection', 'logoStripSection'],
-    },
-    {
-      name: 'media',
-      title: 'Photos and video',
-      of: ['gallerySection', 'videoSection', 'embedSection'],
-    },
-    {
-      // The authoring kit (card 109). A saved section can also go in as a COPY
-      // from the "Insert a saved section" button under the sections list.
-      name: 'saved',
-      title: 'Saved and synced',
-      of: ['syncedSection'],
-    },
-    // Stone Steps (2026-10-18): the starter's business blocks (services grid,
-    // process, story, values, founder, team, service area, testimonials,
-    // guarantee, FAQ list, dynamic list) are no longer offered. They fill from
-    // collections this race does not keep, and none is on any page. Their
-    // types stay registered (the section-field tests read them).
-  ],
+  groups: withSiteGroups(
+    [
+      {
+        name: 'race',
+        title: 'The race',
+        of: [
+          'raceHeroSection',
+          'pageHeaderSection',
+          'contactSection',
+          'faqKioskSection',
+          'distanceTicketsSection',
+          'recordsBoardSection',
+          'raceScheduleSection',
+          'courseFeaturesSection',
+          'loopCardSection',
+          'elevationSection',
+          'courseMapSection',
+          'coursePosterSection',
+          'raceWeatherSection',
+          'sponsorPatchesSection',
+          'tickerSection',
+          'parksSection',
+          'communitySection',
+          'dynastiesSection',
+          'gearSection',
+          'photoBandSection',
+        ],
+      },
+      {
+        name: 'basics',
+        title: 'Words and pictures',
+        of: [
+          'heroSection',
+          'richTextSection',
+          'imageTextSection',
+          'ctaBandSection',
+          'spacerSection',
+        ],
+      },
+      {
+        name: 'proof',
+        title: 'Quotes and numbers',
+        of: ['quoteSection', 'statSection', 'logoStripSection'],
+      },
+      {
+        name: 'media',
+        title: 'Photos and video',
+        of: ['gallerySection', 'videoSection', 'embedSection'],
+      },
+      {
+        // The authoring kit (card 109). A saved section can also go in as a COPY
+        // from the "Insert a saved section" button under the sections list.
+        name: 'saved',
+        title: 'Saved and synced',
+        of: ['syncedSection'],
+      },
+      // Stone Steps (2026-10-18): the starter's business blocks (services grid,
+      // process, story, values, founder, team, service area, testimonials,
+      // guarantee, FAQ list, dynamic list) are no longer offered. They fill from
+      // collections this race does not keep, and none is on any page. Their
+      // types stay registered (the section-field tests read them).
+    ],
+    SITE_INSERT_GROUPS,
+  ),
 };
 
 /** The `options` block every pageBuilder array should carry. */
