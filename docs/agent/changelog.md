@@ -2,6 +2,8 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-26: the drift check compares with the starter again._ `ci.yml` carried the starter's own "self-check" step, which runs `sync-check` with the repo as its own library of record, so every marked file always reported SAME and drift could never fail CI here. The step is now the one every other site runs: check out `NateJ45/ncs-astro-sanity-starter` at `main`, run `sync-check` against it, then delete the checkout. That showed one real drift: `tests/contrast.spec.ts` gained `pinClock()` in 3867a78 (the countdown changes what sits on each photograph). That is this site's own need, so the file's PORTABLE marker came off, with a header note saying what differs. The other 251 marked files match.
+
 _2026-10-25: The /contact region map links somewhere._
 
 Nathan found the three-pin plate not that useful: it showed where things are and left the reader nothing to do. The plate is unchanged in look, but each place in `RegionPoster.astro` is now an SVG link: Downtown and CVG open a Google Maps hotel search centred on that pin, and The Oval opens driving directions (`directionsUrl`). Straight-line miles became drive times (about 15 and 25 minutes, rounded no-traffic estimates hand-entered in the component). Each link has a transparent tap target with a dashed focus ring, and the small lines get bigger type under 480px so they stay readable on a phone.
