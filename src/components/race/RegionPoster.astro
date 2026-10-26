@@ -1,8 +1,8 @@
 ---
 // Foundation, edit with care
 /**
- * The "where to stay" map on /contact: three pins on a dark board, drawn as
- * inline SVG.
+ * The "where to stay" map on /contact: three places on a cream plate, drawn as
+ * inline SVG, each one a link.
  *
  * WHY IT CHANGED (2026-10-09). The first version was a baked screenshot of the
  * site's own terrain map pulled back to show the park, downtown and the airport.
@@ -12,16 +12,25 @@
  * draws. A busier drawn version (contours, interstates, a course inset) was tried
  * and rejected on the same day for doing too much: keep it to the pins.
  *
+ * WHY THE PINS ARE LINKS (2026-10-25). Three pins and straight-line miles still
+ * left the reader with nothing to do next ("this map isn't that useful"). The
+ * map stays as plain as it was, but each place now answers the question it
+ * raises: Downtown and CVG open a Google Maps hotel search centred on that area,
+ * and The Oval opens driving directions to the start. The distance under each
+ * base is a drive time, because nobody plans a race morning in crow-flight
+ * miles.
+ *
  * WHAT IS EXACT. The pins sit at their real coordinates (The Oval is the first
- * point of the recorded course, read at build time), and the miles are
- * straight-line distances computed from those same coordinates, so they cannot
- * drift from the pins. The river is a hand-drawn band for orientation only.
+ * point of the recorded course, read at build time). The drive times are
+ * rounded Google Maps estimates with no traffic, hand-entered below; the river
+ * is a hand-drawn band for orientation only.
  *
  * IT IS A PLATE (cream stock, black edge, hard shadow), not a ridge-cut picture:
  * a dark board vanished into the dark band, and the plate language is what the
  * tickets and FAQ cards already speak in both themes.
  */
 import courseGeo from '../../../scripts/data/course-geo.json';
+import { directionsUrl } from '@/lib/directions';
 
 interface Props {
   /** Accepted for the caller's sake; a plate does not need the band colour. */
@@ -42,8 +51,6 @@ const project = (ll: LL): LL => [
   W / 2 + (ll[0] - CENTER.lon) * KM_LON * PX_PER_KM,
   H / 2 - (ll[1] - CENTER.lat) * KM_LAT * PX_PER_KM,
 ];
-const miles = (a: LL, b: LL) =>
-  Math.round(Math.hypot((a[0] - b[0]) * KM_LON, (a[1] - b[1]) * KM_LAT) * 0.621371);
 
 type Feature = { geometry: { type: string; coordinates: number[][] } };
 const firstLine = (courseGeo as { features: Feature[] }).features.find(
@@ -55,48 +62,114 @@ const OVAL_LL: LL = firstLine
 const DOWNTOWN_LL: LL = [-84.512, 39.1031];
 const CVG_LL: LL = [-84.6678, 39.0489];
 
+// Rounded Google Maps drive times from The Oval, no traffic. Check them if the
+// start ever moves.
+const DRIVE_DOWNTOWN_MIN = 15;
+const DRIVE_CVG_MIN = 25;
+
+// A hotel search centred on a point: Google lists what is near the map centre,
+// so the pin decides the results without a place-name guess.
+const hotelsNear = (ll: LL, zoom: number) =>
+  `https://www.google.com/maps/search/hotels/@${ll[1]},${ll[0]},${zoom}z`;
+const ovalHref = directionsUrl({ lat: OVAL_LL[1], lng: OVAL_LL[0] }) ?? '';
+const downtownHref = hotelsNear(DOWNTOWN_LL, 15);
+const cvgHref = hotelsNear(CVG_LL, 14);
+
 const oval = project(OVAL_LL);
 const downtown = project(DOWNTOWN_LL);
 const cvg = project(CVG_LL);
-const toDowntown = miles(OVAL_LL, DOWNTOWN_LL);
-const toCvg = miles(OVAL_LL, CVG_LL);
 
-// One soft band, roughly where the Ohio runs: between downtown and CVG.
-const RIVER = 'M-20,412 C200,382 380,432 560,398 S760,382 820,362';
+// One soft band, roughly where the Ohio runs: between downtown and CVG. It dips
+// on the right so it passes under Downtown's labels, which sit to the right of
+// its pin.
+const RIVER = 'M-20,396 C200,376 380,436 560,420 S760,436 820,416';
 
-const alt = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where the race starts, is at the top. Downtown Cincinnati is about ${toDowntown} miles south east of it, and the CVG airport is about ${toCvg} miles south west, across the Ohio River in Kentucky.`;
+const label = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where the race starts, is at the top. Downtown Cincinnati is about ${DRIVE_DOWNTOWN_MIN} minutes' drive south east of it, and the CVG airport is about ${DRIVE_CVG_MIN} minutes south west, across the Ohio River in Kentucky. Each place links to Google Maps.`;
 ---
 
 <figure class={`rposter ${extraClass}`}>
-  <svg class="rposter__svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={alt}>
+  <svg class="rposter__svg" viewBox={`0 0 ${W} ${H}`} role="group" aria-label={label}>
     <path d={RIVER} class="rp-river"></path>
-    <text x="40" y="414" class="rp-river-label" transform="rotate(-4 40 414)">
+    <text x="40" y="400" class="rp-river-label" transform="rotate(-4 40 400)">
       Ohio River
     </text>
 
-    <circle cx={oval[0]} cy={oval[1]} r="16" class="rp-pin rp-pin--race"></circle>
-    <text x={oval[0]} y={oval[1] - 34} text-anchor="middle" class="rp-name rp-name--race">
-      The Oval
-    </text>
-    <text x={oval[0]} y={oval[1] + 54} text-anchor="middle" class="rp-sub">
-      Start and finish
-    </text>
+    {/* Each place is one link. The transparent rect is the tap target, so a
+        thumb does not have to land on the letters; it also carries the focus
+        ring. */}
+    <a
+      href={ovalHref}
+      target="_blank"
+      rel="noopener"
+      class="rp-link"
+      aria-label="Driving directions to The Oval (opens Google Maps)"
+    >
+      <rect
+        x={oval[0] - 160}
+        y={oval[1] - 80}
+        width="320"
+        height="182"
+        rx="14"
+        class="rp-hit"
+      ></rect>
+      <circle cx={oval[0]} cy={oval[1]} r="16" class="rp-pin rp-pin--race"></circle>
+      <text x={oval[0]} y={oval[1] - 34} text-anchor="middle" class="rp-name rp-name--race">
+        The Oval
+      </text>
+      <text x={oval[0]} y={oval[1] + 54} text-anchor="middle" class="rp-sub">
+        Start and finish
+      </text>
+      <text x={oval[0]} y={oval[1] + 88} text-anchor="middle" class="rp-go">
+        Directions →
+      </text>
+    </a>
 
-    <circle cx={downtown[0]} cy={downtown[1]} r="12" class="rp-pin"></circle>
-    <text x={downtown[0]} y={downtown[1] - 28} text-anchor="middle" class="rp-name">
-      Downtown
-    </text>
-    <text x={downtown[0]} y={downtown[1] + 48} text-anchor="middle" class="rp-sub">
-      {toDowntown} miles
-    </text>
+    <a
+      href={downtownHref}
+      target="_blank"
+      rel="noopener"
+      class="rp-link"
+      aria-label="Hotels downtown, about 15 minutes' drive (opens Google Maps)"
+    >
+      <rect
+        x={downtown[0] - 22}
+        y={downtown[1] - 44}
+        width="266"
+        height="132"
+        rx="14"
+        class="rp-hit"
+      ></rect>
+      <circle cx={downtown[0]} cy={downtown[1]} r="12" class="rp-pin"></circle>
+      <text x={downtown[0] + 26} y={downtown[1] - 4} class="rp-name">
+        Downtown
+      </text>
+      <text x={downtown[0] + 26} y={downtown[1] + 30} class="rp-sub">
+        {DRIVE_DOWNTOWN_MIN} min drive
+      </text>
+      <text x={downtown[0] + 26} y={downtown[1] + 66} class="rp-go">
+        See hotels →
+      </text>
+    </a>
 
-    <circle cx={cvg[0]} cy={cvg[1]} r="12" class="rp-pin"></circle>
-    <text x={cvg[0]} y={cvg[1] + 50} text-anchor="middle" class="rp-name">
-      CVG airport
-    </text>
-    <text x={cvg[0]} y={cvg[1] + 84} text-anchor="middle" class="rp-sub">
-      {toCvg} miles
-    </text>
+    <a
+      href={cvgHref}
+      target="_blank"
+      rel="noopener"
+      class="rp-link"
+      aria-label="Hotels near CVG airport, about 25 minutes' drive (opens Google Maps)"
+    >
+      <rect x={cvg[0] - 130} y={cvg[1] - 22} width="260" height="148" rx="14" class="rp-hit"></rect>
+      <circle cx={cvg[0]} cy={cvg[1]} r="12" class="rp-pin"></circle>
+      <text x={cvg[0]} y={cvg[1] + 50} text-anchor="middle" class="rp-name">
+        CVG airport
+      </text>
+      <text x={cvg[0]} y={cvg[1] + 82} text-anchor="middle" class="rp-sub">
+        {DRIVE_CVG_MIN} min drive
+      </text>
+      <text x={cvg[0]} y={cvg[1] + 116} text-anchor="middle" class="rp-go">
+        See hotels →
+      </text>
+    </a>
   </svg>
 </figure>
 
@@ -155,8 +228,53 @@ const alt = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where the 
   }
   .rposter__svg .rp-sub {
     font-family: var(--font-mono);
-    font-size: 26px;
+    font-size: 24px;
     letter-spacing: 0.1em;
     color: #5c513b;
+  }
+  /* The call to action under each place: the rust of the race pin, so the
+     three links read as one set, and underlined so they read as links before
+     anyone hovers. */
+  .rposter__svg .rp-go {
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    color: #a83c26;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  /* On a phone the plate is about 310px wide, so the viewBox scales text to
+     roughly 40%: the small lines would land under 10px. Bigger type, and no
+     tracking on the mono line so "15 min drive" still fits right of the
+     Downtown pin. */
+  @media (max-width: 480px) {
+    .rposter__svg .rp-sub {
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+    .rposter__svg .rp-go {
+      font-size: 34px;
+    }
+  }
+  .rp-hit {
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: 4;
+    transition: fill 150ms ease;
+  }
+  .rp-link {
+    cursor: pointer;
+    outline: none;
+  }
+  .rp-link:hover .rp-hit {
+    fill: rgb(168 60 38 / 0.08);
+  }
+  .rp-link:focus-visible .rp-hit {
+    stroke: #a83c26;
+    stroke-dasharray: 10 6;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rp-hit {
+      transition: none;
+    }
   }
 </style>
