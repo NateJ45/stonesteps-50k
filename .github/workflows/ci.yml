@@ -77,15 +77,28 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      # The library of record checks ITSELF: run from the starter, sync-check
-      # resolves the starter to this repo root, so site and library are the
-      # same tree and every marked file must report SAME. That is a real gate,
-      # not a tautology - it fails the moment a canonical file is edited into a
-      # state the walker cannot read, or a marker is added to a path the site
-      # repos cannot mirror. The site repos run the same script against a
-      # checkout of this repo (see any client ci.yml).
-      - name: Canonical files have not drifted (self-check)
+      # PORTS.md card 36. Every file here marked "PORTABLE: canonical copy" is
+      # diffed against ncs-astro-sanity-starter, the library of record, at its
+      # main. Both repos are public, so the checkout needs no token. On DRIFT:
+      # port the improvement up into the starter with a PORTS.md card, or pull
+      # the starter's copy forward here. Promote the starter first, then sites.
+      - name: Check out the library of record
+        uses: actions/checkout@v7
+        with:
+          repository: NateJ45/ncs-astro-sanity-starter
+          ref: main
+          path: .ncs-starter
+
+      - name: Canonical files have not drifted
+        env:
+          NCS_STARTER_DIR: ${{ github.workspace }}/.ncs-starter
         run: node scripts/sync-check.mjs
+
+      # Deleted straight away: prettier and eslint run over the whole tree
+      # further down and would otherwise try to lint the starter's checkout.
+      - name: Remove the library checkout
+        if: always()
+        run: rm -rf .ncs-starter
 
       # What can a stranger read out of this site's dataset? Sanity's free plan
       # is "2 datasets (public only)", so a public dataset is world readable over
