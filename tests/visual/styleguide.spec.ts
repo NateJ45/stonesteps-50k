@@ -10,6 +10,7 @@
    sailed past it.
    ============================================================================ */
 import { test, expect, type Page } from '@playwright/test';
+import { freezeClock } from '../clock';
 
 // THE BASELINES ARE LINUX PIXELS (ported from the starter, 2026-09-18). Font
 // rasterisation on Windows differs enough that the dark shot fails every local
@@ -39,6 +40,8 @@ test.skip(() => WINDOWS_SKIP !== null, WINDOWS_SKIP ?? '');
 const THEME_KEY = 'stone-steps-50k-theme';
 
 async function settle(page: Page) {
+  // The footer carries the live countdown; hold it still (tests/clock.ts).
+  await freezeClock(page);
   await page.goto('/styleguide/', { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   // Fonts swapping after first paint move every line of type. Waiting on
