@@ -32,7 +32,7 @@ export const sponsor = defineType({
           type: 'string',
           description:
             'Describe the mark, not the file. A sponsor logo usually just needs the ' +
-            'organisation name.',
+            'organization name.',
           validation: (Rule) => Rule.required(),
         }),
       ],

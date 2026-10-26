@@ -33,7 +33,7 @@ import type { GuideShotData } from '../../lib/studio-look.ts';
 export const GUIDE_SHOTS: Record<string, GuideShotData> = {
   'home-checklist': {
     src: '/guide-shots/home-checklist.webp',
-    alt: 'The race checklist on Home: eight jobs, ticked ones in colour, with "Race week: a notice is up" waiting and a button to put one up.',
+    alt: 'The race checklist on Home: eight jobs, checked ones in color, with "Race week: a notice is up" waiting and a button to put one up.',
     width: 530,
     height: 1005,
     marks: [
@@ -45,7 +45,12 @@ export const GUIDE_SHOTS: Record<string, GuideShotData> = {
         label: 'Shows up in race week only. "Put one up" opens Quick update.',
       },
       { kind: 'ring', x: 16.2, y: 76, w: 78.1, h: 8.2 },
-      { kind: 'stone', x: 17.2, y: 77, label: 'This one you tick by hand once RunSignUp matches.' },
+      {
+        kind: 'stone',
+        x: 17.2,
+        y: 77,
+        label: 'This one you check by hand once RunSignUp matches.',
+      },
     ],
   },
   'quick-update-tiles': {
