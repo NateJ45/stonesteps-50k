@@ -1,0 +1,11 @@
+# Hand-written rules that Astro's `redirects` map cannot express. The Cloudflare
+# adapter appends the generated rules below these at build time.
+#
+# Astro writes every redirect source with a trailing slash (trailingSlash:
+# 'always'), so `/index.htm` is emitted as `/index.htm/`. The host adds the
+# slash itself for an extensionless path, but not for one that looks like a
+# file, so the old WordPress `.htm` addresses still 404ed after
+# stonesteps-50k#158 (checked live 2026-10-25). Exact matches here, one hop.
+# The slashed forms stay in src/lib/launch-redirects.ts.
+/index.htm                      /   301
+/index_files/Registration.htm   /   301
