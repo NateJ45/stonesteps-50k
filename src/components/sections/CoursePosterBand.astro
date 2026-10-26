@@ -181,8 +181,11 @@ const mileBar = t.mileUnits * 0.5;
             <i>{l.detail}</i>
           </span>
         ))}
+        {/* The chip is the outer span and the words the inner one, so the
+            contrast gate (which hides the element it measures, background and
+            all) measures the words against the chip, as a visitor sees them. */}
         <span class="ctease__scale-label" aria-hidden="true">
-          ½ mile
+          <span>½ mile</span>
         </span>
 
         <span class="ctease__tag" data-tag aria-hidden="true">
@@ -478,8 +481,13 @@ const mileBar = t.mileUnits * 0.5;
     font: 600 0.6875rem/1 var(--font-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    /* 0.6 measured 4.3:1 and 0.72 measured 4.47:1 where the label lands on the
-       plate (contrast.spec, 2026-10-25); 0.9 clears AA with room to spare. */
+    /* The label sits by the start, where the animated runner, its pulse and the
+       trail glow pass behind it, so its contrast depended on WHEN it was
+       measured: 4.3:1 one run, a pass the next (contrast.spec, 2026-10-25).
+       A small chip like the trail tag's gives it a fixed backing. */
+    padding: 0.15rem 0.35rem;
+    border-radius: 2px;
+    background: rgb(18 16 12 / 0.75);
     color: rgb(243 233 210 / 0.9);
   }
 
