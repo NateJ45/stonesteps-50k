@@ -15,8 +15,11 @@
 // Deliberately not in smoke.spec.ts: that file is canonical for the whole site
 // family and these are this site's components.
 import { test, expect } from '@playwright/test';
+import { pinClock } from './clock';
 
 test('the countdown keeps running after navigating away and back', async ({ page }) => {
+  // Before the gun, or the clock has no seconds to watch (tests/clock.ts).
+  await pinClock(page);
   await page.goto('/');
   const seconds = page.locator('.clock [data-unit="seconds"]').first();
   await expect(seconds).toBeVisible();

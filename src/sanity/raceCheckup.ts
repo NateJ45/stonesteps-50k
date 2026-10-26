@@ -156,7 +156,7 @@ export const raceRules: CheckupRule[] = [
         severity: 'Worth a look',
         label: `No trekkers are marked in the ${latest} results`,
         detail:
-          'Trekkers take the early start and cannot win an award, and the site leaves them out of every record. RunSignUp does not say who they were, so somebody has to tick the box. If an early starter finished near the front, open their result and tick "Ran as a trekker".',
+          'Trekkers take the early start and cannot win an award, and the site leaves them out of every record. The import marks them when RunSignUp lists them separately, and it found none this year. If an early starter finished near the front, open their result and tick "Ran as a trekker".',
         target: { pane: `results-and-records;results;results-${latest}` },
         targetLabel: `Open the ${latest} results`,
       };

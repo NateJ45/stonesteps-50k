@@ -7,6 +7,7 @@
 // Run `npm run typegen` after schema changes to regenerate src/lib/sanity.types.ts.
 
 import { sanityFetch } from './sanity';
+import { buildNow } from './build-clock';
 
 // Common Portable Text + image projection shorthand
 export const IMAGE_PROJECTION = `{
@@ -602,7 +603,7 @@ export async function getBusinessInfo() {
 //
 // Returns null when no announcement is active (graceful absence: no banner renders).
 export async function getActiveAnnouncement() {
-  const now = new Date().toISOString();
+  const now = new Date(buildNow()).toISOString();
   return sanityFetch(
     `*[_type == "announcement" && enabled == true
       && (!defined(startDate) || startDate <= $now)

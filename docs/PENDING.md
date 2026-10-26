@@ -383,19 +383,23 @@ again.
    behind it. Three dispatches produced two successes and one cancellation, and
    that cancellation is the concurrency group working, not a failure.
 
-### 1c. Nobody knows who the trekkers are after 2016
+### 1c. Trekkers 2017 to 2025 are unmarked (2026 on flags itself)
 
 Trekkers take the optional early start and the race makes them ineligible for
 age group and overall awards, so `src/lib/age-brackets.ts` excludes them from
-every derived record. Only 2004 to 2007 carry the flag, because those years came
-from spreadsheets with a Trekkers column. RunSignUp does not tell the importer
-who they are, so of 1,032 results from 2017 on, none are marked.
+every derived record. 2004 to 2007 carry the flag from spreadsheets with a
+Trekkers column.
 
-An unflagged trekker can therefore take a record they were not eligible to win.
-Ask David Corfman, or the timer, how the early start is recorded in RunSignUp.
-If it is a bib range or a separate event, `scripts/import-results.mjs` can read
-it and this closes itself. If it lives only in his head, someone has to tick the
-box in the Studio each year.
+2026-10-25: from the 2026 race RunSignUp publishes "50K Including Trekkers" and
+"27K Including Trekkers" sets beside the Overall ones, and the importer now flags
+anyone timed only there (`scripts/lib/result-sets.mjs`): 23 trekkers in 2026
+(13 in the 27K, 10 in the 50K), with no place, Overall places unchanged.
+
+Still open: 2017 to 2025 have only an Overall set on the API, so their trekkers
+are unknown and unmarked (2022 had a "27K Trekker" list on the results page, but
+as an uploaded file the API does not return). An unflagged trekker there can hold
+a record they were not eligible to win. Dave can tick them in the Studio from
+memory or the old lists; nothing in code can.
 
 ## Known gaps, deliberately open
 

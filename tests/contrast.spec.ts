@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { routes } from './routes';
 import { settle } from './helpers';
+import { pinClock } from './clock';
 import { site } from '../src/data/site';
 
 // =============================================================================
@@ -490,6 +491,9 @@ for (const theme of ['light', 'dark'] as const) {
   test.describe(`Contrast beyond axe (${theme} mode)`, () => {
     for (const route of routes) {
       test(`${route} has no unevaluated contrast failures in ${theme} mode`, async ({ page }) => {
+        // The countdown's phase changes the page's length and so what sits on
+        // which photograph; measure the same page every day (tests/clock.ts).
+        await pinClock(page);
         if (theme === 'dark') {
           await page.addInitScript((key) => {
             window.localStorage.setItem(key, 'dark');
