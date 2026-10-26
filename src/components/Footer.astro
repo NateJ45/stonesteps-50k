@@ -47,6 +47,7 @@ import { Phone } from 'lucide-react';
 import CopyEmailButton from '@/components/CopyEmailButton';
 import { externalLinkAttrs } from '@/lib/links';
 import Countdown from '@/components/race/Countdown.astro';
+import { buildNow } from '@/lib/build-clock';
 import { getRace } from '@/lib/queries';
 // THE SVG, NOT THE PNG. The .png files in src/assets were the REID DESIGN
 // wordmark, inherited from the repo this project was forked from, and this
@@ -74,7 +75,7 @@ const raceDateLabel = raceDate
       timeZone: 'UTC', // the date is a race day, not an instant; UTC keeps it from sliding a day
     })
   : null;
-const raceIsUpcoming = raceDate ? raceDate.getTime() > Date.now() : false;
+const raceIsUpcoming = raceDate ? raceDate.getTime() > buildNow() : false;
 /** "23rd" without a lookup table, and correct for 11th/12th/13th. */
 function ordinal(n: number): string {
   const rem100 = n % 100;

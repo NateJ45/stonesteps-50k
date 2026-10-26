@@ -52,6 +52,11 @@ concurrency:
 env:
   PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
   PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+  # The build's "now" (src/lib/build-clock.ts) and the specs' page.clock
+  # (tests/clock.ts), pinned before the snapshot's race date so the countdown and
+  # the footer's race band render the same on race day as the month before.
+  # Keep it before the snapshot's race date when the snapshot is refreshed.
+  NCS_BUILD_NOW: '2026-10-01T16:00:00Z'
 
 jobs:
   # Everything that does not need a built site. Runs in parallel with `site`.
