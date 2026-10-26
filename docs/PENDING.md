@@ -18,7 +18,7 @@ sequence).
 
 ### 1u. The builder kit (starter card 173, 2026-10-26): the signed-in click-through
 
-The eight blocks, the grouped templates and the three new saved sections are built, unit-tested, Playwright-tested and checked at 320, 375 and 1280 in both themes, and the schema validates. Not yet done in a signed-in Studio (a Sanity sign-in is needed): make a page from each template (the menu reads "Race day: Race week" and so on), open "+ Add item" and check the "Words and pictures" and "Events and dates" groups and their pictures, and add an Event details block with its button left empty to confirm Publish is not blocked (card 178). The three new saved sections are seeded only once this build is live, so the Studio already knows their block types: `npm run seed:patterns` (dry), then with `--apply` and `NCS_PRODUCTION_WRITE=yes`; it skips the twelve that exist.
+The eight blocks, the grouped templates and the three new saved sections are built, unit-tested, Playwright-tested and checked at 320, 375 and 1280 in both themes, and the schema validates. Not yet done in a signed-in Studio (a Sanity sign-in is needed): make a page from each template (the menu reads "Race day: Race week" and so on), open "+ Add item" and check the "Words and pictures" and "Events and dates" groups and their pictures, and add an Event details block with its button left empty to confirm Publish is not blocked (card 178). The three new saved sections were seeded as drafts on 2026-10-26, after the deploy (backup of the twelve, dry run, apply, read back; a second dry run reports nothing to do).
 
 ### 1t. Studio complete, phase B (2026-10-19): race-week pass in, the rest queued
 
