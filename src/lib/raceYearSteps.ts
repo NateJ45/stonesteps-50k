@@ -214,7 +214,7 @@ export const STEPS: Step[] = [
     id: 'trekkers',
     title: 'After the race: mark any trekkers',
     blurb:
-      'Early starters cannot win an award. The importer cannot tell who they were, so they need ticking by hand.',
+      'Early starters cannot win an award. The import marks the ones RunSignUp lists as trekkers; tick anyone it missed.',
     target: { pane: 'results-and-records;results' },
     state: () => 'check',
   },

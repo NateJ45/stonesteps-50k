@@ -2,6 +2,8 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-25: The results import reads the 2026 trekker split, and says when RunSignUp changes shape._ The 2026 race published two result sets per distance on the RunSignUp API, "Overall Results" (trekkers present with no time) and "Including Trekkers" (everyone timed, places renumbered). The importer took the largest set, so the first nightly run would have imported 23 trekkers unflagged and shifted every place behind them. `scripts/lib/result-sets.mjs` (tested) now takes the largest non-trekker set as the archive, keeps its places, and adds anyone timed only in a trekker set with `trekker: true` and no place, matched on bib (the sets share no result ids). It also reads event names loosely ("Stone Steps 50K Trail Run" is a 50K), warns on an event it cannot place, on a recent race with no API results a week on, and on an API error, and fails the run before writing when as many timed rows are unreadable as readable. Dry run over 2017 to 2026: earlier years unchanged; 2026 is 83 + 13 trekkers (27K) and 50 + 10 (50K).
+
 _2026-10-20: Starter card 150 synced (Quick update tiles keep their colour edge flush at the top)._
 
 _2026-10-20: Starter card 149 synced (the kit test bench and the docs; the test bench draws the writing helper's suggestion card, so `WritingHelp.tsx` and `studio-ai.ts` are copied but the helper is not wired into this Studio, and the private-page password input is not used here)._

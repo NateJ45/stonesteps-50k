@@ -52,15 +52,20 @@ name: Import race results
 # plainly rather than hidden because a workflow that silently skips the deploy
 # you needed is worse than one that admits when it will.
 #
-# ── WHAT THIS DOES NOT DO ───────────────────────────────────────────────────
-# It does not set the `trekker` flag. Trekkers take the optional early start
-# and the race makes them ineligible for awards, and src/lib/age-brackets.ts
-# excludes them from every record. The importer has no idea who they are: only
-# 2004 to 2007 carry the flag, because those years came from spreadsheets with
-# a Trekkers column. If RunSignUp ever exposes the early start as a bib range
-# or a separate event, teach import-results.mjs to read it. Until then an
-# unflagged trekker can take a record they were not eligible to win, and
-# somebody has to tick the box in the Studio.
+# ── TREKKERS ────────────────────────────────────────────────────────────────
+# Trekkers take the optional early start, the race makes them ineligible for
+# awards, and src/lib/age-brackets.ts excludes them from every record. From
+# 2026 RunSignUp publishes an "Including Trekkers" set beside the Overall one,
+# and the importer flags anyone timed only there (scripts/lib/result-sets.mjs).
+# 2017 to 2025 have no such set, so those years still need a hand tick in the
+# Studio.
+#
+# ── WHEN SOMETHING LOOKS WRONG ──────────────────────────────────────────────
+# The importer prints GitHub warnings (on the run's summary page) for an event
+# it cannot read as a 50K or 27K, a recent race with no results on the API a
+# week later, and a few unreadable times. It FAILS the run, so GitHub emails,
+# when as many timed rows are unreadable as readable: that is a format change,
+# and nothing is written.
 
 on:
   schedule:
