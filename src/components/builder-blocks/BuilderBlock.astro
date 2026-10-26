@@ -1,0 +1,49 @@
+---
+// Safe to edit by hand
+// Picks the component for one builder-kit block (builderSections.ts, PORTS.md
+// card 173). SectionRenderer hands every builder block here in one branch, so
+// the kit grows without touching the shared renderer again. Every component is
+// empty-safe: a block with nothing to show (an event whose dates have all
+// passed, a schedule with nothing in it) renders nothing.
+import '@/styles/builder-blocks.css';
+import type { BuilderPageBlock } from '@/lib/builderBlocks.types';
+import type { SurfaceValue } from '@/lib/surfaces';
+import ColumnsBlock from './ColumnsBlock.astro';
+import ButtonRowBlock from './ButtonRowBlock.astro';
+import TabsBlock from './TabsBlock.astro';
+import TimelineBlock from './TimelineBlock.astro';
+import LetterBlock from './LetterBlock.astro';
+import EventDetailsBlock from './EventDetailsBlock.astro';
+import ScheduleBlock from './ScheduleBlock.astro';
+import PhotoCardsBlock from './PhotoCardsBlock.astro';
+
+interface Props {
+  block: BuilderPageBlock;
+  /** The cadence's surface (sectionCadence.ts). */
+  surface?: SurfaceValue;
+  headingId: string;
+  /** True for the first section on the page: its photo loads first. */
+  isFirst?: boolean;
+}
+
+const { block: b, surface = 'background', headingId, isFirst = false } = Astro.props;
+const common = { surface, headingId };
+---
+
+{b._type === 'columnsSection' ? (
+  <ColumnsBlock block={b} {...common} />
+) : b._type === 'buttonRowSection' ? (
+  <ButtonRowBlock block={b} {...common} />
+) : b._type === 'tabsSection' ? (
+  <TabsBlock block={b} {...common} />
+) : b._type === 'timelineSection' ? (
+  <TimelineBlock block={b} {...common} />
+) : b._type === 'letterSection' ? (
+  <LetterBlock block={b} {...common} />
+) : b._type === 'eventDetailsSection' ? (
+  <EventDetailsBlock block={b} {...common} isFirst={isFirst} />
+) : b._type === 'scheduleSection' ? (
+  <ScheduleBlock block={b} {...common} />
+) : b._type === 'photoCardsSection' ? (
+  <PhotoCardsBlock block={b} {...common} isFirst={isFirst} />
+) : null}

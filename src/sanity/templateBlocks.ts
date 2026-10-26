@@ -71,3 +71,158 @@ export const raceBlock = (type: string, eyebrow: string, headline: string): Rec 
   eyebrow: example(eyebrow),
   headline: example(headline),
 });
+
+// ── The builder kit (builderSections.ts, PORTS.md card 173) ───────────────────
+// Plain data in the shape the kit's schema stores. The callers wrap anything the
+// race must supply in example(); dates come from daysFromNow() so an event block
+// opens with dates still to come (one whose dates have passed draws nothing).
+// Times are left empty on purpose: a template never guesses a race-day time.
+
+/** Several paragraphs at once. */
+export const paras = (...texts: string[]): Rec[] => texts.map((t) => para(t));
+
+/** A calendar day `days` from today, as YYYY-MM-DD. */
+export const daysFromNow = (days: number, from = new Date()): string => {
+  const d = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate() + days));
+  return d.toISOString().slice(0, 10);
+};
+
+export const column = (heading: string, ...body: string[]): Rec => ({
+  _type: 'textColumn',
+  heading,
+  body: paras(...body),
+});
+
+export const columns = (heading: string, cols: Rec[], intro?: string): Rec => ({
+  _type: 'columnsSection',
+  ...(heading ? { heading } : {}),
+  ...(intro ? { intro } : {}),
+  textColumns: cols,
+});
+
+export const link = (cta: Rec, note?: string): Rec => ({
+  _type: 'quickLink',
+  link: cta,
+  ...(note ? { note } : {}),
+});
+
+export const buttonRow = (
+  heading: string,
+  links: Rec[],
+  o: { intro?: string; layout?: 'buttons' | 'cards' } = {},
+): Rec => ({
+  _type: 'buttonRowSection',
+  ...(heading ? { heading } : {}),
+  ...(o.intro ? { intro: o.intro } : {}),
+  layout: o.layout ?? 'buttons',
+  links,
+});
+
+export const tab = (label: string, ...body: string[]): Rec => ({
+  _type: 'tabPanel',
+  label,
+  body: paras(...body),
+});
+
+export const tabs = (heading: string, panels: Rec[], intro?: string): Rec => ({
+  _type: 'tabsSection',
+  ...(heading ? { heading } : {}),
+  ...(intro ? { intro } : {}),
+  tabs: panels,
+});
+
+export const moment = (year: string, title: string, text: string): Rec => ({
+  _type: 'timelineEntry',
+  year,
+  title,
+  text,
+});
+
+export const timeline = (heading: string, entries: Rec[], intro?: string): Rec => ({
+  _type: 'timelineSection',
+  ...(heading ? { heading } : {}),
+  ...(intro ? { intro } : {}),
+  entries,
+});
+
+export const letter = (o: {
+  eyebrow?: string;
+  greeting?: string;
+  body: string[];
+  signOff?: string;
+  name: string;
+  role?: string;
+}): Rec => ({
+  _type: 'letterSection',
+  ...(o.eyebrow ? { eyebrow: o.eyebrow } : {}),
+  greeting: o.greeting ?? 'Dear runners,',
+  body: paras(...o.body),
+  signOff: o.signOff ?? 'See you on the trail,',
+  name: o.name,
+  ...(o.role ? { role: o.role } : {}),
+});
+
+export const eventDate = (
+  date: string,
+  o: { startTime?: string; endTime?: string; label?: string } = {},
+): Rec => ({
+  _type: 'eventDate',
+  date,
+  ...(o.startTime ? { startTime: o.startTime } : {}),
+  ...(o.endTime ? { endTime: o.endTime } : {}),
+  ...(o.label ? { label: o.label } : {}),
+});
+
+export const eventDetails = (o: {
+  eyebrow?: string;
+  title: string;
+  dates: Rec[];
+  place: string;
+  note?: string;
+  button?: Rec;
+}): Rec => ({
+  _type: 'eventDetailsSection',
+  ...(o.eyebrow ? { eyebrow: o.eyebrow } : {}),
+  title: o.title,
+  occurrences: o.dates,
+  place: o.place,
+  ...(o.note ? { note: o.note } : {}),
+  ...(o.button ? { button: o.button } : {}),
+  showCalendar: true,
+});
+
+/** One row of a schedule. `scheduleRow`, because scheduleItem is a document type here. */
+export const slot = (startTime: string, title: string, note?: string): Rec => ({
+  _type: 'scheduleRow',
+  ...(startTime ? { startTime } : {}),
+  title,
+  ...(note ? { note } : {}),
+});
+
+export const scheduleDay = (title: string, items: Rec[]): Rec => ({
+  _type: 'scheduleDay',
+  ...(title ? { title } : {}),
+  items,
+});
+
+export const schedule = (heading: string, days: Rec[], intro?: string): Rec => ({
+  _type: 'scheduleSection',
+  ...(heading ? { heading } : {}),
+  ...(intro ? { intro } : {}),
+  days,
+});
+
+/** A card with a photo. The race director adds the photo. */
+export const photoCard = (title: string, body?: string, cta?: Rec): Rec => ({
+  _type: 'photoCard',
+  title,
+  ...(body ? { body } : {}),
+  ...(cta ? { link: cta } : {}),
+});
+
+export const photoCards = (heading: string, cards: Rec[], intro?: string): Rec => ({
+  _type: 'photoCardsSection',
+  ...(heading ? { heading } : {}),
+  ...(intro ? { intro } : {}),
+  cards,
+});

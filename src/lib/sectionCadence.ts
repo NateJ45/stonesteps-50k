@@ -91,6 +91,16 @@ export const CONTENT_TYPES = new Set([
   'dynastiesSection',
   'gearSection',
   'communitySection',
+  // The builder kit (builderSections.ts, PORTS.md card 173): ordinary content
+  // bands an editor stacks into a page, so they alternate like the rest.
+  'columnsSection',
+  'buttonRowSection',
+  'tabsSection',
+  'timelineSection',
+  'letterSection',
+  'eventDetailsSection',
+  'scheduleSection',
+  'photoCardsSection',
 ]);
 
 export interface SectionBlock {

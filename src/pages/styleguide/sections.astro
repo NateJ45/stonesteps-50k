@@ -47,6 +47,9 @@ const para = (key: string, text: string) => ({
   children: [{ _type: 'span', _key: `${key}-s`, marks: [], text }],
 });
 
+/** A calendar day `n` days after the build, as YYYY-MM-DD. */
+const inDays = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+
 const cta = (label: string) => ({
   _type: 'ctaBlock',
   label,
@@ -251,6 +254,138 @@ const FIXTURES: Record<string, unknown>[] = [
     headline: 'Who keeps coming back',
   },
   { _type: 'gearSection', _key: 'gear', eyebrow: 'What to bring', headline: 'Gear for the trail' },
+  // ── The builder kit (builderSections.ts, PORTS.md card 173) ────────────────
+  // On no page yet, so these always draw from the fixture. The event's date is
+  // relative to the build day, so it is always still to come.
+  {
+    _type: 'columnsSection',
+    _key: 'columns',
+    heading: 'Before you come',
+    textColumns: [
+      ['Getting there', 'Park in the forest lots and walk to the start.'],
+      ['What to bring', 'Photo ID for your bib, layers and a bottle.'],
+      ['After the finish', 'Food at the finish, and a place to sit.'],
+    ].map(([heading, text], i) => ({
+      _key: `col${i}`,
+      heading,
+      body: [para(`col${i}p`, text)],
+    })),
+  },
+  {
+    _type: 'buttonRowSection',
+    _key: 'buttons',
+    heading: 'Where next',
+    layout: 'cards',
+    links: [
+      ['See the course', 'The loops, the climbs and the aid stations.'],
+      ['The records', 'Every course record, both distances.'],
+      ['Ask a question', 'A note to the race, answered within a day.'],
+    ].map(([label, note], i) => ({ _key: `ql${i}`, link: cta(label), note })),
+  },
+  {
+    _type: 'tabsSection',
+    _key: 'tabs',
+    heading: 'Aid stations',
+    tabs: [
+      ['50K', 'Water, sports drink and food at each aid station on every loop.'],
+      ['27K', 'The same aid stations, on the one loop the 27K runs.'],
+    ].map(([label, text], i) => ({
+      _key: `tab${i}`,
+      label,
+      body: [para(`tab${i}p`, text)],
+    })),
+  },
+  {
+    _type: 'timelineSection',
+    _key: 'timeline',
+    heading: 'Year by year',
+    entries: [
+      ['First race', 'Where it began', 'A handful of runners and a lot of steps.'],
+      ['A milestone', 'A new course', 'The loop the race still runs today.'],
+      ['This year', 'Where the race is now', 'Two distances and a full field.'],
+    ].map(([year, title, text], i) => ({ _key: `tl${i}`, year, title, text })),
+  },
+  {
+    _type: 'letterSection',
+    _key: 'letter',
+    eyebrow: 'A note from the race director',
+    greeting: 'Dear runners,',
+    body: [
+      para(
+        'lt0',
+        'Thank you for signing up. The trail is in good shape and the steps are waiting.',
+      ),
+      para('lt1', 'Read the race-week page before Saturday, and say hello at the start.'),
+    ],
+    signOff: 'See you on the trail,',
+    name: 'The race director',
+    role: 'Race director',
+  },
+  {
+    _type: 'eventDetailsSection',
+    _key: 'event',
+    eyebrow: 'Before the race',
+    title: 'Packet pickup',
+    occurrences: [
+      {
+        _key: 'ev0',
+        date: inDays(30),
+        startTime: '16:00',
+        endTime: '19:00',
+        label: 'The evening before',
+      },
+      {
+        _key: 'ev1',
+        date: inDays(31),
+        startTime: '06:00',
+        endTime: '07:30',
+        label: 'Race morning',
+      },
+    ],
+    place: 'The shelter\nMt. Airy Forest, Cincinnati',
+    note: 'Bring photo ID. Your bib, your shirt and a map of the course.',
+    button: cta('Race-week page'),
+    showCalendar: true,
+  },
+  {
+    _type: 'scheduleSection',
+    _key: 'schedule',
+    heading: 'Volunteer shifts',
+    days: [
+      {
+        _key: 'sd0',
+        title: 'Friday',
+        items: [
+          ['15:00', 'Course marking', 'Meet at the shelter'],
+          ['16:00', 'Packet pickup', ''],
+        ].map(([startTime, title, note], i) => ({ _key: `si0${i}`, startTime, title, note })),
+      },
+      {
+        _key: 'sd1',
+        title: 'Saturday',
+        items: [
+          ['06:00', 'Aid stations', 'Set up before the start'],
+          ['09:00', 'The finish', 'Record times'],
+        ].map(([startTime, title, note], i) => ({ _key: `si1${i}`, startTime, title, note })),
+      },
+    ],
+  },
+  {
+    _type: 'photoCardsSection',
+    _key: 'photocards',
+    heading: 'Pick a job',
+    cards: [
+      ['Aid stations', 'Fill bottles, hand out food, cheer every runner through.'],
+      ['Course marshal', 'Stand at a junction and point the way.'],
+      ['The finish', 'Check names and record times.'],
+    ].map(([title, body], i) => ({
+      _key: `pc${i}`,
+      image: image(title),
+      title,
+      body,
+      link: cta('Sign up'),
+    })),
+  },
 ];
 
 // The race's pages, for the real copy of each block. Missing pages (no Sanity

@@ -30,6 +30,10 @@ export const site = {
   url: `https://${_domain}`,
   // BCP 47 language tag for the <html lang> attribute. Change if the site is not in English.
   lang: 'en',
+  // IANA time zone the race's calendar runs on: which day "today" is for an
+  // event's past dates (the builder kit, PORTS.md card 173) and the times in
+  // RSVP emails. Mt. Airy Forest is in US Eastern.
+  timeZone: 'America/New_York',
 
   /** Short display name alias — same as name, kept for any consumer that
    *  accessed the old `site.studio` property. */

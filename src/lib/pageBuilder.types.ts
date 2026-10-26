@@ -37,6 +37,7 @@ import type {
   // FaqSection, LogoStripSection, TeamSection, EmbedSection — not imported from
   // sanity.types yet; their projected types are fully defined below.
 } from './sanity.types';
+import type { BuilderPageBlock } from './builderBlocks.types';
 
 // ---------------------------------------------------------------------------
 // Shared projected shapes
@@ -755,4 +756,6 @@ export type PageBuilderBlock =
   | ProjectedParksSection
   | ProjectedRaceWeatherSection
   | ProjectedDynastiesSection
-  | ProjectedGearSection;
+  | ProjectedGearSection
+  // The builder kit (builderBlocks.types.ts, PORTS.md card 173)
+  | BuilderPageBlock;
