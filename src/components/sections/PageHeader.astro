@@ -15,6 +15,7 @@ import SanityImage from '@/components/SanityImage.astro';
 import MudField from '@/components/race/MudField.astro';
 import Topo from '@/components/race/Topo.astro';
 import type { ProjectedPageHeaderSection } from '@/lib/pageBuilder.types';
+import { withSlash } from '@/lib/links';
 
 type Props = {
   eyebrow?: string;
@@ -107,7 +108,7 @@ const hasImage = Boolean(image?.asset);
         {eyebrow && (
           <p class="blaze text-heading-accent mb-4 font-mono text-[0.75rem] font-semibold tracking-[0.22em] uppercase">
             {eyebrowHref ? (
-              <a class="hover:underline" href={eyebrowHref}>
+              <a class="hover:underline" href={withSlash(eyebrowHref)}>
                 {eyebrow}
               </a>
             ) : (

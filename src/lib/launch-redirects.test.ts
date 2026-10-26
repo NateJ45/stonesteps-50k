@@ -19,6 +19,18 @@ test('the old WordPress addresses forward to the right pages with a 301', () => 
   });
 });
 
+test('Search Console 404s forward to a single slashed page', () => {
+  assert.deepEqual(launchRedirects['/index.htm'], { status: 301, destination: '/' });
+  assert.deepEqual(launchRedirects['/index_files/Registration.htm'], {
+    status: 301,
+    destination: '/',
+  });
+  assert.deepEqual(launchRedirects['/results/results-2016'], {
+    status: 301,
+    destination: '/results/2016/',
+  });
+});
+
 test('every key is already in the canonical shape the redirect map uses', () => {
   for (const from of Object.keys(launchRedirects)) {
     assert.equal(normalizeRedirectPath(from), from, `${from} is not canonical`);
@@ -35,7 +47,7 @@ test('no forward points at another forward, at itself, or off the site', () => {
     );
     assert.match(
       destination,
-      /^\/[a-z0-9-]+\/$/,
+      /^\/([a-z0-9-]+\/)*$/,
       `${from} destination should be a local page path ending in a slash`,
     );
   }
