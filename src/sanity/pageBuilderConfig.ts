@@ -48,12 +48,15 @@ const SELF_FILLING_SECTIONS = [
   'dynamicListSection',
   'faqSection',
   'guaranteeSection',
-  // Its words are the channel's newest video, read at build time (card 197).
   // Its words are the newest files in Downloads (card 197).
   'documentsSection', // scaffold: documents
+  // Its words are the channel's newest video, read at build time (card 197).
   'latestVideoSection',
   'logoStripSection',
   'processSection',
+  // Card 193: filled from Site settings (the phone and the email), so a fresh one
+  // is already complete.
+  'contactCardSection',
   'serviceAreaSection',
   'servicesGridSection',
   'spacerSection',
@@ -93,7 +96,16 @@ export const PAGE_CHECK_CONFIG: PageCheckConfig = {
   // `columns` and `width` are already built in; these two are not.
   // The builder kit's (card 173): the letter arrives with a ready-made greeting
   // and sign-off, neither of which says what THIS letter is about.
-  extraSettingKeys: ['imageSide', 'surface', 'greeting', 'signOff'],
+  // Card 193: the progress bar's unit and the two switches arrive set.
+  extraSettingKeys: [
+    'imageSide',
+    'surface',
+    'greeting',
+    'signOff',
+    'unit',
+    'callButtons',
+    'firstStepCard',
+  ],
   // Every built-in route, plus the folders the build writes into. RESERVED_SLUGS
   // is the same list the slug validation uses, so a new route is added once.
   codeOwnedPaths: [...RESERVED_SLUGS, 'api', 'preview', 'studio', 'robots.txt'],

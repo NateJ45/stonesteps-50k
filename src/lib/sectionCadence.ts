@@ -104,6 +104,13 @@ export const CONTENT_TYPES = new Set([
   'eventDetailsSection',
   'scheduleSection',
   'photoCardsSection',
+  // Card 193
+  'contactCardSection',
+  'progressSection',
+  'calendarSubscribeSection',
+  'iconCardsSection',
+  'stepsRailSection',
+  'hubSection',
 ]);
 
 export interface SectionBlock {
