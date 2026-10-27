@@ -48,6 +48,10 @@ const SELF_FILLING_SECTIONS = [
   'dynamicListSection',
   'faqSection',
   'guaranteeSection',
+  // Its words are the channel's newest video, read at build time (card 197).
+  // Its words are the newest files in Downloads (card 197).
+  'documentsSection', // scaffold: documents
+  'latestVideoSection',
   'logoStripSection',
   'processSection',
   'serviceAreaSection',

@@ -123,6 +123,7 @@ export const kitConfig: KitConfig = {
     sponsor: 'Sponsor',
     scheduleItem: 'Schedule line',
     courseFeature: 'Course feature',
+    libraryDocument: 'Document', // scaffold: documents
   },
 
   weekStartsOn: 1,
@@ -586,6 +587,7 @@ export const kitConfig: KitConfig = {
       links: [
         { title: 'Results by year', target: { pane: 'results-and-records;results' } },
         { title: 'Runners (fix a name)', target: { pane: 'results-and-records;athlete' } },
+        { title: 'Downloads', target: { pane: 'libraryDocument' } }, // scaffold: documents
       ],
     },
     {

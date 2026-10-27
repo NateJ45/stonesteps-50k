@@ -17,6 +17,8 @@ import { raceSectionSchemas } from './raceSections';
 // The builder kit (PORTS.md card 173): columns, buttons, tabs, a timeline, a
 // letter, event details, a schedule and cards with photos.
 import { BUILDER_INSERT_GROUPS, builderSectionSchemas } from './builderSections';
+import { latestVideoSection } from './latestVideoSection';
+import { documentsSection } from './documentsSection'; // scaffold: documents
 import { withSiteGroups, type InsertGroup } from '../../lib/insert-groups';
 import { BlockElementIcon } from '@sanity/icons/BlockElement';
 import { ImageIcon } from '@sanity/icons/Image';
@@ -701,6 +703,9 @@ export const pageSectionSchemas = [
   embedSection,
   // The builder kit (builderSections.ts, PORTS.md card 173).
   ...builderSectionSchemas,
+  // The latest video from a YouTube channel, read at build time (card 197).
+  latestVideoSection,
+  documentsSection, // scaffold: documents
 ];
 
 // The race's blocks and the general ones, on their own. A saved section
@@ -743,7 +748,11 @@ export const sectionThumbnailUrl = (type: string): string | undefined =>
 // with a name that already exists gains the types, a new name becomes a new
 // group at the end. The builder kit adds to "Words and pictures" and brings
 // "Events and dates".
-const SITE_INSERT_GROUPS: InsertGroup[] = [...BUILDER_INSERT_GROUPS];
+const SITE_INSERT_GROUPS: InsertGroup[] = [
+  ...BUILDER_INSERT_GROUPS,
+  { name: 'media', title: 'Media', of: ['latestVideoSection'] },
+  { name: 'files', title: 'Files to download', of: ['documentsSection'] }, // scaffold: documents
+];
 
 export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
   filter: true,

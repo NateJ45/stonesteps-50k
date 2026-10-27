@@ -73,6 +73,19 @@ export const ARCHIVE_PROJECTION = `
 // The per-type arms, shared by a page's own sections and by the sections a
 // synced section shows (below), so a block renders the same either way.
 const SECTION_ARMS = `
+    // The documents list (card 197): the newest 60 files; the block picks its group and count.
+    // scaffold: documents
+    _type == "documentsSection" => {
+      ...,
+      "items": *[_type == "libraryDocument" && defined(file.asset)] | order(date desc)[0...60]{
+        _id, title, category, date, note, expires,
+        "file": file{
+          "url": asset->url, "size": asset->size,
+          "extension": asset->extension, "originalFilename": asset->originalFilename
+        }
+      }
+    },
+    // scaffold:end
     // The builder kit (builderSections.ts, PORTS.md card 173). Columns, tabs and
     // the schedule carry no image or button, so they need no arm.
     _type == "buttonRowSection" => { ..., links[]{ ..., link${CTA_PROJECTION} } },

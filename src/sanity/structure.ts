@@ -70,6 +70,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'faqCategory',
   'journalEntry',
   'journalCategory',
+  'libraryDocument', // scaffold: documents
   'page', // custom pages, placed explicitly under "Pages"
   'sectionPreset', // saved sections, placed explicitly under "Pages"
   'redirect', // placed explicitly under "Pages" -> Redirects
@@ -350,6 +351,15 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
         createLabel: 'Write the first notice',
       }),
       ...TABLES.filter((c) => c.type === 'announcement').map((c) => tableListItem(S, c)),
+
+      // scaffold: documents
+      // DOWNLOADS (starter card 197): course maps, the waiver, results PDFs. The Documents block
+      // lists the newest current ones on any page.
+      S.documentTypeListItem('libraryDocument')
+        .id('libraryDocument')
+        .title('Downloads (course maps, waivers)')
+        .icon(typeIcon('libraryDocument')),
+      // scaffold:end
 
       S.divider(),
 

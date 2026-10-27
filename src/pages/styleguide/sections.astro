@@ -158,6 +158,38 @@ const FIXTURES: Record<string, unknown>[] = [
     heightHint: 'short',
     embedUrl: 'https://embed.example.com/map',
   },
+  // The latest video (card 197): a sample with no picture and no network call.
+  {
+    _type: 'latestVideoSection',
+    _key: 'latest-video',
+    heading: 'Latest video',
+    intro: 'The newest upload from the race channel, kept up to date for you.',
+    channelId: 'UCsampleSampleSampleSample',
+    showChannelLink: true,
+    _fixture: true,
+  },
+  // scaffold: documents
+  {
+    _type: 'documentsSection',
+    _key: 'documents',
+    heading: 'Race documents',
+    intro: 'Course maps, the waiver and past results to download.',
+    limit: 4,
+    showDates: true,
+    items: [
+      ['Course map', 'The 50K and 27K loops, printable.', '2026-10-01'],
+      ['Runner waiver', 'Print it, sign it, bring it to packet pickup.', '2026-08-15'],
+      ['Results', '', '2026-03-02'],
+    ].map(([title, note, date], i) => ({
+      _id: `doc${i}`,
+      title,
+      note,
+      date,
+      category: 'Race day',
+      file: { url: '#', size: 245760, extension: 'pdf' },
+    })),
+  },
+  // scaffold:end
   {
     _type: 'photoBandSection',
     _key: 'photoband',
