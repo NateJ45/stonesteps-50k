@@ -54,9 +54,7 @@ export function withRaceAddress(
 /** The site's facts, resolved once per build. */
 export function getBusinessFacts(): Promise<BusinessFacts> {
   _facts ??= Promise.all([getSiteSettings(), getRace()]).then(([s, race]) =>
-    resolveBusinessFacts(
-      withRaceAddress(s as RawBusinessFacts | null, race as RaceAddress | null),
-    ),
+    resolveBusinessFacts(withRaceAddress(s as RawBusinessFacts | null, race as RaceAddress | null)),
   );
   return _facts;
 }

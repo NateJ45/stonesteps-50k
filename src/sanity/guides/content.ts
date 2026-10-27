@@ -528,7 +528,7 @@ export const guides: Guide[] = [
       },
       {
         kind: 'p',
-        text: 'The start area\'s street address lives on **The race**. Change it there and every place on the website that shows it changes too: the footer, the Map and directions block, and what Google reads.',
+        text: "The start area's street address lives on **The race**. Change it there and every place on the website that shows it changes too: the footer, the Map and directions block, and what Google reads.",
       },
       {
         kind: 'p',
