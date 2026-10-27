@@ -12,7 +12,13 @@
 // blocks a page-builder array accepts. Use it everywhere a pageBuilder array is
 // defined so every builder offers the same library.
 
-import { defineType, defineField, defineArrayMember, type ArrayOptions } from 'sanity';
+import {
+  defineType,
+  defineField,
+  defineArrayMember,
+  type ArrayOptions,
+  type ValidationContext,
+} from 'sanity';
 import { raceSectionSchemas } from './raceSections';
 // The builder kit (PORTS.md card 173): columns, buttons, tabs, a timeline, a
 // letter, event details, a schedule and cards with photos.
@@ -31,9 +37,43 @@ import { PlayIcon } from '@sanity/icons/Play';
 import { ThLargeIcon } from '@sanity/icons/ThLarge';
 import { EarthGlobeIcon } from '@sanity/icons/EarthGlobe';
 import { CodeBlockIcon } from '@sanity/icons/CodeBlock';
+import {
+  FAST_START_MESSAGE,
+  HERO_VIDEO_ACCEPT,
+  checkFastStart,
+  heroVideoProblem,
+} from '../../lib/hero-video';
 import { SyncIcon } from '@sanity/icons/Sync';
 import { columnsField, headingAccentField, hideWhenRich, richTwin } from './_appearanceFields';
 import { sideOptions } from '../../lib/layout-variants';
+
+// The photo hero's video checks (PORTS.md card 189), shared by the main clip and the phone copy: an
+// error for a type the hero cannot play, a warning over the size budget, and a warning when an .mp4
+// is not saved for fast start (reads the first 64 KB of the upload). Rules in src/lib/hero-video.ts.
+const heroVideoCheck =
+  (kind: 'main' | 'phone') =>
+  async (value: { asset?: { _ref?: string } } | undefined, context: ValidationContext) => {
+    const ref = value?.asset?._ref;
+    if (!ref) return true;
+    const asset = await context
+      .getClient({ apiVersion: '2024-01-01' })
+      .fetch<{ url?: string; mimeType?: string; size?: number } | null>(
+        '*[_id == $id][0]{ url, mimeType, size }',
+        { id: ref },
+      );
+    const problem = heroVideoProblem(asset, kind);
+    if (problem?.level === 'error') return problem.message;
+    const slowStart =
+      asset?.url && asset.mimeType === 'video/mp4'
+        ? (await checkFastStart(asset.url)) === false
+        : false;
+    const warnings = [problem?.message, slowStart ? FAST_START_MESSAGE : undefined].filter(Boolean);
+    return warnings.length ? { message: warnings.join(' '), level: 'warning' as const } : true;
+  };
+
+/** Hidden unless the opening banner's style is "Photo behind the words" (card 189). */
+const unlessPhotoStyle = ({ parent }: { parent?: { heroStyle?: string } }) =>
+  parent?.heroStyle !== 'photo';
 
 // Shared image field with required alt text (accessibility + SEO).
 const imageWithAlt = (name = 'image', title = 'Image') =>
@@ -120,6 +160,71 @@ export const heroSection = defineType({
     }),
     defineField({ name: 'subhead', title: 'Subhead', type: 'text', rows: 2 }),
     imageWithAlt('backgroundImage', 'Background photo (optional)'),
+    // The photo hero (PORTS.md card 189, from FBC Auburn): the background photo across the whole
+    // opening with the words over it in white, under a shade that keeps them readable. Standard
+    // leaves the site's usual hero exactly as it was. PhotoHero.astro draws it.
+    defineField({
+      name: 'heroStyle',
+      title: 'Style',
+      type: 'string',
+      description:
+        "Standard is the site's usual opening. Photo behind the words puts the background photo across the whole opening with the words over it in white, with an optional short-facts card and a silent background video. It needs a background photo; without one the opening shows as standard.",
+      initialValue: 'standard',
+      options: {
+        list: [
+          { title: 'Standard', value: 'standard' },
+          { title: 'Photo behind the words', value: 'photo' },
+        ],
+        layout: 'radio',
+      },
+    }),
+    // The card beside the words (Photo behind the words only): a few short facts and a link, for
+    // example opening hours, the next date or the price from. On a phone it follows the words.
+    defineField({
+      name: 'glance',
+      title: 'Short-facts card (optional)',
+      type: 'object',
+      description:
+        'A small card beside the words: a title, up to four short lines and a link. Leave it empty for no card.',
+      hidden: unlessPhotoStyle,
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        defineField({ name: 'title', title: 'Card title', type: 'string' }),
+        defineField({
+          name: 'lines',
+          title: 'Lines',
+          type: 'array',
+          of: [defineArrayMember({ type: 'string' })],
+          validation: (R) => R.max(4),
+          description: 'Short facts, one per line. Four at most.',
+        }),
+        defineField({ name: 'link', title: 'Link (optional)', type: 'ctaBlock' }),
+      ],
+    }),
+    // A short silent clip over the photo (Photo behind the words only). The photo is its poster
+    // and what shows when the clip does not play (reduced motion, Save-Data, a slow connection,
+    // print). Rules: src/lib/hero-video.ts. The phone copy plays under 768px: Sanity does not
+    // transcode files, so the small copy is its own upload.
+    defineField({
+      name: 'backgroundVideo',
+      title: 'Background video (optional)',
+      type: 'file',
+      description:
+        'A short clip that plays silently behind the words. Best: 15 to 30 seconds, landscape, steady, no sound, an .mp4 under 3 MB (720p is plenty), exported with "Fast start" or "Web optimized" turned on so it starts playing straight away. Keep the background photo too: it shows first, and it is all some visitors see. Add the phone video below as well, so phones get a small copy.',
+      options: { accept: HERO_VIDEO_ACCEPT },
+      hidden: unlessPhotoStyle,
+      validation: (R) => R.custom(heroVideoCheck('main')),
+    }),
+    defineField({
+      name: 'backgroundVideoPhone',
+      title: 'Phone video (optional)',
+      type: 'file',
+      description:
+        'A small copy of the same clip for phones, so a visitor on a phone signal is not waiting on the big file. Export it again at 640 pixels wide, no sound, 15 to 20 seconds, with "Fast start" or "Web optimized" turned on. It should come out under 1 MB. Phones play the main video if this is empty.',
+      options: { accept: HERO_VIDEO_ACCEPT },
+      hidden: unlessPhotoStyle,
+      validation: (R) => R.custom(heroVideoCheck('phone')),
+    }),
     defineField({ name: 'primaryCta', title: 'Main button', type: 'ctaBlock' }),
     defineField({ name: 'secondaryCta', title: 'Second button (optional)', type: 'ctaBlock' }),
     defineField({
