@@ -34,6 +34,10 @@ interface CtaBlock {
 import type { SanityImageObject } from '@/lib/pageBuilder.types';
 
 interface Props {
+  /** The variant the main button draws. SectionRenderer's accent budget (src/lib/cta-budget.ts,
+   *  starter card 158) gives the page's first main button 'primary' (the rust plate) and every
+   *  later one 'secondary' (the cream plate). Drawn outside the renderer: primary. */
+  primaryVariant?: 'primary' | 'secondary';
   eyebrow?: string;
   headline: string;
   subhead?: string;
@@ -89,6 +93,7 @@ const {
   glance,
   backgroundVideo,
   backgroundVideoPhone,
+  primaryVariant = 'primary',
 } = Astro.props as Props;
 
 // Split the headline into a first word + the rest, so the rotator can swap
@@ -252,6 +257,7 @@ const wrapperHeight =
     image={effectiveImages[0]}
     primaryCta={primaryCta}
     secondaryCta={secondaryCta}
+    primaryVariant={primaryVariant}
     headingId={headingId}
     size={size}
     glance={glance}
@@ -317,7 +323,7 @@ const wrapperHeight =
         )}
         {(primaryCta || secondaryCta) && (
           <div class="mt-l flex flex-wrap gap-s">
-            {primaryCta && <CtaLink cta={primaryCta} variant="primary" onDark />}
+            {primaryCta && <CtaLink cta={primaryCta} variant={primaryVariant} onDark />}
             {secondaryCta && <CtaLink cta={secondaryCta} variant="secondary" onDark />}
           </div>
         )}

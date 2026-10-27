@@ -28,6 +28,10 @@ import { surfaceClass } from '@/lib/surfaces';
 import type { ProjectedCommunitySection } from '@/lib/pageBuilder.types';
 
 type Props = {
+  /** The variant the main button draws. SectionRenderer's accent budget (src/lib/cta-budget.ts,
+   *  starter card 158) gives the page's first main button 'primary' (the rust plate) and every
+   *  later one 'secondary' (the cream plate). Drawn outside the renderer: primary. */
+  primaryVariant?: 'primary' | 'secondary';
   eyebrow?: string;
   headline?: string;
   body?: string;
@@ -47,6 +51,7 @@ const {
   race,
   surface = 'background',
   headingId,
+  primaryVariant = 'primary',
 } = Astro.props as Props;
 
 // A typed button wins. Otherwise the race's own Facebook address becomes one,
@@ -99,7 +104,7 @@ const button: ProjectedCommunitySection['cta'] =
 
           {button && (
             <div class="mt-8">
-              <CtaLink cta={button} class="btn-plate" />
+              <CtaLink cta={button} variant={primaryVariant} />
             </div>
           )}
         </div>

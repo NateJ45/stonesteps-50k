@@ -44,6 +44,10 @@ import grade from '../../../scripts/data/course-grade.json';
 import miles from '../../../scripts/data/course-miles.json';
 
 interface Props {
+  /** The variant the main button draws. SectionRenderer's accent budget (src/lib/cta-budget.ts,
+   *  starter card 158) gives the page's first main button 'primary' (the rust plate) and every
+   *  later one 'secondary' (the cream plate). Drawn outside the renderer: primary. */
+  primaryVariant?: 'primary' | 'secondary';
   eyebrow?: string;
   headline?: string;
   intro?: string;
@@ -57,6 +61,7 @@ const {
   intro = 'Two loops out of The Oval: the long one four times, the short one three, long first and long last. Pick a loop, then fly the full 3D map.',
   surface = 'background',
   headingId,
+  primaryVariant = 'primary',
 } = Astro.props as Props;
 
 // The band matches the cadence the way every other section does; the torn top
@@ -241,7 +246,11 @@ const mileBar = t.mileUnits * 0.5;
       </div>
 
       <div class="ctease__actions">
-        <a class="btn-plate" href="/course/" data-cta>
+        <a
+          class:list={['btn-plate', primaryVariant === 'secondary' && 'btn-plate--cream']}
+          href="/course/"
+          data-cta
+        >
           Fly the 3D map{' '}
           <span class="btn-plate__arrow" aria-hidden="true">
             &rarr;

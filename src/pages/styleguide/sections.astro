@@ -602,6 +602,7 @@ const SECTIONS = FIXTURES.map((fixture) => real.get(String(fixture._type)) ?? fi
       <SectionRenderer
         sections={[section]}
         idPrefix={`fx-${i}`}
+        anchors="numbered"
         results={(home?.results ?? []) as never}
         historical={(home?.historical ?? []) as never}
       />
