@@ -80,6 +80,9 @@ const SELF_FILLING_SECTIONS = [
   'contactSection',
   'raceWeatherSection',
   'dynastiesSection',
+  // Card 196: the map (and hours, if any are ever typed) fill themselves from Business info.
+  'hoursSection',
+  'mapSection',
 ];
 
 export const PAGE_CHECK_CONFIG: PageCheckConfig = {

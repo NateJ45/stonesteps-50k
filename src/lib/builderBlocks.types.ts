@@ -8,6 +8,7 @@
 // of builderSections.ts) and no `look`.
 
 import type { ProjectedCtaBlock, ProjectedImage } from './pageBuilder.types';
+import type { RawBusinessFacts } from './business-facts';
 
 /** Portable text as stored; rendered by PortableText. */
 type Blocks = unknown[];
@@ -32,6 +33,30 @@ export interface ProjectedButtonRowSection extends Base {
 export interface ProjectedTabsSection extends Base {
   _type: 'tabsSection';
   tabs?: { _key: string; label?: string; body?: Blocks }[];
+}
+
+/** Opening hours (card 196). `facts` is set only by the styleguide wall's fixture. */
+export interface ProjectedHoursSection {
+  _type: 'hoursSection';
+  _key: string;
+  heading?: string;
+  intro?: string;
+  layout?: 'card' | 'band';
+  showAddress?: boolean;
+  showChanges?: boolean;
+  look?: string;
+  facts?: RawBusinessFacts | null;
+}
+
+/** Map and directions (card 196). `facts` is set only by the styleguide wall's fixture. */
+export interface ProjectedMapSection {
+  _type: 'mapSection';
+  _key: string;
+  heading?: string;
+  intro?: string;
+  showHours?: boolean;
+  look?: string;
+  facts?: RawBusinessFacts | null;
 }
 
 export interface ProjectedTimelineSection extends Base {
@@ -179,6 +204,8 @@ export type BuilderPageBlock =
   | ProjectedEventDetailsSection
   | ProjectedScheduleSection
   | ProjectedPhotoCardsSection
+  | ProjectedHoursSection
+  | ProjectedMapSection
   | ProjectedContactCardSection
   | ProjectedProgressSection
   | ProjectedCalendarSubscribeSection
@@ -196,6 +223,8 @@ export const BUILDER_BLOCK_TYPES: ReadonlySet<string> = new Set<BuilderPageBlock
   'eventDetailsSection',
   'scheduleSection',
   'photoCardsSection',
+  'hoursSection',
+  'mapSection',
   'contactCardSection',
   'progressSection',
   'calendarSubscribeSection',

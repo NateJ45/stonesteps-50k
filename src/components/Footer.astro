@@ -60,6 +60,10 @@ import logoLightAsset from '@/assets/logo-light.svg';
 import logoDarkAsset from '@/assets/logo-dark.svg';
 import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { telHref } from '@/lib/phone';
+import { resolveBusinessFacts, type RawBusinessFacts } from '@/lib/business-facts';
+import ToConfirm from '@/components/business/ToConfirm.astro';
+import OpenStatus from '@/components/business/OpenStatus.astro';
+import BusinessAddress from '@/components/business/BusinessAddress.astro';
 
 // THE RACE BAND. Everything here is read from the `race` singleton, so the day
 // it is edited in the Studio the footer follows and nobody has to remember this
@@ -124,6 +128,9 @@ const chrome = resolveSiteSettings(siteSettings);
 const brandName = siteSettings?.title ?? site.name;
 const email = siteSettings?.email ?? '';
 const phone = siteSettings?.phone ?? '';
+// The business facts (card 196): the street address and today's hours join Get in
+// touch only when Business info has them, and a fact still to confirm wears the tag.
+const facts = resolveBusinessFacts(siteSettings as RawBusinessFacts | null | undefined);
 
 // Social links: prefer the new socialLinks array; fall back to the legacy
 // socialInstagram / socialFacebook fields so existing datasets keep working.
@@ -395,6 +402,10 @@ const rowClass = (label: string) =>
         {siteSettings?.tagline && (
           <p class="text-sm text-foreground/80 italic">{siteSettings.tagline}</p>
         )}
+        {facts.address && (
+          <BusinessAddress address={facts.address} findUs={false} class="biz-center-sm pt-xs" />
+        )}
+        <OpenStatus facts={facts} class="biz-center-sm pt-xs" />
       </div>
     </div>
   </div>
