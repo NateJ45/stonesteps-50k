@@ -512,6 +512,31 @@ export const guides: Guide[] = [
     ],
   },
 
+  // Card 196: the business facts and opening hours (docs/agent/business-facts.md).
+  {
+    slug: 'hours-and-address',
+    category: 'Once a year',
+    title: 'Change the race address',
+    icon: 'clock',
+    lead: 'Typed once, shown everywhere: the footer, the Map and directions block, and Google.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'path',
+        items: ['The race'],
+        link: { doc: 'race' },
+      },
+      {
+        kind: 'p',
+        text: "The start area's street address lives on **The race**. Change it there and every place on the website that shows it changes too: the footer, the Map and directions block, and what Google reads.",
+      },
+      {
+        kind: 'p',
+        text: 'While next year’s start is not settled, switch off **confirmed** on The race. The website then keeps the street address out of search results until you switch it back on.',
+      },
+    ],
+  },
+
   {
     slug: 'a-runner-asks-to-be-removed',
     category: 'Results and records',

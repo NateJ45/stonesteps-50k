@@ -91,6 +91,9 @@ export const CONTENT_TYPES = new Set([
   'dynastiesSection',
   'gearSection',
   'communitySection',
+  // The latest video and the documents list (starter card 197).
+  'latestVideoSection',
+  'documentsSection', // scaffold: documents
   // The builder kit (builderSections.ts, PORTS.md card 173): ordinary content
   // bands an editor stacks into a page, so they alternate like the rest.
   'columnsSection',
@@ -101,6 +104,16 @@ export const CONTENT_TYPES = new Set([
   'eventDetailsSection',
   'scheduleSection',
   'photoCardsSection',
+  // Card 196
+  'hoursSection',
+  'mapSection',
+  // Card 193
+  'contactCardSection',
+  'progressSection',
+  'calendarSubscribeSection',
+  'iconCardsSection',
+  'stepsRailSection',
+  'hubSection',
 ]);
 
 export interface SectionBlock {

@@ -16,6 +16,10 @@ sequence).
 
 ## Waiting on a human
 
+### 1v. The Auburn port cards (2026-10-27): content the race can add when it wants
+
+The blocks are in; nothing on a live page changed. When Dave has them: course maps, the waiver and past results PDFs go in Studio > "Downloads (course maps, waivers)" and a Documents block on the course or contact page; a phone action bar ("Results" now, "Register" once registration opens) in Site setup > Navigation; a race YouTube channel id, if there ever is one, for the Latest video block. The flow layer (starter card 192) and the form builder (194) were left out on purpose; see docs/agent/changelog.md.
+
 ### 1u. The builder kit (starter card 173, 2026-10-26): the signed-in click-through
 
 The eight blocks, the grouped templates and the three new saved sections are built, unit-tested, Playwright-tested and checked at 320, 375 and 1280 in both themes, and the schema validates. Not yet done in a signed-in Studio (a Sanity sign-in is needed): make a page from each template (the menu reads "Race day: Race week" and so on), open "+ Add item" and check the "Words and pictures" and "Events and dates" groups and their pictures, and add an Event details block with its button left empty to confirm Publish is not blocked (card 178). The three new saved sections were seeded as drafts on 2026-10-26, after the deploy (backup of the twelve, dry run, apply, read back; a second dry run reports nothing to do).

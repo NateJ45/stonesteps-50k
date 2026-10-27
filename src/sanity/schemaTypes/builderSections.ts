@@ -39,20 +39,31 @@
 //     `endTime`) are in NON_STEGA_FIELDS.
 //   - Rule 13: a field description is an instruction for the box, under about
 //     140 characters.
+//   - Card 196 adds Opening hours and Map and directions: self-filling from
+//     Business info (src/lib/business-facts.ts), so they hold no facts at all.
 //   - Words: plain American English for a non-technical editor. No "CTA" or
 //     "slug", no em-dashes in anything a visitor reads.
 // =============================================================================
 
 import { defineArrayMember, defineField, defineType } from 'sanity';
+import { BellIcon } from '@sanity/icons/Bell';
+import { ChartUpwardIcon } from '@sanity/icons/ChartUpward';
+import { MobileDeviceIcon } from '@sanity/icons/MobileDevice';
+import { SyncIcon } from '@sanity/icons/Sync';
+import { ThLargeIcon } from '@sanity/icons/ThLarge';
+import { ThListIcon } from '@sanity/icons/ThList';
+import { UsersIcon } from '@sanity/icons/Users';
 import { CalendarIcon } from '@sanity/icons/Calendar';
 import { ClockIcon } from '@sanity/icons/Clock';
 import { EnvelopeIcon } from '@sanity/icons/Envelope';
 import { ImagesIcon } from '@sanity/icons/Images';
 import { LinkIcon } from '@sanity/icons/Link';
 import { MenuIcon } from '@sanity/icons/Menu';
+import { PinIcon } from '@sanity/icons/Pin';
 import { SplitVerticalIcon } from '@sanity/icons/SplitVertical';
 import { TimelineIcon } from '@sanity/icons/Timeline';
 import { TIME_OPTIONS } from '../../lib/builder-blocks';
+import { BLOCK_ICONS } from '../../lib/block-icons';
 import type { InsertGroup } from '../../lib/insert-groups';
 
 // ── Shared fields ────────────────────────────────────────────────────────────
@@ -676,6 +687,500 @@ export const photoCardsSection = defineType({
     }),
   },
 });
+
+// ── Card 193 blocks (from FBC Auburn): contact card, progress, newsletter, calendar subscribe,
+// icon cards, a steps rail and a hub. Same rules as above: no colour field, derived values
+// worked out in src/lib/builder-blocks.ts, dropdowns in NON_STEGA_FIELDS.
+
+/** A picker for one icon of the block icon set. Always named `icon` (on NON_STEGA_FIELDS). */
+const iconField = (title = 'Icon (optional)', description?: string) =>
+  defineField({
+    name: 'icon',
+    title,
+    type: 'string',
+    description,
+    options: { list: BLOCK_ICONS.map((i) => ({ title: i.title, value: i.value })) },
+  });
+
+const bodyField = (title = 'A few sentences (optional)') =>
+  defineField({ name: 'body', title, type: 'text', rows: 3, validation: (R) => R.max(280) });
+
+// ── Contact details ──────────────────────────────────────────────────────────
+export const contactCardSection = defineType({
+  name: 'contactCardSection',
+  title: 'Contact details',
+  type: 'object',
+  icon: MobileDeviceIcon,
+  description:
+    'Phone, email, address and opening hours on one card, with big Call and Email buttons if you want them. Everything fills itself from Site settings and Business info; type something here only for a different one.',
+  fields: [
+    defineField({
+      name: 'heading',
+      title: 'Heading (optional)',
+      type: 'string',
+      initialValue: 'Get in touch',
+    }),
+    introField(),
+    defineField({
+      name: 'callButtons',
+      title: 'Lead with big Call and Email buttons',
+      type: 'boolean',
+      description:
+        'Two big buttons above the details. Good for a page where getting in touch is the point.',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'phone',
+      title: 'Phone (optional)',
+      type: 'string',
+      description: 'Leave empty to use the phone number in Site settings.',
+    }),
+    defineField({
+      name: 'email',
+      title: 'Email (optional)',
+      type: 'string',
+      description: 'Leave empty to use the public email in Site settings.',
+      validation: (R) =>
+        R.regex(/^\S+@\S+\.\S+$/, { name: 'email' }).warning(
+          'That does not look like an email address.',
+        ),
+    }),
+    defineField({
+      name: 'address',
+      title: 'Address (optional)',
+      type: 'text',
+      rows: 3,
+      description:
+        'Leave empty to use the address in Business info. Otherwise one line each for the street and the town; a "Get directions" link is made from it.',
+    }),
+    defineField({
+      name: 'hours',
+      title: 'Opening hours (optional)',
+      type: 'text',
+      rows: 4,
+      description:
+        'Leave empty to use the opening hours in Business info, with today\'s status. Otherwise one line for each, like "Monday to Friday, 9 am to 5 pm".',
+    }),
+  ],
+  preview: {
+    select: { title: 'heading' },
+    prepare: ({ title }) => ({ title: title || 'Contact details', subtitle: 'Contact details' }),
+  },
+});
+
+// ── Progress toward a goal ───────────────────────────────────────────────────
+export const progressSection = defineType({
+  name: 'progressSection',
+  title: 'Progress toward a goal',
+  type: 'object',
+  icon: ChartUpwardIcon,
+  description:
+    'A bar that fills toward a goal: a fundraiser, a campaign, a target. You type two numbers; the bar, the percent and "to go" work themselves out.',
+  fields: [
+    headingField(),
+    introField(),
+    defineField({
+      name: 'unit',
+      title: 'What are you counting?',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Dollars', value: 'dollars' },
+          { title: 'A plain number (people, meals, signatures)', value: 'number' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'dollars',
+    }),
+    defineField({
+      name: 'goal',
+      title: 'Goal',
+      type: 'number',
+      description: 'Numbers only, like 50000.',
+      validation: (R) => R.required().positive(),
+    }),
+    defineField({
+      name: 'raised',
+      title: 'So far',
+      type: 'number',
+      validation: (R) => R.required().min(0),
+    }),
+    defineField({
+      name: 'asOf',
+      title: 'As of (optional)',
+      type: 'date',
+      description:
+        'Shows "As of October 18, 2026" under the bar, so nobody wonders how old the number is.',
+    }),
+    linkField(),
+  ],
+  preview: {
+    select: { title: 'heading', goal: 'goal', raised: 'raised' },
+    prepare: ({ title, goal, raised }) => ({
+      title: title || 'Progress toward a goal',
+      subtitle: typeof goal === 'number' ? `${raised ?? 0} of ${goal}` : 'Progress',
+    }),
+  },
+});
+
+// ── Add our calendar ─────────────────────────────────────────────────────────
+export const calendarSubscribeSection = defineType({
+  name: 'calendarSubscribeSection',
+  title: 'Add our calendar to your phone',
+  type: 'object',
+  icon: SyncIcon,
+  description:
+    'Buttons that add your calendar to Google, Apple or Outlook, so new dates show up on visitors’ phones by themselves.',
+  fields: [
+    defineField({
+      name: 'heading',
+      title: 'Heading (optional)',
+      type: 'string',
+      initialValue: 'Never miss a date',
+    }),
+    introField(),
+    defineField({
+      name: 'feed',
+      title: 'Calendar feed address',
+      type: 'string',
+      description:
+        'The address of a calendar feed (it ends in .ics, or starts with webcal://): from Google Calendar, your booking tool, or a file this site publishes (a path starting with /, like /calendar/events.ics).',
+      validation: (R) =>
+        R.required().custom((v) =>
+          !v || /^(https:\/\/|webcal:\/\/|\/(?!\/))/i.test(String(v).trim())
+            ? true
+            : 'Start with https://, webcal:// or a /',
+        ),
+    }),
+  ],
+  preview: {
+    select: { title: 'heading' },
+    prepare: ({ title }) => ({ title: title || 'Calendar buttons', subtitle: 'Add our calendar' }),
+  },
+});
+
+// ── Cards with icons ─────────────────────────────────────────────────────────
+export const iconCardsSection = defineType({
+  name: 'iconCardsSection',
+  title: 'Cards with icons',
+  type: 'object',
+  icon: ThLargeIcon,
+  description:
+    'Two to twelve open cards, each with a big icon (or a photo), a title and a few sentences. Three across on a computer, one on a phone.',
+  fields: [
+    headingField(),
+    introField(),
+    defineField({
+      name: 'cards',
+      title: 'Cards',
+      type: 'array',
+      validation: (R) => R.required().min(2).max(12),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'iconCard',
+          title: 'Card',
+          fields: [
+            iconField(),
+            photoField('image', 'Photo (optional)', {
+              description: 'With a photo the card shows the photo instead of the icon.',
+            }),
+            defineField({
+              name: 'title',
+              title: 'Title',
+              type: 'string',
+              validation: (R) => R.required().max(60),
+            }),
+            bodyField(),
+            defineField({
+              name: 'note',
+              title: 'Small note (optional)',
+              type: 'string',
+              description: 'A day, a reference, a size: shown small under the text.',
+              validation: (R) => R.max(80),
+            }),
+            linkField('Link (optional)'),
+          ],
+          preview: {
+            select: { title: 'title', subtitle: 'note', media: 'image' },
+            prepare: ({ title, subtitle, media }) => ({ title: title || 'Card', subtitle, media }),
+          },
+        }),
+      ],
+    }),
+  ],
+  preview: {
+    select: { title: 'heading', cards: 'cards' },
+    prepare: ({ title, cards }) => ({
+      title: title || 'Cards with icons',
+      subtitle: `Cards with icons${Array.isArray(cards) ? ` (${cards.length})` : ''}`,
+    }),
+  },
+});
+
+// ── Steps on a path ──────────────────────────────────────────────────────────
+// The inline sibling of processSection: that one draws the shared Process steps from their own
+// collection (the Process page); this one holds its steps in the block, so any page can show a
+// short path ("how it works", "what happens on the day") without a collection to keep.
+export const stepsRailSection = defineType({
+  name: 'stepsRailSection',
+  title: 'Steps on a path',
+  type: 'object',
+  icon: ThListIcon,
+  description:
+    'Numbered steps down a line, each with an icon. For "how it works" or "what to expect". The numbers and the line are drawn for you.',
+  fields: [
+    headingField(),
+    introField(),
+    defineField({
+      name: 'steps',
+      title: 'Steps',
+      type: 'array',
+      validation: (R) => R.required().min(2).max(8),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'railStep',
+          title: 'Step',
+          fields: [
+            iconField(),
+            defineField({
+              name: 'title',
+              title: 'Title',
+              type: 'string',
+              validation: (R) => R.required().max(80),
+            }),
+            bodyField('A sentence or two (optional)'),
+            linkField('Link (optional)'),
+          ],
+          preview: {
+            select: { title: 'title', subtitle: 'body' },
+            prepare: ({ title, subtitle }) => ({ title: title || 'Step', subtitle }),
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'firstStepCard',
+      title: 'Set the first step apart on a card',
+      type: 'boolean',
+      description: 'Good when step one is the one that matters most.',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'endHeading',
+      title: 'Closing line (optional)',
+      type: 'string',
+      description: 'A line after the last step, like "Ready when you are."',
+    }),
+    linkField('Closing button (optional)'),
+  ],
+  preview: {
+    select: { title: 'heading', steps: 'steps' },
+    prepare: ({ title, steps }) => ({
+      title: title || 'Steps on a path',
+      subtitle: `Steps${Array.isArray(steps) ? ` (${steps.length})` : ''}`,
+    }),
+  },
+});
+
+// ── Hub: groups of cards with a sticky index ─────────────────────────────────
+export const hubSection = defineType({
+  name: 'hubSection',
+  title: 'Groups of cards with an index',
+  type: 'object',
+  icon: UsersIcon,
+  description:
+    'A page of cards in named groups ("For families", "For businesses"), with an index that follows the scroll and jumps to a group. Every group shows at once. Good for a long list of services, programs or offers.',
+  fields: [
+    defineField({
+      name: 'heading',
+      title: 'Heading (optional)',
+      type: 'string',
+      description: 'Leave it empty when the page title already says it.',
+    }),
+    introField(),
+    defineField({
+      name: 'groups',
+      title: 'Groups',
+      type: 'array',
+      description: 'Each group gets a place in the index. Keep the names short.',
+      validation: (R) => R.required().min(1).max(8),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'hubGroup',
+          title: 'Group',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Group name',
+              type: 'string',
+              validation: (R) => R.required().max(24),
+            }),
+            defineField({
+              name: 'line',
+              title: 'One line about the group (optional)',
+              type: 'string',
+              validation: (R) => R.max(140),
+            }),
+            defineField({
+              name: 'cards',
+              title: 'Cards',
+              type: 'array',
+              validation: (R) => R.required().min(1).max(12),
+              of: [
+                defineArrayMember({
+                  type: 'object',
+                  name: 'hubCard',
+                  title: 'Card',
+                  fields: [
+                    photoField('image', 'Photo (optional)', {
+                      description: 'Without a photo the card shows its icon.',
+                    }),
+                    iconField('Icon (shown when there is no photo)'),
+                    defineField({
+                      name: 'title',
+                      title: 'Title',
+                      type: 'string',
+                      validation: (R) => R.required().max(60),
+                    }),
+                    defineField({
+                      name: 'label',
+                      title: 'Who it is for (optional)',
+                      type: 'string',
+                      description: 'A few words, like "Families" or "Everyone".',
+                      validation: (R) => R.max(40),
+                    }),
+                    defineField({
+                      name: 'when',
+                      title: 'When (optional)',
+                      type: 'string',
+                      description: 'Like "Saturdays, 10 am".',
+                      validation: (R) => R.max(60),
+                    }),
+                    defineField({
+                      name: 'place',
+                      title: 'Where (optional)',
+                      type: 'string',
+                      validation: (R) => R.max(60),
+                    }),
+                    bodyField('A sentence or two (optional)'),
+                    linkField('Link (optional)'),
+                  ],
+                  preview: {
+                    select: { title: 'title', label: 'label', when: 'when', media: 'image' },
+                    prepare: ({ title, label, when, media }) => ({
+                      title: title || 'Card',
+                      subtitle: [label, when].filter(Boolean).join(' · '),
+                      media,
+                    }),
+                  },
+                }),
+              ],
+            }),
+          ],
+          preview: {
+            select: { title: 'title', cards: 'cards' },
+            prepare: ({ title, cards }) => ({
+              title: title || 'Group',
+              subtitle: `Cards${Array.isArray(cards) ? ` (${cards.length})` : ''}`,
+            }),
+          },
+        }),
+      ],
+    }),
+  ],
+  preview: {
+    select: { title: 'heading', groups: 'groups' },
+    prepare: ({ title, groups }) => ({
+      title: title || 'Groups of cards',
+      subtitle: `Groups${Array.isArray(groups) ? ` (${groups.length})` : ''}`,
+    }),
+  },
+});
+
+// ── Opening hours (card 196) ─────────────────────────────────────────────────
+// Self-filling: the hours, the dated changes and the address come from
+// Business info (src/lib/business-facts.ts), never typed here (rule 15). With
+// no hours set the block draws nothing.
+export const hoursSection = defineType({
+  name: 'hoursSection',
+  title: 'Opening hours',
+  type: 'object',
+  icon: ClockIcon,
+  description:
+    'Your hours from Business info, with "Open now" or when you next open, and any holiday changes coming up. Change the hours once in Business info and every place updates.',
+  fields: [
+    defineField({
+      name: 'heading',
+      title: 'Heading (optional)',
+      type: 'string',
+      initialValue: 'Opening hours',
+    }),
+    introField(),
+    defineField({
+      name: 'layout',
+      title: 'Layout',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Today beside the week', value: 'card' },
+          { title: 'One slim band', value: 'band' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'card',
+    }),
+    defineField({
+      name: 'showAddress',
+      title: 'Show the address and directions',
+      type: 'boolean',
+      initialValue: true,
+    }),
+    defineField({
+      name: 'showChanges',
+      title: 'Show holiday and closure changes coming up',
+      type: 'boolean',
+      initialValue: true,
+    }),
+  ],
+  preview: {
+    select: { heading: 'heading', layout: 'layout' },
+    prepare: ({ heading, layout }) => ({
+      title: heading || 'Opening hours',
+      subtitle: layout === 'band' ? 'Opening hours, one slim band' : 'Opening hours',
+    }),
+  },
+});
+
+// ── Map and directions (card 196) ────────────────────────────────────────────
+// A drawn map card from the stored address: nothing loads from a map service
+// and nothing tracks a visitor until they choose a directions button. Draws
+// nothing without a street address in Business info.
+export const mapSection = defineType({
+  name: 'mapSection',
+  title: 'Map and directions',
+  type: 'object',
+  icon: PinIcon,
+  description:
+    'Your address from Business info with Directions and Apple Maps buttons. Change the address once in Business info and every place updates.',
+  fields: [
+    headingField(),
+    introField(),
+    defineField({
+      name: 'showHours',
+      title: "Show today's hours under the address",
+      type: 'boolean',
+      initialValue: true,
+    }),
+  ],
+  preview: {
+    select: { heading: 'heading' },
+    prepare: ({ heading }) => ({ title: heading || 'Map and directions', subtitle: 'Map' }),
+  },
+});
+
 // ── Exports ──────────────────────────────────────────────────────────────────
 
 export const builderSectionSchemas = [
@@ -687,6 +1192,14 @@ export const builderSectionSchemas = [
   eventDetailsSection,
   scheduleSection,
   photoCardsSection,
+  contactCardSection,
+  progressSection,
+  calendarSubscribeSection,
+  iconCardsSection,
+  stepsRailSection,
+  hubSection,
+  hoursSection,
+  mapSection,
 ];
 
 /**
@@ -698,11 +1211,28 @@ export const BUILDER_INSERT_GROUPS: InsertGroup[] = [
   {
     name: 'basics',
     title: 'Words and pictures',
-    of: ['columnsSection', 'buttonRowSection', 'photoCardsSection', 'tabsSection', 'letterSection'],
+    of: [
+      'columnsSection',
+      'buttonRowSection',
+      'photoCardsSection',
+      'tabsSection',
+      'letterSection',
+      'iconCardsSection',
+      'stepsRailSection',
+      'hubSection',
+    ],
+  },
+  {
+    name: 'contact',
+    title: 'Contact and updates',
+    of: ['contactCardSection', 'calendarSubscribeSection'],
   },
   {
     name: 'dates',
     title: 'Events and dates',
-    of: ['eventDetailsSection', 'scheduleSection', 'timelineSection'],
+    of: ['eventDetailsSection', 'scheduleSection', 'timelineSection', 'progressSection'],
   },
+  // Card 196: self-filling from Business info. The race has an address and no opening hours, so
+  // the map leads; the hours block draws nothing until hours are typed.
+  { name: 'visit', title: 'Location and hours', of: ['mapSection', 'hoursSection'] },
 ];
