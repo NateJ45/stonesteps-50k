@@ -305,9 +305,10 @@ export interface KitConfig {
   };
 
   /**
-   * Accounts that see the staff view: Sanity user ids (preferred, safe in a
-   * public repo) or email addresses. Empty means "anyone who is not a Sanity
-   * administrator".
+   * Accounts that see the staff view whatever their role: Sanity user ids
+   * (preferred, safe in a public repo) or email addresses. ADDS to the role
+   * rule (everyone who is not a Sanity administrator is staff anyway) and to
+   * the accounts marked "Simple view" in the Studio (card 175).
    */
   staff: string[];
 
@@ -440,6 +441,12 @@ export interface KitConfig {
      * "Coming up". Needs ncsMailTools registered. Missing counts as off.
      */
     mail?: boolean;
+    /**
+     * Card 163: Home's Newsletter card alone, for a site whose email list lives
+     * somewhere else (a church management system, say) while RSVPs stay on.
+     * Missing counts as on, so it follows `mail`.
+     */
+    newsletter?: boolean;
     /** The status line under the top bar (card 110). Missing counts as on. */
     navbarStatus?: boolean;
     /** The "Help for this page" document panel (card 110). Missing counts as on. */
@@ -462,5 +469,29 @@ export interface KitConfig {
      * Missing counts as on.
      */
     emptyStates?: boolean;
+    /**
+     * The People tool (card 176, src/sanity/people/): administrators invite a
+     * Helper or an Administrator from the Studio. Missing counts as on; with no
+     * SANITY_MEMBERS_TOKEN it shows the sanity.io/manage steps.
+     */
+    people?: boolean;
+  };
+
+  /**
+   * The People tool's settings (card 176). All optional.
+   */
+  people?: {
+    /**
+     * The site's Sanity plan. 'free' never offers Helper (Sanity's Editor role),
+     * even while a Growth trial still lists it, so nobody is invited into a role
+     * that turns read-only when the trial ends; helpers are invited as
+     * Administrators and given the Simple view (card 175). 'auto' (the default)
+     * trusts the project's feature list.
+     */
+    plan?: 'free' | 'auto';
+    /** The two roles in the site's words, over the defaults in studio-people.ts. */
+    roles?: Partial<Record<'helper' | 'administrator', { title?: string; description?: string }>>;
+    /** The line under the tool's heading. */
+    lead?: string;
   };
 }

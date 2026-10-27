@@ -1,4 +1,7 @@
-// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Adapted from the starter's tests/contrast.spec.ts (no PORTABLE marker since 2026-10-26). The one
+// change: pinClock() before measuring, because the race countdown changes the page's length and so
+// which text sits on which photograph (tests/clock.ts, 3867a78). Take the starter's gate changes by
+// hand: diff against its copy and keep the pinClock lines.
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { routes } from './routes';

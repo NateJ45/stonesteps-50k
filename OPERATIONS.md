@@ -483,6 +483,13 @@ See the full schema-change procedure above (in the "Schema-change procedure" sec
 
 ---
 
+## Cloudflare zone rules
+
+Set in the dashboard (stonesteps50k.com, Rules, Redirect Rules), not in this repo. The API token cannot read them.
+
+1. **www to apex**: `www.stonesteps50k.com` 301s to `stonesteps50k.com`.
+2. **Slashless page paths 301 to trailing slash** (2026-10-26): on `stonesteps50k.com`, a GET or HEAD for a path with no trailing slash and no dot 301s to the same path plus `/`, keeping the query string. Without it, Workers static assets answer `/about` with a **307**, which Google treats as temporary, so the slashless URL can stay canonical in Search Console. It skips `/api/`, `/files/`, `/cdn-cgi/`, `/preview` and `/studio`, because those are Worker routes and a 301 would turn a POST into a GET. **If you add a new SSR route prefix, add it to the rule's exclusions.**
+
 ## Common gotchas (the ones that have bitten at least once)
 
 | Symptom                                                 | Cause                                                                                        | Fix                                                                                                                                |

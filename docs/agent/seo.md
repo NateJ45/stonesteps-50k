@@ -120,13 +120,20 @@ normalization rules are shared with the build and unit-tested in `src/lib/redire
 **Old WordPress addresses** are hand-written in `src/lib/launch-redirects.ts` (spread into the
 redirects map before the Studio ones, so an editor can still override one). Today:
 `/all-time-records` -> `/records/`, `/the-course` -> `/course/`, `/dev/wordpress/course` -> `/course/`,
-`/registered-runners` -> `/results/`, `/index.htm` and `/index_files/Registration.htm` -> `/`, and `/results/results-<yyyy>` -> `/results/<yyyy>/` for 2003 to 2025 (Search Console 404s, 2026-10-25), all 301. Destinations keep the trailing slash on purpose: the host answers a slash-less page
+`/registered-runners` -> `/results/`, `/index.htm` and `/index_files/Registration.htm` -> `/`, and `/results/results-<yyyy>` -> `/results/<yyyy>/` for 2003 to 2025 (Search Console 404s, 2026-10-25), all 301. A source that looks like a file (`.htm`) also needs an exact line in `public/_redirects`: Astro writes every source with a trailing slash and the host only adds that slash to extensionless paths, so `/index.htm` 404ed until it had one. Destinations keep the trailing slash on purpose: the host answers a slash-less page
 address with a 307 to the slash form, so pointing straight at it saves a hop (301 then 307 then 200
 becomes 301 then 200). Add one only with evidence the old address is in use (Wayback Machine CDX index for
 whether it existed, GA4 landing pages for whether anyone arrives on it); the last three were added
 on 2026-10-05 (September GA4 showed 12 visitors landing on the 404 page on the first two; `/registered-runners`
 had 3 landings and 200 Wayback captures, and Nathan chose `/results/` as its destination). A unit test
 (`launch-redirects.test.ts`) pins all four so none can be dropped by accident.
+
+An OLD address that looks like a file (`/index.htm`, `/about.php`) needs one more step
+(card 160). With `trailingSlash: 'always'` Astro writes it as `/index.htm/`, and the host
+only adds a trailing slash to extensionless paths, so the visitor would get a 404. The
+`fileStyleRedirects()` integration in `astro.config.mjs` puts an exact slashless rule for
+each one at the top of `dist/client/_redirects` after the build (the build log says
+`added N slashless rule(s)`). Check one with curl on `wrangler dev`, not a static server.
 
 An **archived** page is not built at all, so its URL 404s, it drops out of the menus, and
 it never reaches the sitemap.

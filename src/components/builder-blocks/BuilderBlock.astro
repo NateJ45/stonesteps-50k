@@ -1,0 +1,83 @@
+---
+// Safe to edit by hand
+// Picks the component for one builder-kit block (builderSections.ts, PORTS.md
+// card 173). SectionRenderer hands every builder block here in one branch, so
+// the kit grows without touching the shared renderer again. Every component is
+// empty-safe: a block with nothing to show (an event whose dates have all
+// passed, a schedule with nothing in it) renders nothing.
+import '@/styles/builder-blocks.css';
+import '@/styles/builder-blocks-more.css';
+import type { BuilderPageBlock } from '@/lib/builderBlocks.types';
+import type { SurfaceValue } from '@/lib/surfaces';
+import ColumnsBlock from './ColumnsBlock.astro';
+import ButtonRowBlock from './ButtonRowBlock.astro';
+import TabsBlock from './TabsBlock.astro';
+import TimelineBlock from './TimelineBlock.astro';
+import LetterBlock from './LetterBlock.astro';
+import EventDetailsBlock from './EventDetailsBlock.astro';
+import ScheduleBlock from './ScheduleBlock.astro';
+import PhotoCardsBlock from './PhotoCardsBlock.astro';
+import HoursBlock from './HoursBlock.astro';
+import MapBlock from './MapBlock.astro';
+import ContactCardBlock from './ContactCardBlock.astro';
+import ProgressBlock from './ProgressBlock.astro';
+import CalendarSubscribeBlock from './CalendarSubscribeBlock.astro';
+import IconCardsBlock from './IconCardsBlock.astro';
+import StepsRailBlock from './StepsRailBlock.astro';
+import HubBlock from './HubBlock.astro';
+
+interface Props {
+  block: BuilderPageBlock;
+  /** The cadence's surface (sectionCadence.ts). */
+  surface?: SurfaceValue;
+  headingId: string;
+  /** True for the first section on the page: its photo loads first. */
+  isFirst?: boolean;
+  /** The variant a block's main button draws (the contact card's Call, the steps rail's closing
+   *  button; starter card 193). This site has no accent budget, so it stays the quiet default. */
+  primaryVariant?: 'primary' | 'secondary';
+}
+
+const {
+  block: b,
+  surface = 'background',
+  headingId,
+  isFirst = false,
+  primaryVariant = 'secondary',
+} = Astro.props;
+const common = { surface, headingId };
+---
+
+{b._type === 'columnsSection' ? (
+  <ColumnsBlock block={b} {...common} />
+) : b._type === 'buttonRowSection' ? (
+  <ButtonRowBlock block={b} {...common} />
+) : b._type === 'tabsSection' ? (
+  <TabsBlock block={b} {...common} />
+) : b._type === 'timelineSection' ? (
+  <TimelineBlock block={b} {...common} />
+) : b._type === 'letterSection' ? (
+  <LetterBlock block={b} {...common} />
+) : b._type === 'eventDetailsSection' ? (
+  <EventDetailsBlock block={b} {...common} isFirst={isFirst} />
+) : b._type === 'scheduleSection' ? (
+  <ScheduleBlock block={b} {...common} />
+) : b._type === 'photoCardsSection' ? (
+  <PhotoCardsBlock block={b} {...common} isFirst={isFirst} />
+) : b._type === 'hoursSection' ? (
+  <HoursBlock block={b} {...common} />
+) : b._type === 'mapSection' ? (
+  <MapBlock block={b} {...common} />
+) : b._type === 'contactCardSection' ? (
+  <ContactCardBlock block={b} {...common} primaryVariant={primaryVariant} />
+) : b._type === 'progressSection' ? (
+  <ProgressBlock block={b} {...common} />
+) : b._type === 'calendarSubscribeSection' ? (
+  <CalendarSubscribeBlock block={b} {...common} />
+) : b._type === 'iconCardsSection' ? (
+  <IconCardsBlock block={b} {...common} isFirst={isFirst} />
+) : b._type === 'stepsRailSection' ? (
+  <StepsRailBlock block={b} {...common} primaryVariant={primaryVariant} />
+) : b._type === 'hubSection' ? (
+  <HubBlock block={b} {...common} isFirst={isFirst} />
+) : null}

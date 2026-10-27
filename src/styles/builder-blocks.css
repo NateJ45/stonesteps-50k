@@ -1,0 +1,567 @@
+/* Safe to edit by hand
+   =============================================================================
+   The builder kit's styles (src/components/builder-blocks/, PORTS.md card 173)
+   =============================================================================
+   Imported once by BuilderBlock.astro. Stone Steps' version of the starter's
+   file: the same class names, dressed in this site's grammar (DESIGN.md).
+     - Cards, the letter and the event's details are PLATES, objects on a
+       ground: the plate stock, a 2px edge, the 12px plate radius and the hard
+       ground lift. The stock flips with the theme (charcoal on paper, cream on
+       bark), so .bb-plate re-points the text tokens to the plate's own inks
+       and everything inside reads on either.
+     - Photos wear the same edge and lift (as on the course features band).
+     - Titles are Staatliches at one weight; every time value is mono with
+       tabular figures, like the race clock.
+     - No opacity on text: secondary ink is a solid token.
+   Every colour is a theme token, so light and dark need nothing extra. Class
+   names start bb-; state set by a script is an attribute
+   ([data-bb-tabs-ready], [hidden]), never a class built at run time.
+   ========================================================================== */
+
+/* ---- The plate: an object on the ground. Text tokens re-pointed so prose,
+   links and the blaze inside it use the plate's inks in both themes. ---- */
+.bb-plate {
+  --foreground: var(--plate-ink);
+  --card-foreground: var(--plate-ink);
+  --muted-foreground: var(--plate-ink-soft);
+  --link: var(--plate-accent);
+  --heading-accent: var(--plate-accent);
+  --border: color-mix(in srgb, var(--plate-ink) 24%, transparent);
+  background: var(--plate-face);
+  color: var(--plate-ink);
+  border: 2px solid var(--plate-edge);
+  border-radius: var(--plate-radius);
+  box-shadow: var(--lift-ground);
+}
+/* A plate button ON a plate is not on the page ground, so its shadow stays
+   black (the same rule globals.css gives the tickets and the punch card). */
+.bb-plate .btn-plate {
+  box-shadow: var(--lift);
+}
+.bb-plate .btn-plate:hover {
+  box-shadow: 5px 6px 0 rgb(0 0 0 / 0.55);
+}
+
+/* ---- The shared frame: heading, intro, prose, grids, cards, actions ---- */
+.bb-head {
+  margin-bottom: var(--spacing-l);
+}
+.bb-intro {
+  margin-top: var(--spacing-s);
+  max-width: 42rem;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+.bb-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h4);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--foreground);
+}
+.bb-prose {
+  line-height: 1.7;
+}
+.bb-prose > :first-child {
+  margin-top: 0;
+}
+.bb-prose > :last-child {
+  margin-bottom: 0;
+}
+.bb-grid {
+  display: grid;
+  gap: var(--spacing-l);
+}
+@media (width >= 40rem) {
+  .bb-grid--2,
+  .bb-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (width >= 64rem) {
+  .bb-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.bb-grid > * > .bb-title + .bb-prose,
+.bb-grid > * > .bb-title + p {
+  margin-top: var(--spacing-s);
+}
+.bb-card {
+  padding: var(--spacing-m);
+}
+.bb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-s);
+  margin-top: var(--spacing-m);
+}
+.bb-head + .bb-actions {
+  margin-top: 0;
+}
+
+/* A card with one link whose hit area covers the whole card. The link's own
+   focus ring is drawn on the card, so a keyboard user sees what will open. */
+.bb-stretch {
+  position: relative;
+}
+.bb-stretch a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.bb-stretch:has(a:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+.bb-card.bb-stretch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bb-card.bb-stretch:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--lift-ground-hover);
+  }
+}
+.bb-card__note {
+  color: var(--card-foreground);
+  line-height: 1.55;
+}
+.bb-card.bb-stretch > a {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+/* ---- Tabs. Before the script runs every panel shows, each under its own
+   heading; with it, the tab list shows and the panel headings hide. ---- */
+.bb-tablist {
+  display: none;
+}
+.bb-panel + .bb-panel {
+  margin-top: var(--spacing-l);
+}
+.bb-panel__title {
+  margin-bottom: var(--spacing-s);
+}
+[data-bb-tabs-ready] .bb-tablist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--spacing-m);
+}
+[data-bb-tabs-ready] .bb-panel + .bb-panel {
+  margin-top: 0;
+}
+[data-bb-tabs-ready] .bb-panel__title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.bb-tab {
+  min-height: 44px;
+  padding: var(--spacing-xs) var(--spacing-m);
+  margin-bottom: -1px;
+  border-bottom: 3px solid transparent;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.25rem;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+.bb-tab:hover {
+  color: var(--foreground);
+}
+.bb-tab[aria-selected='true'] {
+  color: var(--foreground);
+  border-bottom-color: var(--primary);
+}
+.bb-tab:focus-visible,
+.bb-panel:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ---- Timeline ---- */
+.bb-timeline {
+  position: relative;
+  max-width: 60rem;
+}
+.bb-moment {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  column-gap: var(--spacing-m);
+  padding-bottom: var(--spacing-l);
+}
+/* The rail: a hairline down the dot column, stopping at the last dot. */
+.bb-moment::before {
+  content: '';
+  position: absolute;
+  top: 0.75rem;
+  bottom: 0;
+  left: calc(0.5rem - 0.5px);
+  width: 1px;
+  background: var(--border);
+}
+.bb-moment:last-child::before {
+  display: none;
+}
+.bb-moment__dot {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.3rem;
+  border-radius: 999px;
+  border: 3px solid var(--primary);
+  background: var(--background);
+  position: relative;
+}
+.bb-moment__year {
+  grid-column: 2;
+  font-family: var(--font-display);
+  font-size: var(--text-h4);
+  line-height: 1;
+  color: var(--link);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.bb-moment__body,
+.bb-moment__photo {
+  grid-column: 2;
+}
+.bb-moment__body p {
+  margin-top: var(--spacing-xs);
+  line-height: 1.65;
+  color: var(--foreground);
+}
+.bb-moment__photo {
+  margin-top: var(--spacing-s);
+}
+.bb-moment__photo img {
+  display: block;
+  width: 100%;
+  max-width: 28rem;
+  height: auto;
+  border: 2px solid var(--plate-edge);
+  border-radius: var(--plate-radius);
+  box-shadow: var(--lift-ground);
+}
+@media (width >= 64rem) {
+  .bb-moment {
+    grid-template-columns: 7rem 1rem minmax(0, 1fr);
+  }
+  .bb-moment::before {
+    left: calc(7rem + var(--spacing-m) + 0.5rem - 0.5px);
+  }
+  .bb-moment__year {
+    grid-column: 1;
+    grid-row: 1;
+    text-align: right;
+  }
+  .bb-moment__dot {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  .bb-moment__body {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .bb-moment__photo {
+    grid-column: 3;
+  }
+  .bb-moment--photo {
+    grid-template-columns: 7rem 1rem minmax(0, 1fr) minmax(0, 0.8fr);
+  }
+  .bb-moment--photo .bb-moment__photo {
+    grid-column: 4;
+    grid-row: 1;
+    margin-top: 0;
+  }
+}
+
+/* ---- A letter ---- */
+/* The letter hangs on the column's left edge like every other object on the
+   site (the community card in CommunityBand.astro), not centred. */
+.bb-letter {
+  max-width: 40rem;
+  padding: clamp(1.75rem, 6vw, 3.5rem) clamp(1.25rem, 6vw, 3.5rem);
+  box-shadow: var(--lift-ground-lg);
+}
+.bb-letter__eyebrow {
+  color: var(--heading-accent);
+  margin-bottom: var(--spacing-m);
+}
+.bb-letter__greeting {
+  margin-top: var(--spacing-m);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h3);
+  line-height: 1;
+  color: var(--plate-ink);
+}
+.bb-letter > .bb-letter__greeting:first-child {
+  margin-top: 0;
+}
+.bb-letter__body {
+  margin-top: var(--spacing-m);
+  font-size: clamp(1.05rem, 1rem + 0.25vw, 1.2rem);
+  line-height: 1.75;
+}
+.bb-letter__sign {
+  margin-top: var(--spacing-l);
+}
+.bb-letter__off {
+  font-style: italic;
+}
+/* A signature is dark ink on white paper, so it sits on a white chip: on the
+   charcoal plate (light theme) it would otherwise vanish. */
+.bb-letter__signature {
+  display: block;
+  width: 220px;
+  max-width: 70%;
+  height: auto;
+  margin: var(--spacing-xs) 0;
+  padding: 0.25rem 0.5rem;
+  background: #fff;
+  border-radius: 4px;
+}
+.bb-letter__name {
+  margin-top: var(--spacing-xs);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h4);
+  line-height: 1;
+}
+.bb-letter__role {
+  margin-top: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* ---- Event details. Grid areas place the three parts: with a photo the card
+   sits under the words beside the photo; without one the card takes the narrow
+   track of the split. One column (photo, words, card) below 64rem. ---- */
+.bb-event {
+  align-items: start;
+}
+.bb-event--photo {
+  grid-template-areas: 'media' 'words' 'card';
+}
+.bb-event--plain {
+  grid-template-areas: 'words' 'card';
+}
+.bb-event__media {
+  grid-area: media;
+}
+.bb-event__photo {
+  border: 2px solid var(--plate-edge);
+  border-radius: var(--plate-radius);
+  box-shadow: var(--lift-ground-lg);
+}
+.bb-event__words {
+  grid-area: words;
+}
+.bb-event__card {
+  grid-area: card;
+  padding: var(--spacing-l) var(--spacing-m);
+}
+@media (width >= 64rem) {
+  .bb-event--plain {
+    grid-template-areas: 'words card';
+  }
+  .bb-event--photo {
+    grid-template-areas: 'words media' 'card media';
+    grid-template-rows: auto 1fr;
+  }
+}
+.bb-event__dates {
+  display: grid;
+  gap: var(--spacing-m);
+}
+.bb-event__date {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--spacing-m);
+}
+.bb-event__date--same {
+  margin-top: calc(var(--spacing-s) * -1);
+}
+.bb-event__num {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+.bb-event__day {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  color: var(--plate-ink);
+  font-variant-numeric: lining-nums;
+}
+.bb-event__month {
+  margin-top: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.bb-event__when {
+  display: flex;
+  flex-direction: column;
+}
+.bb-event__weekday {
+  font-weight: 600;
+}
+.bb-event__time {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+.bb-event__label {
+  display: block;
+  font-family: var(--font-sans);
+  color: var(--plate-ink);
+}
+.bb-event__place {
+  margin-top: var(--spacing-m);
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--border);
+}
+.bb-event__place-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.bb-event__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-s) var(--spacing-m);
+  margin-top: var(--spacing-m);
+}
+.bb-event__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--spacing-m);
+}
+.bb-event__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bb-event__link:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* ---- Schedule ---- */
+.bb-sched {
+  display: grid;
+  gap: var(--spacing-l);
+}
+@media (width >= 64rem) {
+  .bb-sched--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bb-sched--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.bb-sched .bb-title {
+  margin-bottom: var(--spacing-s);
+}
+.bb-sched__rows {
+  border-top: 1px solid var(--border);
+}
+.bb-sched__row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: var(--spacing-m);
+  padding-block: var(--spacing-s);
+  border-bottom: 1px solid var(--border);
+}
+.bb-sched__time {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--link);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+/* A heading, so it is in the display face: one weight only (Staatliches smears
+   when bolded, DESIGN.md). */
+.bb-sched__what {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  color: var(--foreground);
+}
+.bb-sched__note {
+  margin-top: 0.125rem;
+  font-size: 0.9375rem;
+  color: var(--muted-foreground);
+}
+
+/* ---- Cards with photos ---- */
+.bb-pcard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  border-radius: var(--plate-radius);
+}
+.bb-pcard__pic {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 2px solid var(--plate-edge);
+  border-radius: var(--plate-radius);
+  box-shadow: var(--lift-ground);
+  background: var(--muted);
+}
+.bb-pcard__pic img,
+.bb-pcard__blank {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.bb-pcard.bb-stretch .bb-pcard__pic img {
+  transition: transform 300ms ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bb-pcard.bb-stretch:hover .bb-pcard__pic img {
+    transform: scale(1.03);
+  }
+}
+.bb-pcard__body {
+  line-height: 1.6;
+  color: var(--foreground);
+}
+.bb-pcard__more {
+  margin-top: auto;
+}

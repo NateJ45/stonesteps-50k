@@ -60,7 +60,7 @@ export default function RaceContactForm({ subjects, fallbackUrl }: Props) {
     setError(null);
 
     const data = Object.fromEntries(new FormData(e.currentTarget).entries());
-    const subject = String(data.subject ?? 'website enquiry');
+    const subject = String(data.subject ?? 'website inquiry');
 
     try {
       const result = await sendContactSubmission(

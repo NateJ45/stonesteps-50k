@@ -20,6 +20,7 @@ import { localBusinessSchema } from '@/lib/schemas';
 import { getActiveAnnouncement } from '@/lib/queries';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
+import ClientNotes from '@/components/ClientNotes.astro';
 import BackToTop from '@/components/BackToTop';
 import { Toaster } from '@/components/ui/sonner';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics.astro';
@@ -411,6 +412,10 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     </main>
 
     <Footer siteSettings={siteSettings} />
+
+    {/* The client review layer (starter card 195): renders nothing unless CLIENT_NOTES_ON is true in
+        src/data/client-notes.ts AND the site is on a pre-launch address. Off: this site is live. */}
+    <ClientNotes />
 
     {/*
       Both islands were previously `client:load` which forced the JS to

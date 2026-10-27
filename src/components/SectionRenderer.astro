@@ -32,6 +32,9 @@ import LogoStrip from '@/components/sections/LogoStrip.astro';
 import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
+// The latest video and the documents list (starter card 197).
+import LatestVideo from '@/components/sections/LatestVideo.astro';
+import DocumentsList from '@/components/sections/DocumentsList.astro'; // scaffold: documents
 // Stone Steps race blocks.
 import RaceHero from '@/components/sections/RaceHero.astro';
 import DistanceTickets from '@/components/sections/DistanceTickets.astro';
@@ -53,6 +56,9 @@ import CommunityBand from '@/components/sections/CommunityBand.astro';
 import RaceWeather from '@/components/sections/RaceWeather.astro';
 import Dynasties from '@/components/sections/Dynasties.astro';
 import GearBand from '@/components/sections/GearBand.astro';
+// The builder kit (PORTS.md card 173).
+import BuilderBlock from '@/components/builder-blocks/BuilderBlock.astro';
+import { isBuilderBlock } from '@/lib/builderBlocks.types';
 import { classifySections } from '@/lib/sectionCadence';
 import { expandSyncedSections } from '@/lib/authoring';
 import type {
@@ -121,10 +127,18 @@ const editKeyOf = (block: unknown) => {
 };
 ---
 
-{rows.map(({ block: s, surface, headingId }) => (
+{rows.map(({ block: s, surface, headingId }, rowIndex) => (
   <>
     <Wrap {...wrapAttrs(editKeyOf(s))}>
-      {s._type === 'heroSection' ? (
+      {isBuilderBlock(s) ? (
+        // The builder kit (PORTS.md card 173): one branch, BuilderBlock picks the component.
+        <BuilderBlock
+          block={s}
+          surface={surface === 'muted' ? 'muted' : 'background'}
+          headingId={headingId}
+          isFirst={rowIndex === 0}
+        />
+      ) : s._type === 'heroSection' ? (
         <Hero
           eyebrow={s.eyebrow}
           headline={s.headline ?? ''}
@@ -135,6 +149,10 @@ const editKeyOf = (block: unknown) => {
           scriptAccent={s.scriptAccent}
           size={s.size ?? 'short'}
           headingId={headingId}
+          heroStyle={s.heroStyle}
+          glance={s.glance}
+          backgroundVideo={s.backgroundVideo}
+          backgroundVideoPhone={s.backgroundVideoPhone}
         />
       ) : s._type === 'ctaBandSection' ? (
         <FinalCta
@@ -324,6 +342,20 @@ const editKeyOf = (block: unknown) => {
           embedUrl={s.embedUrl}
           embedCode={s.embedCode}
           heightHint={s.heightHint ?? 'medium'}
+          headingId={headingId}
+        />
+      ) : s._type === 'latestVideoSection' ? (
+        <LatestVideo block={s} surface={surface ?? 'background'} headingId={headingId} />
+      ) : // scaffold-branch: documents
+      s._type === 'documentsSection' ? (
+        <DocumentsList
+          heading={s.heading}
+          intro={s.intro}
+          category={s.category}
+          limit={s.limit}
+          showDates={s.showDates}
+          items={s.items ?? []}
+          surface={surface ?? 'background'}
           headingId={headingId}
         />
       ) : s._type === 'dynamicListSection' ? (

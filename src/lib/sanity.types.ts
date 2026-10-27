@@ -15,11 +15,53 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: schema.json
+export type Glance = {
+  title?: string;
+  lines?: Array<string>;
+  link?: CtaBlock;
+};
+
 export type SanityImageAssetReference = {
   _ref: string;
   _type: 'reference';
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: 'sanity.imageAsset';
+};
+
+export type TimelineEntryImage = {
+  asset?: SanityImageAssetReference;
+  media?: unknown; // Unable to locate the referenced type "timelineEntry.image.media" in schema
+  hotspot?: SanityImageHotspot;
+  crop?: SanityImageCrop;
+  alt?: string;
+  _type: 'image';
+};
+
+export type PhotoCardImage = {
+  asset?: SanityImageAssetReference;
+  media?: unknown; // Unable to locate the referenced type "photoCard.image.media" in schema
+  hotspot?: SanityImageHotspot;
+  crop?: SanityImageCrop;
+  alt?: string;
+  _type: 'image';
+};
+
+export type IconCardImage = {
+  asset?: SanityImageAssetReference;
+  media?: unknown; // Unable to locate the referenced type "iconCard.image.media" in schema
+  hotspot?: SanityImageHotspot;
+  crop?: SanityImageCrop;
+  alt?: string;
+  _type: 'image';
+};
+
+export type HubCardImage = {
+  asset?: SanityImageAssetReference;
+  media?: unknown; // Unable to locate the referenced type "hubCard.image.media" in schema
+  hotspot?: SanityImageHotspot;
+  crop?: SanityImageCrop;
+  alt?: string;
+  _type: 'image';
 };
 
 export type Photo = {
@@ -192,6 +234,32 @@ export type FaqCategory = {
   title?: string;
   slug?: Slug;
   displayOrder?: number;
+};
+
+export type SanityFileAssetReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'sanity.fileAsset';
+};
+
+export type LibraryDocument = {
+  _id: string;
+  _type: 'libraryDocument';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  category?: string;
+  date?: string;
+  file?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: 'file';
+  };
+  note?: string;
+  expires?: string;
+  publishAt?: string;
 };
 
 export type Announcement = {
@@ -458,8 +526,12 @@ export type BusinessInfo = {
   _updatedAt: string;
   _rev: string;
   businessModel?: 'in-person' | 'remote' | 'hybrid';
+  street?: string;
   city?: string;
   state?: string;
+  zip?: string;
+  addressConfirmed?: boolean;
+  findUs?: string;
   serviceRegion?: string;
   serviceAreas?: Array<string>;
   travelFees?: Array<{
@@ -479,6 +551,466 @@ export type BusinessInfo = {
     _type: 'additionalLocation';
     _key: string;
   }>;
+  openingHours?: Array<{
+    days?: Array<string>;
+    opens?:
+      | '00:00'
+      | '00:15'
+      | '00:30'
+      | '00:45'
+      | '01:00'
+      | '01:15'
+      | '01:30'
+      | '01:45'
+      | '02:00'
+      | '02:15'
+      | '02:30'
+      | '02:45'
+      | '03:00'
+      | '03:15'
+      | '03:30'
+      | '03:45'
+      | '04:00'
+      | '04:15'
+      | '04:30'
+      | '04:45'
+      | '05:00'
+      | '05:15'
+      | '05:30'
+      | '05:45'
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
+    closes?:
+      | '00:00'
+      | '00:15'
+      | '00:30'
+      | '00:45'
+      | '01:00'
+      | '01:15'
+      | '01:30'
+      | '01:45'
+      | '02:00'
+      | '02:15'
+      | '02:30'
+      | '02:45'
+      | '03:00'
+      | '03:15'
+      | '03:30'
+      | '03:45'
+      | '04:00'
+      | '04:15'
+      | '04:30'
+      | '04:45'
+      | '05:00'
+      | '05:15'
+      | '05:30'
+      | '05:45'
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
+    label?: string;
+    confirmed?: boolean;
+    _type: 'openingHoursRow';
+    _key: string;
+  }>;
+  hoursNote?: string;
+  hoursChanges?: Array<{
+    date?: string;
+    endDate?: string;
+    kind?: 'closed' | 'hours';
+    opens?:
+      | '00:00'
+      | '00:15'
+      | '00:30'
+      | '00:45'
+      | '01:00'
+      | '01:15'
+      | '01:30'
+      | '01:45'
+      | '02:00'
+      | '02:15'
+      | '02:30'
+      | '02:45'
+      | '03:00'
+      | '03:15'
+      | '03:30'
+      | '03:45'
+      | '04:00'
+      | '04:15'
+      | '04:30'
+      | '04:45'
+      | '05:00'
+      | '05:15'
+      | '05:30'
+      | '05:45'
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
+    closes?:
+      | '00:00'
+      | '00:15'
+      | '00:30'
+      | '00:45'
+      | '01:00'
+      | '01:15'
+      | '01:30'
+      | '01:45'
+      | '02:00'
+      | '02:15'
+      | '02:30'
+      | '02:45'
+      | '03:00'
+      | '03:15'
+      | '03:30'
+      | '03:45'
+      | '04:00'
+      | '04:15'
+      | '04:30'
+      | '04:45'
+      | '05:00'
+      | '05:15'
+      | '05:30'
+      | '05:45'
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
+    note?: string;
+    _type: 'hoursChange';
+    _key: string;
+  }>;
+};
+
+export type HomePageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'homePage';
+};
+
+export type AboutPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'aboutPage';
+};
+
+export type ServicesPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'servicesPage';
+};
+
+export type ProcessPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'processPage';
+};
+
+export type FaqPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'faqPage';
+};
+
+export type ContactPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'contactPage';
+};
+
+export type JournalPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'journalPage';
+};
+
+export type PageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'page';
 };
 
 export type SiteSettings = {
@@ -491,6 +1023,8 @@ export type SiteSettings = {
   tagline?: string;
   email?: string;
   phone?: string;
+  phoneConfirmed?: boolean;
+  emailConfirmed?: boolean;
   navItems?: Array<
     | ({
         _key: string;
@@ -528,6 +1062,22 @@ export type SiteSettings = {
     label?: string;
     link?: NavLink;
   };
+  actionBars?: Array<{
+    everyPage?: boolean;
+    page?:
+      | HomePageReference
+      | AboutPageReference
+      | ServicesPageReference
+      | ProcessPageReference
+      | FaqPageReference
+      | ContactPageReference
+      | JournalPageReference
+      | PageReference;
+    text?: string;
+    action?: NavLink;
+    _type: 'actionBar';
+    _key: string;
+  }>;
   showEmail?: boolean;
   showSocials?: boolean;
   showFooterSocials?: boolean;
@@ -536,6 +1086,13 @@ export type SiteSettings = {
       _key: string;
     } & NavLink
   >;
+  whereNext?: Array<{
+    link?: NavLink;
+    note?: string;
+    _type: 'whereNextRow';
+    _key: string;
+  }>;
+  footerStyle?: 'columns' | 'compact';
   logo?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
@@ -621,67 +1178,11 @@ export type SiteSettings = {
   satisfactionGuarantee?: string;
 };
 
-export type HomePageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'homePage';
-};
-
-export type AboutPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'aboutPage';
-};
-
-export type ServicesPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'servicesPage';
-};
-
-export type ProcessPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'processPage';
-};
-
-export type FaqPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'faqPage';
-};
-
-export type ContactPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'contactPage';
-};
-
-export type JournalPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'journalPage';
-};
-
 export type PrivacyPageReference = {
   _ref: string;
   _type: 'reference';
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: 'privacyPage';
-};
-
-export type PageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'page';
 };
 
 export type NavLink = {
@@ -1099,8 +1600,623 @@ export type SectionPreset = {
     | ({
         _key: string;
       } & EmbedSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
   >;
   note?: string;
+};
+
+export type DocumentsSection = {
+  _type: 'documentsSection';
+  heading?: string;
+  intro?: string;
+  category?: string;
+  limit?: number;
+  showDates?: boolean;
+};
+
+export type LatestVideoSection = {
+  _type: 'latestVideoSection';
+  heading?: string;
+  intro?: string;
+  channelId?: string;
+  showChannelLink?: boolean;
+};
+
+export type MapSection = {
+  _type: 'mapSection';
+  heading?: string;
+  intro?: string;
+  showHours?: boolean;
+};
+
+export type HoursSection = {
+  _type: 'hoursSection';
+  heading?: string;
+  intro?: string;
+  layout?: 'card' | 'band';
+  showAddress?: boolean;
+  showChanges?: boolean;
+};
+
+export type HubSection = {
+  _type: 'hubSection';
+  heading?: string;
+  intro?: string;
+  groups?: Array<{
+    title?: string;
+    line?: string;
+    cards?: Array<{
+      image?: HubCardImage;
+      icon?:
+        | 'home'
+        | 'heart'
+        | 'star'
+        | 'calendar'
+        | 'clock'
+        | 'map-pin'
+        | 'phone'
+        | 'mail'
+        | 'chat'
+        | 'users'
+        | 'book'
+        | 'coffee'
+        | 'gift'
+        | 'leaf'
+        | 'tool'
+        | 'door'
+        | 'check';
+      title?: string;
+      label?: string;
+      when?: string;
+      place?: string;
+      body?: string;
+      link?: CtaBlock;
+      _type: 'hubCard';
+      _key: string;
+    }>;
+    _type: 'hubGroup';
+    _key: string;
+  }>;
+};
+
+export type StepsRailSection = {
+  _type: 'stepsRailSection';
+  heading?: string;
+  intro?: string;
+  steps?: Array<{
+    icon?:
+      | 'home'
+      | 'heart'
+      | 'star'
+      | 'calendar'
+      | 'clock'
+      | 'map-pin'
+      | 'phone'
+      | 'mail'
+      | 'chat'
+      | 'users'
+      | 'book'
+      | 'coffee'
+      | 'gift'
+      | 'leaf'
+      | 'tool'
+      | 'door'
+      | 'check';
+    title?: string;
+    body?: string;
+    link?: CtaBlock;
+    _type: 'railStep';
+    _key: string;
+  }>;
+  firstStepCard?: boolean;
+  endHeading?: string;
+  link?: CtaBlock;
+};
+
+export type IconCardsSection = {
+  _type: 'iconCardsSection';
+  heading?: string;
+  intro?: string;
+  cards?: Array<{
+    icon?:
+      | 'home'
+      | 'heart'
+      | 'star'
+      | 'calendar'
+      | 'clock'
+      | 'map-pin'
+      | 'phone'
+      | 'mail'
+      | 'chat'
+      | 'users'
+      | 'book'
+      | 'coffee'
+      | 'gift'
+      | 'leaf'
+      | 'tool'
+      | 'door'
+      | 'check';
+    image?: IconCardImage;
+    title?: string;
+    body?: string;
+    note?: string;
+    link?: CtaBlock;
+    _type: 'iconCard';
+    _key: string;
+  }>;
+};
+
+export type CalendarSubscribeSection = {
+  _type: 'calendarSubscribeSection';
+  heading?: string;
+  intro?: string;
+  feed?: string;
+};
+
+export type ProgressSection = {
+  _type: 'progressSection';
+  heading?: string;
+  intro?: string;
+  unit?: 'dollars' | 'number';
+  goal?: number;
+  raised?: number;
+  asOf?: string;
+  link?: CtaBlock;
+};
+
+export type ContactCardSection = {
+  _type: 'contactCardSection';
+  heading?: string;
+  intro?: string;
+  callButtons?: boolean;
+  phone?: string;
+  email?: string;
+  address?: string;
+  hours?: string;
+};
+
+export type PhotoCardsSection = {
+  _type: 'photoCardsSection';
+  heading?: string;
+  intro?: string;
+  cards?: Array<{
+    image?: PhotoCardImage;
+    title?: string;
+    body?: string;
+    link?: CtaBlock;
+    _type: 'photoCard';
+    _key: string;
+  }>;
+};
+
+export type ScheduleSection = {
+  _type: 'scheduleSection';
+  heading?: string;
+  intro?: string;
+  days?: Array<{
+    title?: string;
+    items?: Array<{
+      startTime?:
+        | '06:00'
+        | '06:15'
+        | '06:30'
+        | '06:45'
+        | '07:00'
+        | '07:15'
+        | '07:30'
+        | '07:45'
+        | '08:00'
+        | '08:15'
+        | '08:30'
+        | '08:45'
+        | '09:00'
+        | '09:15'
+        | '09:30'
+        | '09:45'
+        | '10:00'
+        | '10:15'
+        | '10:30'
+        | '10:45'
+        | '11:00'
+        | '11:15'
+        | '11:30'
+        | '11:45'
+        | '12:00'
+        | '12:15'
+        | '12:30'
+        | '12:45'
+        | '13:00'
+        | '13:15'
+        | '13:30'
+        | '13:45'
+        | '14:00'
+        | '14:15'
+        | '14:30'
+        | '14:45'
+        | '15:00'
+        | '15:15'
+        | '15:30'
+        | '15:45'
+        | '16:00'
+        | '16:15'
+        | '16:30'
+        | '16:45'
+        | '17:00'
+        | '17:15'
+        | '17:30'
+        | '17:45'
+        | '18:00'
+        | '18:15'
+        | '18:30'
+        | '18:45'
+        | '19:00'
+        | '19:15'
+        | '19:30'
+        | '19:45'
+        | '20:00'
+        | '20:15'
+        | '20:30'
+        | '20:45'
+        | '21:00'
+        | '21:15'
+        | '21:30'
+        | '21:45'
+        | '22:00'
+        | '22:15'
+        | '22:30'
+        | '22:45'
+        | '23:00'
+        | '23:15'
+        | '23:30'
+        | '23:45';
+      title?: string;
+      note?: string;
+      _type: 'scheduleRow';
+      _key: string;
+    }>;
+    _type: 'scheduleDay';
+    _key: string;
+  }>;
+};
+
+export type EventDetailsSection = {
+  _type: 'eventDetailsSection';
+  eyebrow?: string;
+  title?: string;
+  occurrences?: Array<{
+    date?: string;
+    startTime?:
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
+    endTime?:
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
+    label?: string;
+    _type: 'eventDate';
+    _key: string;
+  }>;
+  place?: string;
+  note?: string;
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  button?: CtaBlock;
+  showCalendar?: boolean;
+};
+
+export type LetterSection = {
+  _type: 'letterSection';
+  eyebrow?: string;
+  greeting?: string;
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal';
+    listItem?: never;
+    markDefs?: null;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
+  signOff?: string;
+  signature?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  name?: string;
+  role?: string;
+  link?: CtaBlock;
+};
+
+export type TimelineSection = {
+  _type: 'timelineSection';
+  heading?: string;
+  intro?: string;
+  entries?: Array<{
+    year?: string;
+    title?: string;
+    text?: string;
+    image?: TimelineEntryImage;
+    _type: 'timelineEntry';
+    _key: string;
+  }>;
+};
+
+export type TabsSection = {
+  _type: 'tabsSection';
+  heading?: string;
+  intro?: string;
+  tabs?: Array<{
+    label?: string;
+    body?: Array<{
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: 'span';
+        _key: string;
+      }>;
+      style?: 'normal';
+      listItem?: 'bullet' | 'number';
+      markDefs?: Array<{
+        href?: string;
+        _type: 'link';
+        _key: string;
+      }>;
+      level?: number;
+      _type: 'block';
+      _key: string;
+    }>;
+    _type: 'tabPanel';
+    _key: string;
+  }>;
+};
+
+export type ButtonRowSection = {
+  _type: 'buttonRowSection';
+  heading?: string;
+  intro?: string;
+  layout?: 'buttons' | 'cards';
+  links?: Array<{
+    link?: CtaBlock;
+    note?: string;
+    _type: 'quickLink';
+    _key: string;
+  }>;
+};
+
+export type ColumnsSection = {
+  _type: 'columnsSection';
+  heading?: string;
+  intro?: string;
+  textColumns?: Array<{
+    heading?: string;
+    body?: Array<{
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: 'span';
+        _key: string;
+      }>;
+      style?: 'normal';
+      listItem?: 'bullet' | 'number';
+      markDefs?: Array<{
+        href?: string;
+        _type: 'link';
+        _key: string;
+      }>;
+      level?: number;
+      _type: 'block';
+      _key: string;
+    }>;
+    _type: 'textColumn';
+    _key: string;
+  }>;
 };
 
 export type EmbedSection = {
@@ -1285,6 +2401,18 @@ export type HeroSection = {
     crop?: SanityImageCrop;
     alt?: string;
     _type: 'image';
+  };
+  heroStyle?: 'standard' | 'photo';
+  glance?: Glance;
+  backgroundVideo?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: 'file';
+  };
+  backgroundVideoPhone?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: 'file';
   };
   primaryCta?: CtaBlock;
   secondaryCta?: CtaBlock;
@@ -1680,6 +2808,60 @@ export type Page = {
     | ({
         _key: string;
       } & EmbedSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2139,6 +3321,60 @@ export type ProcessPage = {
       } & EmbedSection)
     | ({
         _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & SyncedSection)
     | ({
         _key: string;
@@ -2259,6 +3495,60 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & EmbedSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2421,6 +3711,60 @@ export type AboutPage = {
     | ({
         _key: string;
       } & EmbedSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2644,6 +3988,60 @@ export type HomePage = {
       } & EmbedSection)
     | ({
         _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & SyncedSection)
   >;
   seoTitle?: string;
@@ -2771,6 +4169,15 @@ export type Testimonial = {
   featured?: boolean;
   sourceType?: 'Google' | 'Facebook' | 'Houzz' | 'Direct';
   reviewUrl?: string;
+};
+
+export type StudioStaff = {
+  _id: string;
+  _type: 'studioStaff';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  ids?: Array<string>;
 };
 
 export type StudioWeek = {
@@ -2931,7 +4338,12 @@ export type SanityImageAsset = {
 };
 
 export type AllSanitySchemaTypes =
+  | Glance
   | SanityImageAssetReference
+  | TimelineEntryImage
+  | PhotoCardImage
+  | IconCardImage
+  | HubCardImage
   | Photo
   | Redirect
   | JournalCategory
@@ -2944,6 +4356,8 @@ export type AllSanitySchemaTypes =
   | FaqCategoryReference
   | FaqItem
   | FaqCategory
+  | SanityFileAssetReference
+  | LibraryDocument
   | Announcement
   | Sponsor
   | CourseFeature
@@ -2959,7 +4373,6 @@ export type AllSanitySchemaTypes =
   | Geopoint
   | NotFoundPage
   | BusinessInfo
-  | SiteSettings
   | HomePageReference
   | AboutPageReference
   | ServicesPageReference
@@ -2967,8 +4380,9 @@ export type AllSanitySchemaTypes =
   | FaqPageReference
   | ContactPageReference
   | JournalPageReference
-  | PrivacyPageReference
   | PageReference
+  | SiteSettings
+  | PrivacyPageReference
   | NavLink
   | DynamicListSection
   | TeamSection
@@ -2988,6 +4402,24 @@ export type AllSanitySchemaTypes =
   | SectionPresetReference
   | SyncedSection
   | SectionPreset
+  | DocumentsSection
+  | LatestVideoSection
+  | MapSection
+  | HoursSection
+  | HubSection
+  | StepsRailSection
+  | IconCardsSection
+  | CalendarSubscribeSection
+  | ProgressSection
+  | ContactCardSection
+  | PhotoCardsSection
+  | ScheduleSection
+  | EventDetailsSection
+  | LetterSection
+  | TimelineSection
+  | TabsSection
+  | ButtonRowSection
+  | ColumnsSection
   | EmbedSection
   | LogoStripSection
   | SpacerSection
@@ -3032,6 +4464,7 @@ export type AllSanitySchemaTypes =
   | AboutPage
   | HomePage
   | Testimonial
+  | StudioStaff
   | StudioWeek
   | TrashedItem
   | PreviewShare

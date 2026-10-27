@@ -27,7 +27,7 @@ import { staffDesk } from './kit/shared';
 import { trashListItem } from './kit/trash';
 import { brandIcon, typeIcon, type BrandIcon } from './brandIcons';
 import { emptyAwareList } from './kit/emptyList';
-import { WEEK_TYPE } from '../lib/studio-kit';
+import { STAFF_TYPE, WEEK_TYPE } from '../lib/studio-kit';
 import { TRASH_TYPE } from '../lib/studio-trash';
 import { tableListItem } from './workflow';
 import { TABLES } from './tables.config';
@@ -70,6 +70,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'faqCategory',
   'journalEntry',
   'journalCategory',
+  'libraryDocument', // scaffold: documents
   'page', // custom pages, placed explicitly under "Pages"
   'sectionPreset', // saved sections, placed explicitly under "Pages"
   'redirect', // placed explicitly under "Pages" -> Redirects
@@ -81,6 +82,8 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   TRASH_TYPE, // the Studio kit's Trash, placed explicitly at the bottom
   // The Studio kit's weekly tick document (card 111): Home's bookkeeping, never edited here.
   WEEK_TYPE,
+  // The kit's "Simple view" marks (card 175): written by the People tool only.
+  STAFF_TYPE,
   // Private preview link records (card 117): managed from "Share a preview" only.
   'previewShare',
 ]);
@@ -349,6 +352,15 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
       }),
       ...TABLES.filter((c) => c.type === 'announcement').map((c) => tableListItem(S, c)),
 
+      // scaffold: documents
+      // DOWNLOADS (starter card 197): course maps, the waiver, results PDFs. The Documents block
+      // lists the newest current ones on any page.
+      S.documentTypeListItem('libraryDocument')
+        .id('libraryDocument')
+        .title('Downloads (course maps, waivers)')
+        .icon(typeIcon('libraryDocument')),
+      // scaffold:end
+
       S.divider(),
 
       // Site setup: the menus, the footer, the settings. Rarely touched.
@@ -359,12 +371,12 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
       // only place the race's actual values are written down in one list.
       S.listItem()
         .id('brand-kit')
-        .title('Brand colours (for flyers and posts)')
+        .title('Brand colors (for flyers and posts)')
         .icon(brandIcon('brandKit'))
         .child(
           S.component(BrandKit as never)
             .id('brand-kit-pane')
-            .title('Brand colours'),
+            .title('Brand colors'),
         ),
 
       S.divider(),
