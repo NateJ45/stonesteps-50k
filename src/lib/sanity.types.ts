@@ -1014,6 +1014,13 @@ export type SiteSettings = {
       _key: string;
     } & NavLink
   >;
+  whereNext?: Array<{
+    link?: NavLink;
+    note?: string;
+    _type: 'whereNextRow';
+    _key: string;
+  }>;
+  footerStyle?: 'columns' | 'compact';
   logo?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
