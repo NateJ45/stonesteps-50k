@@ -442,6 +442,41 @@ function rewriteGlobalsCss(config) {
   });
 }
 
+// ---- Rewrite: src/data/layout.ts ----------------------------------------
+// The `layout` block (header / hero / density / cards / motion) is the structure axis.
+// Missing block or missing slots mean the defaults, which is the original
+// layout, so an older config reskins exactly as before. The file is generated
+// whole (no patterns to drift); values were already enum-checked by the schema.
+
+const LAYOUT_DEFAULTS = {
+  header: 'inline',
+  hero: 'bleed',
+  density: 'standard',
+  cards: 'standard',
+  motion: 'reveal',
+};
+
+function rewriteLayoutTs(config) {
+  const l = Object.assign({}, LAYOUT_DEFAULTS, config.layout || {});
+  const lines = [
+    '// Safe to edit by hand, but normally WRITTEN BY `npm run apply-brand` from the',
+    '// `layout` block of brand/brand.config.json. Edit the config, not this file.',
+    '// Defaults (inline, bleed, standard, standard, reveal) reproduce the original layout.',
+    "import { resolveLayout } from '@/lib/site-layout';",
+    '',
+    'export const layout = resolveLayout({',
+  ];
+  for (const k of Object.keys(LAYOUT_DEFAULTS)) {
+    lines.push('  ' + k + ": '" + l[k] + "',");
+  }
+  lines.push('});', '');
+  const body = lines.join('\n');
+  rewriteFile(resolve(root, 'src/data/layout.ts'), function (text) {
+    // Compare line-ending-insensitively so a CRLF checkout reports no change.
+    return text.replace(/\r\n/g, '\n') === body ? text : body;
+  });
+}
+
 // ---- Rewrite: src/data/site.ts ------------------------------------------
 
 function rewriteSiteTs(config) {
@@ -828,6 +863,12 @@ async function main() {
       'site.ts',
       function () {
         rewriteSiteTs(config);
+      },
+    ],
+    [
+      'layout.ts',
+      function () {
+        rewriteLayoutTs(config);
       },
     ],
     [
