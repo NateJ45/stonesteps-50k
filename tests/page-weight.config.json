@@ -17,8 +17,12 @@
     "maxFontKb": 120
   },
   "pages": {
+    "/": {
+      "_why": "Home inlines the race hero (topographic backdrop, mud field masks, the per-letter wordmark) and the course poster; 203 KB of HTML when measured, 2026-10-27.",
+      "maxHtmlKb": 255
+    },
     "/contact/": {
-      "_why": "The form island loads React and the form libraries (1596 KB decoded when measured, 2026-10-27).",
+      "_why": "The race contact form island loads React and the form libraries.",
       "maxScriptKb": 2000
     }
   },
