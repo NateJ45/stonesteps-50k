@@ -957,6 +957,62 @@ export type BusinessInfo = {
   }>;
 };
 
+export type HomePageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'homePage';
+};
+
+export type AboutPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'aboutPage';
+};
+
+export type ServicesPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'servicesPage';
+};
+
+export type ProcessPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'processPage';
+};
+
+export type FaqPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'faqPage';
+};
+
+export type ContactPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'contactPage';
+};
+
+export type JournalPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'journalPage';
+};
+
+export type PageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'page';
+};
+
 export type SiteSettings = {
   _id: string;
   _type: 'siteSettings';
@@ -1006,6 +1062,22 @@ export type SiteSettings = {
     label?: string;
     link?: NavLink;
   };
+  actionBars?: Array<{
+    everyPage?: boolean;
+    page?:
+      | HomePageReference
+      | AboutPageReference
+      | ServicesPageReference
+      | ProcessPageReference
+      | FaqPageReference
+      | ContactPageReference
+      | JournalPageReference
+      | PageReference;
+    text?: string;
+    action?: NavLink;
+    _type: 'actionBar';
+    _key: string;
+  }>;
   showEmail?: boolean;
   showSocials?: boolean;
   showFooterSocials?: boolean;
@@ -1106,67 +1178,11 @@ export type SiteSettings = {
   satisfactionGuarantee?: string;
 };
 
-export type HomePageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'homePage';
-};
-
-export type AboutPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'aboutPage';
-};
-
-export type ServicesPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'servicesPage';
-};
-
-export type ProcessPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'processPage';
-};
-
-export type FaqPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'faqPage';
-};
-
-export type ContactPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'contactPage';
-};
-
-export type JournalPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'journalPage';
-};
-
 export type PrivacyPageReference = {
   _ref: string;
   _type: 'reference';
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: 'privacyPage';
-};
-
-export type PageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'page';
 };
 
 export type NavLink = {
@@ -1628,6 +1644,12 @@ export type SectionPreset = {
       } & HubSection)
     | ({
         _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
       } & LatestVideoSection)
     | ({
         _key: string;
@@ -1651,6 +1673,22 @@ export type LatestVideoSection = {
   intro?: string;
   channelId?: string;
   showChannelLink?: boolean;
+};
+
+export type MapSection = {
+  _type: 'mapSection';
+  heading?: string;
+  intro?: string;
+  showHours?: boolean;
+};
+
+export type HoursSection = {
+  _type: 'hoursSection';
+  heading?: string;
+  intro?: string;
+  layout?: 'card' | 'band';
+  showAddress?: boolean;
+  showChanges?: boolean;
 };
 
 export type HubSection = {
@@ -2814,6 +2852,12 @@ export type Page = {
       } & HubSection)
     | ({
         _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
       } & LatestVideoSection)
     | ({
         _key: string;
@@ -3319,6 +3363,12 @@ export type ProcessPage = {
       } & HubSection)
     | ({
         _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
       } & LatestVideoSection)
     | ({
         _key: string;
@@ -3487,6 +3537,12 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & HubSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
     | ({
         _key: string;
       } & LatestVideoSection)
@@ -3697,6 +3753,12 @@ export type AboutPage = {
     | ({
         _key: string;
       } & HubSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
     | ({
         _key: string;
       } & LatestVideoSection)
@@ -3966,6 +4028,12 @@ export type HomePage = {
     | ({
         _key: string;
       } & HubSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
     | ({
         _key: string;
       } & LatestVideoSection)
@@ -4305,7 +4373,6 @@ export type AllSanitySchemaTypes =
   | Geopoint
   | NotFoundPage
   | BusinessInfo
-  | SiteSettings
   | HomePageReference
   | AboutPageReference
   | ServicesPageReference
@@ -4313,8 +4380,9 @@ export type AllSanitySchemaTypes =
   | FaqPageReference
   | ContactPageReference
   | JournalPageReference
-  | PrivacyPageReference
   | PageReference
+  | SiteSettings
+  | PrivacyPageReference
   | NavLink
   | DynamicListSection
   | TeamSection
@@ -4336,6 +4404,8 @@ export type AllSanitySchemaTypes =
   | SectionPreset
   | DocumentsSection
   | LatestVideoSection
+  | MapSection
+  | HoursSection
   | HubSection
   | StepsRailSection
   | IconCardsSection
