@@ -218,7 +218,7 @@ const actionBar = pickActionBar(siteSettings?.actionBars, publicPath(Astro.url.p
 {/* THE BOARD. Its ground is a literal one step deeper than the page's, set in
     globals.css rather than with `bg-muted`: muted is seven units off the body
     on the cream theme, which left the torn top edge with nothing to cut. */}
-<footer class="site-foot text-foreground">
+<footer id="site-footer" class="site-foot text-foreground">
   {/* The backdrop: one baked field of mud and prints, out of the flow, and
       marked as media so the contrast gate samples the pixels under the type.
       See .foot-mud in globals.css for why it is one layer and not two. */}
