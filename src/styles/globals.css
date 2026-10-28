@@ -68,6 +68,9 @@
 /* The shape contract (.shape-step, .shape-gable, .shape-slab, .shape-tile, .shape-zoom), PORTABLE,
    card 188. Class rules only: nothing changes until markup uses a class. */
 @import './shapes.css';
+/* The flow layer (src/scripts/flow.ts), PORTABLE, starter card 192. Every rule is keyed on
+   html[data-motion] or a class the script adds; this site runs layout.motion 'fade'. */
+@import './flow.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -570,6 +573,27 @@
   /* Focus: one ring. */
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
+
+  /* Motion (starter card 192): the flow layer's timings and distances (brand.config.json
+     layout.motion, src/styles/flow.css, src/scripts/flow.ts, which reads the durations). The race
+     runs 'fade', so only --motion-fade, --motion-fade-distance, --motion-stagger-calm and the ease
+     act here; the rest are the starter's values, kept so the motion wall's 'flow' page works. */
+  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1); /* expo-out: fast start, long settle */
+  --motion-fade: 200ms; /* one short fade as a block arrives */
+  --motion-fade-distance: 8px;
+  --motion-stagger-calm: 40ms;
+  --motion-rise: 600ms;
+  --motion-rise-distance: 16px;
+  --motion-stagger: 60ms;
+  --motion-line: 800ms;
+  --motion-line-stagger: 80ms;
+  --motion-photo: 900ms;
+  --motion-photo-zoom: 1.06;
+  --motion-side: 800ms;
+  --motion-side-distance: 32px;
+  --motion-page-out: 120ms;
+  --motion-page-in: 260ms;
+  --motion-page-distance: 12px;
 }
 .dark {
   --shadow-card: 0 16px 34px -18px rgba(0, 0, 0, 0.6);

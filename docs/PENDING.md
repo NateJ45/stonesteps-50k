@@ -16,9 +16,13 @@ sequence).
 
 ## Waiting on a human
 
+### 1w. A band on /course/ moves after load (CLS about 0.13), older than the flow layer
+
+Found 2026-10-27 measuring card 192: on `/course/`, a cold load walked top to bottom sometimes records one 0.1266 layout shift about 2.2s in, a `band-torn` section below the course map moving as something above it settles (likely the MapLibre map or the weather strip sizing late). It shows on the live site under the old `reveal` motion too, and not under reduced motion. Find the late-sizing piece and reserve its height. Blocks nothing.
+
 ### 1v. The Auburn port cards (2026-10-27): content the race can add when it wants
 
-The blocks are in; nothing on a live page changed. When Dave has them: course maps, the waiver and past results PDFs go in Studio > "Downloads (course maps, waivers)" and a Documents block on the course or contact page; a phone action bar ("Results" now, "Register" once registration opens) in Site setup > Navigation; a race YouTube channel id, if there ever is one, for the Latest video block. The flow layer (starter card 192) and the form builder (194) were left out on purpose; see docs/agent/changelog.md.
+The blocks are in; nothing on a live page changed. When Dave has them: course maps, the waiver and past results PDFs go in Studio > "Downloads (course maps, waivers)" and a Documents block on the course or contact page; a phone action bar ("Results" now, "Register" once registration opens) in Site setup > Navigation; a race YouTube channel id, if there ever is one, for the Latest video block. The form builder (194) was left out on purpose; see docs/agent/changelog.md. The flow layer (192) came in later the same day as motion `fade`.
 
 ### 1u. The builder kit (starter card 173, 2026-10-26): the signed-in click-through
 
