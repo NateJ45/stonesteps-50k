@@ -42,6 +42,7 @@ import { HeartIcon } from '@sanity/icons/Heart';
 import { StarIcon } from '@sanity/icons/Star';
 import { UsersIcon } from '@sanity/icons/Users';
 import { EnterIcon } from '@sanity/icons/Enter';
+import { ResultsImportCard } from './components/ResultsImportCard';
 import {
   buildLinkedNotice,
   buildNotice,
@@ -640,6 +641,10 @@ export const kitConfig: KitConfig = {
   whatsNew: WHATS_NEW,
 
   liveSlowAfterMinutes: 15,
+
+  // Starter card 202: "Race results" under Is it live?, so Dave can pull a timer's
+  // corrections in from RunSignUp himself (src/lib/results-import.ts).
+  homeRail: [ResultsImportCard],
 
   // Home's banner (card 118): the welcome on the forest green top bar. The
   // race's mark is the stone steps on their bark plate (public/favicon.svg),

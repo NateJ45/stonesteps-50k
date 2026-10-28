@@ -40,17 +40,20 @@ name: Import race results
 # best-effort and can be late by tens of minutes under load; nothing here is
 # time-critical.
 #
-# ── THE DEPLOY IS CONDITIONAL, AND IMPERFECTLY SO ───────────────────────────
+# ── THE DEPLOY IS CONDITIONAL ───────────────────────────────────────────────
 # The site is statically built, so imported results are invisible until it is
-# rebuilt. Rebuilding on all 61 scheduled runs would be waste, so the job
-# counts the results before and after and deploys only when the number moved,
-# or when the weather sync baked a new race day.
+# rebuilt. Rebuilding on all 61 scheduled runs would be waste, so the job takes
+# a fingerprint of the results and runners before and after (the count, plus
+# the newest _updatedAt) and deploys only when it moved, or when the weather
+# sync baked a new race day.
 #
-# KNOWN LIMIT: a re-import that CORRECTS an existing row (a fixed time, a
-# corrected place) does not change the count, so it will not trigger a deploy.
-# Use the manual run for that; `deploy_anyway` forces it. This is stated
-# plainly rather than hidden because a workflow that silently skips the deploy
-# you needed is worse than one that admits when it will.
+# Why the newest _updatedAt catches a correction (2026-10-28): the importer
+# patches every row on every run, but Sanity does not touch a document whose
+# patch changes nothing, so _updatedAt only moves when a time, place or name
+# really changed. Until then the job compared the count alone, so a fixed time
+# or place (same number of rows) landed in the dataset and never rebuilt the
+# site. `deploy_anyway` still forces one; the
+# Studio's "Fetch the latest results" button (src/lib/results-import.ts) sets it.
 #
 # ── TREKKERS ────────────────────────────────────────────────────────────────
 # Trekkers take the optional early start, the race makes them ineligible for
@@ -132,9 +135,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # The dataset is public, so counting needs no token. Counted before and
-      # after so the deploy can be skipped on the 60 days a year when the
-      # import finds nothing new. See the header for what this misses.
+      # The dataset is public, so this needs no token. Taken before and after
+      # so the deploy can be skipped on the 60 days a year when the import
+      # changes nothing. The fingerprint is "<count>@<newest _updatedAt>" over
+      # results and runners; the header says why that catches a correction.
       - name: Count results before
         id: before
         env:
@@ -143,9 +147,9 @@ jobs:
         run: |
           N=$(curl -sfG \
             "https://$PROJECT_ID.api.sanity.io/v2026-05-01/data/query/${DATASET:-production}" \
-            --data-urlencode 'query=count(*[_type == "raceResult"])' | jq -r '.result')
+            --data-urlencode 'query=string(count(*[_type in ["raceResult", "athlete"]])) + "@" + (*[_type in ["raceResult", "athlete"]] | order(_updatedAt desc)[0]._updatedAt)' | jq -r '.result')
           echo "count=$N" >> "$GITHUB_OUTPUT"
-          echo "results before: $N"
+          echo "fingerprint before: $N"
 
       - name: Import from RunSignUp
         env:
@@ -187,17 +191,18 @@ jobs:
         run: |
           # The import commits with visibility: 'async', so the query index can
           # trail the write by a moment. Poll briefly rather than reading once
-          # and concluding nothing changed.
+          # and concluding nothing changed. A run that really changed nothing
+          # waits the full 30 seconds, which is the price of not missing one.
           BEFORE=${{ steps.before.outputs.count }}
           for i in 1 2 3 4 5 6; do
             N=$(curl -sfG \
               "https://$PROJECT_ID.api.sanity.io/v2026-05-01/data/query/${DATASET:-production}" \
-              --data-urlencode 'query=count(*[_type == "raceResult"])' | jq -r '.result')
+              --data-urlencode 'query=string(count(*[_type in ["raceResult", "athlete"]])) + "@" + (*[_type in ["raceResult", "athlete"]] | order(_updatedAt desc)[0]._updatedAt)' | jq -r '.result')
             [ "$N" != "$BEFORE" ] && break
             sleep 5
           done
           echo "count=$N" >> "$GITHUB_OUTPUT"
-          echo "results after: $N"
+          echo "fingerprint after: $N"
 
       - name: Summarise
         env:
@@ -207,15 +212,15 @@ jobs:
           {
             echo "### Results import"
             echo ""
-            echo "| | count |"
+            echo "| | results and runners @ newest change |"
             echo "| --- | --- |"
             echo "| before | $BEFORE |"
             echo "| after | $AFTER |"
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "$BEFORE" = "$AFTER" ]; then
-            echo "No new results." >> "$GITHUB_STEP_SUMMARY"
+            echo "Nothing changed." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "Imported $((AFTER - BEFORE)) new results." >> "$GITHUB_STEP_SUMMARY"
+            echo "Results changed; the site rebuilds." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Generate Sanity types

@@ -1,5 +1,7 @@
 # Change history
 
+_2026-10-28: "Fetch the latest results" on Studio Home (starter card 202)._ Dave asked how to reload results after the timer corrected the 2026 field (Daniel Wicks added at 4th in the 50K). The correction went up after the 10-27 run and the 10-28 scheduled run was late, so a manual run fixed it. A new row moves the count and would have deployed anyway, but a fixed time or place does not, and the workflow only rebuilt when the result COUNT moved. Two changes: `results-import.yml` now compares a fingerprint (count plus newest `_updatedAt` over results and runners), so a correction rebuilds the site by itself; and a Race results card on Home (`src/sanity/components/ResultsImportCard.tsx`, through the kit's new `homeRail` slot) starts the import on demand via `/api/race/results-import/`. The route sits outside `/api/studio/` because that folder is the kit's PORTABLE set.
+
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
 _2026-10-27: /course/ layout shift fixed (PENDING 1w closed)._ The elevation strip under the course map replaced a 20px loading line and pushed the loop chips and caption down (CLS 0.13 to 0.22 live). `.cmap__profslot` in `CourseMap.astro` now reserves the strip's height from first paint (sizes track its wrap points); `tests/course-cls.spec.ts` pins /course/ CLS under 0.05 at 375 and 1280. Measured locally after: 0 at 375, 0.007 at 1280.

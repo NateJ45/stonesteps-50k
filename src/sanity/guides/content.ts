@@ -453,6 +453,11 @@ export const guides: Guide[] = [
         kind: 'p',
         text: 'The race is timed on RunSignUp, so the results are already public there the day your timer posts them. The website checks RunSignUp every day through October and November, pulls in anything new, and rebuilds itself. You do not have to do anything at all.',
       },
+      { kind: 'h', text: 'When the timer corrects something' },
+      {
+        kind: 'p',
+        text: 'If the timer fixes a time or adds a finisher on RunSignUp, the next morning’s check picks it up. To see it sooner, press **Fetch the latest results** on the Race results card on Home. It takes about five minutes, and the card says when it is done.',
+      },
       { kind: 'h', text: 'What appears by itself' },
       {
         kind: 'bullets',
