@@ -102,6 +102,11 @@ built from these tokens only and that the words stay inside it (the left 7/12 on
 below `--ph-band` less 160px on a phone). A brand overrides them on `.ph-hero`, never in `:root`
 (every rule here needs a `.ph-` class, so pages without the photo hero ship none of it).
 
+The headline's script accent word (card 203, 2026-10-28) shows over the photo too: `Hero.astro`
+passes `scriptAccent` to `PhotoHero` as `accent`, drawn in `--font-script`, white, so the same shade
+covers it. The face can change through the `--ph-accent-*` tokens on `.ph-hero`; the colour cannot
+(`photo-hero.test.ts` reads every `.ph-accent` rule).
+
 ## Typography
 
 - Headings (h1 through h6): **Libre Baskerville**, with its metric-matched fallbacks second in the stack (above). Self-hosted via `@fontsource/libre-baskerville`. Editorial serif that reads as premium without narrowing the brand voice to any specific style.
