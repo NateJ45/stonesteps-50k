@@ -8,5 +8,5 @@ export const layout = resolveLayout({
   hero: 'bleed',
   density: 'standard',
   cards: 'standard',
-  motion: 'reveal',
+  motion: 'fade',
 });

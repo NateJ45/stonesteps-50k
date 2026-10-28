@@ -120,7 +120,7 @@
     "hero": "bleed",
     "density": "standard",
     "cards": "standard",
-    "motion": "reveal"
+    "motion": "fade"
   },
   "workerName": "stonesteps-50k",
   "logoPaths": {

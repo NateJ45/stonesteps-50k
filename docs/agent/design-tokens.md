@@ -59,7 +59,13 @@ within 0.1%.
 Rerun it after any display-font change. A variable `@fontsource` package ships woff2 only, which
 opentype.js cannot read: pass `-- --file <a .ttf or .woff of the face>`.
 
+## Motion tokens (starter card 192, 2026-10-27)
+
+The end of the one scale's `:root` block in `src/styles/globals.css` holds the flow layer's timings: `--motion-ease`, `--motion-fade` (200ms), `--motion-fade-distance` (8px), `--motion-stagger-calm` (40ms), and the fuller `flow` values (`--motion-rise`, `--motion-line`, `--motion-photo`, `--motion-side`, `--motion-page-*`) at the starter's numbers. The race runs `layout.motion: fade`, so only the first four are drawn; `src/scripts/flow.ts` reads the durations from them. Detail: `animation.md`, "The flow layer".
+
 ## The board grammar (layout `hero: board`)
+
+**Not used on this site (checked 2026-10-27).** Home keeps `RaceHero` and the inner pages keep their own `PageHeader` with the torn bands; the board's quiet one-ground grammar would flatten the race's poster look. `layout.hero` stays `bleed`, and the board components (`src/components/board/`, `board.css`) are not installed, so setting `hero: board` here would do nothing. The starter's description follows for reference.
 
 FBC Auburn's inner-page grammar as an opt-in layout value (card 188; rule 18: the default emits nothing).
 Set `"layout": { "hero": "board" }` in `brand/brand.config.json` and run `npm run apply-brand`.
