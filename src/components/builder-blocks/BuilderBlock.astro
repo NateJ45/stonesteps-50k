@@ -34,7 +34,8 @@ interface Props {
   /** True for the first section on the page: its photo loads first. */
   isFirst?: boolean;
   /** The variant a block's main button draws (the contact card's Call, the steps rail's closing
-   *  button; starter card 193). This site has no accent budget, so it stays the quiet default. */
+   *  button, the event's button, the map's directions; starter cards 158 and 193), from
+   *  SectionRenderer's accent budget. Outside the renderer it stays the quiet default. */
   primaryVariant?: 'primary' | 'secondary';
 }
 
@@ -59,7 +60,7 @@ const common = { surface, headingId };
 ) : b._type === 'letterSection' ? (
   <LetterBlock block={b} {...common} />
 ) : b._type === 'eventDetailsSection' ? (
-  <EventDetailsBlock block={b} {...common} isFirst={isFirst} />
+  <EventDetailsBlock block={b} {...common} isFirst={isFirst} primaryVariant={primaryVariant} />
 ) : b._type === 'scheduleSection' ? (
   <ScheduleBlock block={b} {...common} />
 ) : b._type === 'photoCardsSection' ? (
@@ -67,7 +68,7 @@ const common = { surface, headingId };
 ) : b._type === 'hoursSection' ? (
   <HoursBlock block={b} {...common} />
 ) : b._type === 'mapSection' ? (
-  <MapBlock block={b} {...common} />
+  <MapBlock block={b} {...common} primaryVariant={primaryVariant} />
 ) : b._type === 'contactCardSection' ? (
   <ContactCardBlock block={b} {...common} primaryVariant={primaryVariant} />
 ) : b._type === 'progressSection' ? (

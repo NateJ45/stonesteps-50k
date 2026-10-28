@@ -35,6 +35,10 @@ import type { ProjectedEventDetailsSection } from '@/lib/builderBlocks.types';
 import type { SanityImageObject } from '@/lib/pageBuilder.types';
 
 interface Props {
+  /** The variant the main button draws. SectionRenderer's accent budget (src/lib/cta-budget.ts,
+   *  starter card 158) gives the page's first main button 'primary' (the rust plate) and every
+   *  later one 'secondary' (the cream plate). Drawn outside the renderer: primary. */
+  primaryVariant?: 'primary' | 'secondary';
   block: ProjectedEventDetailsSection;
   surface?: SurfaceValue;
   headingId: string;
@@ -42,7 +46,14 @@ interface Props {
   /** The build moment; tests pass a fixed one. */
   now?: Date;
 }
-const { block, surface = 'background', headingId, isFirst = false, now = new Date() } = Astro.props;
+const {
+  block,
+  surface = 'background',
+  headingId,
+  isFirst = false,
+  now = new Date(),
+  primaryVariant = 'primary',
+} = Astro.props;
 
 const rows = upcomingOccurrences(block.occurrences, siteToday(now, site.timeZone));
 const place = eventPlace(block.place);
@@ -144,7 +155,7 @@ const ld = eventJsonLd({
         )}
 
         <div class="bb-event__actions">
-          {button && <CtaLink cta={button} variant="primary" />}
+          {button && <CtaLink cta={button} variant={primaryVariant} />}
           {(ics || place) && (
             <p class="bb-event__links">
               {ics && (
