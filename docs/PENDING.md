@@ -39,7 +39,7 @@ staff view once the race director's id is in `kitConfig.staff`.
 one says "not set up yet" or keeps its old behaviour. The settings, each once, are the table in OPERATIONS.md "The
 Studio kit": `GITHUB_DEPLOY_TOKEN` (failed-deploy line and Try again), Cloudflare Web Analytics and its three Worker
 settings (Visitors), the `message_status` migration on `stonesteps-contact` (Messages statuses), the
-`SANITY_API_WRITE_TOKEN` repo secret and the `publish-due.yml` schedule (Publish automatically at), the
+`SANITY_API_WRITE_TOKEN` repo secret and the `publish-due.yml` schedule (both done 2026-10-30), the
 `change-note.yml` schedule (morning change note), `"studioWeek"` and `"previewShare"` in the publish webhook's
 deny-list, and the race director's Sanity user id in `staff` (`src/sanity/kit.config.ts`).
 

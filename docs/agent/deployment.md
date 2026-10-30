@@ -57,6 +57,7 @@ Set in Cloudflare -> **Workers & Pages -> your-project -> Settings -> Variables*
 - `SANITY_API_READ_TOKEN` -- only if any page needs to read draft content (typically not, since published content is publicly readable). Mark as Secret.
 - `PUBLIC_WEB3FORMS_KEY` -- contact form access key from [web3forms.com](https://web3forms.com/). Without it the contact form falls back to a no-op action and shows an inline notice.
 - `PUBLIC_CF_ANALYTICS_TOKEN` -- Cloudflare Web Analytics token. Without it the analytics beacon doesn't render.
+- `PUBLIC_STUDIO_HELP_EMAIL` -- the Studio Ask card's email button. Repo variable read by `deploy.yml` (not committed). Without it the card shows its words with no button.
 - `PUBLIC_CALENDLY_URL` -- optional. Booking link for the discovery call CTA.
 - `PUBLIC_NEWSLETTER_FORM_ACTION` -- optional. Build-time override for the ESP form-action endpoint.
 
