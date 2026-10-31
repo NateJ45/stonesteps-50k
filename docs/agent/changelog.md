@@ -4,7 +4,7 @@ _2026-10-28: "Fetch the latest results" on Studio Home (starter card 202)._ Dave
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
-_2026-10-30: Link labels name what they show (axe 4.14)._ The Dependabot group that brought axe-core 4.14 turned on `label-content-name-mismatch`: a link's `aria-label` must contain its visible text. The course teaser link (`CoursePosterBand.astro`) and the three `/contact` region pins (`RegionPoster.astro`) now start their labels with the words on screen ("The Oval, start and finish. Directions (opens Google Maps)").
+_2026-10-30: Link labels name what they show (axe 4.14)._ The Dependabot group that brought axe-core 4.14 turned on `label-content-name-mismatch`: a link's `aria-label` must contain its visible text. The course teaser link (`CoursePosterBand.astro`) and the three `/contact` region pins (`RegionPoster.astro`) now start their labels with the words on screen ("The Oval, start and finish. Directions (opens Google Maps)"). The pins' SVG text lines also get an explicit space between them, because the build runs them together and axe read "The OvalStart and finish"; a space between `<text>` elements does not render.
 
 _2026-10-27: /course/ layout shift fixed (PENDING 1w closed)._ The elevation strip under the course map replaced a 20px loading line and pushed the loop chips and caption down (CLS 0.13 to 0.22 live). `.cmap__profslot` in `CourseMap.astro` now reserves the strip's height from first paint (sizes track its wrap points); `tests/course-cls.spec.ts` pins /course/ CLS under 0.05 at 375 and 1280. Measured locally after: 0 at 375, 0.007 at 1280.
 
