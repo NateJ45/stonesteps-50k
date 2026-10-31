@@ -28,3 +28,5 @@ Moved verbatim from CLAUDE.md. Loads when dependency, Astro, wrangler or workflo
 Deploy reminder from Stack essentials:
 
 - **Cloudflare Workers** for hosting, not Pages (Pages is in maintenance mode). Deploy with `npm run deploy`, which is `wrangler deploy -c dist/server/wrangler.json`. A bare `wrangler deploy` reads the root `wrangler.jsonc`, which knows nothing about the SSR entrypoint, and every sub-route 404s.
+
+- **Transitive security pins (PORTS.md card 214, 2026-10-31).** The `overrides` block in `package.json` also pins patched copies of packages that a parent fixes at an exact old version (scoped to that parent, same major where possible). Dependabot cannot do this itself. After touching it, `npm ls --all` must exit 0 (plain `npm ls` only checks the top level), and an entry goes once its parent ships the patched pin. Alerts left open on purpose: `extract-zip` and `deepmerge` (no patched release), `zod` 3 and `minimatch` (their parents need a release); reasons are in the card.
