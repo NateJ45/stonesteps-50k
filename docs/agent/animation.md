@@ -4,6 +4,31 @@
 
 Non-animation polish (brand stripe, card-lift, surface-warm, reading-progress, sticky-header, paper-grain, print stylesheet) is covered in `polish-layer.md`.
 
+> **The flow layer, motion 'fade' (2026-10-27, starter card 192).** `layout.motion` is `fade`: below the first screen every block arrives with one 200ms, 8px fade, and the older reveals rest. See [The flow layer](#the-flow-layer-motion-fade-starter-card-192).
+
+## The flow layer (motion 'fade', starter card 192)
+
+Taken from the starter on 2026-10-27. `brand/brand.config.json` `layout.motion` is `"fade"` (`src/data/layout.ts` follows it through `apply-brand`; `site-layout.test.ts` fails if they differ). `<html>` carries `data-motion="fade"` and BaseLayout renders `src/components/FlowMotion.astro`, which loads `src/scripts/flow.ts` on every `astro:page-load`.
+
+**Why `fade` and not `flow`.** The race's motion is already its own and physical: the RaceHero entrance and race clock on the first screen, the elevation line drawing itself, the record board's strike, the ticker, the sign plates leaning on hover. `flow` would add Auburn's softer layer on Home (headings rising line by line, photos settling from a zoom, pages lifting between clicks), which reads gentle and ceremonial next to a trail race's plates and torn edges, and would compete with those pieces. `fade` is one quick, plain arrival (8px, 200ms) that keeps the site's own moves as the character, and it keeps the results and records tables calm.
+
+| `layout.motion`    | What moves                                                                                                                                                                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `reveal`           | The older reveals below and the plain cross-fade between pages. No flow script.                                                                                                                                                                                                       |
+| `fade` (this site) | Every unit below the first screen (`h1` to `h4`, `p`, `li`, `dl`, `blockquote`, `figure`, `form`, `iframe`, `table`, pictures, video) fades up 8px over 200ms as it arrives, 40ms apart when several arrive together. Nothing is split or zoomed. The cross-fade between pages stays. |
+| `flow`             | Auburn's fuller motion on pages passing `flow="full"`; not used here.                                                                                                                                                                                                                 |
+| `none`             | Nothing moves; the head script never adds `html.motion`.                                                                                                                                                                                                                              |
+
+**Files.** `src/scripts/flow.ts`, `src/styles/flow.css` (imported by `globals.css`), `src/lib/flow-split.ts` (+ test), `src/components/FlowMotion.astro` and `tests/flow-motion.spec.ts` are PORTABLE, byte-identical to the starter. The timings are the `--motion-*` tokens at the end of the one scale in `globals.css` (`docs/agent/design-tokens.md`).
+
+**What stays the race's own.** Once the layer arms a page (`html.flow-armed`), `flow.css` rests `[data-reveal]` boxes, `[data-stagger-grid]` children and `.img-curtain`; the observer still adds `.is-visible`, so the elevation line, the record strike and the weather icons that key on it still draw. The RaceHero is the first screen, which the layer never touches. The ticker carries `data-flow="off"`: its copies sit off to the right and arrive by the marquee, not by scrolling, so a unit armed there would never land (found in testing: 17 to 22 invisible ticker items before the opt-out). A new marquee, carousel or anything that moves content in sideways needs the same `data-flow="off"`.
+
+**Safety rules (from the starter).** The first screen shows as it is at every width, so LCP does not move. Hidden states are the first frames of paused animations on classes the script adds: JavaScript off, a failed script or reduced motion leaves everything visible. Only opacity and `translate` move (CLS 0 from the layer). Units shed their classes once landed. Keyboard focus lands a unit at once. Native scroll only (rule 5). Live preview never splits. Printing drops `html.motion`.
+
+**The motion wall.** `/styleguide/motion/full/` and `/styleguide/motion/fade/` (`src/pages/styleguide/motion/[level].astro`, noindex, out of the sitemap, `styleguide` a reserved slug) override the motion for themselves so `tests/flow-motion.spec.ts` can drive both levels on any build.
+
+**Measured** (Playwright, local build over the CI snapshot, three cold loads each walking the whole page; LCP ms, CLS). Before (motion `reveal`): Home 375 LCP 128-184 CLS 0.0038-0.0046; Home 1280 LCP 172-184 CLS 0.0036-0.0046; `/course/` 375 LCP 128-648 CLS 0-0.2416; `/course/` 1280 LCP 204-648 CLS 0.0024-0.129. After (`fade`): Home 375 LCP 128-136 CLS 0.0041-0.0046; Home 1280 LCP 168 CLS 0.0036-0.0038; `/course/` 375 LCP 208-224 CLS 0-0.0406; `/course/` 1280 LCP 224-248 CLS 0.0024-0.129. No unit left armed on any route at 375 or 1280. The `/course/` 0.127 shift is older than the layer (it shows on the live site under `reveal` and comes from a band below the map growing mid-scroll); PENDING 1w.
+
 ## Smooth scroll (native; Lenis removed 2026-10-04)
 
 Lenis was removed on 2026-10-04 (Nathan's call). Scrolling is the browser's own, and so is its feel. Programmatic scrolls (home hero scroll cue, case-study TOC) use native `scrollTo({ behavior: 'smooth' })` / `scrollIntoView`, which honor `scroll-mt-*` on heading targets, so TOC targets clear the sticky header without a manual offset (don't add one, it double-applies). The global `prefers-reduced-motion` reset in `globals.css` already forces `scroll-behavior: auto`, and the TOC picks `behavior: 'auto'` itself.
@@ -68,6 +93,54 @@ Each slide is `position: absolute`, `opacity: 0` with a `1.5s` opacity transitio
 - Never starts under `prefers-reduced-motion`.
 
 The first slide stays the eager `fetchpriority="high"` LCP image; the rest lazy-load. The first slide carries its descriptive alt; the additional slides use empty alt so they are decorative.
+
+---
+
+## Photo hero video (`HeroVideo.astro`, PORTS.md card 189)
+
+An opening banner whose **Style** is "Photo behind the words" (`heroSection.heroStyle = 'photo'`,
+drawn by `PhotoHero.astro`) can play a short silent clip over its background photo: Studio > the
+page > the opening banner > **Background video**, and **Phone video** under it. From FBC Auburn's
+Home hero (2026-10-25). The rules, in `src/lib/hero-video.ts` (unit tested):
+
+- The photo is drawn first and stays the LCP (eager, `fetchpriority="high"`). `HeroVideo.astro`
+  is rendered only when the block has a clip, and its script waits for the `load` event, then
+  builds a `<video muted playsinline loop preload="none">` with the photo's `currentSrc` as the
+  poster, puts it over the photo and under `.ph-photo__shade` (so the words keep their contrast),
+  starts it with `play()` (no `autoplay`, so the Pause choice and the off-screen pause win) and
+  fades it in on `playing`. It carries `aria-hidden`, `tabindex=-1`, no controls and
+  `pointer-events: none`.
+- `heroVideoAllowed()` says no for reduced motion, Save-Data, an `effectiveType` of slow-2g, 2g or
+  3g, a measured `downlink` under 1 Mbps (0 counts as unknown) and print: then there is no
+  `<video>` at all and nothing downloads. Switching reduced motion on while the page is open
+  removes it; CSS hides it under reduced motion and in print as a second guard.
+- A Pause / Play button (`[data-hero-video-toggle]`, `aria-pressed`) at the top right (WCAG
+  2.2.2). The choice is kept in `localStorage` (`hero-video-paused`). The clip pauses while the
+  hero is off screen, and starts again when a tab opened in the background comes to the front.
+- It plays at `opacity: 0.99`, never 1: Chrome on Windows promotes a fully opaque video to a
+  hardware overlay plane drawn outside the page, and the shade vanished on screen mid-scroll. That
+  never shows in a browser screenshot, only by eye.
+- **Phone video.** Sanity serves a file as uploaded and does not transcode, so the small copy is a
+  second upload (`backgroundVideoPhone`). Under 768px (`HERO_PHONE_QUERY`) `heroVideoPick()`
+  chooses it before the `<video>` is built, so a phone fetches only the small copy; with none,
+  phones play the main clip. On Auburn this cut a phone's video download from 1,000 KB to 267 KB
+  with LCP unchanged.
+- **Fast start.** The browser streams the clip with range requests (Sanity's CDN answers
+  `206`), which only works when the .mp4's index (`moov`) comes before the data (`mdat`). The
+  Studio reads the first 64 KB of an .mp4 upload (`checkFastStart()` / `mp4FastStart()`) and warns
+  when it does not; a failed request raises nothing. It also warns over 3 MB (1 MB for the phone
+  copy) and refuses anything but .mp4 or .webm.
+- Exporting: 1280x720, H.264, no audio, 15 to 30 seconds, under 3 MB, "Web optimized" (HandBrake)
+  or "Fast start" (Premiere, CapCut, Shotcut). With ffmpeg:
+  `ffmpeg -i in.mov -an -vf scale=1280:-2 -c:v libx264 -preset slow -crf 26 -movflags +faststart out.mp4`.
+  The phone copy: the same at `scale=640:-2`, under 1 MB. An existing mp4 is fixed without
+  re-encoding by `ffmpeg -i in.mp4 -c copy -movflags +faststart out.mp4`.
+- `tests/photo-hero.spec.ts` drives `/styleguide/photo-hero/home/` (fixed data; the CDN is
+  answered with `tests/visual/fixtures/hero-clip.mp4`). Playback itself is not asserted.
+
+The words' contrast over any photo is a separate promise: the shade tokens on `.ph-hero`
+(`--photo-scrim`, `--photo-scrim-text`, `-deep`, `-clear`) are checked by
+`src/lib/photo-hero.test.ts` against a pure white photo (see `docs/agent/design-tokens.md`).
 
 ---
 

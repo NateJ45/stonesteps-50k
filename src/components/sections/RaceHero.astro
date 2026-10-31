@@ -33,6 +33,10 @@ import { displayWords } from '@/lib/display-words';
 import { ordinal } from '@/lib/stat-sources';
 
 type Props = {
+  /** The variant the main button draws. SectionRenderer's accent budget (src/lib/cta-budget.ts,
+   *  starter card 158) gives the page's first main button 'primary' (the rust plate) and every
+   *  later one 'secondary' (the cream plate). Drawn outside the renderer: primary. */
+  primaryVariant?: 'primary' | 'secondary';
   eyebrow?: string;
   headline?: string;
   subhead?: string;
@@ -58,6 +62,7 @@ const {
   secondaryCta,
   race,
   headingId = 'race-hero-heading',
+  primaryVariant = 'primary',
 } = Astro.props as Props;
 
 // THE SLIDES. `images` is the field editors see; `image` is the single-photo
@@ -266,7 +271,7 @@ const isDistanceToken = (w: string, i: number) => i === words.length - 1 && /^\d
         }
 
         <div class="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
-          {primaryCta && <CtaLink cta={primaryCta} class="btn-plate" />}
+          {primaryCta && <CtaLink cta={primaryCta} variant={primaryVariant} />}
           {secondaryCta && <CtaLink cta={secondaryCta} class="btn-plate btn-plate--cream" />}
         </div>
       </div>

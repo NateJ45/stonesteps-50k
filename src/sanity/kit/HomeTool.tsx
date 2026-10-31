@@ -27,6 +27,7 @@
 //   3. Is it live? The build time from /build-info.json against the newest
 //      published change (liveStatus in src/lib/studio-kit.ts). Card 111: a
 //      FAILED deploy (the deploy route) says so, with "Try again".
+//   3b. The site's own rail cards (card 202, kitConfig.homeRail), if any.
 //   4. Fix-it list (card 115, was Site health): the Checkup's findings by
 //      name, each with Edit, and "See the whole list".
 //   4b. Coming up (card 115): what will publish by itself, soonest first.
@@ -59,6 +60,7 @@ import {
   deployProblem,
   firstName,
   greeting,
+  KIT_BOOKKEEPING_TYPES,
   liveStatus,
   timeAgo,
   weekDocId,
@@ -167,7 +169,7 @@ function ThisWeek({
       await (on ? patch.append('ticked', [id]) : patch).commit({ autoGenerateArrayKeys: false });
     } catch {
       setTicked(before);
-      toast.push({ status: 'error', title: 'That tick did not save. Try again in a moment.' });
+      toast.push({ status: 'error', title: 'That check did not save. Try again in a moment.' });
     } finally {
       setSaving(null);
     }
@@ -206,7 +208,7 @@ function ThisWeek({
                 done: row.done,
                 tickable: row.tickable,
                 busy: saving === t.id,
-                note: row.by === 'content' || row.by === 'checkup' ? 'Ticked for you.' : undefined,
+                note: row.by === 'content' || row.by === 'checkup' ? 'Checked for you.' : undefined,
                 action: link ? (
                   <KitAction href={link.href} onClick={link.onClick}>
                     {t.targetLabel ?? 'Do it'}
@@ -532,9 +534,14 @@ export function makeHomeTool(config: KitConfig) {
   return function HomeTool() {
     const { staffView, switchTo, reset, overridden } = useStaffView(config);
     const quick = config.quickActions ?? [];
-    // The kit's weekly tick documents (card 111) are bookkeeping, never an edit.
+    // The kit's weekly tick documents (card 111) and marks (card 175) are bookkeeping, never an edit.
     const ignore = useMemo(
-      () => recentEditsIgnore(config.checkup.ignoreTypes, config.recentIgnoreTypes, WEEK_TYPE),
+      () =>
+        recentEditsIgnore(
+          config.checkup.ignoreTypes,
+          config.recentIgnoreTypes,
+          ...KIT_BOOKKEEPING_TYPES,
+        ),
       [],
     ); // config is fixed for the Studio's life
     const linkTo = useStudioLink();
@@ -602,6 +609,10 @@ export function makeHomeTool(config: KitConfig) {
 
             <aside className="ui-dash__rail" aria-label="Where things stand">
               <IsItLive slowAfter={config.liveSlowAfterMinutes} helperName={config.helper.name} />
+              {/* Card 202: the site's own status cards. The list is fixed for the Studio's life. */}
+              {(config.homeRail ?? []).map((RailCard, i) => (
+                <RailCard key={i} />
+              ))}
               {config.features.checkup && (
                 <FixItList results={checkup.results} failed={checkup.failed} />
               )}
@@ -635,7 +646,9 @@ export function makeHomeTool(config: KitConfig) {
                   {config.features.mail && <RsvpComingUp />}
                 </ComingUp>
               )}
-              {config.features.mail && <NewsletterCard helperName={config.helper.name} />}
+              {config.features.mail && config.features.newsletter !== false && (
+                <NewsletterCard helperName={config.helper.name} />
+              )}
               <RecentEdits ignoreTypes={ignore} />
               <div className="ui-dash__wide">
                 <Visitors enabled={config.features.visitors} helperName={config.helper.name} />

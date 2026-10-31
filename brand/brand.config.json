@@ -115,6 +115,13 @@
     "script": null
   },
   "radius": "0.75rem",
+  "layout": {
+    "header": "inline",
+    "hero": "bleed",
+    "density": "standard",
+    "cards": "standard",
+    "motion": "fade"
+  },
   "workerName": "stonesteps-50k",
   "logoPaths": {
     "light": "src/assets/logo-light.svg",

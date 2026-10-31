@@ -135,6 +135,9 @@ jobs:
           # The Cloudflare Web Analytics beacon, likewise production only. Unset
           # is a no-op. Home's Visitors card in the Studio reads these numbers.
           PUBLIC_CF_ANALYTICS_TOKEN: ${{ vars.PUBLIC_CF_ANALYTICS_TOKEN }}
+          # The Studio's "Ask" email button (src/sanity/kit.config.ts). The address
+          # lives in this repo VARIABLE, not in the public repo. Unset is a no-op.
+          PUBLIC_STUDIO_HELP_EMAIL: ${{ vars.PUBLIC_STUDIO_HELP_EMAIL }}
         run: |
           if [ -z "$PUBLIC_SANITY_PROJECT_ID" ]; then
             echo "::error::PUBLIC_SANITY_PROJECT_ID is not set. The build would ship empty pages over the live site."

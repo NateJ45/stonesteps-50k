@@ -401,6 +401,24 @@ const shortMiles = meta.loops.find((l) => l.kind === 'short')?.publishedMiles ??
     background: var(--color-primary);
   }
 
+  /* Reserves the elevation strip's height (strip plus its 0.75rem top margin:
+     about 235px on a phone, 217px at 640, 190px from 768) so nothing under it moves
+     when it replaces the status line. Taller than the strip never; shorter by a few px
+     between the wrap points at worst. */
+  :global(.cmap__profslot) {
+    min-height: 14.6rem;
+  }
+  @media (min-width: 40rem) {
+    :global(.cmap__profslot) {
+      min-height: 13.5rem;
+    }
+  }
+  @media (min-width: 48rem) {
+    :global(.cmap__profslot) {
+      min-height: 11.8rem;
+    }
+  }
+
   :global(.cmap__status) {
     margin-top: 0.5rem;
     font-size: 0.8125rem;

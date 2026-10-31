@@ -21,6 +21,9 @@
 // =============================================================================
 import { createClient, type SanityClient } from '@sanity/client';
 import { env } from 'cloudflare:workers';
+import { stegaClean, stegaEncodeSourceMap } from '@sanity/client/stega';
+import type { LiveDraftDocument } from './preview-live-draft.ts';
+import { postedDraftMatchesPage, withPostedDraftMappings } from './preview-posted-draft.ts';
 
 export const projectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID as string;
 export const dataset = (import.meta.env.PUBLIC_SANITY_DATASET as string) || 'production';
@@ -107,6 +110,9 @@ const NON_STEGA_FIELDS = new Set([
   'category',
   'columns',
   'heightHint',
+  // Card 189: the opening banner's Style. Hero.astro compares it to 'photo'; an encoded value
+  // would draw the standard hero in the preview.
+  'heroStyle',
   'imageSide',
   'layout',
   'linkType',
@@ -125,6 +131,22 @@ const NON_STEGA_FIELDS = new Set([
   'tone',
   'variant',
   'width',
+  // The builder kit (builderSections.ts, PORTS.md card 173): the event and
+  // schedule times are read as "HH:MM" by src/lib/builder-blocks.ts. (`layout`
+  // above covers the button row.)
+  'startTime',
+  'endTime',
+  // The business facts (card 196, src/lib/business-hours.ts): an hours row's
+  // `days` and its `opens` / `closes` times, and an hours change's `kind`, are
+  // read as weekday keys, "HH:MM" and closed | hours. (The resolver also strips
+  // markers with plain(), belt and braces.) `layout` above covers the hours block.
+  'days',
+  'opens',
+  'closes',
+  'kind',
+  // Card 193: the progress bar's unit picks dollars or a plain number (builder-blocks.ts compares it).
+  // `icon` (the icon picker) is listed below.
+  'unit',
   // Not in this template yet, but standard enum names across the site family.
   // Carried so a block ported from a sibling repo is not a preview-only bug
   // waiting to be found.
@@ -187,4 +209,42 @@ export async function previewFetch<T>(
   params: Record<string, unknown> = {},
 ): Promise<T> {
   return getPreviewClient(draftMode).fetch<T>(query, params);
+}
+
+/**
+ * Render a page from the Studio's own copy of its draft (PORTS.md card 184).
+ *
+ * `pageFilter` is the route's own filter for this path (`*[_type == $type]`),
+ * `fields` its projection, and `draft` the body `readPostedDraft` accepted. ONE
+ * request, like `previewFetch`: the projection runs over `$postedDraft` (GROQ
+ * dereferences inside a parameter just as inside a stored document, so pictures
+ * and synced sections still resolve from the dataset), and the filter's `_id`
+ * comes back beside it for `postedDraftMatchesPage`. Stega is written here,
+ * from the API's source map plus the identity mappings for the posted strings,
+ * with this client's own filter, so the payloads are the ones a stored-draft
+ * fetch would carry. Null when the draft is not this path's document: the
+ * caller falls back to `previewFetch`.
+ */
+export async function previewFetchPostedDraft<T>(
+  pageFilter: string,
+  fields: string,
+  params: Record<string, unknown>,
+  draft: LiveDraftDocument,
+  expectedType: string,
+): Promise<T | null> {
+  const client = getPreviewClient(true);
+  const response = await client.fetch<{ id: unknown; doc: T | null }>(
+    `{"id": ${pageFilter}[0]._id, "doc": $postedDraft${fields}}`,
+    { ...params, postedDraft: draft },
+    { filterResponse: false, resultSourceMap: 'withKeyArraySelector', stega: false },
+  );
+  if (!postedDraftMatchesPage(draft, stegaClean(response.result?.id), expectedType)) return null;
+  const sourceMap = withPostedDraftMappings(response.result, response.resultSourceMap, draft, [
+    'doc',
+  ]);
+  const encoded = stegaEncodeSourceMap(response.result, sourceMap, {
+    ...client.config().stega,
+    enabled: true,
+  }) as { doc: T | null };
+  return encoded.doc;
 }

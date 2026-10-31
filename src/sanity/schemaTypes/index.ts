@@ -37,6 +37,7 @@ import { service } from './service';
 import { servicesPage } from './servicesPage';
 import { siteSettings } from './siteSettings';
 import { sponsor } from './sponsor';
+import { libraryDocument } from './libraryDocument'; // scaffold: documents
 import { testimonial } from './testimonial';
 
 export const schemaTypes = [
@@ -83,6 +84,7 @@ export const schemaTypes = [
   // Reusable content collections
   announcement, // site-wide banner collection (enabled + date-windowed)
   testimonial,
+  libraryDocument, // scaffold: documents
   faqCategory,
   faqItem,
   philosophyPoint,

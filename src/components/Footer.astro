@@ -60,6 +60,9 @@ import logoLightAsset from '@/assets/logo-light.svg';
 import logoDarkAsset from '@/assets/logo-dark.svg';
 import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { telHref } from '@/lib/phone';
+import { publicPath } from '@/lib/page-path';
+import { pickActionBar } from '@/lib/wayfinding';
+import ActionBar from '@/components/ActionBar.astro';
 
 // THE RACE BAND. Everything here is read from the `race` singleton, so the day
 // it is edited in the Studio the footer follows and nobody has to remember this
@@ -204,12 +207,18 @@ const idx = (i: number) => String(i + 1).padStart(2, '0');
 const LONG_LABEL = 18;
 const rowClass = (label: string) =>
   label.length > LONG_LABEL ? 'foot-link__label foot-link__label--long' : 'foot-link__label';
+
+// The phone action bar (starter card 191): one line and one button docked to the foot of a phone
+// screen once the page heading has scrolled away ("Register" before race day, "Results" after).
+// Set in Site setup > Navigation > Phone action bar; nothing is drawn while that list is empty.
+// The live path, so the draft preview draws the bar of the page it previews.
+const actionBar = pickActionBar(siteSettings?.actionBars, publicPath(Astro.url.pathname));
 ---
 
 {/* THE BOARD. Its ground is a literal one step deeper than the page's, set in
     globals.css rather than with `bg-muted`: muted is seven units off the body
     on the cream theme, which left the torn top edge with nothing to cut. */}
-<footer class="site-foot text-foreground">
+<footer id="site-footer" class="site-foot text-foreground">
   {/* The backdrop: one baked field of mud and prints, out of the flow, and
       marked as media so the contrast gate samples the pixels under the type.
       See .foot-mud in globals.css for why it is one layer and not two. */}
@@ -449,4 +458,8 @@ const rowClass = (label: string) =>
       </div>
     </div>
   </div>
+
+  {/* The phone action bar (card 191): nothing unless this page has a bar in Site settings. Only
+      rendered when there is a bar, so a page without one carries none of its script. */}
+  {actionBar && <ActionBar bar={actionBar} />}
 </footer>

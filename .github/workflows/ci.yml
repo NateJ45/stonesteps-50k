@@ -77,15 +77,28 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      # The library of record checks ITSELF: run from the starter, sync-check
-      # resolves the starter to this repo root, so site and library are the
-      # same tree and every marked file must report SAME. That is a real gate,
-      # not a tautology - it fails the moment a canonical file is edited into a
-      # state the walker cannot read, or a marker is added to a path the site
-      # repos cannot mirror. The site repos run the same script against a
-      # checkout of this repo (see any client ci.yml).
-      - name: Canonical files have not drifted (self-check)
+      # PORTS.md card 36. Every file here marked "PORTABLE: canonical copy" is
+      # diffed against ncs-astro-sanity-starter, the library of record, at its
+      # main. Both repos are public, so the checkout needs no token. On DRIFT:
+      # port the improvement up into the starter with a PORTS.md card, or pull
+      # the starter's copy forward here. Promote the starter first, then sites.
+      - name: Check out the library of record
+        uses: actions/checkout@v7
+        with:
+          repository: NateJ45/ncs-astro-sanity-starter
+          ref: main
+          path: .ncs-starter
+
+      - name: Canonical files have not drifted
+        env:
+          NCS_STARTER_DIR: ${{ github.workspace }}/.ncs-starter
         run: node scripts/sync-check.mjs
+
+      # Deleted straight away: prettier and eslint run over the whole tree
+      # further down and would otherwise try to lint the starter's checkout.
+      - name: Remove the library checkout
+        if: always()
+        run: rm -rf .ncs-starter
 
       # What can a stranger read out of this site's dataset? Sanity's free plan
       # is "2 datasets (public only)", so a public dataset is world readable over
@@ -242,7 +255,11 @@ jobs:
   e2e:
     name: e2e (shard ${{ matrix.shard }}/3)
     needs: [site]
-    runs-on: ubuntu-latest
+    # Pinned (2026-10-30): ubuntu-latest moved to 26.04, where Playwright's
+    # WebKit fails to launch, so every webkit-iphone test died. Unpin once
+    # Playwright supports 26.04.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -299,34 +316,65 @@ jobs:
       # libraries. Both projects in playwright.config.ts need a browser:
       # chromium (desktop) AND webkit-iphone (iPhone 14). Installing only
       # chromium makes every webkit test die with "Executable doesn't exist".
+      # The key carries the runner image ($ImageOS: ubuntu24, ubuntu26) as well:
+      # Playwright downloads a WebKit build per Ubuntu release, and during the
+      # ubuntu-latest move to 26.04 (late October 2026) a 26.04 shard restored the
+      # 24.04 build and every webkit test died at launch with "libicudata.so.74:
+      # cannot open shared object file" (starter PORTS.md card 205). `env.ImageOS` is not
+      # readable in an expression (the env context holds only workflow env), so
+      # the step below echoes it into an output.
       - name: Resolve Playwright version
         id: pw
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "image=${ImageOS:-unknown}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache@v6
         id: pw-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.image }}-${{ steps.pw.outputs.version }}
 
       # `--with-deps` runs `apt-get update`, which fails outright when the
       # runner's third-party Chrome/Microsoft apt sources are mid-sync and
       # report a "Hash Sum mismatch" (that killed a WCP deploy 2026-09-09).
       # Playwright's system libraries come from Ubuntu's own archive, so drop
       # those sources first, then retry once for transient network failures.
+      # Each attempt is capped by `timeout` and the step by timeout-minutes. On
+      # 2026-10-26 a throttled Azure Ubuntu mirror fed a normal 30s install at
+      # 29 kB/s for 57 minutes and held required checks; apt resumes the partial
+      # download on the retry, and nothing can sit for the 6-hour default.
       - name: Install Playwright browsers
+        timeout-minutes: 15
         if: steps.pw-cache.outputs.cache-hit != 'true'
         run: |
           sudo rm -f /etc/apt/sources.list.d/google-chrome* /etc/apt/sources.list.d/microsoft*
-          npx playwright install --with-deps chromium webkit ||
-            npx playwright install --with-deps chromium webkit
+          timeout 360 npx playwright install --with-deps chromium webkit || {
+            # The killed try's sudo apt-get keeps running and holds the dpkg lock, so the retry
+            # died at once with "Could not get lock". Stop it, let apt wait for the lock, and
+            # skip the Azure mirror (the slow one) when the mirror list has another entry.
+            sudo pkill -x apt-get || true
+            echo 'DPkg::Lock::Timeout "60";' | sudo tee /etc/apt/apt.conf.d/99-lock-timeout > /dev/null
+            sudo dpkg --configure -a || true
+            grep -qv azure /etc/apt/apt-mirrors.txt && sudo sed -i '/azure/d' /etc/apt/apt-mirrors.txt
+            timeout 360 npx playwright install --with-deps chromium webkit
+          }
 
       - name: Install Playwright system libraries (browsers cached)
+        timeout-minutes: 8
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: |
           sudo rm -f /etc/apt/sources.list.d/google-chrome* /etc/apt/sources.list.d/microsoft*
-          npx playwright install-deps chromium webkit ||
-            npx playwright install-deps chromium webkit
+          timeout 180 npx playwright install-deps chromium webkit || {
+            # The killed try's sudo apt-get keeps running and holds the dpkg lock, so the retry
+            # died at once with "Could not get lock". Stop it, let apt wait for the lock, and
+            # skip the Azure mirror (the slow one) when the mirror list has another entry.
+            sudo pkill -x apt-get || true
+            echo 'DPkg::Lock::Timeout "60";' | sudo tee /etc/apt/apt.conf.d/99-lock-timeout > /dev/null
+            sudo dpkg --configure -a || true
+            grep -qv azure /etc/apt/apt-mirrors.txt && sudo sed -i '/azure/d' /etc/apt/apt-mirrors.txt
+            timeout 180 npx playwright install-deps chromium webkit
+          }
 
       # smoke (every route 200s and carries the site name in its title), axe in
       # light, axe in dark as a separate sweep plus a focus-indicator check (a

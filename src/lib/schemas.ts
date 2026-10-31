@@ -8,6 +8,8 @@
 // https://search.google.com/test/rich-results
 
 import { site } from '@/data/site';
+import { resolveBusinessFacts, type RawBusinessFacts } from '@/lib/business-facts';
+import { openingHoursSpecification, zonedClock } from '@/lib/business-hours';
 
 // ---------- Types (loose — Sanity provides the actual document shapes) ----
 
@@ -17,7 +19,10 @@ interface SocialLink {
   label?: string;
 }
 
-interface SiteSettings {
+interface SiteSettings extends Omit<
+  RawBusinessFacts,
+  'title' | 'phone' | 'email' | 'city' | 'state' | 'geoLat' | 'geoLng'
+> {
   title?: string;
   email?: string;
   phone?: string;
@@ -70,8 +75,15 @@ interface Breadcrumb {
 // The function name is unchanged so the one caller in BaseLayout still reads
 // plainly; only what it emits has moved.
 
-export function localBusinessSchema(settings: SiteSettings | null | undefined): string {
+export function localBusinessSchema(
+  settings: SiteSettings | null | undefined,
+  /** The build moment: which hours changes are still to come. Tests pass a fixed one. */
+  now: Date = new Date(),
+): string {
   const s = settings ?? {};
+  // The business facts (card 196, src/lib/business-facts.ts): a fact whose
+  // confirmed box is unticked never reaches search engines.
+  const facts = resolveBusinessFacts(s);
   const schema: Record<string, any> = {
     '@context': 'https://schema.org',
     '@type': 'SportsOrganization',
@@ -101,6 +113,8 @@ export function localBusinessSchema(settings: SiteSettings | null | undefined): 
       '@type': 'PostalAddress',
       ...(hasCity ? { addressLocality: s.city } : {}),
       ...(hasState ? { addressRegion: s.state } : {}),
+      ...(facts.address?.confirmed ? { streetAddress: facts.address.street } : {}),
+      ...(facts.address?.confirmed && facts.address.zip ? { postalCode: facts.address.zip } : {}),
       addressCountry: 'US',
     };
   }
@@ -120,7 +134,13 @@ export function localBusinessSchema(settings: SiteSettings | null | undefined): 
     schema.areaServed = areas.map((city) => ({ '@type': 'City', name: city }));
   }
 
-  if (s.phone) schema.telephone = s.phone;
+  if (s.phone && s.phoneConfirmed !== false) schema.telephone = s.phone;
+  if (facts.email && !facts.email.confirmed) delete schema.email;
+
+  // Opening hours (starter card 196), confirmed rows only, with the dated changes still to come.
+  // The race has none typed today, so nothing is emitted.
+  const hours = openingHoursSpecification(facts.hours, zonedClock(now, site.timeZone).date);
+  if (hours.length > 0) schema.openingHoursSpecification = hours;
   return JSON.stringify(schema);
 }
 

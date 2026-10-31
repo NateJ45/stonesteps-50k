@@ -1,0 +1,27 @@
+{
+  "_comment": [
+    "EXPECTED TO DIFFER PER SITE. The budgets tests/page-weight.spec.ts checks (decoded kilobytes).",
+    "Start from what the site weighs today plus about 25%, then tighten: a budget set far above",
+    "reality never fails. Keys left out fall back to the spec's own numbers.",
+    "A route that must be heavy gets its own entry under pages, with the reason in _why.",
+    "jsonLd lists the schema.org types a route must carry, e.g. { \"/\": [\"Organization\"] }.",
+    "Stone Steps inlines its whole stylesheet into every page (build.inlineStylesheets always), so HTML runs 220 to 520 KB (measured 2026-10-27, home the largest); the HTML budget is that plus about 25%. Inline CSS measured 205 to 350 KB, budget 440."
+  ],
+  "defaults": {
+    "maxHtmlKb": 660,
+    "maxInlineCssKb": 440,
+    "maxScriptKb": 400,
+    "maxImagesKb": 1200,
+    "maxImageKb": 500,
+    "maxLcpImageKb": 250,
+    "maxFontPreloads": 3,
+    "maxFontKb": 120
+  },
+  "pages": {
+    "/contact/": {
+      "_why": "The race contact form island loads React and the form libraries.",
+      "maxScriptKb": 2000
+    }
+  },
+  "jsonLd": {}
+}

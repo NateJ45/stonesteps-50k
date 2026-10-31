@@ -1727,27 +1727,34 @@ export default function CourseMapLibre() {
           </button>
         </div>
       </div>
-      {status === 'loading' && <p className="cmap__status">Loading the map...</p>}
-      {status === 'failed' && (
-        <p className="cmap__status" role="status">
-          The map could not load. The elevation profile below still shows the whole course.
-        </p>
-      )}
+      {/* THE PROFILE SLOT. The elevation strip arrives after hydration and the map, so
+          what it replaces (a one-line status) was 20px against its 190 to 235px, and the
+          loop chips and caption under it jumped down by the difference (CLS 0.13 live,
+          PENDING 1w). The slot holds the strip's height from the first paint; the sizes
+          are in CourseMap.astro (.cmap__profslot) and track the strip's own wrap points. */}
+      <div className="cmap__profslot">
+        {status === 'loading' && <p className="cmap__status">Loading the map...</p>}
+        {status === 'failed' && (
+          <p className="cmap__status" role="status">
+            The map could not load. The elevation profile below still shows the whole course.
+          </p>
+        )}
 
-      {status === 'ready' && profile.length > 0 && (
-        <CourseProfileStrip
-          points={profile}
-          // The live hover wins while there is one; the placed marker is what
-          // the strip falls back to, so its readout and playhead stay put for
-          // the same reason the map marker does.
-          cursorMile={cursorMile ?? pinnedMile}
-          pinnedMile={pinnedMile}
-          onScrub={onScrub}
-          onSeek={onSeek}
-          onPin={onPin}
-          activeLoop={activeLoop}
-        />
-      )}
+        {status === 'ready' && profile.length > 0 && (
+          <CourseProfileStrip
+            points={profile}
+            // The live hover wins while there is one; the placed marker is what
+            // the strip falls back to, so its readout and playhead stay put for
+            // the same reason the map marker does.
+            cursorMile={cursorMile ?? pinnedMile}
+            pinnedMile={pinnedMile}
+            onScrub={onScrub}
+            onSeek={onSeek}
+            onPin={onPin}
+            activeLoop={activeLoop}
+          />
+        )}
+      </div>
 
       {/* LOOP CHIPS. Seven buttons is the fastest way to answer "which bit is
           the short loop", and each one is a real button so the whole feature

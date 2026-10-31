@@ -182,9 +182,9 @@ automatically at** under its Publishing tab: the editor sets a time and leaves t
 `.github/workflows/publish-due.yml` publishes it within the half hour, then starts `deploy.yml` so the change goes
 live. Home's **Coming up** card lists what is waiting.
 
-The workflow's schedule is commented out until it has its token. To switch it on: set the `SANITY_API_WRITE_TOKEN`
-repo secret (a Sanity token with the Editor role; not `SANITY_AUTH_TOKEN`, which the backup reads with), check the
-`SANITY_PROJECT_ID` repo variable, then uncomment `schedule:` in `publish-due.yml`. By hand:
+The workflow's schedule is on (every half hour, since 2026-10-30). It needs the `SANITY_API_WRITE_TOKEN` repo secret (a
+Sanity token with the Editor role; not `SANITY_AUTH_TOKEN`, which the backup reads with) and the `SANITY_PROJECT_ID`
+repo variable, and skips with a warning if either goes missing. By hand:
 `NCS_PRODUCTION_WRITE=yes node scripts/publish-due.mjs --apply` (card 114's write gate).
 
 ### The Studio kit (PORTS.md cards 106 to 120)
@@ -197,19 +197,29 @@ and Checkup, in the race's paper, rust and forest green. Everything site-specifi
 `src/sanity/studioEdges.config.ts` (the sign-in line) and `brand/brand.config.json` `studio` (forest chrome, icon
 meanings). Full detail: `docs/agent/studio-kit.md`.
 
+**Race results** (starter card 202, the race's own card in Home's rail through `kitConfig.homeRail`). "Fetch the latest
+results" is for the day a timer corrects a time or a finisher on RunSignUp: it POSTs to `/api/race/results-import/`
+(`src/pages/api/race/results-import.ts`, pure half `src/lib/results-import.ts`), which starts `results-import.yml`
+for every year with `deploy_anyway`, so the site rebuilds in about five minutes. Signed-in Studio members only, never
+while a run is going, once per five minutes per Worker instance; GET reports the newest run. It uses the same
+`GITHUB_DEPLOY_TOKEN` and `GITHUB_REPO` as Try again (the token's "Actions: Read and write" covers every workflow in
+the repo). The route is outside `/api/studio/` because that folder is the kit's PORTABLE set. The nightly run now
+rebuilds on a correction by itself too: it compares count plus newest `_updatedAt`, not the count alone.
+
 Each piece that needs a setting says so in the Studio and keeps working without it. The settings, once each:
 
-| Setting                                                                  | Where                                                          | Unlocks                                                          |
-| ------------------------------------------------------------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `GITHUB_DEPLOY_TOKEN` (fine-grained, this repo, Actions: Read and write) | `npx wrangler secret put GITHUB_DEPLOY_TOKEN`                  | "The last update didn't go through" and Try again (card 111)     |
-| `SHARE_PREVIEW_SECRET` (48 random characters)                            | `npx wrangler secret put SHARE_PREVIEW_SECRET`                 | Share a preview links (card 117)                                 |
-| `CF_ANALYTICS_TOKEN`, `CF_ACCOUNT_ID`, `CF_WEB_ANALYTICS_SITE_TAG`       | secret, and `wrangler.jsonc` `vars`                            | Home's Visitors card (card 115), see below                       |
-| `PUBLIC_CF_ANALYTICS_TOKEN` (the beacon token)                           | repo variable, read by `deploy.yml`                            | The Cloudflare beacon, and its line on the privacy page          |
-| `message_status` table                                                   | `npx wrangler d1 migrations apply stonesteps-contact --remote` | Messages remembers New / Replied / Spam (card 117)               |
-| `SANITY_API_WRITE_TOKEN`, then uncomment the schedule                    | repo secret, `publish-due.yml`                                 | Publish automatically at (above)                                 |
-| Uncomment the schedule                                                   | `change-note.yml` (uses `SANITY_AUTH_TOKEN`)                   | The morning "What changed" issue (card 117)                      |
-| Add `"studioWeek"` and `"previewShare"` to the deny-list                 | the publish webhook's filter (above)                           | A checklist tick or a new preview link does not rebuild the site |
-| The race director's Sanity user id                                       | `staff` in `src/sanity/kit.config.ts`                          | His staff view, even though he is an administrator               |
+| Setting                                                                  | Where                                                          | Unlocks                                                                                                 |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `GITHUB_DEPLOY_TOKEN` (fine-grained, this repo, Actions: Read and write) | `npx wrangler secret put GITHUB_DEPLOY_TOKEN`                  | "The last update didn't go through", Try again (card 111), and Race results' "Fetch the latest results" |
+| `SHARE_PREVIEW_SECRET` (48 random characters)                            | `npx wrangler secret put SHARE_PREVIEW_SECRET`                 | Share a preview links (card 117)                                                                        |
+| `CF_ANALYTICS_TOKEN`, `CF_ACCOUNT_ID`, `CF_WEB_ANALYTICS_SITE_TAG`       | secret, and `wrangler.jsonc` `vars`                            | Home's Visitors card (card 115), see below                                                              |
+| `PUBLIC_CF_ANALYTICS_TOKEN` (the beacon token)                           | repo variable, read by `deploy.yml`                            | The Cloudflare beacon, and its line on the privacy page                                                 |
+| `message_status` table                                                   | `npx wrangler d1 migrations apply stonesteps-contact --remote` | Messages remembers New / Replied / Spam (card 117)                                                      |
+| `SANITY_API_WRITE_TOKEN` (done, schedule on)                             | repo secret, `publish-due.yml`                                 | Publish automatically at (above)                                                                        |
+| `PUBLIC_STUDIO_HELP_EMAIL` (done)                                        | repo variable, read by `deploy.yml`                            | The email button on the Studio's Ask card                                                               |
+| Uncomment the schedule                                                   | `change-note.yml` (uses `SANITY_AUTH_TOKEN`)                   | The morning "What changed" issue (card 117)                                                             |
+| Add `"studioWeek"` and `"previewShare"` to the deny-list                 | the publish webhook's filter (above)                           | A checklist tick or a new preview link does not rebuild the site                                        |
+| The race director's Sanity user id                                       | `staff` in `src/sanity/kit.config.ts`                          | His staff view, even though he is an administrator                                                      |
 
 ### Visitor numbers (Home's Visitors card, PORTS.md card 115)
 
@@ -482,6 +492,13 @@ The PNGs land in `src/assets/` (NOT `public/`) so Astro's `<Image>` / `getImage(
 See the full schema-change procedure above (in the "Schema-change procedure" section) for the complete order of operations.
 
 ---
+
+## Cloudflare zone rules
+
+Set in the dashboard (stonesteps50k.com, Rules, Redirect Rules), not in this repo. The API token cannot read them.
+
+1. **www to apex**: `www.stonesteps50k.com` 301s to `stonesteps50k.com`.
+2. **Slashless page paths 301 to trailing slash** (2026-10-26): on `stonesteps50k.com`, a GET or HEAD for a path with no trailing slash and no dot 301s to the same path plus `/`, keeping the query string. Without it, Workers static assets answer `/about` with a **307**, which Google treats as temporary, so the slashless URL can stay canonical in Search Console. It skips `/api/`, `/files/`, `/cdn-cgi/`, `/preview` and `/studio`, because those are Worker routes and a 301 would turn a POST into a GET. **If you add a new SSR route prefix, add it to the rule's exclusions.**
 
 ## Common gotchas (the ones that have bitten at least once)
 

@@ -1,11 +1,11 @@
 ---
-import { withSlash } from '@/lib/links';
+import { ctaHref } from '@/lib/cta-href';
+import { withTrailingSlash } from '@/lib/href';
 // Safe to edit by hand
-// Resolves a Sanity ctaBlock to the right <a href>:
-//   - internal: maps the referenced page _type to its route (homePage → /, etc.)
-//   - external: passes through the URL, opens in new tab by default
-//   - email: builds a mailto: link
-//   - phone: builds a tel: link
+// Resolves a Sanity ctaBlock to the right <a href> through the starter's
+// ctaHref() (src/lib/cta-href.ts, PORTABLE, starter PORTS.md card 187): the
+// referenced page's route, an external URL (new tab by default), mailto: or tel:.
+// The race site adds one escape hatch on top, `internalPath` (below).
 //
 // ONE BUTTON FAMILY: BOTH VARIANTS ARE SIGN PLATES (2026-09-17).
 //   This component arrived from the generic starter with a bronze pill for
@@ -69,52 +69,29 @@ const {
   class: extraClass = '',
 } = Astro.props as Props;
 
-// Map Sanity document _type to its route. Mirrors the routes in src/pages/.
-// Singletons go to a fixed path; journalEntry uses {slug} for the dynamic
-// /journal/[slug] route.
-const TYPE_TO_PATH: Record<string, string> = {
-  homePage: '/',
-  aboutPage: '/about',
-  processPage: '/process',
-  servicesPage: '/services',
-  faqPage: '/faq',
-  contactPage: '/contact',
-  journalPage: '/journal',
-};
-
+// Where the button goes. The resolver is the starter's ctaHref(), shared with
+// anything else that needs a button's destination (the accent budget, card 158).
+// The race site's one addition: `internalPath`, a typed path for file routes
+// with no document to reference (/results/, /records/). A picked page still wins
+// over a typed path, so a slug change cannot strand a button.
 function resolveHref(c?: CtaBlock | null): string {
-  return withSlash(resolveRawHref(c));
-}
-
-function resolveRawHref(c?: CtaBlock | null): string {
-  if (!c?.linkType) return fallbackHref;
-  switch (c.linkType) {
-    case 'internal': {
-      const t = c.internalLink?._type;
-      // A reference wins: it survives a slug change. The typed path is the
-      // escape hatch for file routes like /results that have no document.
-      if (!t) return c.internalPath || fallbackHref;
-      // Slug-based types need the slug appended. Singletons use a fixed path.
-      if (t === 'journalEntry' && c.internalLink?.slug) {
-        return `/journal/${c.internalLink.slug}/`;
-      }
-      // Custom pages (type 'page') route via /[slug].astro.
-      if (t === 'page' && c.internalLink?.slug) {
-        return `/${c.internalLink.slug}/`;
-      }
-      return TYPE_TO_PATH[t] ?? c.internalPath ?? fallbackHref;
-    }
-    case 'external':
-      return c.externalUrl ?? fallbackHref;
-    case 'email':
-      return c.emailAddress ? `mailto:${c.emailAddress}` : fallbackHref;
-    case 'phone':
-      return c.phoneNumber ? `tel:${c.phoneNumber.replace(/[^\d+]/g, '')}` : fallbackHref;
-    default:
-      return fallbackHref;
+  if (c?.linkType === 'internal' && !c.internalLink?._type && c.internalPath) {
+    return withTrailingSlash(c.internalPath);
   }
+  return ctaHref(c, fallbackHref);
 }
 
+// A button object with nothing filled in (an optional button left empty, PORTS.md card 178)
+// draws nothing, rather than the fallback label. No cta at all still takes the fallbacks.
+const isEmpty =
+  cta != null &&
+  !cta.label &&
+  !cta.linkType &&
+  !cta.internalLink &&
+  !cta.internalPath &&
+  !cta.externalUrl &&
+  !cta.emailAddress &&
+  !cta.phoneNumber;
 const href = resolveHref(cta);
 const label = cta?.label ?? fallbackLabel;
 const isExternal = cta?.linkType === 'external';
@@ -136,11 +113,13 @@ const baseClasses = onDark
 const variantClasses = variant === 'primary' ? 'btn-plate' : 'btn-plate btn-plate--cream';
 ---
 
-<a
-  href={href}
-  class:list={[baseClasses, variantClasses, extraClass]}
-  target={newTab ? '_blank' : undefined}
-  rel={newTab ? 'noopener noreferrer' : undefined}
->
-  {label}
-</a>
+{!isEmpty && (
+  <a
+    href={href}
+    class:list={[baseClasses, variantClasses, extraClass]}
+    target={newTab ? '_blank' : undefined}
+    rel={newTab ? 'noopener noreferrer' : undefined}
+  >
+    {label}
+  </a>
+)}

@@ -36,6 +36,13 @@
 /** The surface names the components and the cadence already use. */
 export type SurfaceValue = 'background' | 'muted' | 'card' | 'ink';
 
+/**
+ * The surfaces a CONTENT block can be handed by src/lib/sectionCadence.ts (named for the starter's
+ * newer blocks, cards 193 and 197). The starter narrows it and adds 'feature' for its section looks;
+ * this site has no looks, so here it is every surface the renderer can pass.
+ */
+export type CadenceSurface = SurfaceValue;
+
 export interface SurfacePair {
   value: SurfaceValue;
   /** Plain-language name, for docs and failure messages. */

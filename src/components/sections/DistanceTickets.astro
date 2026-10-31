@@ -22,6 +22,10 @@ import { externalLinkAttrs } from '@/lib/links';
 import type { ProjectedDistanceTicketsSection } from '@/lib/pageBuilder.types';
 
 type Props = {
+  /** The variant the main button draws. SectionRenderer's accent budget (src/lib/cta-budget.ts,
+   *  starter card 158) gives the page's first main button 'primary' (the rust plate) and every
+   *  later one 'secondary' (the cream plate). Drawn outside the renderer: primary. */
+  primaryVariant?: 'primary' | 'secondary';
   eyebrow?: string;
   headline?: string;
   note?: string;
@@ -37,6 +41,7 @@ const {
   distances = [],
   race,
   headingId = 'distances-heading',
+  primaryVariant = 'primary',
 } = Astro.props as Props;
 
 /** Deep-link to this distance's own event where we know its id. */
@@ -150,7 +155,10 @@ function registerHref(eventId?: number): string | undefined {
 
               {registerHref(d.runSignUpEventId) && (
                 <a
-                  class="btn-plate mt-6 w-full justify-center md:mt-auto md:pt-6"
+                  class:list={[
+                    'btn-plate mt-6 w-full justify-center md:mt-auto md:pt-6',
+                    primaryVariant === 'secondary' && 'btn-plate--cream',
+                  ]}
                   href={registerHref(d.runSignUpEventId)}
                   {...externalLinkAttrs(registerHref(d.runSignUpEventId))}
                   rel="noopener"

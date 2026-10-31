@@ -28,7 +28,21 @@
 // =============================================================================
 
 import { freshKeys } from '../lib/authoring.ts';
-import { band, button, example, outLink, raceBlock, text } from './templateBlocks.ts';
+import {
+  band,
+  button,
+  daysFromNow,
+  eventDate,
+  eventDetails,
+  example,
+  letter,
+  outLink,
+  raceBlock,
+  schedule,
+  scheduleDay,
+  slot,
+  text,
+} from './templateBlocks.ts';
 
 type Rec = Record<string, unknown>;
 
@@ -191,6 +205,49 @@ export const SECTION_PATTERNS: SectionPattern[] = [
         outLink(example('Register on RunSignUp')),
       ),
       raceBlock('distanceTicketsSection', 'Next year', 'The 50K and the 27K'),
+    ],
+  }),
+  // The builder kit (PORTS.md card 173, 2026-10-26): the race-week pieces the
+  // race's own data does not hold.
+  pattern({
+    id: 'packet-pickup',
+    title: 'Packet pickup: where and when',
+    note: 'Race week: put in the real date, times and place. Calendar and directions are made for you.',
+    build: () => [
+      eventDetails({
+        eyebrow: example('Before the race'),
+        title: example('Packet pickup'),
+        dates: [eventDate(daysFromNow(14), { label: example('Add the real date and times') })],
+        place: `${example('Name of the place')}\nStreet address`,
+        note: example('Bring photo ID. Say whether someone else can collect a bib.'),
+      }),
+    ],
+  }),
+  pattern({
+    id: 'volunteer-shifts',
+    title: 'Volunteer shifts',
+    note: 'With the volunteer call: one row per shift. Add the times once they are set.',
+    build: () => [
+      schedule(example('The shifts'), [
+        scheduleDay('', [
+          slot('', example('Course marking'), example('Add the time and where to meet')),
+          slot('', example('Aid stations'), example('Add the time and where to meet')),
+          slot('', example('The finish'), example('Add the time and where to meet')),
+        ]),
+      ]),
+    ],
+  }),
+  pattern({
+    id: 'director-note',
+    title: 'A note from the race director',
+    note: 'Any time: a short signed letter. Race week, after the race, or with next year’s date.',
+    build: () => [
+      letter({
+        eyebrow: example('A note from the race director'),
+        body: [example('A few short paragraphs, in your own words.')],
+        name: example('Your name'),
+        role: 'Race director',
+      }),
     ],
   }),
 ];

@@ -224,13 +224,16 @@ one would leave the site with a route and no document.
 What a WordPress block-editor handover gives a client, built on the page builder that is already here. Five parts:
 
 1. **Page templates.** `src/sanity/pageTemplates.ts` (the site's OWN file, not PORTABLE) lists the starting points
-   offered when a page is made. Stone Steps follows the race year: Simple page, Race week: what to know, Volunteer
-   call, Course notes and aid stations, Race recap and photos, Sponsor thank-you, Save the date, Blank page.
+   offered when a page is made. Stone Steps follows the race year, in four groups shown as "Group: Title"
+   (`TEMPLATE_GROUPS`, `templateMenuTitle()`, card 173): Basics (Simple page, Blank page), Race day (Race week: what
+   to know, Course notes and aid stations), People (Volunteer call, A note from the race director, Sponsor
+   thank-you), The race year (Race recap and photos, Race history, Save the date).
    `sanity.config.ts` registers each as an initial value template on `page` (`value` is a function, so every new page
    gets fresh `_key`s from `freshKeys()` in `src/lib/authoring.ts`) and `newDocumentOptions` hides the stock `page`
    template, which stays registered so intents that name it keep working. Every example line starts `Example:`.
    `src/lib/authoring.test.ts` fails if a template uses a block a custom page does not accept, leaves an array member
-   without a `_key`, repeats keys between two pages, or forgets the marker.
+   without a `_key`, repeats keys between two pages, forgets the marker, breaks a copy rule (em-dash, AI-tell word, UK
+   spelling, a price) or a schema limit, sits out of group order, or would warn about anything but example text.
 2. **The picture picker.** `SECTION_INSERT_MENU` in `schemaTypes/sections.ts` carries
    `views: [grid, list]`; the grid's `previewImageUrl` is `/section-thumbnails/<type>.jpg`, served by the site (the
    Studio's own origin). The pictures are shot by `npm run thumbnails` (`scripts/shoot-section-thumbnails.mjs`, build
@@ -271,5 +274,38 @@ list, dynamic list) fill from collections this race does not keep, were on no pa
 types stay registered). Twelve race-year saved sections (registration open, the price going up, the race full,
 volunteers wanted, race week, weather watch, a course change, results up, new records, photos up, sponsor thanks,
 save the date) live in `src/sanity/sectionPatterns.ts` and are seeded as drafts by `npm run seed:patterns` (dry by
-default; never overwrites). The page rule is "open with the page heading, once" on custom pages. The race blocks that
+default; never overwrites). Three more came with the builder kit (2026-10-26): packet pickup (event details),
+volunteer shifts (a schedule) and a note from the race director (a letter). The page rule is "open with the page heading, once" on custom pages. The race blocks that
 draw from the race's own data are in `selfFillingSections`, so an empty heading on one is not an empty section.
+
+## The builder kit: eight smaller blocks (starter PORTS.md card 173, 2026-10-26)
+
+The smaller pieces between the race's own blocks and the general library, so the race director can build a
+volunteer page, a packet-pickup page or a note from the race director alone. Schemas in
+`src/sanity/schemaTypes/builderSections.ts` (spread into `pageSectionSchemas`), components in
+`src/components/builder-blocks/` (`BuilderBlock.astro` picks one; `SectionRenderer` has one `isBuilderBlock()`
+branch), styles in `src/styles/builder-blocks.css`, types in `src/lib/builderBlocks.types.ts`, projection arms in
+`SECTION_ARMS`, logic in `src/lib/builder-blocks.ts` (copied from the starter with its test, and `src/lib/ics.ts`,
+PORTABLE, for the calendar file).
+
+- **The eight:** text in columns, a row of buttons or link cards, tabs, a timeline, a letter, event details (each
+  date still to come, the place, "Add to my calendar" as a `data:` link, directions, one schema.org `Event` per
+  date; past dates drop off and the block disappears once all have passed, worked out in `site.timeZone`), a
+  schedule and cards with photos.
+- **Left out, because the site already does the job:** the wide photo (Photograph band), fold-out questions (FAQ
+  kiosk and FAQ docs), the countdown (the race clock counts down from the race's own date, rule 15) and the dated
+  notice (Race notices, the site-wide banner).
+- **Race day itself** uses the Race-day schedule block, which fills itself from Schedule items. The kit's schedule is
+  for everything else (packet pickup, volunteer shifts, a training run). Its rows are `scheduleRow`, because
+  `scheduleItem` is a document type here.
+- **Dressed in this site's grammar:** cards, the letter and the event details are plates (`.bb-plate`: plate stock,
+  2px edge, plate radius, ground lift; text tokens re-pointed to the plate's inks so both themes read), photos take
+  the same edge and lift, titles are Staatliches at one weight, every time value is mono. No `look` field (this
+  site has none) and no colour field (`builderSections` is in the section-fields gate). `startTime` and `endTime`
+  are in `NON_STEGA_FIELDS`; the letter's `greeting` and `signOff` are setting keys. The event's main button is the
+  rust plate (no accent-button budget here).
+- **Insert menu:** `BUILDER_INSERT_GROUPS` merged by `withSiteGroups()` (`src/lib/insert-groups.ts`): five join
+  "Words and pictures", and a new "Events and dates" group holds event details, the schedule and the timeline.
+- **Tests:** `builder-blocks.test.ts`, `insert-groups.test.ts`, `ics.test.ts`, the template and pattern checks in
+  `authoring.test.ts`, and `tests/builder-blocks.spec.ts` (tabs keyboard pattern; the event's calendar file,
+  directions and JSON-LD on `/styleguide/sections/`).

@@ -32,6 +32,9 @@ import LogoStrip from '@/components/sections/LogoStrip.astro';
 import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
+// The latest video and the documents list (starter card 197).
+import LatestVideo from '@/components/sections/LatestVideo.astro';
+import DocumentsList from '@/components/sections/DocumentsList.astro'; // scaffold: documents
 // Stone Steps race blocks.
 import RaceHero from '@/components/sections/RaceHero.astro';
 import DistanceTickets from '@/components/sections/DistanceTickets.astro';
@@ -53,14 +56,23 @@ import CommunityBand from '@/components/sections/CommunityBand.astro';
 import RaceWeather from '@/components/sections/RaceWeather.astro';
 import Dynasties from '@/components/sections/Dynasties.astro';
 import GearBand from '@/components/sections/GearBand.astro';
+// The builder kit (PORTS.md card 173).
+import BuilderBlock from '@/components/builder-blocks/BuilderBlock.astro';
+import { isBuilderBlock } from '@/lib/builderBlocks.types';
 import { classifySections } from '@/lib/sectionCadence';
+import { sectionAnchors, sectionHeadingText } from '@/lib/section-anchors';
+import { primaryBudget, repeatsHeaderCta } from '@/lib/cta-budget';
+import { ctaHref, type CtaTarget } from '@/lib/cta-href';
+import { withTrailingSlash } from '@/lib/href';
+import { getSiteSettings } from '@/lib/queries';
+import { resolveSiteSettings } from '@/lib/siteSettings';
 import { expandSyncedSections } from '@/lib/authoring';
 import type {
   PageBuilderBlock,
   ProjectedRaceResult,
   ProjectedRecordEntry,
 } from '@/lib/pageBuilder.types';
-import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
+import { SECTION_DRAG_FLOW, sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
 
 interface Props {
   sections?: unknown[];
@@ -89,6 +101,14 @@ interface Props {
    * `npm run parity compare` is the standing gate on that promise.
    */
   editDoc?: EditDoc;
+  /**
+   * 'named' (the default): a section with a heading takes an id made from it,
+   * so /course/#what-to-bring links to it (src/lib/section-anchors.ts, starter
+   * card 158). 'numbered': every section keeps `<idPrefix>-<n>`. Pages that
+   * draw several renderers (the styleguide walls) pass 'numbered' so their ids
+   * stay unique.
+   */
+  anchors?: 'named' | 'numbered';
 }
 
 const {
@@ -97,14 +117,88 @@ const {
   editDoc,
   results: sharedResults = [],
   historical: sharedHistorical = [],
+  anchors = 'named',
 } = Astro.props as Props;
 // Synced sections (the authoring kit, PORTS.md card 109) are swapped for the
 // sections their saved copy holds BEFORE the cadence runs, so a synced band
 // takes its place in the alternating rhythm like any typed-in band (rule 9).
-const rows = classifySections<PageBuilderBlock>(
+const classified = classifySections<PageBuilderBlock>(
   expandSyncedSections(sections as PageBuilderBlock[]),
   idPrefix,
 );
+// Named anchors (starter card 158): a section with a heading takes a unique id
+// made from it (`heading`, else `headline`), the rest keep the numbered one.
+// Stega is stripped inside, so the draft preview gets the live page's ids.
+// The page header's title is two lines ("Ask the" / "race director."), so its
+// name reads both: /contact/#ask-the-race-director, not #ask-the.
+const anchorHeading = (block: unknown) => {
+  const first = sectionHeadingText(block);
+  const second = (block as { headlineSecondLine?: unknown }).headlineSecondLine;
+  return first && typeof second === 'string' && second.trim() ? `${first} ${second}` : first;
+};
+const anchorIds =
+  anchors === 'named'
+    ? sectionAnchors(
+        classified.map(({ block, headingId }) => ({
+          key: (block as { _key?: string })._key,
+          heading: anchorHeading(block),
+          fallback: headingId,
+        })),
+      )
+    : classified.map(({ headingId }) => headingId);
+const rows = classified.map((row, i) => ({ ...row, headingId: anchorIds[i] }));
+
+// One accent button per page (src/lib/cta-budget.ts, starter card 158). The
+// first section that draws a main button keeps the rust plate; every later one
+// draws the cream plate. The header's Register plate is not counted (it keeps
+// the accent on every page), and a body button that goes where the header
+// button goes repeats it, so it draws cream without spending the budget
+// (card 187; the header button is off-site today, so this never fires yet).
+// Which blocks draw a main button is this site's own list:
+//   raceHeroSection / heroSection   the hero's first button
+//   distanceTicketsSection          the Register plate on each ticket
+//   coursePosterSection             "Fly the 3D map", to /course/
+//   communitySection                the typed button, else the Facebook group
+//   ctaBandSection, eventDetailsSection, contactCardSection (Call),
+//   stepsRailSection (closing button), mapSection (Directions)
+// Everything else already draws the cream plate.
+const headerCta = resolveSiteSettings(await getSiteSettings()).headerCta;
+type Cta = (CtaTarget & { label?: string; internalPath?: string }) | null | undefined;
+// Where a button goes, the way CtaLink resolves it (its typed-path escape hatch included).
+const hrefOf = (c: Cta) =>
+  c?.linkType === 'internal' && !c.internalLink?._type && c.internalPath
+    ? withTrailingSlash(c.internalPath)
+    : ctaHref(c);
+const own = (c: Cta) => !repeatsHeaderCta(hrefOf(c), headerCta);
+const ctaVariant = primaryBudget(classified, ({ block }) => {
+  const b = block as Record<string, unknown> & { _type: string };
+  switch (b._type) {
+    case 'raceHeroSection':
+    case 'heroSection':
+      return !!b.primaryCta && own(b.primaryCta as Cta);
+    case 'ctaBandSection': {
+      const c = b.cta as Cta;
+      // A button left empty draws nothing (CtaLink), so it cannot hold the accent either.
+      return !(c && !c.label && !c.linkType) && own(c);
+    }
+    case 'eventDetailsSection':
+      return !!(b.button as Cta)?.label && own(b.button as Cta);
+    case 'stepsRailSection':
+      return !!(b.link as Cta)?.label && own(b.link as Cta);
+    case 'contactCardSection':
+      return b.callButtons === true;
+    case 'communitySection':
+      return (b.cta as Cta)?.label ? own(b.cta as Cta) : true;
+    case 'distanceTicketsSection':
+      return !!(b.race as { registerUrl?: string } | null)?.registerUrl;
+    case 'coursePosterSection':
+      return !repeatsHeaderCta('/course/', headerCta);
+    case 'mapSection':
+      return true;
+    default:
+      return false;
+  }
+});
 
 // A real element in preview, nothing at all on the live site. The wrapper must
 // NOT be `display: contents`: the overlay outlines the element's rect, and a
@@ -112,7 +206,7 @@ const rows = classifySections<PageBuilderBlock>(
 // <section> changes no layout.
 const Wrap = editDoc ? 'div' : Fragment;
 const wrapAttrs = (key: string | undefined) =>
-  editDoc && key ? { 'data-sanity': sectionEditAttr(editDoc, key) } : {};
+  editDoc && key ? { 'data-sanity': sectionEditAttr(editDoc, key), ...SECTION_DRAG_FLOW } : {};
 // A section that came out of a synced section is not in the page itself; its
 // in-canvas controls act on the synced block it came from, which is.
 const editKeyOf = (block: unknown) => {
@@ -121,10 +215,19 @@ const editKeyOf = (block: unknown) => {
 };
 ---
 
-{rows.map(({ block: s, surface, headingId }) => (
+{rows.map(({ block: s, surface, headingId }, rowIndex) => (
   <>
     <Wrap {...wrapAttrs(editKeyOf(s))}>
-      {s._type === 'heroSection' ? (
+      {isBuilderBlock(s) ? (
+        // The builder kit (PORTS.md card 173): one branch, BuilderBlock picks the component.
+        <BuilderBlock
+          block={s}
+          surface={surface === 'muted' ? 'muted' : 'background'}
+          headingId={headingId}
+          isFirst={rowIndex === 0}
+          primaryVariant={ctaVariant(rowIndex)}
+        />
+      ) : s._type === 'heroSection' ? (
         <Hero
           eyebrow={s.eyebrow}
           headline={s.headline ?? ''}
@@ -135,6 +238,11 @@ const editKeyOf = (block: unknown) => {
           scriptAccent={s.scriptAccent}
           size={s.size ?? 'short'}
           headingId={headingId}
+          primaryVariant={ctaVariant(rowIndex)}
+          heroStyle={s.heroStyle}
+          glance={s.glance}
+          backgroundVideo={s.backgroundVideo}
+          backgroundVideoPhone={s.backgroundVideoPhone}
         />
       ) : s._type === 'ctaBandSection' ? (
         <FinalCta
@@ -147,6 +255,7 @@ const editKeyOf = (block: unknown) => {
           headingAccent={s.headingAccent}
           backgroundImage={s.backgroundImage}
           headingId={headingId}
+          primaryVariant={ctaVariant(rowIndex)}
         />
       ) : s._type === 'statSection' ? (
         /* No filtering here any more: an item can now name a source instead
@@ -326,6 +435,20 @@ const editKeyOf = (block: unknown) => {
           heightHint={s.heightHint ?? 'medium'}
           headingId={headingId}
         />
+      ) : s._type === 'latestVideoSection' ? (
+        <LatestVideo block={s} surface={surface ?? 'background'} headingId={headingId} />
+      ) : // scaffold-branch: documents
+      s._type === 'documentsSection' ? (
+        <DocumentsList
+          heading={s.heading}
+          intro={s.intro}
+          category={s.category}
+          limit={s.limit}
+          showDates={s.showDates}
+          items={s.items ?? []}
+          surface={surface ?? 'background'}
+          headingId={headingId}
+        />
       ) : s._type === 'dynamicListSection' ? (
         <DynamicList
           eyebrow={s.eyebrow}
@@ -352,6 +475,7 @@ const editKeyOf = (block: unknown) => {
           secondaryCta={s.secondaryCta}
           race={s.race}
           headingId={headingId}
+          primaryVariant={ctaVariant(rowIndex)}
         />
       ) : s._type === 'distanceTicketsSection' ? (
         <DistanceTickets
@@ -361,6 +485,7 @@ const editKeyOf = (block: unknown) => {
           distances={s.distances ?? []}
           race={s.race}
           headingId={headingId}
+          primaryVariant={ctaVariant(rowIndex)}
         />
       ) : s._type === 'recordsBoardSection' ? (
         <RecordsBoard
@@ -429,6 +554,7 @@ const editKeyOf = (block: unknown) => {
           intro={s.intro}
           surface={surface ?? 'background'}
           headingId={headingId}
+          primaryVariant={ctaVariant(rowIndex)}
         />
       ) : s._type === 'courseMapSection' ? (
         <CourseMapBand
@@ -508,6 +634,7 @@ const editKeyOf = (block: unknown) => {
           race={s.race}
           surface={surface ?? 'background'}
           headingId={headingId}
+          primaryVariant={ctaVariant(rowIndex)}
         />
       ) : s._type === 'dynastiesSection' ? (
         <Dynasties

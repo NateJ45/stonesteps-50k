@@ -47,6 +47,25 @@ const para = (key: string, text: string) => ({
   children: [{ _type: 'span', _key: `${key}-s`, marks: [], text }],
 });
 
+/** A calendar day `n` days after the build, as YYYY-MM-DD. */
+const inDays = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+
+// Made-up business facts for the hours and map blocks (card 196), in the shape
+// the site settings query folds in from Business info. The holiday is always
+// ten days out, so the "Changes coming up" line is on the thumbnail.
+const FIXTURE_FACTS = {
+  street: '12 Main Street',
+  city: 'Hamilton',
+  state: 'OH',
+  zip: '45013',
+  findUs: 'Park behind the building and use the side door.',
+  openingHours: [
+    { _key: 'wk', days: ['mon', 'tue', 'wed', 'thu', 'fri'], opens: '09:00', closes: '17:00' },
+    { _key: 'sat', days: ['sat'], opens: '10:00', closes: '14:00' },
+  ],
+  hoursChanges: [{ _key: 'hol', date: inDays(10), kind: 'closed', note: 'Staff holiday' }],
+};
+
 const cta = (label: string) => ({
   _type: 'ctaBlock',
   label,
@@ -155,6 +174,38 @@ const FIXTURES: Record<string, unknown>[] = [
     heightHint: 'short',
     embedUrl: 'https://embed.example.com/map',
   },
+  // The latest video (card 197): a sample with no picture and no network call.
+  {
+    _type: 'latestVideoSection',
+    _key: 'latest-video',
+    heading: 'Latest video',
+    intro: 'The newest upload from the race channel, kept up to date for you.',
+    channelId: 'UCsampleSampleSampleSample',
+    showChannelLink: true,
+    _fixture: true,
+  },
+  // scaffold: documents
+  {
+    _type: 'documentsSection',
+    _key: 'documents',
+    heading: 'Race documents',
+    intro: 'Course maps, the waiver and past results to download.',
+    limit: 4,
+    showDates: true,
+    items: [
+      ['Course map', 'The 50K and 27K loops, printable.', '2026-10-01'],
+      ['Runner waiver', 'Print it, sign it, bring it to packet pickup.', '2026-08-15'],
+      ['Results', '', '2026-03-02'],
+    ].map(([title, note, date], i) => ({
+      _id: `doc${i}`,
+      title,
+      note,
+      date,
+      category: 'Race day',
+      file: { url: '#', size: 245760, extension: 'pdf' },
+    })),
+  },
+  // scaffold:end
   {
     _type: 'photoBandSection',
     _key: 'photoband',
@@ -251,6 +302,273 @@ const FIXTURES: Record<string, unknown>[] = [
     headline: 'Who keeps coming back',
   },
   { _type: 'gearSection', _key: 'gear', eyebrow: 'What to bring', headline: 'Gear for the trail' },
+  // ── The builder kit (builderSections.ts, PORTS.md card 173) ────────────────
+  // On no page yet, so these always draw from the fixture. The event's date is
+  // relative to the build day, so it is always still to come.
+  {
+    _type: 'columnsSection',
+    _key: 'columns',
+    heading: 'Before you come',
+    textColumns: [
+      ['Getting there', 'Park in the forest lots and walk to the start.'],
+      ['What to bring', 'Photo ID for your bib, layers and a bottle.'],
+      ['After the finish', 'Food at the finish, and a place to sit.'],
+    ].map(([heading, text], i) => ({
+      _key: `col${i}`,
+      heading,
+      body: [para(`col${i}p`, text)],
+    })),
+  },
+  {
+    _type: 'buttonRowSection',
+    _key: 'buttons',
+    heading: 'Where next',
+    layout: 'cards',
+    links: [
+      ['See the course', 'The loops, the climbs and the aid stations.'],
+      ['The records', 'Every course record, both distances.'],
+      ['Ask a question', 'A note to the race, answered within a day.'],
+    ].map(([label, note], i) => ({ _key: `ql${i}`, link: cta(label), note })),
+  },
+  {
+    _type: 'tabsSection',
+    _key: 'tabs',
+    heading: 'Aid stations',
+    tabs: [
+      ['50K', 'Water, sports drink and food at each aid station on every loop.'],
+      ['27K', 'The same aid stations, on the one loop the 27K runs.'],
+    ].map(([label, text], i) => ({
+      _key: `tab${i}`,
+      label,
+      body: [para(`tab${i}p`, text)],
+    })),
+  },
+  {
+    _type: 'timelineSection',
+    _key: 'timeline',
+    heading: 'Year by year',
+    entries: [
+      ['First race', 'Where it began', 'A handful of runners and a lot of steps.'],
+      ['A milestone', 'A new course', 'The loop the race still runs today.'],
+      ['This year', 'Where the race is now', 'Two distances and a full field.'],
+    ].map(([year, title, text], i) => ({ _key: `tl${i}`, year, title, text })),
+  },
+  {
+    _type: 'letterSection',
+    _key: 'letter',
+    eyebrow: 'A note from the race director',
+    greeting: 'Dear runners,',
+    body: [
+      para(
+        'lt0',
+        'Thank you for signing up. The trail is in good shape and the steps are waiting.',
+      ),
+      para('lt1', 'Read the race-week page before Saturday, and say hello at the start.'),
+    ],
+    signOff: 'See you on the trail,',
+    name: 'The race director',
+    role: 'Race director',
+  },
+  {
+    _type: 'eventDetailsSection',
+    _key: 'event',
+    eyebrow: 'Before the race',
+    title: 'Packet pickup',
+    occurrences: [
+      {
+        _key: 'ev0',
+        date: inDays(30),
+        startTime: '16:00',
+        endTime: '19:00',
+        label: 'The evening before',
+      },
+      {
+        _key: 'ev1',
+        date: inDays(31),
+        startTime: '06:00',
+        endTime: '07:30',
+        label: 'Race morning',
+      },
+    ],
+    place: 'The shelter\nMt. Airy Forest, Cincinnati',
+    note: 'Bring photo ID. Your bib, your shirt and a map of the course.',
+    button: cta('Race-week page'),
+    showCalendar: true,
+  },
+  {
+    _type: 'scheduleSection',
+    _key: 'schedule',
+    heading: 'Volunteer shifts',
+    days: [
+      {
+        _key: 'sd0',
+        title: 'Friday',
+        items: [
+          ['15:00', 'Course marking', 'Meet at the shelter'],
+          ['16:00', 'Packet pickup', ''],
+        ].map(([startTime, title, note], i) => ({ _key: `si0${i}`, startTime, title, note })),
+      },
+      {
+        _key: 'sd1',
+        title: 'Saturday',
+        items: [
+          ['06:00', 'Aid stations', 'Set up before the start'],
+          ['09:00', 'The finish', 'Record times'],
+        ].map(([startTime, title, note], i) => ({ _key: `si1${i}`, startTime, title, note })),
+      },
+    ],
+  },
+  {
+    _type: 'photoCardsSection',
+    _key: 'photocards',
+    heading: 'Pick a job',
+    cards: [
+      ['Aid stations', 'Fill bottles, hand out food, cheer every runner through.'],
+      ['Course marshal', 'Stand at a junction and point the way.'],
+      ['The finish', 'Check names and record times.'],
+    ].map(([title, body], i) => ({
+      _key: `pc${i}`,
+      image: image(title),
+      title,
+      body,
+      link: cta('Sign up'),
+    })),
+  },
+  // ── Card 193: contact card, progress, newsletter, calendar buttons, icon cards, steps, hub ──
+  // The contact card and the newsletter take their values from Site settings on a real page; the
+  // wall has no settings, so these fixtures type their own (a block's own phone, email and
+  // sign-up page win over the settings).
+  {
+    _type: 'contactCardSection',
+    _key: 'contact',
+    heading: 'Get in touch',
+    callButtons: true,
+    phone: '(555) 555-0100',
+    email: 'hello@example.com',
+    address: 'The community hall\n123 Main Street, Springfield',
+    hours: 'Monday to Friday, 9 am to 5 pm\nSaturday, 10 am to 2 pm',
+  },
+  // Card 198: the same block with nothing typed, filling itself from business facts
+  // (the wall's fixture facts; phone and email set, the phone still unconfirmed).
+  {
+    _type: 'contactCardSection',
+    _key: 'contact-facts',
+    heading: 'Visit or call',
+    facts: {
+      ...FIXTURE_FACTS,
+      phone: '(555) 555-0142',
+      phoneConfirmed: false,
+      email: 'office@example.com',
+    },
+  },
+  {
+    _type: 'progressSection',
+    _key: 'progress',
+    heading: 'Our spring fundraiser',
+    intro: 'Every gift goes straight to the new roof.',
+    unit: 'dollars',
+    goal: 50000,
+    raised: 32500,
+    asOf: inDays(0),
+    link: cta('Give to the fund'),
+  },
+  {
+    _type: 'calendarSubscribeSection',
+    _key: 'subscribe',
+    heading: 'Never miss a date',
+    intro: 'Add our calendar once and new dates arrive on their own.',
+    feed: 'https://example.com/calendar/events.ics',
+  },
+  {
+    _type: 'iconCardsSection',
+    _key: 'iconcards',
+    heading: 'What we do',
+    intro: 'Three things we do well, in plain words.',
+    cards: [
+      [
+        'home',
+        'Make you welcome',
+        'Someone meets you at the door and shows you around.',
+        'Every day',
+      ],
+      ['calendar', 'Keep it simple', 'Pick a time that suits you. We handle the rest.', ''],
+      ['users', 'Do it together', 'Bring a friend, or meet someone new.', 'Saturdays'],
+    ].map(([icon, title, body, note], i) => ({
+      _key: `ic${i}`,
+      icon,
+      title,
+      body,
+      note,
+      link: i === 0 ? cta('Read more') : undefined,
+    })),
+  },
+  {
+    _type: 'stepsRailSection',
+    _key: 'steps',
+    heading: 'How it works',
+    intro: 'Three steps, start to finish.',
+    firstStepCard: true,
+    steps: [
+      ['chat', 'Say hello', 'Tell us what you are after. A sentence is plenty.'],
+      ['calendar', 'Pick a time', 'We offer a few that suit you, and you choose one.'],
+      ['check', 'Come along', 'We will have everything ready when you arrive.'],
+    ].map(([icon, title, body], i) => ({ _key: `st${i}`, icon, title, body })),
+    endHeading: 'Ready when you are.',
+    link: cta('Get started'),
+  },
+  {
+    _type: 'hubSection',
+    _key: 'hub',
+    heading: 'Find the right fit',
+    intro: 'Everything we offer, by who it is for.',
+    groups: [
+      ['For families', ['Weekend workshops', 'After-school club']],
+      ['For schools', ['Class visits', 'Teacher training']],
+      ['For groups', ['Team days', 'Private events']],
+    ].map(([title, cards], gi) => ({
+      _key: `hg${gi}`,
+      title,
+      line: 'A short line about this group.',
+      cards: (cards as string[]).map((card, ci) => ({
+        _key: `hc${gi}${ci}`,
+        title: card,
+        label: gi === 0 ? 'Everyone' : 'By arrangement',
+        when: ci === 0 ? 'Saturdays, 10 am' : undefined,
+        place: ci === 0 ? 'The main hall' : undefined,
+        body: 'A sentence or two about what happens and who it suits.',
+        icon: ['users', 'book', 'home', 'tool', 'heart', 'star'][gi * 2 + ci],
+        image: gi === 0 && ci === 0 ? image(card) : undefined,
+        link: ci === 0 ? cta('Find out more') : undefined,
+      })),
+    })),
+  },
+
+  // ── Every main page a page builder (card 190) ──────────────────────────────
+  // These read what they show themselves (the Contact page's form settings, the posts), so
+  // what they draw here follows the dataset; the policy shows the built-in text.
+  { _type: 'contactFormSection', _key: 'contact-form', sidebar: true },
+  { _type: 'privacyPolicySection', _key: 'privacy-policy', lastUpdated: '2026-01-15' },
+  { _type: 'journalPostsSection', _key: 'journal-posts', showCategories: true }, // scaffold: journal
+  // ── Hours and location (card 196) ──────────────────────────────────────────
+  // These two fill themselves from Business info; on the wall they carry the
+  // made-up facts below instead (the `facts` key exists only for fixtures).
+  {
+    _type: 'hoursSection',
+    _key: 'hours',
+    heading: 'Opening hours',
+    layout: 'card',
+    showAddress: true,
+    showChanges: true,
+    facts: FIXTURE_FACTS,
+  },
+  {
+    _type: 'mapSection',
+    _key: 'map',
+    heading: 'Find us',
+    intro: 'Five minutes from the town square, with parking at the back.',
+    showHours: true,
+    facts: FIXTURE_FACTS,
+  },
 ];
 
 // The race's pages, for the real copy of each block. Missing pages (no Sanity
@@ -284,6 +602,7 @@ const SECTIONS = FIXTURES.map((fixture) => real.get(String(fixture._type)) ?? fi
       <SectionRenderer
         sections={[section]}
         idPrefix={`fx-${i}`}
+        anchors="numbered"
         results={(home?.results ?? []) as never}
         historical={(home?.historical ?? []) as never}
       />

@@ -111,7 +111,7 @@ export default function BrandKit() {
     <Box padding={4}>
       <Stack gap={5} style={{ maxWidth: 720, margin: '0 auto' }}>
         <Stack gap={3}>
-          <ToolHeading icon={ColorWheelIcon}>Brand colours and type</ToolHeading>
+          <ToolHeading icon={ColorWheelIcon}>Brand colors and type</ToolHeading>
           <Text size={2} muted style={{ lineHeight: 1.6 }}>
             For anything made away from the website: a flyer, a Facebook post, a sign at The Oval.
             These are the values the site itself uses, so something made with them will look like it

@@ -31,12 +31,20 @@ const { items = [] } = Astro.props as Props;
 // here) and so past any ordinary screen. The shift is 100/copies, making the
 // cycle exactly one copy, and the duration is per-copy, so the speed is
 // identical no matter how many copies there are.
+//
+// data-flow="off" keeps the flow layer (starter card 192) away: the copies sit
+// off to the right and slide in by the marquee, never by scrolling, so a unit
+// armed there would wait for an arrival that never comes and stay invisible.
 const COPIES = Math.max(4, Math.ceil(24 / Math.max(items.length, 1)));
 const shift = `${(100 / COPIES).toFixed(4)}%`;
 ---
 
 {items.length > 0 && (
-  <div class="ticker border-y-2 border-black bg-primary text-primary-foreground" aria-hidden="true">
+  <div
+    class="ticker border-y-2 border-black bg-primary text-primary-foreground"
+    aria-hidden="true"
+    data-flow="off"
+  >
     <div class="ticker__ease">
       <div class="ticker__track" style={`--ticker-shift: ${shift}`}>
         {Array.from({ length: COPIES }).map(() => (

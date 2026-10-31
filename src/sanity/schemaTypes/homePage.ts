@@ -184,8 +184,8 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'A single word from the headline, set in the handwritten script font. Must match ' +
-        'the word exactly, including case. Ignored when "rotating words" is set.',
+        'A single word from the headline, set in the handwritten script font. Must be a whole ' +
+        'word from the headline (capitals do not matter). Ignored when "rotating words" is set.',
     }),
 
     // Meet the Founder (legacy — hidden for rollback safety)
@@ -413,7 +413,7 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
+        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must be whole words from the headline (capitals do not matter). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
     defineField({
       name: 'testimonialsSubhead',
@@ -475,7 +475,7 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
+        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must be whole words from the headline (capitals do not matter). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
     defineField({
       name: 'servicesGridSubhead',
@@ -541,7 +541,7 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
+        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must be whole words from the headline (capitals do not matter). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
     defineField({
       name: 'finalCtaSubhead',

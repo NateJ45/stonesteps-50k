@@ -32,7 +32,7 @@ export const athlete = defineType({
       title: 'Slug',
       type: 'slug',
       description:
-        'How the results import recognises this runner. To fix how the name reads, change the name.',
+        'How the results import recognizes this runner. To fix how the name reads, change the name.',
       options: { source: 'name', maxLength: 96 },
       // The import matches on it; a hand edit splits one runner into two.
       readOnly: true,

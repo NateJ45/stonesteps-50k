@@ -13,6 +13,11 @@ import { ClientRouter } from 'astro:transitions';
 // Preloaded, not merely imported. See the <link rel="preload"> below.
 import staatlichesWoff2 from '@fontsource/staatliches/files/staatliches-latin-400-normal.woff2?url';
 import { site } from '@/data/site';
+// Site layout slots (starter PORTS.md card 72). Header, hero, density and cards are at their
+// defaults (they emit nothing); motion is 'fade' (card 192), so <html data-motion="fade">.
+import { layout } from '@/data/layout';
+import { layoutAttrs, hasFlow, type SiteLayout } from '@/lib/site-layout';
+import FlowMotion from '@/components/FlowMotion.astro';
 // The routes that really have an OG image, written by `npm run og:pages`.
 import OG_PAGES from '@/data/ogPages.json';
 import { urlFor } from '@/lib/sanity';
@@ -20,6 +25,7 @@ import { localBusinessSchema } from '@/lib/schemas';
 import { getActiveAnnouncement } from '@/lib/queries';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
+import ClientNotes from '@/components/ClientNotes.astro';
 import BackToTop from '@/components/BackToTop';
 import { Toaster } from '@/components/ui/sonner';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics.astro';
@@ -49,6 +55,10 @@ interface Props {
   ogArticle?: { publishedAt?: string; author?: string };
   /** Let the page run up behind a background-less header. See Header.astro. */
   headerOverlay?: boolean;
+  /** The flow layer's full level for this page (starter card 192): 'full' marks <main> data-flow-full when the motion is 'flow'. Ignored under 'fade', this site's motion; the motion wall uses it. */
+  flow?: 'full';
+  /** Override brand.config.json layout.motion for this page only. For the motion wall (/styleguide/motion/), so every motion can be tested from one build. */
+  motion?: SiteLayout['motion'];
 }
 
 const {
@@ -62,7 +72,14 @@ const {
   ogType = 'website',
   ogArticle,
   headerOverlay = false,
+  flow,
+  motion,
 } = Astro.props as Props;
+
+// Motion (starter card 192): the site's layout.motion ('fade' since 2026-10-27), or this page's
+// override. The flow layer's script is rendered only when it runs (flow or fade).
+const pageLayout: SiteLayout = motion ? { ...layout, motion } : layout;
+const flowFull = flow === 'full' && pageLayout.motion === 'flow';
 
 const canonical = new URL(Astro.url.pathname, site.url).toString();
 
@@ -174,7 +191,7 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
 ---
 
 <!doctype html>
-<html lang={site.lang}>
+<html lang={site.lang} {...layoutAttrs(pageLayout)}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -287,7 +304,8 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
         function applyTheme() {
           document.documentElement.classList.toggle(
             'motion',
-            !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+              document.documentElement.getAttribute('data-motion') !== 'none',
           );
           let dark = false;
           try {
@@ -406,11 +424,19 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
 
     <Header siteSettings={siteSettings} overlay={headerOverlay} />
 
-    <main id="main" class="flex-1">
+    <main id="main" class="flex-1" data-flow-full={flowFull ? '' : undefined}>
       <slot />
     </main>
 
     <Footer siteSettings={siteSettings} />
+
+    {/* The client review layer (starter card 195): renders nothing unless CLIENT_NOTES_ON is true in
+        src/data/client-notes.ts AND the site is on a pre-launch address. Off: this site is live. */}
+    <ClientNotes />
+
+    {/* The flow layer (starter card 192): only when layout.motion is flow or fade. This site runs
+        'fade': one 200ms fade as each block below the first screen arrives. */}
+    {hasFlow(pageLayout) && <FlowMotion />}
 
     {/*
       Both islands were previously `client:load` which forced the JS to
