@@ -13,25 +13,16 @@ name: Publish scheduled drafts
 # seconds. Do NOT add an install step here; if the script ever needs a package,
 # that is the signal that the design broke, not that the job needs npm.
 #
-# ── THIS REPO IS A TEMPLATE ──────────────────────────────────────────────────
-# ncs-astro-sanity-starter ships no Sanity project of its own, so there are no
-# drafts to publish and the schedule is COMMENTED OUT (same stance as
-# sanity-backup.yml elsewhere in the family). It is committed anyway so a FORK
-# inherits working scheduled publishing on day one.
-#
-# To enable in a fork, per site:
-#   1. Set the SANITY_API_WRITE_TOKEN repo secret: a Sanity token with the
-#      Editor role. Not SANITY_AUTH_TOKEN, which the backup workflow uses and
-#      which is usually a READ token (it cannot publish). Card 111.
-#   2. Set the SANITY_PROJECT_ID repo variable to that site's Sanity project id.
-#      Not a secret (it ships in the client bundle), a variable because this
-#      file is a template and every fork has a different one.
-#   3. Uncomment the `schedule:` block below.
+# ── ENABLED FOR THIS SITE ────────────────────────────────────────────────────
+# The SANITY_API_WRITE_TOKEN repo secret (a Sanity token with the Editor role;
+# not SANITY_AUTH_TOKEN, which the backup workflow uses and which is usually a
+# READ token that cannot publish) and the SANITY_PROJECT_ID repo variable are
+# both set, so the schedule below is live. The starter ships this file with the
+# schedule commented out, because it has no Sanity project of its own.
 #
 # The two-job gate below is the load-bearing part and is intact: with the secret
 # or the variable missing, the workflow logs a warning and skips rather than
-# failing. That is what makes it safe to commit before either exists.
-# workflow_dispatch stays on, so a manual run always works.
+# failing. workflow_dispatch stays on, so a manual run always works.
 #
 # AFTER A PUBLISH IT REBUILDS THE SITE (card 111). The site is statically built,
 # so a scheduled publish nobody deploys is invisible. When a run published
@@ -44,8 +35,8 @@ name: Publish scheduled drafts
 # field description in the Studio says exactly that. GitHub's scheduler is also
 # best-effort and can be delayed under load, so treat this as a soft promise.
 on:
-  # schedule:
-  #   - cron: '*/30 * * * *' # every half hour
+  schedule:
+    - cron: '*/30 * * * *' # every half hour
   workflow_dispatch:
 
 jobs:
@@ -63,7 +54,7 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::SANITY_API_WRITE_TOKEN secret and/or SANITY_PROJECT_ID variable not set; skipping scheduled publishing. Expected in the unforked template."
+            echo "::warning::SANITY_API_WRITE_TOKEN secret and/or SANITY_PROJECT_ID variable not set; skipping scheduled publishing. Add them to enable scheduled publishing."
           fi
 
   publish:

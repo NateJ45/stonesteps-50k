@@ -16,6 +16,12 @@ sequence).
 
 ## Waiting on a human
 
+### 1w. The e2e job is pinned to ubuntu-24.04 (2026-10-30)
+
+`ubuntu-latest` moved to 26.04, where Playwright's WebKit will not launch, so every
+`[webkit-iphone]` test failed in shard 3. `ci.yml`'s `e2e` job now says `runs-on: ubuntu-24.04`.
+Unpin it once a Playwright release supports 26.04 (try it on a branch first).
+
 ### 1v. The Auburn port cards (2026-10-27): content the race can add when it wants
 
 The blocks are in; nothing on a live page changed. When Dave has them: course maps, the waiver and past results PDFs go in Studio > "Downloads (course maps, waivers)" and a Documents block on the course or contact page; a phone action bar ("Results" now, "Register" once registration opens) in Site setup > Navigation; a race YouTube channel id, if there ever is one, for the Latest video block. The form builder (194) was left out on purpose; see docs/agent/changelog.md. The flow layer (192) came in later the same day as motion `fade`.
@@ -39,7 +45,7 @@ staff view once the race director's id is in `kitConfig.staff`.
 one says "not set up yet" or keeps its old behaviour. The settings, each once, are the table in OPERATIONS.md "The
 Studio kit": `GITHUB_DEPLOY_TOKEN` (failed-deploy line and Try again), Cloudflare Web Analytics and its three Worker
 settings (Visitors), the `message_status` migration on `stonesteps-contact` (Messages statuses), the
-`SANITY_API_WRITE_TOKEN` repo secret and the `publish-due.yml` schedule (Publish automatically at), the
+`SANITY_API_WRITE_TOKEN` repo secret and the `publish-due.yml` schedule (both done 2026-10-30), the
 `change-note.yml` schedule (morning change note), `"studioWeek"` and `"previewShare"` in the publish webhook's
 deny-list, and the race director's Sanity user id in `staff` (`src/sanity/kit.config.ts`).
 

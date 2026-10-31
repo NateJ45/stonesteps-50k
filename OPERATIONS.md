@@ -182,9 +182,9 @@ automatically at** under its Publishing tab: the editor sets a time and leaves t
 `.github/workflows/publish-due.yml` publishes it within the half hour, then starts `deploy.yml` so the change goes
 live. Home's **Coming up** card lists what is waiting.
 
-The workflow's schedule is commented out until it has its token. To switch it on: set the `SANITY_API_WRITE_TOKEN`
-repo secret (a Sanity token with the Editor role; not `SANITY_AUTH_TOKEN`, which the backup reads with), check the
-`SANITY_PROJECT_ID` repo variable, then uncomment `schedule:` in `publish-due.yml`. By hand:
+The workflow's schedule is on (every half hour, since 2026-10-30). It needs the `SANITY_API_WRITE_TOKEN` repo secret (a
+Sanity token with the Editor role; not `SANITY_AUTH_TOKEN`, which the backup reads with) and the `SANITY_PROJECT_ID`
+repo variable, and skips with a warning if either goes missing. By hand:
 `NCS_PRODUCTION_WRITE=yes node scripts/publish-due.mjs --apply` (card 114's write gate).
 
 ### The Studio kit (PORTS.md cards 106 to 120)
@@ -215,7 +215,8 @@ Each piece that needs a setting says so in the Studio and keeps working without 
 | `CF_ANALYTICS_TOKEN`, `CF_ACCOUNT_ID`, `CF_WEB_ANALYTICS_SITE_TAG`       | secret, and `wrangler.jsonc` `vars`                            | Home's Visitors card (card 115), see below                                                              |
 | `PUBLIC_CF_ANALYTICS_TOKEN` (the beacon token)                           | repo variable, read by `deploy.yml`                            | The Cloudflare beacon, and its line on the privacy page                                                 |
 | `message_status` table                                                   | `npx wrangler d1 migrations apply stonesteps-contact --remote` | Messages remembers New / Replied / Spam (card 117)                                                      |
-| `SANITY_API_WRITE_TOKEN`, then uncomment the schedule                    | repo secret, `publish-due.yml`                                 | Publish automatically at (above)                                                                        |
+| `SANITY_API_WRITE_TOKEN` (done, schedule on)                             | repo secret, `publish-due.yml`                                 | Publish automatically at (above)                                                                        |
+| `PUBLIC_STUDIO_HELP_EMAIL` (done)                                        | repo variable, read by `deploy.yml`                            | The email button on the Studio's Ask card                                                               |
 | Uncomment the schedule                                                   | `change-note.yml` (uses `SANITY_AUTH_TOKEN`)                   | The morning "What changed" issue (card 117)                                                             |
 | Add `"studioWeek"` and `"previewShare"` to the deny-list                 | the publish webhook's filter (above)                           | A checklist tick or a new preview link does not rebuild the site                                        |
 | The race director's Sanity user id                                       | `staff` in `src/sanity/kit.config.ts`                          | His staff view, even though he is an administrator                                                      |
