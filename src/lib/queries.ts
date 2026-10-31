@@ -474,7 +474,6 @@ export const SITE_SETTINGS_PROJECTION = `{
       showPortfolio,
       showJournal,
       showShop,
-      showEDesign,
       showGiftCertificates,
       showPress,
       showResources,
