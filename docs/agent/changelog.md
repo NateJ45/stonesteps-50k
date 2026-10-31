@@ -1,5 +1,7 @@
 # Change history
 
+_2026-10-30: CI reads Node from `.nvmrc` (starter card 209)._ Every `actions/setup-node` step asked for `node-version: 22` and took whatever 22.x the runner image had cached, and Astro 7.4.4 refuses anything below 22.23.4. A repo-root `.nvmrc` now pins 22.23.4, every workflow reads it with `node-version-file: .nvmrc`, and `engines.node` rises to match. `docs/agent/studio-kit.md` is resynced with the starter in the same change (card 210's Inbox section), so `sync-check` reads SAME.
+
 _2026-10-28: "Fetch the latest results" on Studio Home (starter card 202)._ Dave asked how to reload results after the timer corrected the 2026 field (Daniel Wicks added at 4th in the 50K). The correction went up after the 10-27 run and the 10-28 scheduled run was late, so a manual run fixed it. A new row moves the count and would have deployed anyway, but a fixed time or place does not, and the workflow only rebuilt when the result COUNT moved. Two changes: `results-import.yml` now compares a fingerprint (count plus newest `_updatedAt` over results and runners), so a correction rebuilds the site by itself; and a Race results card on Home (`src/sanity/components/ResultsImportCard.tsx`, through the kit's new `homeRail` slot) starts the import on demand via `/api/race/results-import/`. The route sits outside `/api/studio/` because that folder is the kit's PORTABLE set.
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
