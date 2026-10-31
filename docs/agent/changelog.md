@@ -2,6 +2,8 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+_2026-10-30: Link labels name what they show (axe 4.14)._ The Dependabot group that brought axe-core 4.14 turned on `label-content-name-mismatch`: a link's `aria-label` must contain its visible text. The course teaser link (`CoursePosterBand.astro`) and the three `/contact` region pins (`RegionPoster.astro`) now start their labels with the words on screen ("The Oval, start and finish. Directions (opens Google Maps)").
+
 _2026-10-25: The /contact region map links somewhere._
 
 Nathan found the three-pin plate not that useful: it showed where things are and left the reader nothing to do. The plate is unchanged in look, but each place in `RegionPoster.astro` is now an SVG link: Downtown and CVG open a Google Maps hotel search centred on that pin, and The Oval opens driving directions (`directionsUrl`). Straight-line miles became drive times (about 15 and 25 minutes, rounded no-traffic estimates hand-entered in the component). Each link has a transparent tap target with a dashed focus ring, and the small lines get bigger type under 480px so they stay readable on a phone.

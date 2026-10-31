@@ -102,7 +102,7 @@ const label = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where th
       target="_blank"
       rel="noopener"
       class="rp-link"
-      aria-label="Driving directions to The Oval (opens Google Maps)"
+      aria-label="The Oval, start and finish. Directions (opens Google Maps)"
     >
       <rect
         x={oval[0] - 160}
@@ -129,7 +129,7 @@ const label = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where th
       target="_blank"
       rel="noopener"
       class="rp-link"
-      aria-label="Hotels downtown, about 15 minutes' drive (opens Google Maps)"
+      aria-label={`Downtown, ${DRIVE_DOWNTOWN_MIN} min drive. See hotels (opens Google Maps)`}
     >
       <rect
         x={downtown[0] - 22}
@@ -156,7 +156,7 @@ const label = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where th
       target="_blank"
       rel="noopener"
       class="rp-link"
-      aria-label="Hotels near CVG airport, about 25 minutes' drive (opens Google Maps)"
+      aria-label={`CVG airport, ${DRIVE_CVG_MIN} min drive. See hotels (opens Google Maps)`}
     >
       <rect x={cvg[0] - 130} y={cvg[1] - 22} width="260" height="148" rx="14" class="rp-hit"></rect>
       <circle cx={cvg[0]} cy={cvg[1]} r="12" class="rp-pin"></circle>
