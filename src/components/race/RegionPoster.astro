@@ -96,13 +96,15 @@ const label = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where th
 
     {/* Each place is one link. The transparent rect is the tap target, so a
         thumb does not have to land on the letters; it also carries the focus
-        ring. */}
+        ring. Each aria-label starts with the words on screen (axe
+        label-content-name-mismatch), and the {' '} between the text lines stops
+        the build running them together ("The OvalStart and finish"). */}
     <a
       href={ovalHref}
       target="_blank"
       rel="noopener"
       class="rp-link"
-      aria-label="Driving directions to The Oval (opens Google Maps)"
+      aria-label="The Oval, start and finish. Directions (opens Google Maps)"
     >
       <rect
         x={oval[0] - 160}
@@ -115,10 +117,10 @@ const label = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where th
       <circle cx={oval[0]} cy={oval[1]} r="16" class="rp-pin rp-pin--race"></circle>
       <text x={oval[0]} y={oval[1] - 34} text-anchor="middle" class="rp-name rp-name--race">
         The Oval
-      </text>
+      </text>{' '}
       <text x={oval[0]} y={oval[1] + 54} text-anchor="middle" class="rp-sub">
         Start and finish
-      </text>
+      </text>{' '}
       <text x={oval[0]} y={oval[1] + 88} text-anchor="middle" class="rp-go">
         Directions →
       </text>
@@ -129,7 +131,7 @@ const label = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where th
       target="_blank"
       rel="noopener"
       class="rp-link"
-      aria-label="Hotels downtown, about 15 minutes' drive (opens Google Maps)"
+      aria-label={`Downtown, ${DRIVE_DOWNTOWN_MIN} min drive. See hotels (opens Google Maps)`}
     >
       <rect
         x={downtown[0] - 22}
@@ -142,10 +144,10 @@ const label = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where th
       <circle cx={downtown[0]} cy={downtown[1]} r="12" class="rp-pin"></circle>
       <text x={downtown[0] + 26} y={downtown[1] - 4} class="rp-name">
         Downtown
-      </text>
+      </text>{' '}
       <text x={downtown[0] + 26} y={downtown[1] + 30} class="rp-sub">
         {DRIVE_DOWNTOWN_MIN} min drive
-      </text>
+      </text>{' '}
       <text x={downtown[0] + 26} y={downtown[1] + 66} class="rp-go">
         See hotels →
       </text>
@@ -156,16 +158,16 @@ const label = `Map of the Cincinnati area. The Oval in Mt. Airy Forest, where th
       target="_blank"
       rel="noopener"
       class="rp-link"
-      aria-label="Hotels near CVG airport, about 25 minutes' drive (opens Google Maps)"
+      aria-label={`CVG airport, ${DRIVE_CVG_MIN} min drive. See hotels (opens Google Maps)`}
     >
       <rect x={cvg[0] - 130} y={cvg[1] - 22} width="260" height="148" rx="14" class="rp-hit"></rect>
       <circle cx={cvg[0]} cy={cvg[1]} r="12" class="rp-pin"></circle>
       <text x={cvg[0]} y={cvg[1] + 50} text-anchor="middle" class="rp-name">
         CVG airport
-      </text>
+      </text>{' '}
       <text x={cvg[0]} y={cvg[1] + 82} text-anchor="middle" class="rp-sub">
         {DRIVE_CVG_MIN} min drive
-      </text>
+      </text>{' '}
       <text x={cvg[0]} y={cvg[1] + 116} text-anchor="middle" class="rp-go">
         See hotels →
       </text>
