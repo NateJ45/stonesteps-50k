@@ -768,6 +768,9 @@ export const siteSettings = defineType({
     // IMPORTANT: an unset field (undefined/null) counts as VISIBLE — only an
     // explicit `false` hides a section. This means the existing live site is
     // completely unaffected until an editor intentionally turns something off.
+    // 2026-10-30 (PORTS.md card 208): `showEDesign` was RETIRED. Nothing read
+    // it. Old values come out with `scripts/retire-fields.mjs` (rule 16),
+    // never "Remove field".
     defineField({
       name: 'sectionVisibility',
       // NOT A STONE STEPS FIELD. Toggles for a portfolio, shop, e-design, gift certificates, a style quiz and a budget calculator. None of them exist here, and the footer links they gate are replaced by this race's own footer columns.
@@ -801,14 +804,6 @@ export const siteSettings = defineType({
         defineField({
           name: 'showShop',
           title: 'Shop',
-          type: 'boolean',
-          initialValue: true,
-          description:
-            'When off, this section disappears from the menu, footer, homepage, and its own page (which redirects home). Your drafts stay safe. Turn it back on when ready.',
-        }),
-        defineField({
-          name: 'showEDesign',
-          title: 'E-Design',
           type: 'boolean',
           initialValue: true,
           description:

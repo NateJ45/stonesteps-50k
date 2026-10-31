@@ -33,7 +33,6 @@ const SEO_PAGE_TYPES = new Set<string>([
   'faqPage',
   'contactPage',
   'journalPage',
-  'eDesignPage',
   'shopPage',
   'giftPage',
   'resourcesPage',
