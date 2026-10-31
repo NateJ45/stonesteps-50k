@@ -32,8 +32,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
-
+          node-version-file: .nvmrc
       # No `npm ci`: the script uses only built-in fetch, on purpose, so this
       # job stays a few seconds rather than a few minutes.
       - name: Check every external link in the dataset

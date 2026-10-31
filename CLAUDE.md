@@ -20,7 +20,7 @@ _Provenance: forked from the Reid Design build._
 
 Full stack notes and the `astro.config.mjs` landmines are in `docs/agent/stack-and-config.md`. The must-knows:
 
-- **Astro 7.x**, TypeScript strict, `output: 'static'` with a handful of SSR routes. Node 22.12+.
+- **Astro 7.x**, TypeScript strict, `output: 'static'` with a handful of SSR routes. Node 22.23.4 (pinned in `.nvmrc`, which every workflow reads; starter card 209).
 - **Sanity v6** is the CMS. The Studio lives IN THIS PACKAGE (schemas in `src/sanity/schemaTypes/`, desk in `src/sanity/structure.ts`, config at the repo-root `sanity.config.ts`, CLI config in `sanity.cli.ts`) and is **embedded at `/studio`** via `@sanity/astro`, so it rebuilds with every deploy and can never drift stale. There is deliberately no `studioHost`/`deployment` in `sanity.cli.ts` so a stray `sanity deploy` cannot recreate a hosted copy. `npm run typegen` regenerates types from the schemas.
 - **Live draft preview at `/preview/**`** through Sanity's Presentation tool (click-to-edit, live refresh over SSE, in-canvas section controls). Rules for touching it are in `.claude/rules/live-preview.md`.
 - **Tailwind 4 via `@tailwindcss/vite`.** There is no `tailwind.config.mjs`. Brand tokens live in `@theme` blocks in `src/styles/globals.css`.
