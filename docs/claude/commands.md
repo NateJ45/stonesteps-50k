@@ -31,3 +31,7 @@ Standalone scripts (not path-scoped):
 - A note on `npx sanity build`: it writes to `./dist` by default, which would clobber the Astro build. The Studio is built by `astro build`, so there is no `studio:build` script. If you ever need a standalone bundle, pass an output dir: `npx sanity build .studio-dist`.
 
 `public/og-default.png` is committed to the repo because it is a real asset shipped to visitors.
+
+## Share pictures (PORTS.md card 215)
+
+`scripts/finish-share-cards.mjs` (PORTABLE) runs at the end of `npm run build`. It recompresses PNG share cards in `dist/client/og/` and `og-default.png` losslessly, because some link previews drop a picture over about 600 KB, and warns about any page whose share picture is missing or still over 600 KB. It never fails a build. The Studio page gets its share tags from its PORTABLE page, using the brand name and `/og-default.png`.
