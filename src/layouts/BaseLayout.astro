@@ -28,7 +28,8 @@ import Footer from '@/components/Footer.astro';
 import ClientNotes from '@/components/ClientNotes.astro';
 import BackToTop from '@/components/BackToTop';
 import { Toaster } from '@/components/ui/sonner';
-import GoogleAnalytics from '@/components/analytics/GoogleAnalytics.astro';
+import Analytics from '@/components/Analytics.astro';
+import SiteEvents from '@/components/analytics/SiteEvents.astro';
 import GoogleAnalyticsEvents from '@/components/analytics/GoogleAnalyticsEvents.astro';
 import '@/styles/globals.css';
 // Starwind UI CSS — accordion keyframes + @theme inline for new semantic tokens.
@@ -144,7 +145,7 @@ const allSchemas = siteSettings ? [localBusinessSchema(siteSettings), ...schemas
 // A privacy page that hand-maintains its own copy of these tests will
 // eventually tell visitors the opposite of what the site is doing, which is the
 // near-miss written up in that module and in PORTS.md card 54.
-import { cfAnalyticsToken as cfToken, gaId, hasCfAnalytics, hasGa } from '@/lib/analytics-config';
+import { hasGa } from '@/lib/analytics-config';
 import { withSlash } from '@/lib/links';
 
 // Notes on the two values, kept here because this is where they are used.
@@ -349,18 +350,13 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
       })();
     </script>
 
-    {/* Cloudflare Web Analytics — conditional, no cookie banner needed. */}
-    {hasCfAnalytics && (
-      <script
-        defer
-        src="https://static.cloudflareinsights.com/beacon.min.js"
-        data-cf-beacon={`{"token": "${cfToken}"}`}
-      ></script>
-    )}
-
-    {/* Google Analytics 4 — conditional, loaded at idle. See the component. */}
-    {hasGa && <GoogleAnalytics gaId={gaId} />}
+    {/* Cloudflare Web Analytics and GA4, each conditional on its own variable
+        (src/components/Analytics.astro). Then this site's own registration_click
+        listener (inline, GA4 only), then the shared event layer (card 217), which
+        is a bundled script and renders whether or not GA4 is on. */}
+    <Analytics />
     {hasGa && <GoogleAnalyticsEvents />}
+    <SiteEvents />
 
     <ClientRouter />
 

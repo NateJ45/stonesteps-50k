@@ -67,3 +67,8 @@ docs/superpowers
 src/components/Hero.astro
 src/components/HeroBackground.astro
 src/layouts/BaseLayout.astro
+
+# The chart kit (PORTS.md card 218): the same bytes the WordPress themes carry,
+# pinned by a hash in src/lib/studio-board.test.ts. Prettier must never rewrite them.
+src/sanity/kit/board/ncs-charts.js
+src/sanity/kit/board/ncs-charts.css
