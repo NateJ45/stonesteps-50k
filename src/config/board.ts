@@ -57,13 +57,11 @@ export const boardConfig: BoardConfig = {
   // Visits are counted from September 5. Clicks on RunSignUp links and messages sent were
   // counted from October 5. The four link events below begin when the shared layer went out.
   since: {
-    all: '2026-10-05',
-    visitors: '2026-09-05',
-    visits: '2026-09-05',
-    pageViews: '2026-09-05',
-    newVisitors: '2026-09-05',
+    all: '2026-09-05',
     searchClicks: '2026-09-15',
     searchAppearances: '2026-09-15',
+    'event:registration_click': '2026-10-05',
+    'event:generate_lead': '2026-10-05',
     'event:contact_click': NEW_LINK_EVENTS_SINCE,
     'event:directions_click': NEW_LINK_EVENTS_SINCE,
     'event:watch_click': NEW_LINK_EVENTS_SINCE,
