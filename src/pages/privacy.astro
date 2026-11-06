@@ -26,6 +26,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/Hero.astro';
 import { getSiteSettings } from '@/lib/queries';
 import { hasCfAnalytics, hasGa } from '@/lib/analytics-config';
+import { eventsConfig } from '@/config/events';
+import { eventsSentence } from '@/lib/event-kinds';
 
 const siteSettings = await getSiteSettings();
 
@@ -37,7 +39,11 @@ const contactEmail = siteSettings?.email?.trim() || 'rd@stonesteps50k.com';
 // Reviewed date. Update this whenever the substance changes, not on every
 // deploy: a policy that claims to have been reviewed today, every day, tells a
 // reader nothing.
-const lastReviewed = 'September 2026';
+const lastReviewed = 'November 2026';
+
+// The kinds of click the shared event layer counts, worked out from
+// src/config/events.ts (card 217) so this page cannot fall behind what is sent.
+const eventsLine = eventsSentence(eventsConfig);
 ---
 
 <BaseLayout
@@ -165,11 +171,11 @@ const lastReviewed = 'September 2026';
                   does set cookies on your device, named <code>_ga</code> and <code>_ga_</code>
                   followed by a stream id, so a return visit is recognized as the same person rather
                   than a new one. It records which pages get opened, roughly what part of the world
-                  the visit came from, and what kind of device was used. It also counts two actions:
-                  following a link through to RunSignUp, and a contact message being sent. It
-                  records that the action happened, never your name, email address or anything you
-                  wrote. It is used to see whether people can find the course description, the
-                  results and the registration page, nothing more.
+                  the visit came from, and what kind of device was used. It counts following a link
+                  through to RunSignUp and a contact message being sent. {eventsLine} It records
+                  that the action happened, never your name, email address or anything you wrote. It
+                  is used to see whether people can find the course description, the results and the
+                  registration page, nothing more.
                 </p>
               )}
               {hasGa && (

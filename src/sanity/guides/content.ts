@@ -1381,6 +1381,40 @@ guides.push(
       { kind: 'seealso', items: ['The once-a-year list', 'Read messages from the website'] },
     ],
   },
+  {
+    slug: 'reading-your-report',
+    category: 'Once a year',
+    title: 'Reading the Report',
+    icon: 'info',
+    lead: 'How many people came to the website and what they did, set against the same time a year before.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'The Report is for administrators, and it appears in the bar at the top of the Studio only when it has been switched on for the site.',
+      },
+      { kind: 'h', text: 'Choosing a period' },
+      {
+        kind: 'p',
+        text: 'Pick **Month**, **Quarter** or **Year**, then choose which one from the list beside it. A period that is not over yet says **so far**. It counts through yesterday and is set against the same days a year before.',
+      },
+      { kind: 'h', text: 'What the words mean' },
+      {
+        kind: 'bullets',
+        items: [
+          '**Up 13%** compares this period with the same period a year before.',
+          '**Not tracked yet** means the website was not counting this then. Because the race turns on one day a year, most comparisons start to mean something after the next race.',
+          'The small **i** beside a number says how it is counted.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Sign-up clicks are clicks, not entries.',
+        text: 'The website sees someone press a link to RunSignUp. It cannot see whether they finished signing up, so RunSignUp has the true entry count.',
+      },
+    ],
+  },
 );
 
 GUIDES_FOR_TYPE.race = [
