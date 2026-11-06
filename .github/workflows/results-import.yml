@@ -133,7 +133,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       # The dataset is public, so this needs no token. Taken before and after
       # so the deploy can be skipped on the 60 days a year when the import
