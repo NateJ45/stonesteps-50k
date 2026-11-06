@@ -44,7 +44,7 @@ Tests: `tests/ga-events.spec.ts` stubs `window.gtag`, never leaves the site (Run
 
 `off` in `events.ts` also lists `outbound_click` and `download_click` (Enhanced Measurement counts those) and every other shared event (`form_view`, `embed_interact`, `article_*`, `site_search`, `search_no_results`, `page_not_found`, `js_error`), so the site counts exactly the table above plus its two goal events. `sponsor_click` needs a look-up because the classifier gets an address, not the element: the rule checks the address against the `a.patch__link` links on the page.
 
-September 2026: 335 of the 469 page views on 2026-09-18 (the day of the move) were hostName `localhost`, our own test runs (part of the 347-session localhost group above); the real site had 134 views that day. The Report lists September 2026 as a `gaps` month for that reason (the Worker's series report does not filter by hostName).
+September 2026: 335 of the 469 page views on 2026-09-18 (the day of the move) were hostName `localhost`, our own test runs (part of the 347-session localhost group above); the real site had 134 views that day. The Report does not count them: the `stonesteps` entry in studio-status `src/site-series-config.ts` has `hosts`, which limits every GA4 query to `stonesteps50k.com` and `www`.
 
 ## The Report (card 218)
 

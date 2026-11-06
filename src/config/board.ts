@@ -24,10 +24,8 @@
 //                       the shared layer (SiteEvents.astro) with src/config/events.ts
 //
 // DATES: Google Analytics has page views from 2026-09-05, so September 2026 is a
-// part month. It is also listed in `gaps`: about a third of that month's visits
-// came from our own test runs on localhost (the property held 347 sessions
-// there), which the Worker cannot filter out, so a year-on-year comparison with
-// it would mislead. Clicks began on 2026-10-05; the four new link events begin
+// part month. Our own test runs on localhost (347 sessions that month) are not
+// counted: the Worker's `hosts` setting keeps only this site's hostnames. Clicks began on 2026-10-05; the four new link events begin
 // on NEW_LINK_EVENTS_SINCE, which is the day the shared layer was deployed
 // (update it if that is not the right day). Google's search numbers begin on
 // 2026-09-15, when the site first shows in Search Console.
@@ -40,7 +38,7 @@ import type { BoardConfig } from '../lib/studio-board';
 import { site } from '../data/site';
 
 /** The day the shared link events (contact, directions, watch, sponsor) began to be counted. */
-const NEW_LINK_EVENTS_SINCE = '2026-11-07';
+const NEW_LINK_EVENTS_SINCE = '2026-11-06';
 
 const REGISTER =
   'Each time someone clicked a link through to RunSignUp, where runners sign up. These are clicks, not entries: the website cannot see whether the person then finished signing up. RunSignUp has the true entry count.';
@@ -49,7 +47,7 @@ const CONTACT_SENT =
 const GOOGLE =
   'Times someone chose the race website in a Google search. From Google Search Console, which runs about three days behind.';
 const VISITORS =
-  'People who came to the website. Someone who comes back in the same period is counted once. Counting began on September 5, 2026, when the website moved.';
+  'People who came to the website. Someone who comes back in the same period is counted once. Counting began on September 5, 2026, on the old website; the new one started on September 18.';
 const RESULTS_PAGES = ['/results', '/runners', '/records', '/all-time-records'];
 
 export const boardConfig: BoardConfig = {
@@ -71,12 +69,7 @@ export const boardConfig: BoardConfig = {
     'event:watch_click': NEW_LINK_EVENTS_SINCE,
     'event:sponsor_click': NEW_LINK_EVENTS_SINCE,
   },
-  gaps: [
-    {
-      months: ['2026-09'],
-      text: 'About a third of September 2026 visits came from our own testing while the website was being finished, so the month is left out rather than compared with next year.',
-    },
-  ],
+  gaps: [],
 
   overview: {
     tiles: [
