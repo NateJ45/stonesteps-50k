@@ -18,7 +18,11 @@
 //
 // WHAT EACH EVENT IS, AND WHAT SENDS IT:
 //   registration_click  src/lib/ga-events-listener.js (inline), a click or
-//                       middle-click on a RunSignUp link
+//                       middle-click on a RunSignUp link. Here it means the race
+//                       page and sign-up form only: studio-status splits the one
+//                       event by its link
+//   results_click       the same event on a RunSignUp results link. Not an event
+//                       GA4 knows, only studio-status's name for that half
 //   generate_lead       src/lib/ga-events.ts, called by RaceContactForm.tsx
 //   contact_click, directions_click, watch_click, sponsor_click
 //                       the shared layer (SiteEvents.astro) with src/config/events.ts
@@ -41,7 +45,9 @@ import { site } from '../data/site';
 const NEW_LINK_EVENTS_SINCE = '2026-11-06';
 
 const REGISTER =
-  'Each time someone clicked a link through to RunSignUp, where runners sign up. These are clicks, not entries: the website cannot see whether the person then finished signing up. RunSignUp has the true entry count.';
+  'Each time someone clicked a link through to the race’s page or sign-up form on RunSignUp. These are clicks, not entries: the website cannot see whether the person then finished signing up. RunSignUp has the true entry count. Clicks through to results are counted apart.';
+const RESULTS_CLICKS =
+  'Each time someone clicked a link through to race results on RunSignUp. It shows interest in the results, not sign-ups, so these are kept apart from the clicks to sign up.';
 const CONTACT_SENT =
   'Each time a message was sent from the contact form. It counts a message that went through, never what it said or who sent it.';
 const GOOGLE =
@@ -61,6 +67,7 @@ export const boardConfig: BoardConfig = {
     searchClicks: '2026-09-15',
     searchAppearances: '2026-09-15',
     'event:registration_click': '2026-10-05',
+    'event:results_click': '2026-10-05',
     'event:generate_lead': '2026-10-05',
     'event:contact_click': NEW_LINK_EVENTS_SINCE,
     'event:directions_click': NEW_LINK_EVENTS_SINCE,
@@ -83,6 +90,12 @@ export const boardConfig: BoardConfig = {
         explain: CONTACT_SENT,
       },
       { measure: 'searchClicks', label: 'Clicks from Google', explain: GOOGLE },
+      {
+        measure: 'event:results_click',
+        label: 'Clicks through to race results',
+        explain: RESULTS_CLICKS,
+        up: 'flat',
+      },
     ],
     charts: [
       { measure: 'event:registration_click', title: 'Clicks to sign up, by month' },
@@ -124,6 +137,14 @@ export const boardConfig: BoardConfig = {
       title: 'Results archive',
       explain:
         'Runners looking themselves up, past results, runner pages and the records. The list counts pages opened, so it shows what people looked for, not how many people looked.',
+      tiles: [
+        {
+          measure: 'event:results_click',
+          label: 'Clicks through to race results',
+          explain: RESULTS_CLICKS,
+          up: 'flat',
+        },
+      ],
       charts: [
         {
           measure: 'topContent',
@@ -131,6 +152,7 @@ export const boardConfig: BoardConfig = {
           prefix: RESULTS_PAGES,
           limit: 10,
         },
+        { measure: 'event:results_click', title: 'Clicks through to race results, by month' },
       ],
     },
     {
