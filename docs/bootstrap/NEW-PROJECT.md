@@ -312,22 +312,22 @@ the `PUBLIC_*` vars can be plain).
 **c) Wire the Sanity -> Cloudflare publish webhook**
 
 The site is fully prerendered, so a Sanity content edit only goes live after a
-rebuild. Wire a deploy hook so editors don't need a developer for every content
+rebuild. Wire a GitHub dispatch webhook so editors don't need a developer for every content
 change. Full authoritative steps are in `docs/agent/deployment.md`; summary:
 
-1. **Create the Cloudflare deploy hook** at Cloudflare dashboard -> Workers &
-   Pages -> your Worker -> Settings -> Build hooks (or Triggers -> Deploy hooks,
-   depending on the UI version). Name it `Sanity content publish`, branch
-   `main`. Copy the generated URL.
+1. **Create a GitHub token** (fine-grained, this repo only, Contents: Read and
+   write). The webhook sends it as `Authorization: Bearer <token>`.
 
 2. **Create the Sanity webhook** at manage.sanity.io -> your project -> API ->
    GROQ-powered Webhooks. Name it `Rebuild live site`, dataset `production`,
-   trigger on Create + Update + Delete, HTTP method POST, paste the Cloudflare
-   deploy hook URL. Apply the deny-list GROQ filter (see `docs/agent/deployment.md`
+   trigger on Create + Update + Delete, HTTP method POST, URL
+   `https://api.github.com/repos/<owner>/<repo>/dispatches`, projection
+   `{"event_type": "sanity-publish"}`, the `Authorization` header. Apply the deny-list GROQ filter (see `docs/agent/deployment.md`
    for the exact filter string).
 
-3. **Test:** publish a field change in Sanity Studio and watch the Cloudflare
-   Deployments tab. A new build should kick off within about 10 seconds.
+3. **Test:** publish a field change in Sanity Studio and watch GitHub
+   Actions. A Deploy run (event `repository_dispatch`) should start within
+   seconds.
 
 **d) Pre-launch checklist**
 
