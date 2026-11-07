@@ -108,7 +108,7 @@ Stone Steps specifics on top of the shared text:
 ## Vault (business context lives outside this repo)
 
 - Business context, decisions and the Work log live in `_vault/clients/stone-steps-50k.md` at the Projects root (`C:\Users\natha\Documents\Claude\Projects`). Read its `## Current state` first. Never create notes inside this repo.
-- The note's frontmatter says `plan: none`, `mrr: 0`, but its Current state calls this a paid build for David Corfman, so treat it as paying (confirm with Nathan if unsure): append a Work log row (`- YYYY-MM-DD | ~Xh | summary`) at the end of a session doing real work, per `_vault/README.md` rule 6, then commit and push `_vault/`.
+- Append a Work log row (`- YYYY-MM-DD | ~Xh | summary`) at the end of a session doing real work, per `_vault/README.md` rule 6, then commit and push `_vault/`.
 - Docs are part of "done": update the affected repo docs (this file, README, OPERATIONS, `docs/PENDING.md`, `docs/agent/*`) in the same piece of work as any code, behaviour or decision change.
 
 ## Ports (shared improvements across the site family)
