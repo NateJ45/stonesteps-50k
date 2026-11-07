@@ -118,7 +118,7 @@ off or explicitly deferred with a reason.
 ## Rebuild and publish pipeline
 
 - [ ] Sanity publish webhook created (manage.sanity.io -> project -> API ->
-      GROQ-powered Webhooks) pointing at the Cloudflare deploy hook
+      GROQ-powered Webhooks) sending a GitHub `repository_dispatch` to `deploy.yml`
 - [ ] Webhook tested: publish a document in Studio, confirm a deploy fires and
       the change appears on the live site after the build completes
 - [ ] Team briefed on the rebuild model: edits go live after a rebuild, not
