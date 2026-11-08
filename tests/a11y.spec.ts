@@ -6,10 +6,11 @@ import { settle } from './helpers';
 
 // Accessibility (axe-core), light mode, every route. Zero violations.
 //
-// Tags are explicit: WCAG 2.0 / 2.1 / 2.2 level A and AA plus axe's best
-// practices. WCAG 2.2 is listed on purpose, because axe leaves its 2.2 rules
-// (target-size, 2.5.8) off unless 'wcag22aa' is requested. Exclude a rule only
-// with a comment saying which false positive it is.
+// Tagged WCAG 2.0 A/AA, 2.1 A/AA and 2.2 AA plus best-practice, so the 2.2 rules (target-size,
+// 2.5.8) run by name instead of depending on axe's default set (a WCAG 2.2 sweep on
+// 2026-11-08 found failures the old untagged run never reported). A rule added by an axe upgrade under one of these
+// tags is enforced the day it lands. Exclude a rule only with a comment saying which false
+// positive it is.
 
 for (const route of routes) {
   test(`a11y (light): ${route} has no axe violations`, async ({ page }) => {
