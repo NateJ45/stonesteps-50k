@@ -416,8 +416,10 @@
   }
 }
 .bb-hub__group {
-  /* A jump lands the group's name just under the header and the chip row. */
-  scroll-margin-top: calc(var(--hub-header, 4rem) + 4.5rem);
+  /* A jump lands the group's name just under the header and the chip row. `html` already
+     reserves the header (scroll-padding-top: --header-h + 0.75rem), so that part is taken
+     back out of the margin: the landing spot is the same as before the padding existed. */
+  scroll-margin-top: calc(var(--hub-header, 4rem) + 4.5rem - var(--header-h) - 0.75rem);
 }
 .bb-hub__group + .bb-hub__group {
   margin-top: var(--spacing-section-md);
@@ -507,7 +509,8 @@
   }
 }
 .bb-hcard {
-  scroll-margin-top: calc(var(--hub-header, 4rem) + 5rem);
+  /* Same arithmetic as .bb-hub__group: html's scroll-padding-top already holds the header. */
+  scroll-margin-top: calc(var(--hub-header, 4rem) + 5rem - var(--header-h) - 0.75rem);
 }
 /* Phones: a card without a photo is a compact row, a 96px tile left and the words right. */
 @media (width < 40rem) {
