@@ -14,6 +14,14 @@
 // The animation stops entirely under prefers-reduced-motion. A permanently
 // moving strip is a genuine problem for vestibular disorders, and there is no
 // version of this that is worth that.
+//
+// WCAG 2.2.2 (Pause, Stop, Hide): moving content that starts by itself and runs
+// past five seconds needs a way to stop it, whatever the visitor's motion
+// setting says. So the strip carries a real Pause / Play button. It is OUTSIDE
+// the aria-hidden window (a hidden button is no control at all), reachable by
+// keyboard, and the strip also holds still while the pointer is over it or focus
+// is anywhere inside it. The click handler is delegated from document, bound
+// once, so it survives Astro's ClientRouter swaps.
 
 type Props = { items?: string[] };
 const { items = [] } = Astro.props as Props;
@@ -42,30 +50,101 @@ const shift = `${(100 / COPIES).toFixed(4)}%`;
 {items.length > 0 && (
   <div
     class="ticker border-y-2 border-black bg-primary text-primary-foreground"
-    aria-hidden="true"
     data-flow="off"
+    data-ticker
   >
-    <div class="ticker__ease">
-      <div class="ticker__track" style={`--ticker-shift: ${shift}`}>
-        {Array.from({ length: COPIES }).map(() => (
-          <ul class="ticker__row">
-            {items.map((item) => (
-              <li>
-                {item}
-                <span class="ticker__dot">&middot;</span>
-              </li>
-            ))}
-          </ul>
-        ))}
+    <div class="ticker__window" aria-hidden="true">
+      <div class="ticker__ease">
+        <div class="ticker__track" style={`--ticker-shift: ${shift}`}>
+          {Array.from({ length: COPIES }).map(() => (
+            <ul class="ticker__row">
+              {items.map((item) => (
+                <li>
+                  {item}
+                  <span class="ticker__dot">&middot;</span>
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
       </div>
     </div>
+    <button
+      type="button"
+      class="ticker__toggle"
+      data-ticker-toggle
+      aria-label="Pause the scrolling strip"
+    >
+      <span data-ticker-toggle-text>Pause</span>
+    </button>
   </div>
 )}
 
+<script>
+  // Delegated and bound once. State lives on the strip (data-paused), so a fresh
+  // strip after a page swap starts playing again.
+  const w = window as unknown as { __tickerToggle?: boolean };
+  if (!w.__tickerToggle) {
+    w.__tickerToggle = true;
+    document.addEventListener('click', (event) => {
+      const btn = (event.target as Element | null)?.closest<HTMLButtonElement>(
+        '[data-ticker-toggle]',
+      );
+      const strip = btn?.closest<HTMLElement>('[data-ticker]');
+      if (!btn || !strip) return;
+      const paused = strip.toggleAttribute('data-paused');
+      btn.setAttribute(
+        'aria-label',
+        paused ? 'Play the scrolling strip' : 'Pause the scrolling strip',
+      );
+      const text = btn.querySelector('[data-ticker-toggle-text]');
+      if (text) text.textContent = paused ? 'Play' : 'Pause';
+    });
+  }
+</script>
+
 <style>
   .ticker {
+    position: relative;
+  }
+  .ticker__window {
     overflow: hidden;
     padding-block: 0.55rem;
+  }
+  /* Held still on request, over the pointer, or while focus is inside. */
+  .ticker[data-paused] .ticker__track,
+  .ticker[data-paused] .ticker__ease,
+  .ticker:hover .ticker__track,
+  .ticker:hover .ticker__ease,
+  .ticker:focus-within .ticker__track,
+  .ticker:focus-within .ticker__ease {
+    animation-play-state: paused;
+  }
+  /* The control is a small plate in the strip's own inverse colours, so it
+     keeps the sign-board look and its contrast is the strip's, flipped. The
+     focus ring sits INSIDE the plate (negative offset) because the strip is a
+     tight fit for an outer one. 1.75rem tall clears the 24px target size. */
+  .ticker__toggle {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0.5rem;
+    margin-block: auto;
+    height: 1.75rem;
+    min-width: 3.75rem;
+    padding-inline: 0.6rem;
+    border: 2px solid #000;
+    background: var(--primary-foreground);
+    color: var(--primary);
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .ticker__toggle:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -5px;
   }
   .ticker__track {
     display: flex;
@@ -123,6 +202,10 @@ const shift = `${(100 / COPIES).toFixed(4)}%`;
   }
 
   @media (prefers-reduced-motion: reduce) {
+    /* Nothing is moving, so there is nothing to pause. */
+    .ticker__toggle {
+      display: none;
+    }
     .ticker__ease {
       animation: none;
     }

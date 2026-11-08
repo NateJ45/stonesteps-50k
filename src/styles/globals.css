@@ -1747,6 +1747,16 @@ body::before {
   }
 }
 
+/* WCAG 2.4.11 Focus Not Obscured (2026-11-08). The header is sticky, so tabbing
+   BACKWARDS scrolled a link to the very top edge of the viewport, under the
+   header, and the browser counted that as in view. Reserve the header's height
+   (the same --header-h the mud and hero already use) plus a little air, so a
+   focused element is brought to rest just below the bar. The ActionBar sets
+   scroll-padding-bottom on the same element for the other edge. */
+html {
+  scroll-padding-top: calc(var(--header-h) + 0.75rem);
+}
+
 .display-echo {
   text-shadow: 0.055em 0.055em 0 var(--display-echo);
 }
