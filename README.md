@@ -1,3 +1,7 @@
+<a href="https://nixoncreativestudio.com/work/stone-steps-50k/"><img src="https://raw.githubusercontent.com/NateJ45/NateJ45/main/assets/cards/stonesteps-50k.png" alt="Stone Steps 50K, case study by Nixon Creative Studio" width="100%"></a>
+
+<p align="center"><a href="https://nixoncreativestudio.com/work/stone-steps-50k/">Read the case study</a> · <a href="https://stonesteps50k.com">Visit stonesteps50k.com</a></p>
+
 <div align="center">
 
 # Stone Steps 50K
