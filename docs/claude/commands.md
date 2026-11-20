@@ -35,3 +35,12 @@ Standalone scripts (not path-scoped):
 ## Share pictures (PORTS.md card 215)
 
 `scripts/finish-share-cards.mjs` (PORTABLE) runs at the end of `npm run build`. It recompresses PNG share cards in `dist/client/og/` and `og-default.png` losslessly, because some link previews drop a picture over about 600 KB, and warns about any page whose share picture is missing or still over 600 KB. It never fails a build. The Studio page gets its share tags from its PORTABLE page, using the brand name and `/og-default.png`.
+
+## Command detail (moved from CLAUDE.md)
+
+`npm run build` runs `node scripts/with-workerd.mjs astro build` (the Windows workerd shim) and does NOT chain typegen. Everything else, with detail in `docs/claude/commands.md`:
+
+- `npm run apply-brand`, `npm run og`, `npm run seed`, `npm run sync-check`, `npm run free-dist` (Windows EPERM on `dist/`). `npm run audit:data` checks the live data against the compiled schema, read only. Baked assets (`mud`, `weather:sync`): see `.claude/rules/baked-assets-and-scripts.md`.
+- **Every script that writes to Sanity is a dry run unless it gets `--apply` (or its own write flag) AND `NCS_PRODUCTION_WRITE=yes` in the same command.** A delegated agent may set the variable, but only under the write protocol (backup, dry run, apply, verify). Detail, the CI allowance and the backtick rule: `.claude/rules/data-scripts.md`.
+- **There is no separate studio dev server or deploy.** `npm run dev` serves the Studio at `/studio`, and deploying the site deploys the Studio. For CLI work (`sanity dataset`, `sanity cors`, typegen) run `npx sanity ...` from the repo root; `sanity.cli.ts` configures it. Do **not** run `npx sanity deploy`: it would publish a separate hosted Studio that silently falls behind the embedded one.
+- `npm run preview` runs `wrangler dev -c dist/server/wrangler.json` against the last build. This is the only way to exercise the SSR routes (`/preview/**`, `/api/draft-mode/*`) and the real response headers locally; a static file server proves nothing about them.

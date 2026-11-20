@@ -7,14 +7,7 @@ The site is stonesteps50k.com for the Stone Steps 50K / 27K race (Mt. Airy Fores
 **Design context.** `PRODUCT.md` (audience, purpose, tone, anti-references; the answers tagged "Proposed ... edit if wrong" are drafts Nathan has not confirmed) and `DESIGN.md` (the visual system as built) sit at the repo root; read them before any design work and update them in the same change when the system moves.
 
 **Read `docs/PENDING.md` early in a session.** It is the live registry of open loops: queued work, known gaps, and waiting-on-a-human items. If you finish or discover one, update it in the same commit.
-
-`ncs-astro-sanity-starter` is a production-ready Astro + Sanity + Cloudflare Workers site template forked from a finished client build. This is a **page-builder-first** starter: the home, about, services, and process pages all render via a shared `SectionRenderer` component fed by Sanity `pageBuilder` arrays, and any custom page created in the Studio gets a `/[slug]` route for free. The infrastructure -- build pipeline, CMS integration, deploy hooks, polish layer, section-visibility system, component library, Lighthouse 100/100/100/100 baseline -- is already standing. A new project pours in two things: its brand identity (run `npm run apply-brand` with `brand/brand.config.json`) and its content.
-
-This starter is not a minimal scaffold. It ships with real patterns and real gotchas documented from production. The point is to skip the month of discovering them.
-
-_Provenance: forked from the Reid Design build._
-
----
+The site is a fork of `ncs-astro-sanity-starter`; the starter provenance notes are in `docs/claude/README.md`.
 
 ## Stack essentials
 
@@ -26,18 +19,10 @@ Full stack notes and the `astro.config.mjs` landmines are in `docs/agent/stack-a
 - **Tailwind 4 via `@tailwindcss/vite`.** There is no `tailwind.config.mjs`. Brand tokens live in `@theme` blocks in `src/styles/globals.css`.
 - **React 19 islands** for interactivity; Astro components for everything static.
 - **Cloudflare Workers** for hosting, not Pages (Pages is in maintenance mode). Deploy with `npm run deploy`, which is `wrangler deploy -c dist/server/wrangler.json`. A bare `wrangler deploy` reads the root `wrangler.jsonc`, which knows nothing about the SSR entrypoint, and every sub-route 404s.
-- **Contact form** on Cloudflare Email Sending + D1 (`CONTACT_DB`, mail to the race inbox; `src/pages/api/contact.ts`), **Cloudflare Web Analytics** (cookieless, no banner), and **GA4** when `PUBLIC_GA_ID` is set (production hostname only; `registration_click` and `generate_lead`, plus the shared link events of card 217; `docs/agent/analytics.md`).
-- **The Studio kit** (starter cards 106 to 120): the Studio opens on Home (race checklist, Is it live?, Race results with "Fetch the latest results" (card 202, `src/lib/results-import.ts`), Fix-it list, Visitors, Your pages), with Quick update, Messages, Site Guide and Checkup in the top bar, the race's own paper, rust and forest chrome, plate icons and a `/studio/` boot page. The kit's design language (card 128) takes the race's devices from `brand/brand.config.json` `studio.look`; Home's banner type, eyebrow, stamp and plate button are data in `kit.config.ts` `homeBanner.style` (card 135); `src/sanity/studioArt.css` is left with only the Site Guide banner's title and eyebrow. Site settings: `src/sanity/kit.config.ts`, `src/sanity/raceCheckup.ts`, `src/sanity/structure.ts`; the PORTABLE kit is `src/sanity/kit/` and `src/sanity/workflow/`. Detail and the settings each piece needs: `docs/agent/studio-kit.md` and OPERATIONS.md "The Studio kit".
-- **The authoring kit** (starter card 109): page templates for the race year (`src/sanity/pageTemplates.ts`, grouped as "Group: Title" in the new-page menu), fifteen race-year saved sections (`src/sanity/sectionPatterns.ts`, `npm run seed:patterns`), synced sections, the picture picker (`npm run thumbnails` after a build, from `/styleguide/sections/`) and page warnings (`pageRules` in `kit.config.ts`). A new block needs a fixture on that wall and a thumbnail, or the `authoring` unit test fails. The builder kit (starter card 173, `src/sanity/schemaTypes/builderSections.ts`, `src/components/builder-blocks/`) adds eight smaller blocks: columns, a button row, tabs, a timeline, a letter, event details (calendar file, directions, Event JSON-LD), a schedule and photo cards. Detail: `docs/agent/sanity.md`.
-- **Starter cards 186 to 198** (the Auburn port run, 2026-10-27): the one scale and `shapes.css` in the race's plate values, the photo hero Style, Latest video and Downloads (documents capability), six more builder blocks, Map and directions from the race document's address (`src/lib/business-data.ts`), the phone action bar, the client notes layer (off). What was left out and why: `docs/agent/changelog.md`. Run `sync-check` with `NCS_STARTER_DIR` set: `package.json` still names the starter.
-- **Layout slots** (starter card 72): `brand/brand.config.json` `layout` (header, hero, density, cards, motion), resolved by `src/lib/site-layout.ts` (PORTABLE) into `src/data/layout.ts` by `apply-brand`, and spread on `<html>` by `layoutAttrs()`; a default emits nothing. Only `motion` acts here, set to `fade` (starter card 192, the flow layer; `docs/agent/animation.md`); the race draws its own header and `RaceHero`, and `hero: board` is not used. Detail in `.claude/rules/brand-reskin.md`.
+- **More stack notes** (contact form, Studio kit, authoring kit, starter cards 186 to 198, layout slots): `docs/agent/stack-and-config.md`.
 - **`sanityFetch(query, params, fallback)`** in `src/lib/sanity.ts` is the single chokepoint for all Sanity reads. When `PUBLIC_SANITY_PROJECT_ID` is absent or set to the placeholder value, it returns the fallback without any network call, so `npm run build` succeeds with no Sanity project configured -- pages render their default-sections content (see below).
 
----
-
 ## Commands
-
-`npm run build` runs `node scripts/with-workerd.mjs astro build` (the Windows workerd shim) and does NOT chain typegen. Everything else, with detail in `docs/claude/commands.md`:
 
 - `npm run dev`: dev server; the Studio is at `/studio` (no separate studio server).
 - `npm run typegen`: regenerate Sanity types after any schema change, BEFORE `npm run build`. `npm run build:full` chains both.
@@ -46,16 +31,11 @@ Full stack notes and the `astro.config.mjs` landmines are in `docs/agent/stack-a
 - `npm run parity compare`: rendered-HTML parity gate for render-neutral changes. Build with `PUBLIC_GA_ID=` blank first or every page fails (`PUBLIC_GA_ID= npm run build && npm run parity compare`).
 - `npm run preview`: `wrangler dev -c dist/server/wrangler.json`; the only way to exercise the SSR routes and real response headers locally.
 - `npm run deploy`: build, then `wrangler deploy -c dist/server/wrangler.json`. Never a bare `wrangler deploy` (it reads the root `wrangler.jsonc`, every sub-route 404s).
-- `npm run apply-brand`, `npm run og`, `npm run seed`, `npm run sync-check`, `npm run free-dist` (Windows EPERM on `dist/`). `npm run audit:data` checks the live data against the compiled schema, read only. Baked assets (`mud`, `weather:sync`): see `.claude/rules/baked-assets-and-scripts.md`.
-- **Every script that writes to Sanity is a dry run unless it gets `--apply` (or its own write flag) AND `NCS_PRODUCTION_WRITE=yes` in the same command.** A delegated agent may set the variable, but only under the write protocol (backup, dry run, apply, verify). Detail, the CI allowance and the backtick rule: `.claude/rules/data-scripts.md`.
-- **There is no separate studio dev server or deploy.** `npm run dev` serves the Studio at `/studio`, and deploying the site deploys the Studio. For CLI work (`sanity dataset`, `sanity cors`, typegen) run `npx sanity ...` from the repo root; `sanity.cli.ts` configures it. Do **not** run `npx sanity deploy`: it would publish a separate hosted Studio that silently falls behind the embedded one.
-- `npm run preview` runs `wrangler dev -c dist/server/wrangler.json` against the last build. This is the only way to exercise the SSR routes (`/preview/**`, `/api/draft-mode/*`) and the real response headers locally; a static file server proves nothing about them.
+- Everything else (apply-brand, og, seed, sync-check, free-dist, audits, the Studio-less deploy note) and the dry-run rule for Sanity-writing scripts: `docs/claude/commands.md`. **Every script that writes to Sanity is a dry run unless it gets `--apply` AND `NCS_PRODUCTION_WRITE=yes` in the same command.**
 
 ## Branch, CI and deploy
 
-- Work on a branch and open a PR; CI (`ci.yml`) runs on pushes to `main` and on every PR as parallel jobs: `static` (audits, typegen, stale-types guard, check, lint, format, unit) and `site` (build once, links, upload `dist/client`) feed the required check `build`; `e2e` (Playwright in 3 shards on the uploaded build) feeds the required check `test`. `build` and `test` are aggregators: keep the names, and never path-filter `ci.yml`. `lighthouse.yml` (path-filtered PRs on a 4-URL sample, weekly full run, never on push) and `visual.yml` (path-filtered) run separately. Parity is deliberately a local gate.
-- **CI never reads live content** (starter PORTS.md card 138): the `ci.yml` build and `og:check` steps, `lighthouse.yml` and `visual.yml` run as `node scripts/snapshot.mjs run -- <cmd>` over the committed `ci/sanity-snapshot.ndjson.gz` (anonymous, published view, the same thing CI saw live), so an editor renaming or retiring a page cannot turn a check red. Specs may name `/course/`, `/records/`, `/contact/`. Refresh on purpose with `node scripts/snapshot.mjs export` and update whatever names the page in the same PR. `deploy.yml` and `results-import.yml` still build LIVE. `live-watch.yml` (daily, not required, never on a PR) checks the real site. A new build-time `createClient` needs `...snapshotClientOptions(process.env)`. Detail: `docs/claude/commands.md`.
-- Push to `main` deploys to the Cloudflare Worker (`deploy.yml`; prose-only paths such as `docs/**`, `CLAUDE.md`, `*.md` are ignored). `main` is the only branch and a merge is the production deploy (staging was abandoned 2026-10-03). Work on short-lived branches, PR into `main`, merge when CI (`build`, `test`) is green.
+- Work on a branch and open a PR; `main` is production and a merge deploys. CI (`ci.yml`) has parallel jobs feeding the required checks `build` and `test` (keep the names, never path-filter `ci.yml`). CI never reads live content (snapshot). Detail: `docs/agent/deployment.md`.
 - Content is statically built: a Sanity edit only goes live after a rebuild (push to `main`, or the Sanity publish webhook). Detail in `docs/agent/deployment.md`.
 - Never read or print `.env` or `.dev.vars`. `SANITY_TOKEN` is a runtime secret (`npx wrangler secret put SANITY_TOKEN`).
 
@@ -64,27 +44,27 @@ Full stack notes and the `astro.config.mjs` landmines are in `docs/agent/stack-a
 ## The rules that bite if you forget them
 
 <!-- prettier-ignore-start -->
-
-1. **Never click "Remove field" in the Studio.** It deletes that field's data across every document and cannot be undone without a dataset restore. It appears when the Studio's schema is older than the data. Since the Studio is embedded (it ships with the site build) the sequence after a schema change is: edit schema, `npm run typegen`, commit, deploy. There is no separate `studio:deploy` step any more.
-2. **No em-dashes in public-facing site copy** (the text visitors read: page copy, component text, Sanity content). Use commas, colons, or restructure. Code comments, commit messages, plans, specs, and internal docs are exempt.
-3. **Build in both light AND dark mode** on every UI change. Detail in `docs/agent/theme-and-color.md`.
-4. **Desktop nav is server-rendered** in `Header.astro`. Do not regress it to a client-only island. Detail in `docs/agent/page-architecture.md`.
-5. **Scrolling is native.** Lenis was removed 2026-10-04; do not reintroduce a smooth-scroll library. The flow layer (motion `fade`) fades blocks in as they arrive; anything that slides content in sideways (a marquee, a carousel) needs `data-flow="off"`. Navigation scroll reset (forward to top, back/forward restores) is Astro's ClientRouter. Detail in `docs/agent/animation.md`.
-6. **Content is statically built.** A Sanity edit only goes live after a rebuild (push to `main`, or the publish webhook). Detail in `docs/agent/deployment.md`.
-7. **After any schema change, run `npm run typegen` before `npm run build`.** `npm run build` runs `astro build` only and does not chain typegen. Use `npm run build:full` to run both in sequence. `src/lib/sanity.types.ts` is committed so collaborators can read schema types in code without running typegen.
-8. **The Astro / adapter / wrangler / Sanity versions are a MATCHED SET. Do not bump one in isolation** (`@astrojs/cloudflare` 14.3.4, `wrangler` ~4.149.0, React exact 19.3.1, the Sanity phase-2 set: `sanity` 6.19.0, `@sanity/ui` 4.4.9). Pins, reasons, invariants and the `session: false` / no `not_found_handling` landmines: `.claude/rules/dependencies-and-deploy.md`, which loads when you touch package or config files. Curling a page is not verifying it: anything that mounts a client framework gets opened in a real browser with the console read.
-   8b. **A new logic-driving dropdown field needs its name added to `NON_STEGA_FIELDS`** in `src/lib/cms-preview.ts`, in the same commit (full text: `.claude/rules/sanity-schema.md`).
-9. **`pageBuilder` cadence is managed by `SectionRenderer`. Blocks carry no colour/surface field; do not add one.** A test enforces it (`section-fields.test.ts`). The renderer also hands out the one rust plate per page and names section anchors from headings (starter card 158; `docs/agent/page-architecture.md`). Full text: `.claude/rules/sanity-schema.md`.
-10. **The reserved-slug guard lives inside `getStaticPaths` in `[slug].astro`**, not at module scope (full text: `.claude/rules/sanity-schema.md`).
-11. **`apply-brand` does not install font packages**: `npm install @fontsource/...` first. **12.** After `apply-brand`, run `npm run build` (full text: `.claude/rules/brand-reskin.md`).
-13. **A field `description` is instructions for the editor typing into that box**, under ~140 characters, never dates, names, provenance or file paths; that goes in a `//` comment above `defineField(` (full text: `.claude/rules/sanity-schema.md`).
+1. **Never click "Remove field" in the Studio** (deletes that field's data everywhere). After a schema change: edit schema, `npm run typegen`, commit, deploy.
+2. **No em-dashes in public-facing site copy.** Code comments, commits and internal docs are exempt.
+3. **Build in both light AND dark mode** on every UI change (`docs/agent/theme-and-color.md`).
+4. **Desktop nav is server-rendered** in `Header.astro`; do not make it a client-only island.
+5. **Scrolling is native; no smooth-scroll library.** Anything sliding content in sideways needs `data-flow="off"` (`docs/agent/animation.md`).
+6. **Content is statically built.** A Sanity edit goes live only after a rebuild.
+7. **After any schema change run `npm run typegen` before `npm run build`.**
+8. **Astro, adapter, wrangler, React and Sanity versions are a MATCHED SET;** never bump one alone (`.claude/rules/dependencies-and-deploy.md`). Curling a page is not verifying it.
+   8b. A new logic-driving dropdown goes into `NON_STEGA_FIELDS` in `src/lib/cms-preview.ts`.
+9. **Blocks carry no colour/surface field** (`section-fields.test.ts`); `SectionRenderer` owns the cadence (`.claude/rules/sanity-schema.md`).
+10. **The reserved-slug guard lives inside `getStaticPaths`** in `[slug].astro`.
+11. **`apply-brand` does not install font packages.** **12.** Run `npm run build` after `apply-brand` (`.claude/rules/brand-reskin.md`).
+13. **A field `description` is instructions for the editor,** under ~140 characters, no dates, names or file paths (`.claude/rules/sanity-schema.md`).
 
 <!-- prettier-ignore-end -->
+
+Full text of every rule: `docs/claude/rules-detail.md`.
 
 Foundation files (schemas, `globals.css`, `BaseLayout.astro`, `SectionRenderer.astro`, preview stack, Studio config, `astro.config.mjs`, `wrangler.jsonc`, `package.json`) are "edit with care, plan the session". The list loads from `.claude/rules/foundation-files.md` when you touch one; files safe to edit by hand are in `docs/claude/safe-to-edit.md`.
 
 PORTABLE-marked files are canonical in the starter; do not make site-specific edits inside one (see Ports below).
-
 ---
 
 ## Code conventions and Working with Claude
@@ -92,11 +72,8 @@ PORTABLE-marked files are canonical in the starter; do not make site-specific ed
 Shared by every site repo in the family, so they live in one PORTABLE file imported here (it is expanded into context at launch, so this saves lines in this file, not tokens): the code conventions (strict TypeScript, header comments, Astro and React islands, images, Tailwind) and the working-with-Claude habits (desktop app, Plan Mode, confirm before installing, describe design in plain language, verify in a real browser).
 
 @docs/claude/family-conventions.md
-
 Stone Steps specifics on top of the shared text:
-
-- Images: the shared file says to use `<SanityImage />` for Sanity-hosted images; the image handling detail is in `docs/agent/images.md`.
-- What to verify in the browser (both themes, both viewports, interactive states, adjacent sections) is in `.claude/rules/ui-verification.md`, which loads when you touch UI files. This site ships light AND dark, so every UI change needs screenshots in both themes at both viewports.
+Stone Steps specifics: image handling in `docs/agent/images.md`; browser verification in `.claude/rules/ui-verification.md`.
 
 ## Style (short version; full rules in `.claude/rules/copy-and-voice.md`)
 
@@ -121,21 +98,4 @@ Stone Steps specifics on top of the shared text:
 
 ## Docs map
 
-| Need                                                                                        | Read                                                                                     |
-| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Open loops (read early each session)                                                        | `docs/PENDING.md`                                                                        |
-| Tactical playbook (deploy, patch content, audits)                                           | `OPERATIONS.md`                                                                          |
-| npm script detail, parity, tests, CI gates                                                  | `docs/claude/commands.md`                                                                |
-| Routes table and opt-in modules                                                             | `docs/claude/routes-and-modules.md`                                                      |
-| Files safe to edit by hand                                                                  | `docs/claude/safe-to-edit.md`                                                            |
-| PORTS.md and sync-check working rules                                                       | `docs/claude/library-of-record.md`                                                       |
-| Shared code conventions and Claude habits (PORTABLE, imported above)                        | `docs/claude/family-conventions.md`                                                      |
-| Deep dives (theme, components, SEO, performance, Sanity, deployment...)                     | `docs/claude/topic-index.md` then `docs/agent/*`                                         |
-| Cross-repo registry                                                                         | `PORTS.md`                                                                               |
-| New-project setup                                                                           | `docs/bootstrap/NEW-PROJECT.md`                                                          |
-| Change history                                                                              | `docs/agent/changelog.md`                                                                |
-| GA4 events; the Report tool (card 218, `src/config/board.ts`, switch `PUBLIC_BOARD_REPORT`) | `docs/agent/analytics.md`, `docs/agent/studio-kit.md` ("The Report", the starter's text) |
-
-Path-scoped rules (load automatically in `.claude/rules/`): `live-preview.md`, `dependencies-and-deploy.md`, `sanity-schema.md`, `brand-reskin.md`, `baked-assets-and-scripts.md`, `data-scripts.md`, `foundation-files.md`, `ui-verification.md`, `copy-and-voice.md`.
-
-See `OPERATIONS.md` for the tactical playbook (deploy, patch content, run audits, common gotchas).
+The full table of what to read for what (open loops `docs/PENDING.md`, `OPERATIONS.md`, routes, safe-to-edit, PORTS, bootstrap, changelog, analytics) and the path-scoped rules list: `docs/claude/topic-index.md`. Open `docs/PENDING.md` early in a session.
