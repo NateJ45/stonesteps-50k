@@ -35,3 +35,22 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Change history (prose ledger; the checkable matrix lives in PORTS.md)                                    | `docs/agent/changelog.md`                                            |
 | New-project setup runbook + pre-launch checklist (forthcoming)                                           | `docs/bootstrap/NEW-PROJECT.md`, `docs/bootstrap/setup-checklist.md` |
 | Per-module enable guides (forthcoming)                                                                   | `docs/modules/<module-name>.md`                                      |
+
+## Docs map (moved from CLAUDE.md)
+
+| Need                                                                                        | Read                                                                                     |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Open loops (read early each session)                                                        | `docs/PENDING.md`                                                                        |
+| Tactical playbook (deploy, patch content, audits)                                           | `OPERATIONS.md`                                                                          |
+| npm script detail, parity, tests, CI gates                                                  | `docs/claude/commands.md`                                                                |
+| Routes table and opt-in modules                                                             | `docs/claude/routes-and-modules.md`                                                      |
+| Files safe to edit by hand                                                                  | `docs/claude/safe-to-edit.md`                                                            |
+| PORTS.md and sync-check working rules                                                       | `docs/claude/library-of-record.md`                                                       |
+| Shared code conventions and Claude habits (PORTABLE, imported above)                        | `docs/claude/family-conventions.md`                                                      |
+| Deep dives (theme, components, SEO, performance, Sanity, deployment...)                     | `docs/claude/topic-index.md` then `docs/agent/*`                                         |
+| Cross-repo registry                                                                         | `PORTS.md`                                                                               |
+| New-project setup                                                                           | `docs/bootstrap/NEW-PROJECT.md`                                                          |
+| Change history                                                                              | `docs/agent/changelog.md`                                                                |
+| GA4 events; the Report tool (card 218, `src/config/board.ts`, switch `PUBLIC_BOARD_REPORT`) | `docs/agent/analytics.md`, `docs/agent/studio-kit.md` ("The Report", the starter's text) |
+
+Path-scoped rules (load automatically in `.claude/rules/`): `live-preview.md`, `dependencies-and-deploy.md`, `sanity-schema.md`, `brand-reskin.md`, `baked-assets-and-scripts.md`, `data-scripts.md`, `foundation-files.md`, `ui-verification.md`, `copy-and-voice.md`.
