@@ -17,6 +17,7 @@ import SanityImage from '@/components/SanityImage.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
 import CtaLink from '@/components/CtaLink.astro';
 import JournalCategoryChip from '@/components/JournalCategoryChip.astro';
+import { formatDate, LONG_DATE } from '@/lib/format-date';
 
 interface JournalLite {
   _id?: string;
@@ -70,14 +71,7 @@ const heroAspectClass = !hasCompanions
 const heroHref = hero?.slug?.current ? `/journal/${hero.slug.current}/` : '#';
 const heroPrimaryCategory = hero?.categories?.[0];
 
-function formatDate(d?: string): string {
-  if (!d) return '';
-  const date = new Date(d);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-}
-
-const heroDate = formatDate(hero?.publishedAt);
+const heroDate = formatDate(hero?.publishedAt, LONG_DATE);
 ---
 
 {hasEntries && (
@@ -207,7 +201,7 @@ const heroDate = formatDate(hero?.publishedAt);
             {companions.map((p, i) => {
               const cHref = p.slug?.current ? `/journal/${p.slug.current}/` : '#';
               const cCat = p.categories?.[0];
-              const cDate = formatDate(p.publishedAt);
+              const cDate = formatDate(p.publishedAt, LONG_DATE);
               return (
                 <a
                   href={cHref}
