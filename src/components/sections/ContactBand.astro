@@ -13,6 +13,8 @@ import RaceContactForm from '@/components/RaceContactForm';
 import type { ProjectedContactSection } from '@/lib/pageBuilder.types';
 import { externalLinkAttrs } from '@/lib/links';
 import { directionsUrl } from '@/lib/directions';
+import { formatDate } from '@/lib/format-date';
+import { site } from '@/data/site';
 
 type Props = {
   eyebrow?: string;
@@ -36,16 +38,12 @@ const {
 
 const surfaceClass = surface === 'muted' ? 'band-torn bg-muted' : 'band-torn bg-background';
 
-const raceDate = race?.raceDate ? new Date(race.raceDate) : null;
 const dateLabel =
-  raceDate && !Number.isNaN(raceDate.getTime())
-    ? raceDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : null;
+  formatDate(
+    race?.raceDate,
+    { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' },
+    site.timeZone,
+  ) || null;
 ---
 
 <section class={`py-section-lg ${surfaceClass}`} aria-labelledby={headingId}>

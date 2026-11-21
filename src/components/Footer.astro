@@ -61,23 +61,22 @@ import logoDarkAsset from '@/assets/logo-dark.svg';
 import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { telHref } from '@/lib/phone';
 import { publicPath } from '@/lib/page-path';
+import { formatDate } from '@/lib/format-date';
 import { pickActionBar } from '@/lib/wayfinding';
 import ActionBar from '@/components/ActionBar.astro';
 
 // THE RACE BAND. Everything here is read from the `race` singleton, so the day
 // it is edited in the Studio the footer follows and nobody has to remember this
 // file exists.
+const RACE_DATE_LABEL = {
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+} as const;
 const race = await getRace().catch(() => null);
 const raceDate = race?.raceDate ? new Date(race.raceDate) : null;
-const raceDateLabel = raceDate
-  ? raceDate.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      timeZone: 'UTC', // the date is a race day, not an instant; UTC keeps it from sliding a day
-    })
-  : null;
+const raceDateLabel = raceDate ? formatDate(race?.raceDate, RACE_DATE_LABEL, site.timeZone) : null;
 const raceIsUpcoming = raceDate ? raceDate.getTime() > buildNow() : false;
 /** "23rd" without a lookup table, and correct for 11th/12th/13th. */
 function ordinal(n: number): string {
